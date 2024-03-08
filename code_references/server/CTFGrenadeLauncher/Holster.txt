@@ -1,0 +1,5 @@
+bool __thiscall CTFGrenadeLauncher::Holster(CTFGrenadeLauncher *this, CBaseCombatWeapon *pSwitchingTo)
+{
+  this->m_flChargeBeginTime = 0.0;
+  return CTFWeaponBaseGun::Holster(this, pSwitchingTo);
+}

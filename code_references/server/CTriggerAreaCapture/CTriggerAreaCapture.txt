@@ -1,0 +1,52 @@
+void __thiscall CTriggerAreaCapture::CTriggerAreaCapture(CTriggerAreaCapture *this)
+{
+  int NumberOfTeams; // eax
+
+  CBaseTrigger::CBaseTrigger(this);
+  this->__vftable = (CTriggerAreaCapture_vtbl *)&CTriggerAreaCapture::`vftable';
+  this->m_TeamData.m_Memory.m_pMemory = 0;
+  this->m_TeamData.m_Memory.m_nAllocationCount = 0;
+  this->m_TeamData.m_Memory.m_nGrowSize = 0;
+  this->m_TeamData.m_Size = 0;
+  this->m_TeamData.m_pElements = 0;
+  this->m_Blockers.m_Memory.m_pMemory = 0;
+  this->m_Blockers.m_Memory.m_nAllocationCount = 0;
+  this->m_Blockers.m_Memory.m_nGrowSize = 0;
+  this->m_Blockers.m_Size = 0;
+  this->m_Blockers.m_pElements = 0;
+  this->m_OnStartTeam1.m_Value.iVal = 0;
+  this->m_OnStartTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnStartTeam2.m_Value.iVal = 0;
+  this->m_OnStartTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnStartTeam2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnBreakTeam1.m_Value.iVal = 0;
+  this->m_OnBreakTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnBreakTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnBreakTeam2.m_Value.iVal = 0;
+  this->m_OnBreakTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnBreakTeam2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnCapTeam1.m_Value.iVal = 0;
+  this->m_OnCapTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnCapTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnCapTeam2.m_Value.iVal = 0;
+  this->m_OnCapTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnCapTeam2.m_Value.fieldType = FIELD_VOID;
+  this->m_StartOutput.m_Value.iVal = 0;
+  this->m_StartOutput.m_Value.eVal.m_Index = -1;
+  this->m_StartOutput.m_Value.fieldType = FIELD_VOID;
+  this->m_BreakOutput.m_Value.iVal = 0;
+  this->m_BreakOutput.m_Value.eVal.m_Index = -1;
+  this->m_BreakOutput.m_Value.fieldType = FIELD_VOID;
+  this->m_CapOutput.m_Value.iVal = 0;
+  this->m_CapOutput.m_Value.eVal.m_Index = -1;
+  this->m_CapOutput.m_Value.fieldType = FIELD_VOID;
+  this->m_hPoint.m_Index = -1;
+  NumberOfTeams = GetNumberOfTeams();
+  this->m_TeamData.m_Size = 0;
+  CUtlVector<CTriggerAreaCapture::perteamdata_t,CUtlMemory<CTriggerAreaCapture::perteamdata_t,int>>::InsertMultipleBefore(
+    &this->m_TeamData,
+    0,
+    NumberOfTeams,
+    0);
+}

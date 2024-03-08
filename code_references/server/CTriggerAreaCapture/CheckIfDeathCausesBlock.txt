@@ -1,0 +1,36 @@
+char __thiscall CTriggerAreaCapture::CheckIfDeathCausesBlock(
+        CTriggerAreaCapture *this,
+        CBaseMultiplayerPlayer *pVictim,
+        CBaseMultiplayerPlayer *pKiller)
+{
+  int TeamNumber; // ebp
+  int v5; // eax
+  int m_nCapturingTeam; // ecx
+  CTriggerAreaCapture::perteamdata_t *m_pMemory; // edx
+  bool v8; // al
+  CTeamControlPoint *v9; // eax
+  int v11; // [esp+0h] [ebp-Ch]
+
+  if ( !pVictim || !pKiller || !CBaseTrigger::IsTouching(this, pVictim) )
+    return 0;
+  TeamNumber = CBaseEntity::GetTeamNumber(pVictim);
+  if ( TeamNumber != CBaseEntity::GetTeamNumber(pKiller) && this->m_bCapturing )
+  {
+    v5 = CBaseEntity::GetTeamNumber(pVictim);
+    m_nCapturingTeam = this->m_nCapturingTeam;
+    if ( v5 == m_nCapturingTeam )
+    {
+      m_pMemory = this->m_TeamData.m_Memory.m_pMemory;
+      if ( mp_capstyle.m_pParent->m_nValue == 1 )
+        v8 = m_pMemory[m_nCapturingTeam].iBlockedTouching - 1 <= 0;
+      else
+        v8 = m_pMemory[m_nCapturingTeam].iBlockedTouching - 1 < m_pMemory[m_nCapturingTeam].iNumRequiredToCap;
+      if ( v8 )
+      {
+        v9 = (CTeamControlPoint *)CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint);
+        CTeamControlPoint::CaptureBlocked(v9, (int)pVictim, (int)this, pKiller, v11);
+      }
+    }
+  }
+  return 1;
+}

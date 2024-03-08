@@ -1,0 +1,11 @@
+void __thiscall CDispenserControlPanel::OnTickActive(
+        CDispenserControlPanel *this,
+        C_BaseObject *pObj,
+        CUtlVector<KeyValues *,CUtlMemory<KeyValues *,int> > *pLocalPlayer)
+{
+  float v4; // [esp+0h] [ebp-Ch]
+
+  CCollisionEvent::ObjectLeaveTrigger((vgui::TreeView *)this, (int)pObj, pLocalPlayer);
+  v4 = (double)pObj[1].m_VarMap.m_Entries.m_Memory.m_nAllocationCount * 0.0024999999;
+  ((void (__stdcall *)(_DWORD))this->m_pAmmoProgress->SetProgress)(LODWORD(v4));
+}

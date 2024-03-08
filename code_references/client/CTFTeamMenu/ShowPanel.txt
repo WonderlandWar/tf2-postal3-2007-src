@@ -1,0 +1,43 @@
+void __thiscall CTFTeamMenu::ShowPanel(CTFTeamMenu *this, bool bShow)
+{
+  char *p_m_iScoreBoardKey; // esi
+  C_TFPlayer *LocalTFPlayer; // ebx
+  int v5; // ebp
+  C_TFPlayer *v6; // eax
+  C_TFPlayer *v7; // eax
+
+  p_m_iScoreBoardKey = (char *)&this[-1].m_iScoreBoardKey;
+  if ( vgui::Panel::IsVisible((CTFTeamMenu *)((char *)this - 384)) != bShow )
+  {
+    if ( bShow )
+    {
+      if ( g_pGameRules[3].m_pNext == (CAutoGameSystemPerFrame *)5
+        && C_TFPlayer::GetLocalTFPlayer()
+        && (LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer(),
+            v5 = ((int (__thiscall *)(C_GameRules *))g_pGameRules->__vftable[1].LevelShutdownPreEntity)(g_pGameRules),
+            LocalTFPlayer->GetTeamNumber(LocalTFPlayer) != v5)
+        && (v6 = C_TFPlayer::GetLocalTFPlayer(), v6->GetTeamNumber(v6) != 1)
+        && (v7 = C_TFPlayer::GetLocalTFPlayer(), v7->GetTeamNumber(v7)) )
+      {
+        (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_iScoreBoardKey + 124))(p_m_iScoreBoardKey, 0);
+        (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_iScoreBoardKey + 520))(p_m_iScoreBoardKey, 0);
+        internalCenterPrint->Print(internalCenterPrint, "#TF_CantChangeTeamNow");
+      }
+      else
+      {
+        engine->CheckPoint(engine, "TeamMenu");
+        (*(void (__thiscall **)(char *))(*(_DWORD *)p_m_iScoreBoardKey + 868))(p_m_iScoreBoardKey);
+        (*(void (__thiscall **)(char *, int))(*(_DWORD *)p_m_iScoreBoardKey + 520))(p_m_iScoreBoardKey, 1);
+        this->m_pMapInfoHTML = (vgui::HTML *)gameuifuncs->GetButtonCodeForBind(gameuifuncs, "changeteam");
+        *(_DWORD *)&this->m_InternalMouseReleased_register = gameuifuncs->GetButtonCodeForBind(
+                                                               gameuifuncs,
+                                                               "showscores");
+      }
+    }
+    else
+    {
+      (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_iScoreBoardKey + 124))(p_m_iScoreBoardKey, 0);
+      (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_iScoreBoardKey + 520))(p_m_iScoreBoardKey, 0);
+    }
+  }
+}

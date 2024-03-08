@@ -1,0 +1,17 @@
+void __thiscall CTFGrenadeLauncher::ItemBusyFrame(CTFGrenadeLauncher *this)
+{
+  CTFPlayer *Owner; // esi
+  CTFWeaponBase *v3; // eax
+
+  Owner = (CTFPlayer *)CBaseCombatWeapon::GetOwner(this);
+  if ( Owner )
+  {
+    if ( Owner->IsPlayer(Owner) && (Owner->m_nButtons & 0x800) != 0 )
+    {
+      v3 = CTFPlayer::Weapon_OwnsThisID(Owner, 21);
+      if ( v3 )
+        v3->SecondaryAttack(v3);
+    }
+  }
+  CTFWeaponBase::ItemBusyFrame(this);
+}

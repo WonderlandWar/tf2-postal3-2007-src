@@ -1,0 +1,6 @@
+void __thiscall CTFFreezePanel::Reset(CTFFreezePanel *this)
+{
+  CTFFreezePanel::Hide((CTFFreezePanel *)((char *)this - 232));
+  if ( this->m_pDragDrop )
+    (*(void (__thiscall **)(vgui::DragDrop_t *))(*(_DWORD *)this->m_pDragDrop + 864))(this->m_pDragDrop);
+}

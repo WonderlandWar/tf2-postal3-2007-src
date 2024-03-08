@@ -1,0 +1,100 @@
+void __usercall CControlPointProgressBar::UpdateBarText(
+        CControlPointProgressBar *this@<ecx>,
+        int a2@<ebp>,
+        int a3@<esi>)
+{
+  C_BasePlayer *LocalPlayer; // ebx
+  int m_iCPIndex; // esi
+  int v6; // ebp
+  int v7; // ebx
+  CHudElement *Element; // ecx
+  bool v9; // al
+  char szReason[256]; // [esp+20h] [ebp-108h] BYREF
+
+  LocalPlayer = C_BasePlayer::GetLocalPlayer();
+  if ( LocalPlayer && this->m_pBarText && this->m_pAttachedToIcon )
+  {
+    ((void (__thiscall *)(vgui::Label *, int, int))this->m_pBarText->SetVisible)(this->m_pBarText, 1, a3);
+    m_iCPIndex = this->m_pAttachedToIcon->m_iCPIndex;
+    if ( m_iCPIndex < g_pObjectiveResource->m_iNumControlPoints )
+      *(_DWORD *)szReason = g_pObjectiveResource->m_iCappingTeam[m_iCPIndex];
+    else
+      *(_DWORD *)szReason = 0;
+    v6 = ((int (__thiscall *)(C_BasePlayer *, int))LocalPlayer->GetTeamNumber)(LocalPlayer, a2);
+    if ( m_iCPIndex < g_pObjectiveResource->m_iNumControlPoints )
+      v7 = g_pObjectiveResource->m_iOwner[m_iCPIndex];
+    else
+      v7 = 0;
+    Element = CHud::FindElement(&gHUD, "CHudControlPointIcons");
+    if ( Element[17].m_bNeedsRemove )
+    {
+      if ( *(float *)(gpGlobals.m_Index + 12) > (double)*(float *)&Element[18].__vftable )
+      {
+        *(_DWORD *)&Element[17].m_bActive = -1;
+        Element[17].m_bNeedsRemove = 0;
+        Element[17].m_bIsParentedToClientDLLRootPanel = 0;
+      }
+      if ( Element[17].m_bNeedsRemove && (m_iCPIndex == -1 || m_iCPIndex == *(_DWORD *)&Element[17].m_bActive) )
+      {
+        this->m_pBarText->SetText(this->m_pBarText, "#Team_Capture_OwnPoint");
+        return;
+      }
+    }
+    if ( !((unsigned __int8 (__thiscall *)(C_GameRules *))g_pGameRules->__vftable[1].LevelInitPostEntity)(g_pGameRules) )
+    {
+      this->m_pBarText->SetText(this->m_pBarText, "#Team_Capture_NotNow");
+      return;
+    }
+    if ( mp_blockstyle.m_pParent->m_nValue != 1 || !*(_DWORD *)szReason || *(_DWORD *)szReason == v6 )
+      goto LABEL_26;
+    if ( g_pObjectiveResource->m_bBlocked[m_iCPIndex] )
+    {
+      ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Blocking_Capture");
+      return;
+    }
+    if ( v7 )
+    {
+LABEL_26:
+      if ( C_BaseTeamObjectiveResource::GetOwningTeam(g_pObjectiveResource, m_iCPIndex) == v6 )
+      {
+        ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Capture_OwnPoint");
+      }
+      else if ( ((unsigned __int8 (__thiscall *)(C_GameRules *, int, int))g_pGameRules->__vftable[1].Init)(
+                  g_pGameRules,
+                  v6,
+                  m_iCPIndex) )
+      {
+        if ( ((unsigned __int8 (__thiscall *)(C_GameRules *))g_pGameRules->__vftable[1].Shutdown)(g_pGameRules) )
+        {
+          v9 = 1;
+          if ( mp_capstyle.m_pParent->m_nValue != 1 )
+            v9 = g_pObjectiveResource->m_iNumTeamMembers[8 * v6 + m_iCPIndex] >= g_pObjectiveResource->m_iTeamReqCappers[8 * v6 + m_iCPIndex];
+          if ( *(_DWORD *)szReason == v6 && v9 )
+          {
+            this->m_pBarText->SetText(this->m_pBarText, "#Team_Capture_Blocked");
+          }
+          else if ( g_pObjectiveResource->m_bTeamCanCap[8 * v6 + m_iCPIndex] )
+          {
+            ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Waiting_for_teammate");
+          }
+          else
+          {
+            ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Cannot_Capture");
+          }
+        }
+        else
+        {
+          ((void (__cdecl *)(char *))this->m_pBarText->SetText)(&szReason[8]);
+        }
+      }
+      else
+      {
+        ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Capture_Linear");
+      }
+    }
+    else
+    {
+      ((void (__cdecl *)(const char *))this->m_pBarText->SetText)("#Team_Reverting_Capture");
+    }
+  }
+}

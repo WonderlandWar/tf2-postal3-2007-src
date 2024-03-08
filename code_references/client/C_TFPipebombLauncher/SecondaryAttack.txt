@@ -1,0 +1,35 @@
+void __thiscall C_TFPipebombLauncher::SecondaryAttack(C_TFPipebombLauncher *this)
+{
+  C_BaseCombatCharacter *Owner; // edi
+  void (__thiscall *WeaponSound)(C_BaseCombatWeapon *, WeaponSound_t, float); // eax
+  CHintSystem *v4; // eax
+  int iHintID; // [esp+0h] [ebp-Ch]
+
+  if ( C_TFWeaponBase::CanAttack(this) )
+  {
+    if ( this->m_iPipebombCount )
+    {
+      Owner = C_BaseCombatWeapon::GetOwner(this);
+      if ( Owner )
+      {
+        if ( Owner->IsPlayer(Owner) )
+        {
+          *(float *)&iHintID = 0.0;
+          WeaponSound = this->WeaponSound;
+          if ( *(float *)(gpGlobals.m_Index + 12) - this->m_flLastGrenadeLaunchTime >= tf_grenadelauncher_livetime.m_pParent->m_fValue )
+          {
+            ((void (__thiscall *)(C_TFPipebombLauncher *, int))WeaponSound)(this, 13);
+            v4 = (CHintSystem *)Owner->C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].Save(
+                                  Owner,
+                                  (ISave *)this->m_iAltFireHint);
+            CHintSystem::RemoveHintTimer(v4, iHintID);
+          }
+          else
+          {
+            ((void (__thiscall *)(C_TFPipebombLauncher *, int, int))WeaponSound)(this, 12, iHintID);
+          }
+        }
+      }
+    }
+  }
+}

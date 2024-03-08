@@ -1,0 +1,44 @@
+int __thiscall CObjectSentrygun::DrawDebugTextOverlays(CObjectSentrygun *this)
+{
+  int result; // eax
+  int v3; // edi
+  int v4; // edi
+  int v5; // edi
+  Vector vecSrc; // [esp+18h] [ebp-22Ch] BYREF
+  Vector forward; // [esp+24h] [ebp-220h] BYREF
+  float v8; // [esp+30h] [ebp-214h]
+  Vector target; // [esp+34h] [ebp-210h] BYREF
+  char v10[512]; // [esp+40h] [ebp-204h] BYREF
+
+  result = CBaseObject::DrawDebugTextOverlays(this);
+  v3 = result;
+  if ( (this->m_debugOverlays & 1) != 0 )
+  {
+    V_snprintf(v10, 512, "Level: %d", this->m_iUpgradeLevel.m_Value);
+    CBaseEntity::EntityText(this, v3, v10, 0.0, 255, 255, 255, 255);
+    v4 = v3 + 1;
+    V_snprintf(v10, 512, "Shells: %d / %d", this->m_iAmmoShells.m_Value, this->m_iMaxAmmoShells.m_Value);
+    CBaseEntity::EntityText(this, v4, v10, 0.0, 255, 255, 255, 255);
+    v5 = v4 + 1;
+    if ( this->m_iUpgradeLevel.m_Value == 3 )
+    {
+      V_snprintf(v10, 512, "Rockets: %d / %d", this->m_iAmmoRockets.m_Value, this->m_iMaxAmmoRockets.m_Value);
+      CBaseEntity::EntityText(this, v5++, v10, 0.0, 255, 255, 255, 255);
+    }
+    V_snprintf(v10, 512, "Upgrade metal %d", this->m_iUpgradeMetal.m_Value);
+    CBaseEntity::EntityText(this, v5, v10, 0.0, 255, 255, 255, 255);
+    this->EyePosition(this, (Vector *)&vecSrc.y);
+    AngleVectors(&this->m_vecCurAngles, (Vector *)&forward.y);
+    target.x = forward.y * 200.0 + vecSrc.y;
+    target.y = forward.z * 200.0 + vecSrc.z;
+    target.z = 200.0 * v8 + forward.x;
+    NDebugOverlay::Line((Vector *)&vecSrc.y, &target, 0, 255, 0, 0, 0.1);
+    AngleVectors(&this->m_vecGoalAngles, (Vector *)&forward.y);
+    target.x = forward.y * 200.0 + vecSrc.y;
+    target.y = forward.z * 200.0 + vecSrc.z;
+    target.z = 200.0 * v8 + forward.x;
+    NDebugOverlay::Line((Vector *)&vecSrc.y, &target, 0, 0, 255, 0, 0.1);
+    return v5 + 1;
+  }
+  return result;
+}

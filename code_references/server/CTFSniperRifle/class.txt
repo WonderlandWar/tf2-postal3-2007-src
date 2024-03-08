@@ -1,0 +1,43 @@
+class CTFSniperRifle : public CTFWeaponBaseGun
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    private void CTFSniperRifle(class CTFSniperRifle & );
+    public void CTFSniperRifle();
+    public void ~CTFSniperRifle();
+    public int GetWeaponID();
+    public void Spawn();
+    public void Precache();
+    public void ResetTimers();
+    public bool Reload();
+    public bool Holster(class CBaseCombatWeapon * );
+    public void HandleZooms();
+    public void ItemPostFrame();
+    public bool Lower();
+    public float GetProjectileDamage();
+    public int GetDamageType();
+    public bool IsZoomed();
+    private void CreateSniperDot();
+    private void DestroySniperDot();
+    private void UpdateSniperDot();
+    private void SetRezoom(bool ,float );
+    private void Zoom();
+    private void ZoomOutIn();
+    private void ZoomIn();
+    private void ZoomOut();
+    private void Fire(class CTFPlayer * );
+    class NetworkVar_m_flChargedDamage
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFSniperRifle::NetworkVar_m_flChargedDamage> m_flChargedDamage;
+    private bool m_bZoomed;
+    private class CHandle<CSniperDot> m_hSniperDot;
+    private float m_flUnzoomTime;
+    private float m_flRezoomTime;
+    private bool m_bRezoomAfterShot;
+    public class CTFSniperRifle & operator=(class CTFSniperRifle & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

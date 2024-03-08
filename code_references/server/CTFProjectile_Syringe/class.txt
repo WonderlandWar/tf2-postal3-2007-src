@@ -1,0 +1,12 @@
+class CTFProjectile_Syringe : public CTFProjectile_Nail
+{
+    public void CTFProjectile_Syringe(class CTFProjectile_Syringe & );
+    public void CTFProjectile_Syringe();
+    public void ~CTFProjectile_Syringe();
+    public class CTFProjectile_Syringe * Create(class Vector & ,class QAngle & ,class CBaseEntity * ,class CBaseEntity * ,bool );
+    public char * GetProjectileModelName();
+    public float GetGravity();
+    public class CTFProjectile_Syringe & operator=(class CTFProjectile_Syringe & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

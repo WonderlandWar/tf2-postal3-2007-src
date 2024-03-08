@@ -1,0 +1,32 @@
+void __thiscall CTeamplayRoundWin::RoundWin(CTeamplayRoundWin *this)
+{
+  void *v2; // edi
+  int TeamNumber; // eax
+  int v4; // ecx
+  void (__thiscall *v5)(void *, int, int, int, bool); // edx
+
+  v2 = __RTDynamicCast(
+         g_pGameRules,
+         0,
+         &CGameRules `RTTI Type Descriptor',
+         &CTeamplayRoundBasedRules `RTTI Type Descriptor',
+         0);
+  if ( v2 )
+  {
+    TeamNumber = CBaseEntity::GetTeamNumber(this);
+    if ( TeamNumber <= 1 )
+    {
+      (*(void (__thiscall **)(void *, bool))(*(_DWORD *)v2 + 548))(v2, this->m_bForceMapReset);
+    }
+    else
+    {
+      LOBYTE(v4) = this->m_bForceMapReset;
+      v5 = *(void (__thiscall **)(void *, int, int, int, bool))(*(_DWORD *)v2 + 544);
+      if ( (_BYTE)v4 )
+        v5(v2, TeamNumber, this->m_iWinReason, v4, this->m_bSwitchTeamsOnWin);
+      else
+        v5(v2, TeamNumber, this->m_iWinReason, 0, 0);
+    }
+  }
+  COutputEvent::FireOutput(&this->m_outputOnRoundWin, this, this, 0.0);
+}

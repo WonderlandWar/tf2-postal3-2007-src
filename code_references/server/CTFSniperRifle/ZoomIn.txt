@@ -1,0 +1,12 @@
+void __thiscall CTFSniperRifle::ZoomIn(CTFSniperRifle *this)
+{
+  CTFPlayer *TFPlayerOwner; // edi
+
+  CTFWeaponBaseGun::ZoomIn(this);
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  CTFPlayerShared::AddCond(&TFPlayerOwner->m_Shared, 3, -1.0);
+  CTFPlayer::TeamFortress_SetSpeed(TFPlayerOwner);
+  CTFSniperRifle::CreateSniperDot(this);
+  CTFPlayer::ClearExpression(TFPlayerOwner);
+  this->m_bZoomed = 1;
+}

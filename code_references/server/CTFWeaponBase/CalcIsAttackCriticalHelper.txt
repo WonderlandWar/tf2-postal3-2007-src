@@ -1,0 +1,44 @@
+// positive sp value has been detected, the output may be wrong!
+bool __thiscall CTFWeaponBase::CalcIsAttackCriticalHelper(CTFWeaponBase *this)
+{
+  CBaseCombatCharacter *Owner; // eax
+  char *v3; // edi
+  IUniformRandomStream *m_pWeaponInfo; // ecx
+  IUniformRandomStream *v6; // ecx
+  float m_fValue; // [esp+8h] [ebp-10h]
+  float v8; // [esp+8h] [ebp-10h]
+  float flCritDuration; // [esp+10h] [ebp-8h]
+  float v10; // [esp+14h] [ebp-4h]
+
+  Owner = CBaseCombatWeapon::GetOwner(this);
+  v3 = (char *)__RTDynamicCast(
+                 Owner,
+                 0,
+                 &CBaseCombatCharacter `RTTI Type Descriptor',
+                 &CBasePlayer `RTTI Type Descriptor',
+                 0);
+  if ( !v3 || !(*(unsigned __int8 (__thiscall **)(char *))(*(_DWORD *)v3 + 304))(v3) )
+    return 0;
+  CTFPlayerShared::GetCritMult((CTFPlayerShared *)(v3 + 3792));
+  m_pWeaponInfo = (IUniformRandomStream *)this->m_pWeaponInfo;
+  if ( LOBYTE(m_pWeaponInfo[16 * this->m_iWeaponMode + 421].__vftable) )
+  {
+    v6 = (IUniformRandomStream *)gpGlobals;
+    if ( gpGlobals->curtime >= (double)this->m_flCritTime )
+    {
+      if ( this->m_flLastCritCheckTime + 1.0 > gpGlobals->curtime )
+        return 0;
+      this->m_flLastCritCheckTime = gpGlobals->curtime;
+      m_fValue = tf_damage_critical_chance_rapid.m_pParent->m_fValue;
+      if ( 1.0 / (v10 / (flCritDuration * m_fValue) - v10) * 10000.0 < (double)_RandomInt(v6, 0, 9999) )
+        return 0;
+      this->m_flCritTime = tf_damage_critical_duration_rapid.m_pParent->m_fValue + gpGlobals->curtime;
+    }
+    return 1;
+  }
+  else
+  {
+    v8 = tf_damage_critical_chance.m_pParent->m_fValue;
+    return flCritDuration * v8 * 10000.0 > (double)_RandomInt(m_pWeaponInfo, 0, 9999);
+  }
+}

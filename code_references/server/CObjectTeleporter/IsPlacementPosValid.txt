@@ -1,0 +1,33 @@
+bool __thiscall CObjectTeleporter::IsPlacementPosValid(CObjectTeleporter *this)
+{
+  bool result; // al
+  float z; // edx
+  float y; // ecx
+  const CViewVectors *v5; // eax
+  Vector *p_m_vHullMax; // [esp-14h] [ebp-7Ch]
+  Vector vecTestPos; // [esp+0h] [ebp-68h] BYREF
+  CGameTrace tr; // [esp+Ch] [ebp-5Ch] BYREF
+
+  result = CBaseObject::IsPlacementPosValid(this);
+  if ( result )
+  {
+    z = this->m_vecBuildOrigin.z;
+    y = this->m_vecBuildOrigin.y;
+    vecTestPos.y = this->m_vecBuildOrigin.x;
+    vecTestPos.z = y;
+    tr.startpos.x = z + 12.0;
+    p_m_vHullMax = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vHullMax;
+    v5 = g_pGameRules->GetViewVectors(g_pGameRules);
+    UTIL_TraceHull(
+      (Vector *)&vecTestPos.y,
+      (Vector *)&vecTestPos.y,
+      &v5->m_vHullMin,
+      p_m_vHullMax,
+      0x200400Bu,
+      this,
+      8,
+      (CGameTrace *)&tr.startpos.y);
+    return *(float *)&tr.contents >= 1.0;
+  }
+  return result;
+}

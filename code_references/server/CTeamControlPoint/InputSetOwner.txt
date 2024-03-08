@@ -1,0 +1,24 @@
+void __thiscall CTeamControlPoint::InputSetOwner(CTeamControlPoint *this, inputdata_t *input)
+{
+  inputdata_t *v2; // edi
+  const char *pszValue; // esi
+
+  v2 = input;
+  if ( input->value.fieldType == FIELD_INTEGER )
+    pszValue = input->value.iszVal.pszValue;
+  else
+    pszValue = 0;
+  if ( ((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].~IGameSystem)(g_pGameRules) )
+  {
+    if ( v2->pCaller->IsPlayer(v2->pCaller) )
+    {
+      input = (inputdata_t *)engine->IndexOfEdict(engine, v2->pCaller->m_Network.m_pPev);
+      CTeamControlPoint::InternalSetOwner(this, (int)pszValue, 1, 1, (int *)&input);
+    }
+    else
+    {
+      CTeamControlPoint::InternalSetOwner(this, (int)pszValue, 0, 0, 0);
+    }
+    CBaseTeamObjectiveResource::SetOwningTeam(g_pObjectiveResource, this->m_iPointIndex, this->m_iTeam);
+  }
+}

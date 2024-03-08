@@ -1,0 +1,18 @@
+void __thiscall CTFPlayerShared::OnRemoveDisguised(CTFPlayerShared *this)
+{
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  val = 0;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDisguiseTeam>::Set(&this->m_nDisguiseTeam, &val);
+  val = 0;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDisguiseClass>::Set(&this->m_nDisguiseClass, &val);
+  val = -1;
+  CNetworkVarBase<CHandle<CBaseEntity>,CTFPlayerShared::NetworkVar_m_hDisguiseTarget>::Set(
+    &this->m_hDisguiseTarget,
+    (const CHandle<CBaseEntity> *)&val);
+  val = 0;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDisguiseHealth>::Set(&this->m_iDisguiseHealth, &val);
+  CTFPlayer::UpdateModel(this->m_pOuter);
+  CTFPlayer::TeamFortress_SetSpeed(this->m_pOuter);
+  CTFPlayer::ClearExpression(this->m_pOuter);
+}

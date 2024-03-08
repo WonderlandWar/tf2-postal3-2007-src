@@ -1,0 +1,15 @@
+void __thiscall CObjectTeleporter::CObjectTeleporter(CObjectTeleporter *this)
+{
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  CBaseObject::CBaseObject(this);
+  this->CBaseObject::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CObjectTeleporter_vtbl *)&CObjectTeleporter::`vftable'{for `CBaseCombatCharacter'};
+  this->CBaseObject::IHasBuildPoints::__vftable = (IHasBuildPoints_vtbl *)&CObjectTeleporter::`vftable'{for `IHasBuildPoints'};
+  this->CBaseObject::IScorer::__vftable = (IScorer_vtbl *)&CObjectTeleporter::`vftable'{for `IScorer'};
+  this->m_hMatchingTeleporter.m_Index = -1;
+  this->m_hTeleportingPlayer.m_Index = -1;
+  val = 150;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iMaxHealth>::Set(&this->m_iMaxHealth, &val);
+  val = 150;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(&this->m_iHealth, &val);
+}

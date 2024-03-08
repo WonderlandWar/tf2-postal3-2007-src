@@ -1,0 +1,82 @@
+bool __thiscall CTeamControlPoint::KeyValue(CTeamControlPoint *this, int szKeyName, const char *szValue)
+{
+  const char *v3; // esi
+  CTeamControlPoint::perteamdata_t *v5; // esi
+  CTeamControlPoint::perteamdata_t *v7; // esi
+  CTeamControlPoint::perteamdata_t *v8; // esi
+  CTeamControlPoint::perteamdata_t *v9; // esi
+  CTeamControlPoint::perteamdata_t *v10; // esi
+  CTeamControlPoint::perteamdata_t *v11; // esi
+  CTeamControlPoint::perteamdata_t *v12; // esi
+  string_t v13; // eax
+  int v14; // [esp+8h] [ebp-4h] BYREF
+
+  v3 = (const char *)szKeyName;
+  if ( V_strncmp((const char *)szKeyName, "team_capsound_", 14) )
+  {
+    if ( V_strncmp(v3, "team_model_", 11) )
+    {
+      if ( V_strncmp(v3, "team_timedpoints_", 17) )
+      {
+        if ( V_strncmp(v3, "team_bodygroup_", 15) )
+        {
+          if ( V_strncmp(v3, "team_icon_", 10) )
+          {
+            if ( V_strncmp(v3, "team_overlay_", 13) )
+            {
+              if ( V_strncmp(v3, "team_previouspoint_", 19) )
+              {
+                return CBaseEntity::KeyValue(this, v3, szValue);
+              }
+              else
+              {
+                szKeyName = 0;
+                sscanf(v3 + 19, "%d_%d", &v14, &szKeyName);
+                v12 = &this->m_TeamData.m_Memory.m_pMemory[v14];
+                v13.pszValue = AllocPooledString((const char *)&szValue).pszValue;
+                v12->iszPreviousPoint[szKeyName].pszValue = *(const char **)v13.pszValue;
+                return 1;
+              }
+            }
+            else
+            {
+              v11 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 13)];
+              v11->iszOverlay.pszValue = *(const char **)AllocPooledString((const char *)&szValue).pszValue;
+              return 1;
+            }
+          }
+          else
+          {
+            v10 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 10)];
+            v10->iszIcon.pszValue = *(const char **)AllocPooledString((const char *)&szValue).pszValue;
+            return 1;
+          }
+        }
+        else
+        {
+          v9 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 15)];
+          v9->iModelBodygroup = atoi(szValue);
+          return 1;
+        }
+      }
+      else
+      {
+        v8 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 17)];
+        v8->iTimedPoints = atoi(szValue);
+        return 1;
+      }
+    }
+    else
+    {
+      v7 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 11)];
+      v7->iszModel.pszValue = *(const char **)AllocPooledString((const char *)&szValue).pszValue;
+      return 1;
+    }
+  }
+  else
+  {
+    v5 = &this->m_TeamData.m_Memory.m_pMemory[atoi(v3 + 14)];
+    v5->iszCapSound.pszValue = *(const char **)AllocPooledString((const char *)&szValue).pszValue;
+    return 1;
+  }
+}

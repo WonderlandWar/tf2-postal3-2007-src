@@ -1,0 +1,35 @@
+int __thiscall CSecondaryTargetID::CalculateTargetIndex(CSecondaryTargetID *this, C_TFPlayer *pLocalTFPlayer)
+{
+  C_TFPlayer *v2; // edi
+  C_BaseEntity *HealTarget; // eax
+  IClientNetworkable *v5; // edi
+  IClientNetworkable *v7; // edi
+  float flChargeLevel; // [esp+8h] [ebp-4h] BYREF
+
+  v2 = pLocalTFPlayer;
+  HealTarget = C_TFPlayer::MedicGetHealTarget(pLocalTFPlayer);
+  if ( HealTarget )
+  {
+    v5 = &HealTarget->IClientNetworkable;
+    if ( HealTarget->entindex(&HealTarget->IClientNetworkable) != this->m_iTargetEntIndex )
+      this->m_pwszPrepend = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_playerid_healtarget");
+    return v5->entindex(v5);
+  }
+  else
+  {
+    C_TFPlayer::GetHealer(v2, &pLocalTFPlayer, &flChargeLevel);
+    if ( pLocalTFPlayer )
+    {
+      v7 = &pLocalTFPlayer->IClientNetworkable;
+      if ( pLocalTFPlayer->entindex(&pLocalTFPlayer->IClientNetworkable) != this->m_iTargetEntIndex )
+        this->m_pwszPrepend = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_playerid_healer");
+      return v7->entindex(v7);
+    }
+    else
+    {
+      if ( this->m_iTargetEntIndex )
+        this->m_pwszPrepend = 0;
+      return 0;
+    }
+  }
+}

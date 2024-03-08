@@ -1,0 +1,284 @@
+void __thiscall CTFFreezePanel::FireGameEvent(CTFFreezePanel *this, IGameEvent *event)
+{
+  const char *v3; // eax
+  IVEngineClient_vtbl *v4; // esi
+  int v5; // eax
+  int v6; // esi
+  C_TFPlayer *LocalTFPlayer; // eax
+  vgui::IBorder **p_border; // edi
+  int v9; // eax
+  C_BasePlayer *BaseEntity; // esi
+  C_BasePlayer *v11; // eax
+  int v12; // ebp
+  int v13; // eax
+  vgui::Panel *ChildByName; // eax
+  C_TFPlayer *v15; // ebp
+  C_BasePlayer *v16; // eax
+  int v17; // eax
+  bool v18; // zf
+  float (__thiscall *CalcRoll)(C_BasePlayer *, const QAngle *, const Vector *, float, float); // eax
+  float (__thiscall *v20)(C_BasePlayer *, const QAngle *, const Vector *, float, float); // eax
+  vgui::IBorder *v21; // ebp
+  const char *v22; // eax
+  vgui::Panel *v23; // eax
+  CAvatarImagePanel *v24; // eax
+  C_TFPlayer *Builder; // eax
+  C_BasePlayer *v26; // ebp
+  int v27; // eax
+  vgui::IBorder *v28; // esi
+  const char *v29; // eax
+  vgui::Panel *v30; // eax
+  CAvatarImagePanel *v31; // eax
+  vgui::IBorder *v32; // ebp
+  int v33; // eax
+  float (__thiscall *v34)(C_BasePlayer *, const QAngle *, const Vector *, float, float); // eax
+  Color m_clrDragFrame; // eax
+  wchar_t *v36; // ebp
+  int v37; // eax
+  wchar_t *v38; // eax
+  C_BasePlayer *v39; // esi
+  int v40; // eax
+  C_BasePlayer *v41; // esi
+  int v42; // eax
+  vgui::Panel *v43; // eax
+  void *v44; // eax
+  int v45; // ecx
+  int v46; // [esp+8h] [ebp-24h]
+  int yp; // [esp+1Ch] [ebp-10h] BYREF
+  C_BaseObject *pObj; // [esp+20h] [ebp-Ch] BYREF
+  double v49; // [esp+24h] [ebp-8h]
+  C_TFPlayer *pVictim; // [esp+30h] [ebp+4h]
+  C_TFPlayer *pVictima; // [esp+30h] [ebp+4h]
+  C_TFPlayer *pVictimb; // [esp+30h] [ebp+4h]
+  int pVictimc; // [esp+30h] [ebp+4h]
+
+  v3 = event->GetName(event);
+  if ( !strcmp("player_death", v3) )
+  {
+    v4 = engine->__vftable;
+    v5 = event->GetInt(event, "userid", 0);
+    v6 = v4->GetPlayerForUserID(engine, v5);
+    LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+    if ( LocalTFPlayer && v6 == LocalTFPlayer->entindex(&LocalTFPlayer->IClientNetworkable) )
+    {
+      if ( event->GetInt(event, "dominated", 0) <= 0 )
+        this->m_clrDragFrame = event->GetInt(event, "revenge", 0) <= 0 ? 0 : (Color)2;
+      else
+        this->m_clrDragFrame = (Color)1;
+    }
+    return;
+  }
+  if ( !strcmp("hide_freezepanel", v3) )
+    goto LABEL_11;
+  if ( !strcmp("freezecam_started", v3) )
+  {
+    *(float *)&this->m_hKeyBindingsContext = *(float *)(gpGlobals.m_Index + 12) + 1.0;
+    *(float *)&this->_vpanel = *(float *)(gpGlobals.m_Index + 12) + 1.25;
+    return;
+  }
+  if ( !strcmp("teamplay_win_panel", v3) )
+  {
+LABEL_11:
+    CTFFreezePanel::Hide((CTFFreezePanel *)((char *)this - 232));
+    return;
+  }
+  if ( !V_strcmp("show_freezepanel", v3)
+    && g_PR
+    && __RTDynamicCast(
+         g_PR,
+         0,
+         &C_PlayerResource `RTTI Type Descriptor',
+         &C_TF_PlayerResource `RTTI Type Descriptor',
+         0) )
+  {
+    p_border = &this[-1]._border;
+    CTFFreezePanel::Show((CTFFreezePanel *)((char *)this - 232));
+    CTFFreezePanel::ShowSnapshotPanel((CTFFreezePanel *)((char *)this - 232), 0);
+    v9 = event->GetInt(event, "killer", 0);
+    *(_DWORD *)&this->m_InternalInvalidateLayout_register = v9;
+    BaseEntity = (C_BasePlayer *)CClientEntityList::GetBaseEntity((CClientEntityList *)cl_entitylist.m_Index, v9);
+    ((void (__thiscall *)(vgui::IBorder **, const char *, _DWORD, _DWORD))this[-1]._border[191].__vftable)(
+      &this[-1]._border,
+      "resource/UI/FreezePanel_Basic.res",
+      0,
+      0);
+    vgui::Panel::GetPos((CTFFreezePanel *)((char *)this - 232), &yp, (int *)&pObj);
+    if ( *(_DWORD *)&this->m_InternalKeyTyped_register == -1 )
+      *(_DWORD *)&this->m_InternalKeyTyped_register = pObj;
+    if ( g_pGameRules[3].m_pNext == (CAutoGameSystemPerFrame *)5 )
+    {
+      v49 = (double)*(int *)&this->m_InternalKeyTyped_register;
+      v46 = (int)(v49 - (double)ScreenHeight() * 0.002083333333333333 * 50.0);
+      vgui::Panel::SetPos((CTFFreezePanel *)((char *)this - 232), yp, v46);
+    }
+    else
+    {
+      vgui::Panel::SetPos((CTFFreezePanel *)((char *)this - 232), yp, *(_DWORD *)&this->m_InternalKeyTyped_register);
+    }
+    if ( BaseEntity )
+    {
+      v11 = ToBasePlayer(BaseEntity);
+      pVictim = 0;
+      if ( v11 )
+        pVictim = (C_TFPlayer *)CTFPlayerShared::GetMaxBuffedHealth((CTFPlayerShared *)&v11[1].m_nFXComputeFrame);
+      v12 = BaseEntity->GetHealth(BaseEntity);
+      if ( !BaseEntity->IsAlive(BaseEntity) )
+        v12 = 0;
+      v13 = BaseEntity->GetMaxHealth(BaseEntity);
+      CTFHudPlayerHealth::SetHealth((CTFHudPlayerHealth *)this->m_pDragDrop, v12, v13, (int)pVictim);
+      ChildByName = vgui::Panel::FindChildByName((CTFFreezePanel *)((char *)this - 232), "FreezeLabel", 0);
+      v15 = (C_TFPlayer *)__RTDynamicCast(
+                            ChildByName,
+                            0,
+                            &vgui::Panel `RTTI Type Descriptor',
+                            &vgui::Label `RTTI Type Descriptor',
+                            0);
+      pVictima = v15;
+      if ( BaseEntity->IsPlayer(BaseEntity) )
+      {
+        pVictimb = C_TFPlayer::GetLocalTFPlayer();
+        v16 = ToBasePlayer(BaseEntity);
+        LODWORD(v49) = v16;
+        if ( pVictimb
+          && v16
+          && (v17 = pVictimb->entindex(&pVictimb->IClientNetworkable),
+              CTFPlayerShared::IsPlayerDominated((CTFPlayerShared *)(LODWORD(v49) + 4576), v17)) )
+        {
+          v18 = !BaseEntity->IsAlive(BaseEntity);
+          CalcRoll = v15->CalcRoll;
+          if ( v18 )
+            ((void (__thiscall *)(C_TFPlayer *, const char *))CalcRoll)(v15, "#FreezePanel_Nemesis_Dead");
+          else
+            ((void (__thiscall *)(C_TFPlayer *, const char *))CalcRoll)(v15, "#FreezePanel_Nemesis");
+        }
+        else
+        {
+          v18 = !BaseEntity->IsAlive(BaseEntity);
+          v20 = v15->CalcRoll;
+          if ( v18 )
+            ((void (__thiscall *)(C_TFPlayer *, const char *))v20)(v15, "#FreezePanel_Killer_Dead");
+          else
+            ((void (__thiscall *)(C_TFPlayer *, const char *))v20)(v15, "#FreezePanel_Killer");
+        }
+        v21 = *p_border;
+        v22 = g_PR->GetPlayerName(&g_PR->IGameResources, *(_DWORD *)&this->m_InternalInvalidateLayout_register);
+        ((void (__thiscall *)(vgui::IBorder **, const char *, const char *))v21[208].__vftable)(
+          &this[-1]._border,
+          "killername",
+          v22);
+        v23 = vgui::Panel::FindChildByName((CTFFreezePanel *)((char *)this - 232), "AvatarImage", 0);
+        v24 = (CAvatarImagePanel *)__RTDynamicCast(
+                                     v23,
+                                     0,
+                                     &vgui::Panel `RTTI Type Descriptor',
+                                     &CAvatarImagePanel `RTTI Type Descriptor',
+                                     0);
+        if ( v24 )
+          CAvatarImagePanel::SetPlayer(v24, BaseEntity);
+      }
+      else if ( BaseEntity->IsBaseObject(BaseEntity) )
+      {
+        LODWORD(v49) = BaseEntity;
+        Builder = C_BaseObject::GetBuilder((C_BaseObject *)BaseEntity);
+        v26 = Builder;
+        if ( Builder )
+        {
+          v27 = Builder->entindex(&Builder->IClientNetworkable);
+          v28 = *p_border;
+          *(_DWORD *)&this->m_InternalInvalidateLayout_register = v27;
+          v29 = g_PR->GetPlayerName(&g_PR->IGameResources, v27);
+          ((void (__thiscall *)(vgui::IBorder **, const char *, const char *))v28[208].__vftable)(
+            &this[-1]._border,
+            "killername",
+            v29);
+          v30 = vgui::Panel::FindChildByName((CTFFreezePanel *)((char *)this - 232), "AvatarImage", 0);
+          v31 = (CAvatarImagePanel *)__RTDynamicCast(
+                                       v30,
+                                       0,
+                                       &vgui::Panel `RTTI Type Descriptor',
+                                       &CAvatarImagePanel `RTTI Type Descriptor',
+                                       0);
+          if ( v31 )
+            CAvatarImagePanel::SetPlayer(v31, v26);
+          BaseEntity = v26;
+        }
+        if ( pVictima )
+        {
+          if ( !BaseEntity || BaseEntity->IsAlive(BaseEntity) )
+            ((void (__thiscall *)(C_TFPlayer *, const char *))pVictima->CalcRoll)(pVictima, "#FreezePanel_KillerObject");
+          else
+            ((void (__thiscall *)(C_TFPlayer *, const char *))pVictima->CalcRoll)(
+              pVictima,
+              "#FreezePanel_KillerObject_Dead");
+        }
+        v32 = *p_border;
+        v33 = (*(int (__thiscall **)(_DWORD))(*(_DWORD *)LODWORD(v49) + 820))(LODWORD(v49));
+        ((void (__thiscall *)(vgui::IBorder **, const char *, int))v32[208].__vftable)(
+          &this[-1]._border,
+          "objectkiller",
+          v33);
+      }
+      else if ( v15 )
+      {
+        v18 = !BaseEntity->IsAlive(BaseEntity);
+        v34 = v15->CalcRoll;
+        if ( v18 )
+          ((void (__thiscall *)(C_TFPlayer *, const char *))v34)(v15, "#FreezePanel_Killer_Dead");
+        else
+          ((void (__thiscall *)(C_TFPlayer *, const char *))v34)(v15, "#FreezePanel_Killer");
+      }
+    }
+    m_clrDragFrame = this->m_clrDragFrame;
+    v36 = 0;
+    pVictimc = 5;
+    if ( m_clrDragFrame )
+    {
+      v37 = *(_DWORD *)&m_clrDragFrame - 1;
+      if ( !v37 )
+      {
+        LODWORD(v49) = C_TFPlayer::GetLocalTFPlayer();
+        v39 = ToBasePlayer(BaseEntity);
+        if ( !v39 )
+          goto LABEL_64;
+        v40 = (*(int (__thiscall **)(int))(*(_DWORD *)(LODWORD(v49) + 8) + 36))(LODWORD(v49) + 8);
+        if ( !CTFPlayerShared::IsPlayerDominated((CTFPlayerShared *)&v39[1].m_nFXComputeFrame, v40) )
+          goto LABEL_64;
+        v38 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_NewNemesis");
+        pVictimc = 3;
+        goto LABEL_63;
+      }
+      if ( v37 != 1 )
+      {
+LABEL_64:
+        (*(void (__thiscall **)(char *, const char *, wchar_t *))(*(_DWORD *)this->_panelName + 828))(
+          this->_panelName,
+          "nemesisname",
+          v36);
+        v43 = vgui::Panel::FindChildByName((vgui::Panel *)this->_panelName, "NemesisLabel", 0);
+        v44 = __RTDynamicCast(v43, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::Label `RTTI Type Descriptor', 0);
+        if ( v44 )
+          (*(void (__thiscall **)(void *, int))(*(_DWORD *)v44 + 784))(v44, pVictimc);
+        LOBYTE(v45) = v36 != 0;
+        ((void (__thiscall *)(vgui::IBorder *, int))p_border[76]->__vftable[3].GetInset)(p_border[76], v45);
+        this->m_clrDragFrame = 0;
+        return;
+      }
+      v38 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_GotRevenge");
+    }
+    else
+    {
+      LODWORD(v49) = C_TFPlayer::GetLocalTFPlayer();
+      v41 = ToBasePlayer(BaseEntity);
+      if ( !v41 )
+        goto LABEL_64;
+      v42 = (*(int (__thiscall **)(int))(*(_DWORD *)(LODWORD(v49) + 8) + 36))(LODWORD(v49) + 8);
+      if ( !CTFPlayerShared::IsPlayerDominated((CTFPlayerShared *)&v41[1].m_nFXComputeFrame, v42) )
+        goto LABEL_64;
+      v38 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_FreezeNemesis");
+    }
+    pVictimc = 5;
+LABEL_63:
+    v36 = v38;
+    goto LABEL_64;
+  }
+}

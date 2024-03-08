@@ -1,0 +1,79 @@
+char __thiscall CTargetID::ShouldDraw(CTargetID *this)
+{
+  C_TFPlayer *LocalTFPlayer; // ebp
+  int v4; // eax
+  double v5; // st7
+  int m_iTargetEntIndex; // eax
+  char v7; // bl
+  C_BaseEntity *BaseEntity; // edi
+  C_BaseCombatWeapon *v9; // eax
+  bool v10; // bl
+  CHandle<C_BaseCombatWeapon> v11; // [esp+Ch] [ebp-4h] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( !LocalTFPlayer
+    || LocalTFPlayer->GetObserverMode(LocalTFPlayer) && LocalTFPlayer->GetObserverMode(LocalTFPlayer) != 4 )
+  {
+    return 0;
+  }
+  v4 = this->CalculateTargetIndex(this, LocalTFPlayer);
+  this->m_iTargetEntIndex = v4;
+  if ( v4 )
+  {
+    v5 = *(float *)(gpGlobals.m_Index + 12);
+    goto LABEL_11;
+  }
+  v5 = 0.0;
+  if ( 0.0 != this->m_flLastChangeTime && this->m_flLastChangeTime < (double)*(float *)(gpGlobals.m_Index + 12) )
+  {
+    this->m_iLastEntIndex = 0;
+LABEL_11:
+    this->m_flLastChangeTime = v5;
+    goto LABEL_12;
+  }
+  this->m_iTargetEntIndex = this->m_iLastEntIndex;
+LABEL_12:
+  m_iTargetEntIndex = this->m_iTargetEntIndex;
+  v7 = 0;
+  if ( m_iTargetEntIndex )
+  {
+    BaseEntity = CClientEntityList::GetBaseEntity((CClientEntityList *)cl_entitylist.m_Index, m_iTargetEntIndex);
+    if ( BaseEntity )
+    {
+      if ( IsPlayerIndex(this->m_iTargetEntIndex) )
+      {
+        if ( !CTFPlayerShared::InCond((CTFPlayerShared *)&BaseEntity[3].m_pIntermediateData[77], 7)
+          || CTFPlayerShared::InCond((CTFPlayerShared *)&BaseEntity[3].m_pIntermediateData[77], 6)
+          || CTFPlayerShared::InCond((CTFPlayerShared *)&BaseEntity[3].m_pIntermediateData[77], 8) )
+        {
+          v10 = 0;
+        }
+        else
+        {
+          v11.m_Index = BaseEntity[3].m_hEffectEntity.m_Index;
+          v9 = CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *(&v11);
+          v10 = ToBasePlayer(v9) != 0;
+        }
+        if ( LocalTFPlayer->GetTeamNumber(LocalTFPlayer) != 1
+          && !LocalTFPlayer->InSameTeam(LocalTFPlayer, BaseEntity)
+          && !v10 )
+        {
+          return 0;
+        }
+        goto LABEL_26;
+      }
+      if ( BaseEntity->IsBaseObject(BaseEntity) && LocalTFPlayer->InSameTeam(LocalTFPlayer, BaseEntity) )
+      {
+LABEL_26:
+        v7 = 1;
+        if ( !this->IsVisible(&this->vgui::EditablePanel) || this->m_iTargetEntIndex != this->m_iLastEntIndex )
+        {
+          this->m_iLastEntIndex = this->m_iTargetEntIndex;
+          this->m_bLayoutOnUpdate = 1;
+        }
+        CTargetID::UpdateID(this, (int)BaseEntity);
+      }
+    }
+  }
+  return v7;
+}

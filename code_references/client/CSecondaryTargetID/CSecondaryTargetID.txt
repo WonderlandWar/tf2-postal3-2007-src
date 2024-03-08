@@ -1,0 +1,32 @@
+void __thiscall CSecondaryTargetID::CSecondaryTargetID(CSecondaryTargetID *this, const char *pElementName)
+{
+  vgui::PanelMessageMap *v3; // edi
+  PanelAnimationMap *v4; // edi
+  vgui::PanelKeyBindingMap *v5; // edi
+
+  CTargetID::CTargetID(this, pElementName);
+  this->CTargetID::CHudElement::CGameEventListener::IGameEventListener2::__vftable = (CSecondaryTargetID_vtbl *)&CSecondaryTargetID::`vftable'{for `CHudElement'};
+  this->CTargetID::vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable = (vgui::EditablePanel_vtbl *)&CSecondaryTargetID::`vftable'{for `vgui::EditablePanel'};
+  if ( !`CSecondaryTargetID::ChainToMap'::`2'::chained )
+  {
+    `CSecondaryTargetID::ChainToMap'::`2'::chained = 1;
+    v3 = vgui::FindOrAddPanelMessageMap("CSecondaryTargetID");
+    v3->pfnClassName = CSecondaryTargetID::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelMessageMap("CTargetID");
+  }
+  if ( !`CSecondaryTargetID::ChainToAnimationMap'::`2'::chained )
+  {
+    `CSecondaryTargetID::ChainToAnimationMap'::`2'::chained = 1;
+    v4 = FindOrAddPanelAnimationMap("CSecondaryTargetID");
+    v4->pfnClassName = CSecondaryTargetID::GetPanelClassName;
+    v4->baseMap = FindOrAddPanelAnimationMap("CTargetID");
+  }
+  if ( !`CSecondaryTargetID::KB_ChainToMap'::`2'::chained )
+  {
+    `CSecondaryTargetID::KB_ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelKeyBindingMap("CSecondaryTargetID");
+    v5->pfnClassName = CSecondaryTargetID::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelKeyBindingMap("CTargetID");
+  }
+  this->m_pwszPrepend = 0;
+}

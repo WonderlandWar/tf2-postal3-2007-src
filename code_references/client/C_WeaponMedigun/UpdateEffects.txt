@@ -1,0 +1,169 @@
+void __thiscall C_WeaponMedigun::UpdateEffects(C_WeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  C_BasePlayer *m_pEntity; // ebp
+  C_TFPlayer *LocalTFPlayer; // eax
+  C_WeaponMedigun *ViewModel; // ebx
+  int i; // esi
+  unsigned int v8; // eax
+  int m_Size; // ebp
+  int v10; // edx
+  C_WeaponMedigun::healingtargeteffects_t *v11; // esi
+  IHandleEntity *v12; // eax
+  const char *v13; // eax
+  CNewParticleEffect *v14; // ebp
+  C_BaseEntity *v15; // ecx
+  int v16; // ebx
+  int m_nAllocationCount; // eax
+  CUtlVector<C_WeaponMedigun::healingtargeteffects_t,CUtlMemory<C_WeaponMedigun::healingtargeteffects_t,int> > *p_m_hHealingTargetEffects; // esi
+  C_WeaponMedigun::healingtargeteffects_t *m_pMemory; // ecx
+  int v20; // eax
+  bool v21; // zf
+  unsigned int v22; // edi
+  int v23; // ecx
+  Vector v24; // [esp-Ch] [ebp-30h]
+  C_WeaponMedigun *v25; // [esp+10h] [ebp-14h]
+  IHandleEntity *v26; // [esp+14h] [ebp-10h]
+  __int64 v27; // [esp+1Ch] [ebp-8h]
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_BasePlayer *)v3->m_pEntity;
+      v26 = v3->m_pEntity;
+      if ( v3->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer(m_pEntity) )
+        {
+          LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+          ViewModel = this;
+          v25 = this;
+          if ( LocalTFPlayer != m_pEntity
+            || (ViewModel = (C_WeaponMedigun *)C_BasePlayer::GetViewModel(LocalTFPlayer, 0), (v25 = ViewModel) != 0) )
+          {
+            for ( i = this->m_hHealingTargetEffects.m_Size - 1; i >= 0; --i )
+            {
+              if ( ViewModel )
+                CParticleProperty::StopEmission(
+                  &ViewModel->m_Particles,
+                  this->m_hHealingTargetEffects.m_Memory.m_pMemory[i].pEffect);
+              else
+                CNewParticleEffect::StopEmission(this->m_hHealingTargetEffects.m_Memory.m_pMemory[i].pEffect, 0, 0);
+              if ( this->m_hHealingTargetEffects.m_Size - i - 1 > 0 )
+                memmove(
+                  (unsigned __int8 *)&this->m_hHealingTargetEffects.m_Memory.m_pMemory[i],
+                  (unsigned __int8 *)&this->m_hHealingTargetEffects.m_Memory.m_pMemory[i + 1],
+                  8 * (this->m_hHealingTargetEffects.m_Size - i - 1));
+              --this->m_hHealingTargetEffects.m_Size;
+            }
+            if ( ViewModel )
+            {
+              if ( !C_BasePlayer::IsPlayerDead(m_pEntity) )
+              {
+                v8 = this->m_hHealingTargets.m_Value[0].m_Index;
+                if ( v8 != -1
+                  && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber == v8 >> 12
+                  && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity )
+                {
+                  m_Size = this->m_hHealingTargetEffects.m_Size;
+                  v10 = 0;
+                  if ( m_Size <= 0 )
+                  {
+LABEL_27:
+                    if ( ((int (__thiscall *)(IHandleEntity *))v26->__vftable[23].SetRefEHandle)(v26) == 2 )
+                    {
+                      if ( this->m_bChargeRelease.m_Value )
+                        v13 = "medicgun_beam_red_invun";
+                      else
+                        v13 = "medicgun_beam_red";
+                    }
+                    else
+                    {
+                      v13 = "medicgun_beam_blue_invun";
+                      if ( !this->m_bChargeRelease.m_Value )
+                        v13 = "medicgun_beam_blue";
+                    }
+                    v14 = CParticleProperty::Create(&ViewModel->m_Particles, v13, PATTACH_POINT_FOLLOW, "muzzle");
+                    if ( this->m_hHealingTargets.m_Value[0].m_Index == -1
+                      || g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber != this->m_hHealingTargets.m_Value[0].m_Index >> 12 )
+                    {
+                      v15 = 0;
+                    }
+                    else
+                    {
+                      v15 = (C_BaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity;
+                    }
+                    v24.x = 0.0;
+                    *((float *)&v27 + 1) = 50.0;
+                    *(float *)&v27 = 0.0;
+                    *(_QWORD *)&v24.y = v27;
+                    CParticleProperty::AddControlPoint(
+                      &ViewModel->m_Particles,
+                      v14,
+                      1,
+                      v15,
+                      PATTACH_ABSORIGIN_FOLLOW,
+                      0,
+                      v24);
+                    v16 = this->m_hHealingTargetEffects.m_Size;
+                    m_nAllocationCount = this->m_hHealingTargetEffects.m_Memory.m_nAllocationCount;
+                    p_m_hHealingTargetEffects = &this->m_hHealingTargetEffects;
+                    if ( v16 + 1 > m_nAllocationCount )
+                      CUtlMemory<CEntityDataInstantiator<StepSimulationData>::HashEntry,int>::Grow(
+                        (CUtlMemory<CUtlHandleTable<vgui::BuildGroup,20>::EntryType_t,int> *)&this->m_hHealingTargetEffects,
+                        v16 - m_nAllocationCount + 1);
+                    ++this->m_hHealingTargetEffects.m_Size;
+                    m_pMemory = p_m_hHealingTargetEffects->m_Memory.m_pMemory;
+                    v20 = this->m_hHealingTargetEffects.m_Size - v16 - 1;
+                    v21 = this->m_hHealingTargetEffects.m_Size - v16 == 1;
+                    this->m_hHealingTargetEffects.m_pElements = this->m_hHealingTargetEffects.m_Memory.m_pMemory;
+                    if ( v20 >= 0 && !v21 )
+                      memmove((unsigned __int8 *)&m_pMemory[v16 + 1], (unsigned __int8 *)&m_pMemory[v16], 8 * v20);
+                    v22 = this->m_hHealingTargets.m_Value[0].m_Index;
+                    if ( v22 == -1 || (v23 = v22 & 0xFFF, g_pEntityList->m_EntPtrArray[v23].m_SerialNumber != v22 >> 12) )
+                    {
+                      p_m_hHealingTargetEffects->m_Memory.m_pMemory[v16].pTarget = 0;
+                      p_m_hHealingTargetEffects->m_Memory.m_pMemory[v16].pEffect = v14;
+                    }
+                    else
+                    {
+                      p_m_hHealingTargetEffects->m_Memory.m_pMemory[v16].pTarget = (C_BaseEntity *)g_pEntityList->m_EntPtrArray[v23].m_pEntity;
+                      p_m_hHealingTargetEffects->m_Memory.m_pMemory[v16].pEffect = v14;
+                    }
+                  }
+                  else
+                  {
+                    v11 = this->m_hHealingTargetEffects.m_Memory.m_pMemory;
+                    while ( 1 )
+                    {
+                      if ( this->m_hHealingTargets.m_Value[0].m_Index == -1
+                        || (ViewModel = v25,
+                            g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber != this->m_hHealingTargets.m_Value[0].m_Index >> 12) )
+                      {
+                        v12 = 0;
+                      }
+                      else
+                      {
+                        v12 = g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity;
+                      }
+                      if ( v11->pTarget == v12 )
+                        break;
+                      ++v10;
+                      ++v11;
+                      if ( v10 >= m_Size )
+                        goto LABEL_27;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

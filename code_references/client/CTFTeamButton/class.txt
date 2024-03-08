@@ -1,0 +1,60 @@
+class CTFTeamButton : public CTFButton
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFTeamButton_RegisterMap
+    {
+        public void CTFTeamButton_RegisterMap();
+    };
+    public class CTFTeamButton::CTFTeamButton_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFTeamButton_Register
+    {
+        public void CTFTeamButton_Register();
+    };
+    public class CTFTeamButton::CTFTeamButton_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFTeamButton_RegisterKBMap
+    {
+        public void CTFTeamButton_RegisterKBMap();
+    };
+    public class CTFTeamButton::CTFTeamButton_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFTeamButton(class CTFTeamButton & );
+    public void CTFTeamButton(class vgui::Panel * ,char * );
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    class PanelAnimationVar_m_clrDefaultBG
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_clrDefaultBG();
+    };
+    private void * GetVar_m_clrDefaultBG(class vgui::Panel * );
+    private class CTFTeamButton::PanelAnimationVar_m_clrDefaultBG m_m_clrDefaultBG_register;
+    private class Color m_clrDefaultBG;
+    class PanelAnimationVar_m_clrArmedBG
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_clrArmedBG();
+    };
+    private void * GetVar_m_clrArmedBG(class vgui::Panel * );
+    private class CTFTeamButton::PanelAnimationVar_m_clrArmedBG m_m_clrArmedBG_register;
+    private class Color m_clrArmedBG;
+    class PanelAnimationVar_m_clrDepressedBG
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_clrDepressedBG();
+    };
+    private void * GetVar_m_clrDepressedBG(class vgui::Panel * );
+    private class CTFTeamButton::PanelAnimationVar_m_clrDepressedBG m_m_clrDepressedBG_register;
+    private class Color m_clrDepressedBG;
+    public void ~CTFTeamButton();
+    public class CTFTeamButton & operator=(class CTFTeamButton & );
+    public void * __vecDelDtor(unsigned int );
+};

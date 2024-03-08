@@ -1,0 +1,21 @@
+void __usercall CTFFreezePanel::OnThink(CTFFreezePanel *this@<ecx>, Vector *a2@<ebp>)
+{
+  double v3; // st7
+
+  vgui::Panel::OnThink(this);
+  v3 = 0.0;
+  if ( 0.0 != this->m_flShowCalloutsAt && *(float *)(gpGlobals.m_Index + 12) > (double)this->m_flShowCalloutsAt )
+  {
+    if ( this->ShouldDraw(&this->CHudElement) )
+      CTFFreezePanel::UpdateCallout(this, a2, (Vector *)this);
+    v3 = 0.0;
+    this->m_flShowCalloutsAt = 0.0;
+  }
+  if ( v3 != this->m_flShowSnapshotReminderAt
+    && *(float *)(gpGlobals.m_Index + 12) > (double)this->m_flShowSnapshotReminderAt )
+  {
+    if ( this->ShouldDraw(&this->CHudElement) )
+      CTFFreezePanel::ShowSnapshotPanel(this, (vgui::Panel *)1);
+    this->m_flShowSnapshotReminderAt = 0.0;
+  }
+}

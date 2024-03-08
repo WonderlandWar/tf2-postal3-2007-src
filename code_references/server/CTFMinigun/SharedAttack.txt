@@ -1,0 +1,148 @@
+void __thiscall CTFMinigun::SharedAttack(CTFMinigun *this)
+{
+  CTFPlayer *PlayerOwner; // edi
+  int m_nButtons; // eax
+  const float *v4; // eax
+  bool v5; // zf
+  int m_Value; // [esp-8h] [ebp-1Ch]
+  bool m_bCurrentAttackIsCrit; // [esp+Bh] [ebp-9h] BYREF
+  int val[2]; // [esp+Ch] [ebp-8h] BYREF
+
+  PlayerOwner = (CTFPlayer *)CTFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner && PlayerOwner->IsPlayer(PlayerOwner) )
+  {
+    if ( CTFWeaponBase::CanAttack(this) )
+    {
+      m_nButtons = PlayerOwner->m_nButtons;
+      if ( (m_nButtons & 1) != 0 )
+      {
+        this->m_iWeaponMode = 0;
+      }
+      else if ( (m_nButtons & 0x800) != 0 )
+      {
+        this->m_iWeaponMode = 1;
+      }
+      switch ( this->m_iWeaponState.m_Value )
+      {
+        case AC_STATE_STARTFIRING:
+          if ( gpGlobals->curtime >= (double)this->m_flNextPrimaryAttack.m_Value )
+          {
+            if ( this->m_iWeaponMode == 1 )
+            {
+              val[0] = 3;
+              CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+                (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+                val);
+              CTFPlayer::SpeakWeaponFire(PlayerOwner, 3);
+            }
+            else
+            {
+              val[0] = 2;
+              CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+                (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+                val);
+              CTFPlayer::SpeakWeaponFire(PlayerOwner, 4);
+            }
+            *(double *)val = gpGlobals->curtime + 0.1;
+            v4 = CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle>::operator=<double>(
+                   &this->m_flTimeWeaponIdle,
+                   (const long double *)val);
+            CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, v4);
+          }
+          break;
+        case AC_STATE_FIRING:
+          if ( this->m_iWeaponMode == 1 )
+          {
+            CTFPlayer::ClearWeaponFireScene(PlayerOwner);
+            CTFPlayer::SpeakWeaponFire(PlayerOwner, 3);
+            val[0] = 3;
+            CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+              (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+              val);
+          }
+          else if ( CBaseCombatCharacter::GetAmmoCount(PlayerOwner, this->m_iPrimaryAmmoType.m_Value) > 0 )
+          {
+            if ( this->m_flStartedFiringAt < 0.0 )
+              this->m_flStartedFiringAt = gpGlobals->curtime;
+            CTFWeaponBaseGun::PrimaryAttack(this);
+            CTFWeaponBase::CalcIsAttackCritical(this);
+            m_bCurrentAttackIsCrit = this->m_bCurrentAttackIsCrit;
+            CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+              (CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bCritShot,
+              &m_bCurrentAttackIsCrit);
+            CTFPlayer::DoAnimationEvent(PlayerOwner, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+            *(double *)val = gpGlobals->curtime + 0.2;
+            CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle>::operator=<double>(
+              &this->m_flTimeWeaponIdle,
+              (const long double *)val);
+          }
+          else
+          {
+            val[0] = 4;
+            CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+              (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+              val);
+          }
+          break;
+        case AC_STATE_SPINNING:
+          v5 = this->m_iWeaponMode == 0;
+          this->m_flStartedFiringAt = -1.0;
+          if ( v5 )
+          {
+            if ( CBaseCombatCharacter::GetAmmoCount(PlayerOwner, this->m_iPrimaryAmmoType.m_Value) <= 0 )
+            {
+              val[0] = 4;
+            }
+            else
+            {
+              CTFPlayer::ClearWeaponFireScene(PlayerOwner);
+              CTFPlayer::SpeakWeaponFire(PlayerOwner, 4);
+              val[0] = 2;
+            }
+            CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+              (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+              val);
+          }
+          goto LABEL_27;
+        case AC_STATE_DRYFIRE:
+          m_Value = this->m_iPrimaryAmmoType.m_Value;
+          this->m_flStartedFiringAt = -1.0;
+          if ( CBaseCombatCharacter::GetAmmoCount(PlayerOwner, m_Value) <= 0 )
+          {
+            if ( this->m_iWeaponMode == 1 )
+            {
+              val[0] = 3;
+              CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+                (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+                val);
+            }
+          }
+          else
+          {
+            val[0] = 2;
+            CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+              (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+              val);
+          }
+LABEL_27:
+          this->SendWeaponAnim(this, 181);
+          break;
+        default:
+          CTFMinigun::WindUp(this);
+          *(float *)val = gpGlobals->curtime + 1.0;
+          CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, (const float *)val);
+          *(float *)val = gpGlobals->curtime + 1.0;
+          CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle>::Set(
+            &this->m_flTimeWeaponIdle,
+            (const float *)val);
+          this->m_flStartedFiringAt = -1.0;
+          CTFPlayer::DoAnimationEvent(PlayerOwner, PLAYERANIMEVENT_ATTACK_PRE, 0);
+          break;
+      }
+    }
+    else
+    {
+      this->WeaponIdle(this);
+    }
+  }
+}

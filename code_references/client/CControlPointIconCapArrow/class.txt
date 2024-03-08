@@ -1,0 +1,40 @@
+class CControlPointIconCapArrow : public vgui::Panel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CControlPointIconCapArrow_RegisterMap
+    {
+        public void CControlPointIconCapArrow_RegisterMap();
+    };
+    public class CControlPointIconCapArrow::CControlPointIconCapArrow_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CControlPointIconCapArrow_Register
+    {
+        public void CControlPointIconCapArrow_Register();
+    };
+    public class CControlPointIconCapArrow::CControlPointIconCapArrow_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CControlPointIconCapArrow_RegisterKBMap
+    {
+        public void CControlPointIconCapArrow_RegisterKBMap();
+    };
+    public class CControlPointIconCapArrow::CControlPointIconCapArrow_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CControlPointIconCapArrow(class CControlPointIconCapArrow & );
+    public void CControlPointIconCapArrow(class CControlPointIcon * ,class vgui::Panel * ,char * );
+    public void Paint();
+    public bool IsVisible();
+    public void SetImage(char * );
+    private class IMaterial * m_pArrowMaterial;
+    private class CControlPointIcon * m_pAttachedToIcon;
+    public void ~CControlPointIconCapArrow();
+    public class CControlPointIconCapArrow & operator=(class CControlPointIconCapArrow & );
+    public void * __vecDelDtor(unsigned int );
+};

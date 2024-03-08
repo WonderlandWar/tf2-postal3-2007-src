@@ -1,0 +1,27 @@
+void __thiscall CTFMinigun::WeaponReset(CTFMinigun *this)
+{
+  bool v2; // zf
+  CSoundEnvelopeController *Controller; // eax
+  bool v4; // [esp+Bh] [ebp-5h] BYREF
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  CTFWeaponBase::WeaponReset(this);
+  val = 0;
+  CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+    (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+    &val);
+  this->m_iWeaponMode = 0;
+  v4 = 0;
+  CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+    (CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bCritShot,
+    &v4);
+  v2 = this->m_pSoundCur == 0;
+  this->m_flStartedFiringAt = 0.0;
+  if ( !v2 )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    Controller->SoundDestroy(Controller, this->m_pSoundCur);
+    this->m_pSoundCur = 0;
+  }
+  this->m_iMinigunSoundCur = -1;
+}

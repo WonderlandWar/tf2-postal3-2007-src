@@ -1,0 +1,107 @@
+void __thiscall C_TFPlayer::OnDataChanged(C_TFPlayer *this, DataUpdateType_t updateType)
+{
+  C_TFPlayer *v3; // ebx
+  const QAngle *LocalAngles; // eax
+  C_TFPlayer_vtbl *v6; // eax
+  double v7; // st7
+  CVoiceStatus *ClientVoiceMgr; // eax
+  IGameEvent *v9; // eax
+  IGameEvent *v10; // eax
+  IGameEvent *v11; // eax
+  IGameEvent *v12; // edi
+  IGameEvent_vtbl *v13; // ebp
+  BOOL v14; // eax
+  int AmmoCount; // ebx
+  IGameEvent *v16; // edi
+  char bShouldDisplayNemesisIcon; // [esp+18h] [ebp+4h]
+
+  v3 = (C_TFPlayer *)((char *)this - 8);
+  LocalAngles = C_BaseEntity::GetLocalAngles((C_TFPlayer *)((char *)this - 8));
+  C_BaseEntity::SetNetworkAngles(v3, LocalAngles);
+  C_BasePlayer::OnDataChanged(this, updateType);
+  v6 = v3->C_BasePlayer::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  if ( updateType )
+  {
+    if ( this->m_hSpawnedGibs.m_Size != v6->GetTeamNumber(v3)
+      || this->m_iOldTeam != LODWORD(this->m_Shared.m_flCondExpireTimeLeft[12]) )
+    {
+      C_TFPlayer::InitInvulnerableMaterial(v3);
+      LOBYTE(this->m_iPreviousMetal) = 1;
+    }
+  }
+  else
+  {
+    ((void (__thiscall *)(C_TFPlayer *, _DWORD))v6->SetNextClientThink)(v3, -1293.0);
+    C_TFPlayer::InitInvulnerableMaterial(v3);
+  }
+  if ( this->m_nLastThinkTick > (signed int)this->m_hHealer.m_Index && this->m_nLastThinkTick >= v3->GetMaxHealth(v3) )
+    C_BaseEntity::RemoveAllDecals(v3);
+  if ( this->m_hItem.m_Value.m_Index != LODWORD(this->m_angTauntEngViewAngles.z) )
+    C_TFPlayer::OnPlayerClassChange(v3);
+  if ( *(_DWORD *)&this->m_bToolRecordingVisibility != this->m_iOldPlayerClass )
+    C_TFPlayer::ClientPlayerRespawn(v3);
+  if ( LOBYTE(this->m_Hints.m_RegisteredResetHints.m_Size) != BYTE1(this->m_Hints.m_RegisteredResetHints.m_Size) )
+    C_TFPlayer::CreateSaveMeEffect(v3);
+  if ( CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_pCigaretteSmoke, 13) && !this->m_nPlayerModelIndex.m_Value )
+    C_TFPlayer::StartBurningSound(v3);
+  bShouldDisplayNemesisIcon = C_TFPlayer::ShouldShowNemesisIcon(v3);
+  if ( bShouldDisplayNemesisIcon != LOBYTE(this->m_hOffHandWeapon.m_Value.m_Index) )
+    C_TFPlayer::ShowNemesisIcon(v3, bShouldDisplayNemesisIcon);
+  ((void (__thiscall *)(CNewParticleEffect **))this->m_pCigaretteSmoke->m_Sheet.m_pNext)(&this->m_pCigaretteSmoke);
+  if ( LOBYTE(this->m_iOldDisguiseTeam) != CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_pCigaretteSmoke, 7) )
+  {
+    if ( *(float *)(gpGlobals.m_Index + 12) >= (double)*(float *)&this->m_pDisguisingEffect )
+      v7 = *(float *)(gpGlobals.m_Index + 12);
+    else
+      v7 = *(float *)&this->m_pDisguisingEffect;
+    *(float *)&this->m_pDisguisingEffect = v7;
+  }
+  if ( C_BasePlayer::IsLocalPlayer(v3) )
+  {
+    if ( updateType == DATA_UPDATE_CREATED )
+    {
+      SetupHeadLabelMaterials();
+      ClientVoiceMgr = GetClientVoiceMgr();
+      CVoiceStatus::SetHeadLabelOffset(ClientVoiceMgr, 50.0);
+    }
+    if ( this->m_hSpawnedGibs.m_Size != v3->GetTeamNumber(v3) )
+    {
+      v9 = gameeventmanager->CreateEvent(gameeventmanager, "localplayer_changeteam", 0);
+      if ( v9 )
+        gameeventmanager->FireEventClientSide(gameeventmanager, v9);
+    }
+    if ( this == (C_TFPlayer *)-4512
+      || (CHandle<C_BaseEntity> *)LODWORD(this->m_angTauntEngViewAngles.z) != this->m_hSpawnedGibs.m_pElements )
+    {
+      v10 = gameeventmanager->CreateEvent(gameeventmanager, "localplayer_changeclass", 0);
+      if ( v10 )
+        gameeventmanager->FireEventClientSide(gameeventmanager, v10);
+    }
+    if ( this->m_hSpawnedGibs.m_pElements == (CHandle<C_BaseEntity> *)8
+      && (LOBYTE(this->m_iOldDisguiseTeam) != CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_pCigaretteSmoke, 7)
+       || this->m_iOldClass != LODWORD(this->m_Shared.m_flCondExpireTimeLeft[13])) )
+    {
+      v11 = gameeventmanager->CreateEvent(gameeventmanager, "localplayer_changedisguise", 0);
+      v12 = v11;
+      if ( v11 )
+      {
+        v13 = v11->__vftable;
+        LOBYTE(v14) = CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_pCigaretteSmoke, 7);
+        v13->SetBool(v12, "disguised", v14);
+        gameeventmanager->FireEventClientSide(gameeventmanager, v12);
+      }
+    }
+    AmmoCount = C_BaseCombatCharacter::GetAmmoCount(v3, 3);
+    if ( AmmoCount != this->m_iOldDisguiseClass )
+    {
+      v16 = gameeventmanager->CreateEvent(gameeventmanager, "player_account_changed", 0);
+      if ( v16 )
+      {
+        v16->SetInt(v16, "old_account", this->m_iOldDisguiseClass);
+        v16->SetInt(v16, "new_account", AmmoCount);
+        gameeventmanager->FireEventClientSide(gameeventmanager, v16);
+      }
+      this->m_iOldDisguiseClass = AmmoCount;
+    }
+  }
+}

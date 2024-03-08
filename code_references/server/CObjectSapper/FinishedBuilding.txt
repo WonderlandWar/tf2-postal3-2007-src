@@ -1,0 +1,18 @@
+void __thiscall CObjectSapper::FinishedBuilding(CObjectSapper *this)
+{
+  CBaseObject *ParentObject; // eax
+  float soundtime; // [esp+0h] [ebp-Ch]
+
+  CBaseObject::FinishedBuilding(this);
+  if ( CBaseObject::GetParentObject(this) )
+  {
+    ParentObject = CBaseObject::GetParentObject(this);
+    CBaseObject::OnAddSapper(ParentObject);
+  }
+  CBaseEntity::EmitSound(this, "Weapon_Sapper.Plant", 0.0, 0);
+  CBaseEntity::EmitSound(this, "Weapon_Sapper.Timer", 0.0, 0);
+  this->m_flSapperDamageAccumulator = 0.0;
+  this->m_flLastThinkTime = gpGlobals->curtime;
+  soundtime = gpGlobals->curtime + 0.1;
+  CBaseEntity::ThinkSet(this,  __thiscall CObjectSapper::`vcall'{1276,{flat}}, soundtime, "SapperThink");
+}

@@ -1,0 +1,5 @@
+void __thiscall CTargetID::VidInit(CTargetID *this)
+{
+  this->m_iLastEntIndex = 0;
+  this->m_flLastChangeTime = 0.0;
+}

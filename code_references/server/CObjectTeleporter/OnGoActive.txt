@@ -1,0 +1,37 @@
+void __thiscall CObjectTeleporter::OnGoActive(CObjectTeleporter *this)
+{
+  CTFPlayer *v2; // edi
+  CHintSystem *v3; // eax
+  bool v4; // zf
+  float thinkTime; // [esp+4h] [ebp-14h]
+  int val; // [esp+14h] [ebp-4h] BYREF
+
+  v2 = this->GetBuilder(this);
+  if ( v2 )
+  {
+    ((void (__thiscall *)(CObjectTeleporter *))this->SetModel)(this);
+    CBaseObject::SetActivity(this, ACT_OBJ_IDLE);
+    v3 = (CHintSystem *)((int (__thiscall *)(CTFPlayer *, int))v2->Hints)(v2, 30);
+    CHintSystem::RemoveHintTimer(v3, (int)"models/buildables/teleporter_light.mdl");
+    thinkTime = gpGlobals->curtime + 0.1;
+    CBaseEntity::ThinkSet(
+      this,
+      (void (__thiscall *)(CBaseEntity *))CObjectTeleporter::TeleporterThink,
+      thinkTime,
+      "TeleporterContext");
+    v4 = this->m_iState.m_Value == 1;
+    this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CObjectTeleporter::TeleporterTouch;
+    val = 1;
+    if ( !v4 )
+    {
+      CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(
+        (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> *)&this->m_iState,
+        &val);
+      this->m_flLastStateChangeTime = gpGlobals->curtime;
+    }
+    CBaseObject::OnGoActive(this);
+    *(float *)&val = 0.0;
+    CNetworkVarBase<float,CSprite::NetworkVar_m_flGlowProxySize>::Set(&this->m_flPlaybackRate, (const float *)&val);
+    this->m_flLastStateChangeTime = 0.0;
+  }
+}

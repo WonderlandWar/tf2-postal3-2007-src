@@ -1,0 +1,4 @@
+int __thiscall CTeamControlPoint::GetDefaultOwner(CTeamControlPoint *this)
+{
+  return this->m_iDefaultOwner;
+}

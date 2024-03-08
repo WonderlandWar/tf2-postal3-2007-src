@@ -1,0 +1,18 @@
+void __thiscall CTFPlayerShared::OnConditionAdded(CTFPlayerShared *this, int nCond)
+{
+  switch ( nCond )
+  {
+    case 8:
+      CTFPlayerShared::OnAddStealthed(this);
+      break;
+    case 12:
+      this->m_flHealFraction = 0.0;
+      this->m_flDisguiseHealFraction = 0.0;
+      break;
+    case 13:
+      CBaseEntity::EmitSound(this->m_pOuter, "Fire.Engulf", 0.0, 0);
+      break;
+    default:
+      return;
+  }
+}

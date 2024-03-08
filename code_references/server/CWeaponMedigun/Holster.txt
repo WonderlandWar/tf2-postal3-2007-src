@@ -1,0 +1,34 @@
+bool __userpurge CWeaponMedigun::Holster@<al>(
+        CWeaponMedigun *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<ebp>,
+        CBaseCombatWeapon *pSwitchingTo)
+{
+  unsigned int m_Index; // eax
+  unsigned int v6; // edx
+  CEntInfo *v7; // ecx
+  IHandleEntity *m_pEntity; // edi
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  CWeaponMedigun::RemoveHealingTarget(this, a2, a3, (int)this, -1, 1);
+  val = 0;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking>::Set(&this->m_bAttacking, &val);
+  val = 1;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bHolstered>::Set(&this->m_bHolstered, &val);
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v6 = this->m_hOwnerEntity.m_Value.m_Index & 0xFFF;
+    v7 = &g_pEntityList->m_EntPtrArray[v6];
+    if ( g_pEntityList->m_EntPtrArray[v6].m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = v7->m_pEntity;
+      if ( v7->m_pEntity )
+      {
+        if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(v7->m_pEntity) )
+          CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&m_pEntity[948], 1);
+      }
+    }
+  }
+  return CTFWeaponBaseGun::Holster(this, pSwitchingTo);
+}

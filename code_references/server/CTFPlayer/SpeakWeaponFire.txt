@@ -1,0 +1,35 @@
+void __thiscall CTFPlayer::SpeakWeaponFire(CTFPlayer *this, int iCustomConcept)
+{
+  int v2; // edx
+  AI_Response *v4; // eax
+  char szScene[260]; // [esp+14h] [ebp-10Ch] BYREF
+
+  v2 = iCustomConcept;
+  if ( iCustomConcept == -1 )
+  {
+    if ( gpGlobals->curtime < (double)this->m_flNextSpeakWeaponFire )
+      return;
+    v2 = 0;
+  }
+  this->m_flNextSpeakWeaponFire = gpGlobals->curtime + 5.0;
+  if ( this->m_hWeaponFireSceneEnt.m_Index == -1
+    || g_pEntityList->m_EntPtrArray[this->m_hWeaponFireSceneEnt.m_Index & 0xFFF].m_SerialNumber != this->m_hWeaponFireSceneEnt.m_Index >> 12
+    || !g_pEntityList->m_EntPtrArray[this->m_hWeaponFireSceneEnt.m_Index & 0xFFF].m_pEntity )
+  {
+    v4 = CBaseMultiplayerPlayer::SpeakConcept(this, v2);
+    if ( v4 )
+    {
+      AI_Response::GetResponse(v4, &szScene[4], 0x104u);
+      this->m_flNextSpeakWeaponFire = InstancedScriptedScene(
+                                        this,
+                                        &szScene[4],
+                                        &this->m_hExpressionSceneEnt,
+                                        0.0,
+                                        1,
+                                        0,
+                                        1,
+                                        0)
+                                    + gpGlobals->curtime;
+    }
+  }
+}

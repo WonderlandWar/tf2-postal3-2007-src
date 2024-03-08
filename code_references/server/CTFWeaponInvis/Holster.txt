@@ -1,0 +1,10 @@
+bool __thiscall CTFWeaponInvis::Holster(CTFWeaponInvis *this, CBaseCombatWeapon *pSwitchingTo)
+{
+  bool v3; // bl
+  float v5; // [esp+0h] [ebp-Ch]
+
+  v3 = CTFWeaponBase::Holster(this, pSwitchingTo);
+  v5 = gpGlobals->curtime + 10.0;
+  ((void (__thiscall *)(CTFWeaponInvis *, _DWORD))this->SetWeaponIdleTime)(this, LODWORD(v5));
+  return v3;
+}

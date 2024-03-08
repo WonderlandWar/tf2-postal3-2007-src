@@ -1,0 +1,4 @@
+void __thiscall CTFWeaponBaseMelee::SendPlayerAnimEvent(CTFWeaponBaseMelee *this, CTFPlayer *pPlayer)
+{
+  CTFPlayer::DoAnimationEvent(pPlayer, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+}

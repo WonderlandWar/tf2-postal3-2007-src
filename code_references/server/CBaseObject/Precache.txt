@@ -1,0 +1,8 @@
+void __thiscall CBaseObject::Precache(CBaseObject *this)
+{
+  const CObjectInfo *ObjectInfo; // eax
+
+  PrecacheMaterial("vgui/screens/vgui_overlay");
+  ObjectInfo = GetObjectInfo(this->m_iObjectType.m_Value);
+  CBaseEntity::PrecacheScriptSound(ObjectInfo->m_pExplodeSound);
+}

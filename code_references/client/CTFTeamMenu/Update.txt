@@ -1,0 +1,15 @@
+void __thiscall CTFTeamMenu::Update(CTFTeamMenu *this)
+{
+  C_TFPlayer *LocalTFPlayer; // eax
+  vgui::Panel *ChildByName; // eax
+
+  CTeamMenu::Update(this);
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( LocalTFPlayer && LocalTFPlayer->GetTeamNumber(LocalTFPlayer) )
+    this->m_pViewPort->CTeamMenu::__vftable[4].ShowBackGround(this->m_pViewPort, 1);
+  else
+    this->m_pViewPort->CTeamMenu::__vftable[4].ShowBackGround(this->m_pViewPort, 0);
+  ChildByName = vgui::Panel::FindChildByName((CTFTeamMenu *)((char *)this - 384), "teambutton2", 0);
+  if ( ChildByName )
+    ChildByName->RequestFocus(ChildByName, 0);
+}

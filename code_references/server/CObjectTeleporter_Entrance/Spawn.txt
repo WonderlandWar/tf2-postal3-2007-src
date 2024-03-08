@@ -1,0 +1,5 @@
+void __thiscall CObjectTeleporter_Entrance::Spawn(CObjectTeleporter_Entrance *this)
+{
+  this->SetModel(this, "models/buildables/teleporter_blueprint_enter.mdl");
+  CObjectTeleporter::Spawn(this);
+}

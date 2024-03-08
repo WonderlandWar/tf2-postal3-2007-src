@@ -1,0 +1,253 @@
+char __thiscall CObjectSentrygun::Fire(CObjectSentrygun *this)
+{
+  int m_Value; // ecx
+  int v3; // eax
+  CBaseEntity *v4; // eax
+  float *v5; // eax
+  double v6; // st6
+  double v7; // st7
+  CTFPlayer *v8; // ebp
+  CTFProjectile_Rocket *v9; // eax
+  CTFProjectile_Rocket *v10; // edi
+  CTFPlayer *v11; // eax
+  CTFPlayer *v12; // eax
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells> *p_m_iAmmoShells; // ebp
+  int v14; // edi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  int v17; // eax
+  float v18; // ecx
+  float v19; // edx
+  float v20; // eax
+  unsigned int v21; // eax
+  IHandleEntity *v22; // ecx
+  float *v23; // eax
+  double y; // st7
+  double z; // st6
+  double x; // st5
+  double v27; // rt2
+  double v28; // rtt
+  double v29; // st5
+  double v30; // st7
+  double v31; // rtt
+  double v32; // st5
+  CObjectSentrygun_vtbl *v33; // edx
+  CTFPlayer *(__thiscall *GetBuilder)(CBaseObject *); // eax
+  CBaseEntity *v35; // eax
+  int m_iAmmoType; // ecx
+  void (__thiscall *FireBullets)(CBaseEntity *, const FireBulletsInfo_t *); // edx
+  edict_t *m_pPev; // eax
+  float v39; // eax
+  int v40; // ecx
+  float soundtime; // [esp+10h] [ebp-160h]
+  float _X; // [esp+14h] [ebp-15Ch]
+  Vector vecAimDir; // [esp+28h] [ebp-148h] BYREF
+  Vector vecMidEnemy; // [esp+34h] [ebp-13Ch] BYREF
+  Vector vecSrc; // [esp+40h] [ebp-130h] BYREF
+  FireBulletsInfo_t info; // [esp+4Ch] [ebp-124h] BYREF
+  CEffectData data; // [esp+9Ch] [ebp-D4h] BYREF
+  QAngle angAimDir; // [esp+FCh] [ebp-74h] BYREF
+  QAngle vecAng; // [esp+108h] [ebp-68h] BYREF
+  CGameTrace tr; // [esp+114h] [ebp-5Ch] BYREF
+
+  if ( this->m_iUpgradeLevel.m_Value == 3 )
+  {
+    m_Value = this->m_iAmmoRockets.m_Value;
+    if ( m_Value > 0 && gpGlobals->curtime > (double)this->m_flNextRocketAttack )
+    {
+      if ( (m_Value & 1) != 0 )
+        v3 = this->m_iAttachments[2];
+      else
+        v3 = this->m_iAttachments[3];
+      CBaseAnimating::GetAttachment(this, v3, (Vector *)&vecMidEnemy.y, (QAngle *)&vecSrc.y);
+      v4 = CHandle<CBaseAnimating>::operator CBaseAnimating *(&this->m_hEnemy);
+      v5 = (float *)v4->WorldSpaceCenter(v4);
+      v6 = v5[1] - vecMidEnemy.z;
+      v7 = v5[2] - vecSrc.x;
+      vecAimDir.y = *v5 - vecMidEnemy.y;
+      vecAimDir.z = v6;
+      vecMidEnemy.x = v7;
+      pfVectorNormalize((Vector *)&vecAimDir.y);
+      VectorAngles((Vector *)&vecAimDir.y, (QAngle *)&vecAng.y);
+      CBaseEntity::EmitSound(this, "Building_Sentrygun.FireRocket", 0.0, 0);
+      CBaseAnimatingOverlay::AddGesture(this, ACT_RANGE_ATTACK2, 1);
+      VectorAngles((Vector *)&vecAimDir.y, (QAngle *)&angAimDir.y);
+      v8 = this->GetBuilder(this);
+      v9 = (CTFProjectile_Rocket *)CTFBaseRocket::Create(
+                                     "tf_projectile_sentryrocket",
+                                     (Vector *)&vecMidEnemy.y,
+                                     (QAngle *)&angAimDir.y,
+                                     this,
+                                     0);
+      v10 = v9;
+      if ( v9 )
+      {
+        CTFProjectile_Rocket::SetScorer(v9, v8);
+        ((void (__thiscall *)(CTFProjectile_Rocket *, _DWORD))v10->SetDamage)(v10, 100.0);
+      }
+      this->m_flNextRocketAttack = gpGlobals->curtime + 3.0;
+      if ( !tf_sentrygun_ammocheat.m_pParent->m_nValue )
+      {
+        LODWORD(vecAimDir.x) = this->m_iAmmoRockets.m_Value - 1;
+        CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets>::Set(
+          &this->m_iAmmoRockets,
+          (const int *)&vecAimDir);
+      }
+      if ( this->m_iAmmoRockets.m_Value == 10 )
+      {
+        v11 = this->GetBuilder(this);
+        ClientPrint(v11, 1, "#Sentry_rocketslow", 0, 0, 0, 0);
+      }
+      if ( !this->m_iAmmoRockets.m_Value )
+      {
+        v12 = this->GetBuilder(this);
+        ClientPrint(v12, 1, "#Sentry_rocketsout", 0, 0, 0, 0);
+      }
+    }
+  }
+  p_m_iAmmoShells = &this->m_iAmmoShells;
+  if ( this->m_iAmmoShells.m_Value <= 0 )
+  {
+    if ( this->m_iUpgradeLevel.m_Value > 1 && !CBaseAnimatingOverlay::IsPlayingGesture(this, ACT_RANGE_ATTACK1_LOW) )
+    {
+      CBaseAnimatingOverlay::RemoveGesture(this, ACT_RANGE_ATTACK1);
+      CBaseAnimatingOverlay::AddGesture(this, ACT_RANGE_ATTACK1_LOW, 1);
+    }
+    CBaseEntity::EmitSound(this, "Building_Sentrygun.Empty", 0.0, 0);
+    this->m_flNextAttack = gpGlobals->curtime + 0.2;
+  }
+  else
+  {
+    if ( !CBaseAnimatingOverlay::IsPlayingGesture(this, ACT_RANGE_ATTACK1) )
+    {
+      CBaseAnimatingOverlay::RemoveGesture(this, ACT_RANGE_ATTACK1_LOW);
+      CBaseAnimatingOverlay::AddGesture(this, ACT_RANGE_ATTACK1, 1);
+    }
+    if ( this->m_iUpgradeLevel.m_Value > 1 && (p_m_iAmmoShells->m_Value & 1) != 0 )
+      v14 = this->m_iAttachments[1];
+    else
+      v14 = this->m_iAttachments[0];
+    CBaseAnimating::GetAttachment(this, v14, (Vector *)&vecSrc.y, (QAngle *)&vecAng.y);
+    m_Index = this->m_hEnemy.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_pEntity;
+    v17 = (int)m_pEntity->__vftable[45].GetRefEHandle(m_pEntity);
+    v18 = *(float *)v17;
+    v19 = *(float *)(v17 + 4);
+    v20 = *(float *)(v17 + 8);
+    vecMidEnemy.y = v18;
+    vecMidEnemy.z = v19;
+    vecSrc.x = v20;
+    UTIL_TraceLine((Vector *)&vecSrc.y, (Vector *)&vecMidEnemy.y, 0x200400Bu, this, 0, (CGameTrace *)&tr.startpos.y);
+    if ( tr.hitbox && engine->IndexOfEdict(engine, *(const edict_t **)(tr.hitbox + 344)) )
+    {
+      z = vecMidEnemy.z;
+      x = vecSrc.x;
+      y = vecMidEnemy.y;
+    }
+    else
+    {
+      v21 = this->m_hEnemy.m_Index;
+      if ( v21 == -1 || g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_SerialNumber != v21 >> 12 )
+        v22 = 0;
+      else
+        v22 = g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_pEntity;
+      v23 = (float *)((int (__thiscall *)(IHandleEntity *, float *))v22->__vftable[39].GetRefEHandle)(v22, &angAimDir.y);
+      y = *v23;
+      z = v23[1];
+      x = v23[2] - 5.0;
+    }
+    v27 = x;
+    v28 = y - vecSrc.y;
+    vecAimDir.y = v28;
+    v29 = z - vecSrc.z;
+    v30 = v28;
+    vecAimDir.z = v29;
+    v31 = v29;
+    v32 = v27 - *(float *)&info.m_iShots;
+    vecMidEnemy.x = v32;
+    _X = v30 * v30 + v31 * v31 + v32 * v32;
+    vecAimDir.x = pfSqrt(_X);
+    pfVectorNormalize((Vector *)&vecAimDir.y);
+    v33 = this->CBaseObject::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    info.m_vecSpread.y = 0.0;
+    info.m_vecSpread.z = 0.0;
+    info.m_iDamage = 1;
+    info.m_flDistance = 0.0;
+    LODWORD(info.m_vecSrc.x) = 1;
+    GetBuilder = v33->GetBuilder;
+    *(float *)&info.m_iAmmoType = 8192.0;
+    memset(&info.m_iPlayerDamage, 0, 12);
+    *(float *)&info.m_pAttacker = 1.0;
+    info.m_pAdditionalIgnoreEnt = 0;
+    info.m_vecSrc.y = vecSrc.y;
+    *(_DWORD *)&info.m_bPrimaryAttack = 0;
+    info.m_vecSrc.z = vecSrc.z;
+    LOBYTE(data.m_vOrigin.x) = 1;
+    info.m_vecDirShooting.x = *(float *)&info.m_iShots;
+    info.m_vecDirShooting.y = vecAimDir.y;
+    info.m_vecDirShooting.z = vecAimDir.z;
+    info.m_vecSpread.x = vecMidEnemy.x;
+    v35 = GetBuilder(this);
+    m_iAmmoType = this->m_iAmmoType;
+    info.m_vecSpread.y = vec3_origin.x;
+    info.m_vecSpread.z = vec3_origin.y;
+    info.m_pAdditionalIgnoreEnt = v35;
+    info.m_iTracerFreq = m_iAmmoType;
+    info.m_flDistance = vec3_origin.z;
+    *(float *)&info.m_iAmmoType = vecAimDir.x + 100.0;
+    FireBullets = this->FireBullets;
+    info.m_iPlayerDamage = tf_sentrygun_damage.m_pParent->m_nValue;
+    FireBullets(this, (const FireBulletsInfo_t *)&info.m_vecSrc);
+    m_pPev = this->m_Network.m_pPev;
+    data.m_vOrigin.y = 0.0;
+    data.m_vOrigin.z = 0.0;
+    data.m_nEntIndex = 0;
+    data.m_vStart.x = 0.0;
+    data.m_flScale = 0.0;
+    data.m_vStart.y = 0.0;
+    *(_DWORD *)&data.m_nSurfaceProp = 0;
+    data.m_vStart.z = 0.0;
+    LOWORD(data.m_nMaterial) = 0;
+    data.m_vNormal.x = 0.0;
+    memset(&data.m_nDamageType, 0, 13);
+    data.m_vNormal.y = 0.0;
+    data.m_vNormal.z = 0.0;
+    data.m_vAngles.x = 0.0;
+    data.m_vAngles.y = 0.0;
+    data.m_vAngles.z = 0.0;
+    *(float *)&data.m_fFlags = 0.0;
+    data.m_flMagnitude = 1.0;
+    data.m_flRadius = 0.0;
+    *(float *)&data.m_nAttachmentIndex = 0.0;
+    v39 = COERCE_FLOAT(engine->IndexOfEdict(engine, m_pPev));
+    v40 = this->m_iUpgradeLevel.m_Value;
+    data.m_flScale = v39;
+    *(_DWORD *)&data.m_nSurfaceProp = v14;
+    data.m_nEntIndex = v40;
+    DispatchEffect("TF_3rdPersonMuzzleFlash_SentryGun", (CEffectData *)&data.m_vOrigin.y);
+    soundtime = 0.0;
+    if ( this->m_iUpgradeLevel.m_Value == 2 )
+    {
+      CBaseEntity::EmitSound(this, "Building_Sentrygun.Fire2", soundtime, 0);
+    }
+    else if ( this->m_iUpgradeLevel.m_Value == 3 )
+    {
+      CBaseEntity::EmitSound(this, "Building_Sentrygun.Fire3", soundtime, 0);
+    }
+    else
+    {
+      CBaseEntity::EmitSound(this, "Building_Sentrygun.Fire", soundtime, 0);
+    }
+    if ( !tf_sentrygun_ammocheat.m_pParent->m_nValue )
+    {
+      LODWORD(vecAimDir.x) = p_m_iAmmoShells->m_Value - 1;
+      CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells>::Set(
+        &this->m_iAmmoShells,
+        (const int *)&vecAimDir);
+    }
+  }
+  return 1;
+}

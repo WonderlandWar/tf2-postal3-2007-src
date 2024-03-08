@@ -1,0 +1,56 @@
+const char *__thiscall C_TFWeaponBase::GetViewModel(C_TFWeaponBase *this, int iViewModel)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  const char *result; // eax
+  FileWeaponInfo_t *WpnData; // eax
+  C_BaseCombatCharacter *v6; // eax
+  _DWORD *v7; // eax
+  TFPlayerClassData_t *PlayerClassData; // edi
+  FileWeaponInfo_t *v9; // eax
+  KeyValues **v10; // eax
+  FileWeaponInfo_t *v11; // eax
+
+  Owner = C_BaseCombatWeapon::GetOwner(this);
+  if ( !__RTDynamicCast(
+          Owner,
+          0,
+          &C_BaseCombatCharacter `RTTI Type Descriptor',
+          &C_BasePlayer `RTTI Type Descriptor',
+          0) )
+    return C_BaseCombatWeapon::GetViewModel(this, 0);
+  WpnData = (FileWeaponInfo_t *)C_BaseCombatWeapon::GetWpnData(this);
+  if ( !*((_DWORD *)__RTDynamicCast(
+                      WpnData,
+                      0,
+                      &FileWeaponInfo_t `RTTI Type Descriptor',
+                      &CTFWeaponInfo `RTTI Type Descriptor',
+                      0)
+        + 637)
+    || (v6 = C_BaseCombatWeapon::GetOwner(this),
+        v7 = __RTDynamicCast(
+               v6,
+               0,
+               &C_BaseCombatCharacter `RTTI Type Descriptor',
+               &C_TFPlayer `RTTI Type Descriptor',
+               0),
+        PlayerClassData = GetPlayerClassData(v7[1131]),
+        v9 = (FileWeaponInfo_t *)C_BaseCombatWeapon::GetWpnData(this),
+        v10 = (KeyValues **)__RTDynamicCast(
+                              v9,
+                              0,
+                              &FileWeaponInfo_t `RTTI Type Descriptor',
+                              &CTFWeaponInfo `RTTI Type Descriptor',
+                              0),
+        (result = KeyValues::GetString(v10[637], PlayerClassData->m_szClassName, 0)) == 0) )
+  {
+    v11 = (FileWeaponInfo_t *)C_BaseCombatWeapon::GetWpnData(this);
+    return (char *)__RTDynamicCast(
+                     v11,
+                     0,
+                     &FileWeaponInfo_t `RTTI Type Descriptor',
+                     &CTFWeaponInfo `RTTI Type Descriptor',
+                     0)
+         + 166;
+  }
+  return result;
+}

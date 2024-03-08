@@ -1,0 +1,47 @@
+void __thiscall CTeamplayRoundBasedRules::RoundRespawn(CTeamplayRoundBasedRules *this)
+{
+  int v2; // edi
+  float *m_flOriginalTeamRespawnWaveTime; // ebx
+  int i; // esi
+  CBasePlayer *v5; // edi
+
+  if ( this->m_bForceMapReset )
+  {
+    CTeamplayRoundBasedRules::CleanUpMap(this);
+    this->m_iszPreviousRounds.m_Size = 0;
+  }
+  v2 = 0;
+  m_flOriginalTeamRespawnWaveTime = this->m_flOriginalTeamRespawnWaveTime;
+  do
+  {
+    if ( *m_flOriginalTeamRespawnWaveTime >= 0.0 )
+      CTeamplayRoundBasedRules::NetworkVar_m_TeamRespawnWaveTimes::Set(
+        &this->m_TeamRespawnWaveTimes,
+        v2,
+        m_flOriginalTeamRespawnWaveTime);
+    ++v2;
+    ++m_flOriginalTeamRespawnWaveTime;
+  }
+  while ( v2 < 32 );
+  this->SetupOnRoundStart(this);
+  if ( this->ShouldSwitchTeams(this) )
+  {
+    this->HandleSwitchTeams(this);
+    this->SetSwitchTeams(this, 0);
+  }
+  if ( this->ShouldScrambleTeams(this) )
+  {
+    this->HandleScrambleTeams(this);
+    this->SetScrambleTeams(this, 0);
+  }
+  CTeamplayRoundBasedRules::RespawnPlayers(this, 1, 0, 0);
+  for ( i = 0; i < 32; ++i )
+  {
+    v5 = UTIL_PlayerByIndex(i);
+    if ( v5 )
+    {
+      if ( v5->IsPlayer(v5) )
+        v5->ResetPerRoundStats(v5);
+    }
+  }
+}

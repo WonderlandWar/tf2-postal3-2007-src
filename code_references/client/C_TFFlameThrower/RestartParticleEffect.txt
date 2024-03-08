@@ -1,0 +1,52 @@
+void __thiscall C_TFFlameThrower::RestartParticleEffect(C_TFFlameThrower *this)
+{
+  C_BasePlayer *PlayerOwner; // esi
+  const char *v3; // edi
+  int (__thiscall *GetTeamNumber)(C_BaseEntity *); // eax
+  C_BasePlayer *LocalPlayer; // esi
+  C_BaseViewModel *ViewModel; // eax
+  C_BaseViewModel *v7; // eax
+
+  PlayerOwner = C_TFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner && PlayerOwner->IsPlayer(PlayerOwner) )
+  {
+    this->m_iParticleWaterLevel = PlayerOwner->m_nWaterLevel;
+    if ( PlayerOwner->m_nWaterLevel == 3 )
+    {
+      v3 = "flamethrower_underwater";
+    }
+    else
+    {
+      GetTeamNumber = PlayerOwner->GetTeamNumber;
+      if ( this->m_bCritFire.m_Value )
+      {
+        if ( GetTeamNumber(PlayerOwner) == 3 )
+          v3 = "flamethrower_crit_blue";
+        else
+          v3 = "flamethrower_crit_red";
+      }
+      else
+      {
+        v3 = "flamethrower_blue";
+        if ( GetTeamNumber(PlayerOwner) != 3 )
+          v3 = "flamethrower";
+      }
+    }
+    LocalPlayer = C_BasePlayer::GetLocalPlayer();
+    if ( LocalPlayer && LocalPlayer == C_BaseCombatWeapon::GetOwner(this) )
+    {
+      if ( C_BasePlayer::GetViewModel(LocalPlayer, 0) )
+      {
+        ViewModel = C_BasePlayer::GetViewModel(LocalPlayer, 0);
+        CParticleProperty::StopEmission(&ViewModel->m_Particles, 0);
+        v7 = C_BasePlayer::GetViewModel(LocalPlayer, 0);
+        CParticleProperty::Create(&v7->m_Particles, v3, PATTACH_POINT_FOLLOW, "muzzle");
+      }
+    }
+    else
+    {
+      CParticleProperty::StopEmission(&this->m_Particles, 0);
+      CParticleProperty::Create(&this->m_Particles, v3, PATTACH_POINT_FOLLOW, "muzzle");
+    }
+  }
+}

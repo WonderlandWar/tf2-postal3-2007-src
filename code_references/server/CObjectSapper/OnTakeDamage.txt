@@ -1,0 +1,7 @@
+int __thiscall CObjectSapper::OnTakeDamage(CObjectSapper *this, const CTakeDamageInfo *info)
+{
+  if ( info->m_iDamageCustom == 4 )
+    return CBaseObjectUpgrade::OnTakeDamage(this, info);
+  else
+    return 0;
+}

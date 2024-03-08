@@ -1,0 +1,47 @@
+int __thiscall CTFFreezePanel::HudElementKeyInput(
+        CTFFreezePanel *this,
+        int down,
+        ButtonCode_t keynum,
+        const char *pszCurrentBinding)
+{
+  C_BasePlayer *LocalPlayer; // eax
+  int m_iKillerIndex; // esi
+  const char *pszKillerName; // esi
+  ConVarRef cl_screenshotname; // [esp+Ch] [ebp-210h] BYREF
+  char szScreenShotName[512]; // [esp+14h] [ebp-208h] BYREF
+
+  if ( this->ShouldDraw(&this->CHudElement) )
+  {
+    if ( pszCurrentBinding )
+    {
+      if ( !_stricmp(pszCurrentBinding, "screenshot") )
+      {
+        LocalPlayer = C_BasePlayer::GetLocalPlayer();
+        if ( LocalPlayer )
+        {
+          g_flFreezeFlash = *(float *)(gpGlobals.m_Index + 12) + 0.75;
+          C_BaseEntity::EmitSound(LocalPlayer, "Camera.SnapShot", 0.0, 0);
+          engine->ClientCmd(engine, "extendfreeze");
+          ((void (__stdcall *)(_DWORD))view->FreezeFrame)(3.0);
+          this->m_flShowSnapshotReminderAt = 0.0;
+          CTFFreezePanel::ShowSnapshotPanel(this, 0);
+          m_iKillerIndex = this->m_iKillerIndex;
+          if ( m_iKillerIndex <= 32 )
+          {
+            pszKillerName = g_PR->GetPlayerName(&g_PR->IGameResources, m_iKillerIndex);
+            if ( pszKillerName )
+            {
+              ConVarRef::ConVarRef((ConVarRef *)&cl_screenshotname.m_pConVarState, "cl_screenshotname");
+              if ( ConVarRef::IsValid((ConVarRef *)&cl_screenshotname.m_pConVarState) )
+              {
+                V_snprintf(&szScreenShotName[4], 512, "%s %s", pszKillerName, "is looking good!");
+                cl_screenshotname.m_pConVarState->IsFlagSet(cl_screenshotname.m_pConVarState, (int)&szScreenShotName[4]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,35 @@
+void __thiscall CBaseObject::Explode(CBaseObject *this)
+{
+  int v2; // ebx
+  char *m_pExplodeSound; // eax
+  CPASFilter filter; // [esp+30h] [ebp-24h] BYREF
+
+  v2 = 2;
+  m_pExplodeSound = GetObjectInfo(this->m_iObjectType.m_Value)->m_pExplodeSound;
+  if ( m_pExplodeSound && (int)strlen(m_pExplodeSound) > 0 )
+  {
+    CBaseEntity::EmitSound(this, m_pExplodeSound, 0.0, 0);
+    v2 = 6;
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+  *(_DWORD *)&filter.m_bReliable = &CPASFilter::`vftable';
+  CRecipientFilter::AddRecipientsByPAS((CRecipientFilter *)&filter.m_bReliable, &this->m_vecAbsOrigin);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  ((void (__stdcall *)(bool *, _DWORD, Vector *, _DWORD, _DWORD, int, int, int, int, _DWORD, int))te->Explosion)(
+    &filter.m_bReliable,
+    0.0,
+    &this->m_vecAbsOrigin,
+    g_sModelIndexFireball,
+    5.4000001,
+    15,
+    v2,
+    256,
+    200,
+    0,
+    67);
+  CBaseObject::CreateObjectGibs(this);
+  CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+}

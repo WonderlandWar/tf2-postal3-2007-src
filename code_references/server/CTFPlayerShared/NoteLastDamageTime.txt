@@ -1,0 +1,7 @@
+void __thiscall CTFPlayerShared::NoteLastDamageTime(CTFPlayerShared *this, int nDamage)
+{
+  if ( nDamage > 5 )
+    CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flLastStealthExposeTime>::Set(
+      &this->m_flLastStealthExposeTime,
+      &gpGlobals->curtime);
+}

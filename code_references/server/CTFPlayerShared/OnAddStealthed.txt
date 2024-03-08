@@ -1,0 +1,35 @@
+void __thiscall CTFPlayerShared::OnAddStealthed(CTFPlayerShared *this)
+{
+  int v2; // ebx
+  CBaseCombatWeapon *Weapon; // eax
+  CTFWeaponBase *v4; // esi
+  float val; // [esp+8h] [ebp-4h] BYREF
+
+  val = tf_spy_invis_time.m_pParent->m_fValue + gpGlobals->curtime;
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeCompleteTime>::Set(
+    &this->m_flInvisChangeCompleteTime,
+    &val);
+  val = tf_spy_invis_time.m_pParent->m_fValue;
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeTotalTime>::Set(
+    &this->m_flInvisChangeTotalTime,
+    &val);
+  v2 = 0;
+  if ( CBaseCombatCharacter::WeaponCount(this->m_pOuter) > 0 )
+  {
+    while ( 1 )
+    {
+      Weapon = CBaseCombatCharacter::GetWeapon(this->m_pOuter, v2);
+      v4 = (CTFWeaponBase *)Weapon;
+      if ( Weapon )
+      {
+        if ( ((int (__thiscall *)(CBaseCombatWeapon *))Weapon->__vftable[1].~IHandleEntity)(Weapon) == 51 )
+          break;
+      }
+      if ( ++v2 >= CBaseCombatCharacter::WeaponCount(this->m_pOuter) )
+        goto LABEL_7;
+    }
+    CTFPlayer::SetOffHandWeapon(this->m_pOuter, v4);
+  }
+LABEL_7:
+  CTFPlayer::TeamFortress_SetSpeed(this->m_pOuter);
+}

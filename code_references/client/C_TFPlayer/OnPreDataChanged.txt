@@ -1,0 +1,38 @@
+void __thiscall C_TFPlayer::OnPreDataChanged(C_TFPlayer *this, DataUpdateType_t updateType)
+{
+  float z; // edx
+  CNewParticleEffect *v4; // eax
+  int m_iOldPlayerClass; // ecx
+  breakmodel_t *m_pElements; // eax
+  float v7; // eax
+  bool v8; // al
+  int v9; // ecx
+  CNewParticleEffect *m_pCigaretteSmoke; // edx
+  void (__thiscall *v11)(CNewParticleEffect **); // eax
+
+  C_BasePlayer::OnPreDataChanged(this, updateType);
+  z = this->m_angTauntEngViewAngles.z;
+  v4 = (CNewParticleEffect *)this->m_Shared.__vftable;
+  this->m_hHealer.m_Index = this->m_nLastThinkTick;
+  m_iOldPlayerClass = this->m_iOldPlayerClass;
+  *(float *)&this->m_hItem.m_Value.m_Index = z;
+  LOBYTE(z) = this->m_Hints.m_RegisteredResetHints.m_Size;
+  *(_DWORD *)&this->m_bToolRecordingVisibility = m_iOldPlayerClass;
+  this->m_pTeleporterEffect = v4;
+  m_pElements = this[-1].m_aGibs.m_pElements;
+  BYTE1(this->m_Hints.m_RegisteredResetHints.m_Size) = LOBYTE(z);
+  this->m_hSpawnedGibs.m_Size = (*(int (**)(void))&m_pElements->modelName[268])();
+  if ( this == (C_TFPlayer *)-4512 )
+    v7 = 0.0;
+  else
+    v7 = this->m_angTauntEngViewAngles.z;
+  *(float *)&this->m_hSpawnedGibs.m_pElements = v7;
+  v8 = CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_pCigaretteSmoke, 7);
+  v9 = LODWORD(this->m_Shared.m_flCondExpireTimeLeft[13]);
+  m_pCigaretteSmoke = this->m_pCigaretteSmoke;
+  LOBYTE(this->m_iOldDisguiseTeam) = v8;
+  this->m_iOldTeam = LODWORD(this->m_Shared.m_flCondExpireTimeLeft[12]);
+  v11 = *(void (__thiscall **)(CNewParticleEffect **))&m_pCigaretteSmoke->m_hRenderHandle;
+  this->m_iOldClass = v9;
+  v11(&this->m_pCigaretteSmoke);
+}

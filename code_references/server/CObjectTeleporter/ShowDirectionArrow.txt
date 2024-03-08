@@ -1,0 +1,55 @@
+void __thiscall CObjectTeleporter::ShowDirectionArrow(CObjectTeleporter *this, float bShow)
+{
+  char v2; // bl
+  int m_iDirectionBodygroup; // eax
+  unsigned int m_Index; // eax
+  unsigned int v6; // edx
+  CBaseEntity *m_pEntity; // edi
+  double v8; // st7
+  QAngle angleToExit; // [esp+4h] [ebp-28h] BYREF
+  float v10; // [esp+10h] [ebp-1Ch]
+  Vector pseudoup; // [esp+14h] [ebp-18h] BYREF
+  Vector v12; // [esp+20h] [ebp-Ch] BYREF
+
+  v2 = LOBYTE(bShow);
+  if ( LOBYTE(bShow) != this->m_bShowDirectionArrow )
+  {
+    m_iDirectionBodygroup = this->m_iDirectionBodygroup;
+    if ( m_iDirectionBodygroup >= 0 )
+      CBaseAnimating::SetBodygroup(this, m_iDirectionBodygroup, LOBYTE(bShow) != 0);
+    this->m_bShowDirectionArrow = v2;
+    if ( v2 )
+    {
+      m_Index = this->m_hMatchingTeleporter.m_Index;
+      if ( m_Index == -1
+        || (v6 = this->m_hMatchingTeleporter.m_Index & 0xFFF,
+            g_pEntityList->m_EntPtrArray[v6].m_SerialNumber != m_Index >> 12) )
+      {
+        m_pEntity = 0;
+      }
+      else
+      {
+        m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[v6].m_pEntity;
+      }
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      if ( (m_pEntity->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(m_pEntity);
+      v12.x = m_pEntity->m_vecAbsOrigin.x - this->m_vecAbsOrigin.x;
+      v12.y = m_pEntity->m_vecAbsOrigin.y - this->m_vecAbsOrigin.y;
+      v12.z = m_pEntity->m_vecAbsOrigin.z - this->m_vecAbsOrigin.z;
+      pseudoup.x = 0.0;
+      pseudoup.y = 0.0;
+      pseudoup.z = 1.0;
+      VectorAngles(&v12, &pseudoup, (QAngle *)&angleToExit.y);
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      angleToExit.y = angleToExit.y - this->m_angAbsRotation.x;
+      v8 = angleToExit.z - this->m_angAbsRotation.y;
+      angleToExit.z = v8;
+      v10 = v10 - this->m_angAbsRotation.z;
+      bShow = (double)(unsigned __int16)(int)((180.0 - v8) * 182.04445) * 0.0054931641;
+      CNetworkVarBase<float,CObjectTeleporter::NetworkVar_m_flYawToExit>::Set(&this->m_flYawToExit, &bShow);
+    }
+  }
+}

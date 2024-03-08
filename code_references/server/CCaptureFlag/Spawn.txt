@@ -1,0 +1,64 @@
+void __thiscall CCaptureFlag::Spawn(CCaptureFlag *this)
+{
+  bool v2; // zf
+  edict_t *m_pPev; // eax
+  bool v4[4]; // [esp+18h] [ebp-8h] BYREF
+  float val; // [esp+1Ch] [ebp-4h] BYREF
+
+  this->Precache(this);
+  this->SetModel(this, "models/flag/briefcase.mdl");
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, 12);
+  CBaseEntity::SetSize(this, &vec3_origin, &vec3_origin);
+  CCollisionProperty::UseTriggerBounds(&this->m_Collision, 1, 24.0);
+  CNetworkVarBase<bool,CTFBottle::NetworkVar_m_bBroken>::Set(&this->m_bDisabled, &this->m_bStartDisabled);
+  this->m_bStartDisabled = 0;
+  CDynamicProp::Spawn(this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  this->m_vecResetPos.x = this->m_vecAbsOrigin.x;
+  this->m_vecResetPos.y = this->m_vecAbsOrigin.y;
+  this->m_vecResetPos.z = this->m_vecAbsOrigin.z;
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  this->m_vecResetAng.x = this->m_angAbsRotation.x;
+  this->m_vecResetAng.y = this->m_angAbsRotation.y;
+  this->m_vecResetAng.z = this->m_angAbsRotation.z;
+  CCaptureFlag::SetFlagStatus(this, 0);
+  val = 0.0;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(&this->m_flResetTime, &val);
+  val = 0.0;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(&this->m_flNeutralTime, &val);
+  this->m_bAllowOwnerPickup = 1;
+  CNetworkHandleBase<CBaseEntity,CCaptureFlag::NetworkVar_m_hPrevOwner>::Set(&this->m_hPrevOwner, 0);
+  v2 = !this->m_bDisabled.m_Value;
+  this->m_bCaptured = 0;
+  if ( v2 )
+  {
+    CCaptureFlag::SetDisabled(this, 0);
+  }
+  else
+  {
+    v4[0] = 1;
+    CNetworkVarBase<bool,CTFBottle::NetworkVar_m_bBroken>::Set(&this->m_bDisabled, v4);
+    if ( v4[0] )
+    {
+      CBaseEntity::AddEffects(this, 32);
+      this->m_pfnTouch = 0;
+      CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+    }
+    else
+    {
+      LODWORD(val) = this->m_fEffects.m_Value & 0xFFFFFFDF;
+      CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(&this->m_fEffects, (const int *)&val);
+      m_pPev = this->m_Network.m_pPev;
+      this->m_iEFlags |= 0x10000u;
+      if ( m_pPev )
+        m_pPev->m_fStateFlags |= 0x80u;
+      CBaseEntity::DispatchUpdateTransmitState(this);
+      this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CCaptureFlag::FlagTouch;
+      CBaseEntity::ThinkSet(this,  __thiscall CGameWeaponManager::`vcall'{180,{flat}}, 0.0, 0);
+      CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+    }
+  }
+}

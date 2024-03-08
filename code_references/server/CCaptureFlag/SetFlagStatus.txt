@@ -1,0 +1,23 @@
+void __thiscall CCaptureFlag::SetFlagStatus(CCaptureFlag *this, int iStatus)
+{
+  CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nFlagStatus> *p_m_nFlagStatus; // esi
+  int v4; // eax
+  int v5; // eax
+
+  p_m_nFlagStatus = &this->m_nFlagStatus;
+  CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nFlagStatus>::Set(&this->m_nFlagStatus, &iStatus);
+  switch ( p_m_nFlagStatus->m_Value )
+  {
+    case 0:
+      goto LABEL_4;
+    case 1:
+      v5 = CBaseAnimating::LookupSequence(this, "idle");
+      CBaseAnimating::ResetSequence(this, v5);
+      return;
+    case 2:
+LABEL_4:
+      v4 = CBaseAnimating::LookupSequence(this, "spin");
+      CBaseAnimating::ResetSequence(this, v4);
+      break;
+  }
+}

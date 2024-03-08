@@ -1,0 +1,5 @@
+bool __thiscall CTFGrenadeLauncher::Deploy(CTFGrenadeLauncher *this)
+{
+  this->m_flChargeBeginTime = 0.0;
+  return CTFWeaponBase::Deploy(this);
+}

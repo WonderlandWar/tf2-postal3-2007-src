@@ -1,0 +1,14 @@
+void __thiscall CTFPlayerShared::FindDisguiseTarget(CTFPlayerShared *this)
+{
+  const CHandle<CBaseEntity> *DisguiseTarget; // eax
+  CHandle<CBaseEntity> result; // [esp+4h] [ebp-4h] BYREF
+
+  DisguiseTarget = CTFPlayer::TeamFortress_GetDisguiseTarget(
+                     this->m_pOuter,
+                     &result,
+                     this->m_nDisguiseTeam.m_Value,
+                     this->m_nDisguiseClass.m_Value);
+  CNetworkVarBase<CHandle<CBaseEntity>,CTFPlayerShared::NetworkVar_m_hDisguiseTarget>::Set(
+    &this->m_hDisguiseTarget,
+    DisguiseTarget);
+}

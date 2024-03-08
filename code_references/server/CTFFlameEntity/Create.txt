@@ -1,0 +1,86 @@
+CTFFlameEntity *__cdecl CTFFlameEntity::Create(
+        const Vector *vecOrigin,
+        const QAngle *vecAngles,
+        CBaseEntity *pOwner,
+        int iDmgType,
+        float flDmgAmount)
+{
+  CTFFlameEntity *result; // eax
+  CTFFlameEntity *v6; // esi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  CTFFlameEntity_vtbl *v9; // edi
+  int TeamNumber; // eax
+  double m_fValue; // st7
+  double v12; // st5
+  double v13; // st6
+  double v14; // st7
+  unsigned int v15; // eax
+  CBaseEntity *v16; // ebx
+  float minVal; // [esp+8h] [ebp-48h]
+  float maxVal; // [esp+Ch] [ebp-44h]
+  Vector vecForward; // [esp+1Ch] [ebp-34h] BYREF
+  float v20; // [esp+28h] [ebp-28h]
+  Vector v21; // [esp+2Ch] [ebp-24h] BYREF
+  int v22; // [esp+38h] [ebp-18h] BYREF
+  Vector vecRight; // [esp+40h] [ebp-10h] BYREF
+
+  result = (CTFFlameEntity *)CBaseEntity::Create("tf_flame", vecOrigin, vecAngles, pOwner);
+  v6 = result;
+  if ( result )
+  {
+    result->SetOwnerEntity(result, pOwner);
+    m_Index = pOwner->m_hOwnerEntity.m_Value.m_Index;
+    if ( m_Index == -1
+      || g_pEntityList->m_EntPtrArray[pOwner->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[pOwner->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_pEntity;
+    }
+    if ( m_pEntity )
+      v6->m_hAttacker.m_Index = m_pEntity->GetRefEHandle(m_pEntity)->m_Index;
+    else
+      v6->m_hAttacker.m_Index = -1;
+    v9 = v6->__vftable;
+    TeamNumber = CBaseEntity::GetTeamNumber(pOwner);
+    v9->ChangeTeam(v6, TeamNumber);
+    v6->m_flDmgAmount = flDmgAmount;
+    v6->m_iDmgType = iDmgType;
+    AngleVectors(vecAngles, (Vector *)&vecForward.y, (Vector *)&vecRight.y, (Vector *)&v22);
+    m_fValue = tf_flamethrower_velocity.m_pParent->m_fValue;
+    v12 = vecForward.z * m_fValue;
+    v13 = v20 * m_fValue;
+    v6->m_vecBaseVelocity.x = vecForward.y * m_fValue;
+    v6->m_vecBaseVelocity.y = v12;
+    v6->m_vecBaseVelocity.z = v13;
+    v14 = m_fValue * tf_flamethrower_vecrand.m_pParent->m_fValue;
+    maxVal = v14;
+    minVal = -v14;
+    Vector::Random(&v21, minVal, maxVal);
+    v6->m_vecBaseVelocity.x = v6->m_vecBaseVelocity.x + v21.x;
+    v6->m_vecBaseVelocity.y = v6->m_vecBaseVelocity.y + v21.y;
+    v6->m_vecBaseVelocity.z = v6->m_vecBaseVelocity.z + v21.z;
+    v15 = pOwner->m_hOwnerEntity.m_Value.m_Index;
+    if ( v15 == -1
+      || g_pEntityList->m_EntPtrArray[pOwner->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != v15 >> 12 )
+    {
+      v16 = 0;
+    }
+    else
+    {
+      v16 = (CBaseEntity *)g_pEntityList->m_EntPtrArray[pOwner->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_pEntity;
+    }
+    if ( (v16->m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(v16);
+    v6->m_vecAttackerVelocity.x = v16->m_vecAbsVelocity.x;
+    v6->m_vecAttackerVelocity.y = v16->m_vecAbsVelocity.y;
+    v6->m_vecAttackerVelocity.z = v16->m_vecAbsVelocity.z;
+    CBaseEntity::SetAbsVelocity(v6, &v6->m_vecBaseVelocity);
+    CBaseEntity::SetAbsAngles(v6, vecAngles);
+    return v6;
+  }
+  return result;
+}

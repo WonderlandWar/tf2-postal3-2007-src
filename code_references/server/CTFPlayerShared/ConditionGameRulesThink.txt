@@ -1,0 +1,282 @@
+void __thiscall CTFPlayerShared::ConditionGameRulesThink(CTFPlayerShared *this)
+{
+  int v2; // edi
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *p_m_nPlayerCond; // ebp
+  float *m_flCondExpireTimeLeft; // ebx
+  double frametime; // st6
+  double v6; // st6
+  int m_Value; // ebx
+  CTFPlayer *m_pOuter; // edi
+  double flScale; // st7
+  double v10; // st6
+  int v11; // ecx
+  float *p_flAmount; // eax
+  double v13; // st5
+  int m_flHealFraction; // ebp
+  int v15; // edi
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDisguiseHealth> *p_m_iDisguiseHealth; // ecx
+  int v17; // eax
+  CTFPlayer *v18; // ecx
+  int v19; // ebp
+  bool v20; // cc
+  unsigned int m_Index; // eax
+  CTFPlayer *m_pEntity; // edi
+  int TeamNumber; // ebx
+  CTFPlayer *v24; // eax
+  int v25; // edi
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth> *p_m_iHealth; // ebx
+  double v27; // st7
+  int v28; // edi
+  double v29; // st7
+  unsigned int v30; // eax
+  CBaseEntity *v31; // edx
+  unsigned int v32; // eax
+  CBaseEntity *v33; // eax
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvulnerableOffTime> *p_m_flInvulnerableOffTime; // ecx
+  float val; // [esp+0h] [ebp-7Ch]
+  float C_4; // [esp+10h] [ebp-6Ch]
+  float C_4a; // [esp+10h] [ebp-6Ch]
+  char nHealthToAdd_2; // [esp+26h] [ebp-56h]
+  bool nHealthToAdd_3; // [esp+27h] [ebp-55h]
+  int fTotalHealAmount; // [esp+28h] [ebp-54h]
+  float fTotalHealAmounta; // [esp+28h] [ebp-54h]
+  int nHealthToDrain; // [esp+2Ch] [ebp-50h]
+  int nHealthToDraina; // [esp+2Ch] [ebp-50h]
+  CTakeDamageInfo info; // [esp+30h] [ebp-4Ch] BYREF
+
+  if ( gpGlobals->curtime > (double)this->m_flNextCritUpdate )
+  {
+    CTFPlayerShared::UpdateCritMult(this);
+    this->m_flNextCritUpdate = gpGlobals->curtime + 0.5;
+  }
+  v2 = 0;
+  p_m_nPlayerCond = (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond;
+  m_flCondExpireTimeLeft = this->m_flCondExpireTimeLeft;
+  do
+  {
+    if ( ((1 << v2) & p_m_nPlayerCond->m_Value) != 0 && -1.0 != *m_flCondExpireTimeLeft )
+    {
+      frametime = gpGlobals->frametime;
+      if ( v2 > 12 )
+      {
+        LODWORD(info.m_vecDamageForce.x) = this->m_aHealers.m_Size;
+        if ( SLODWORD(info.m_vecDamageForce.x) > 0 )
+          frametime = frametime + (double)SLODWORD(info.m_vecDamageForce.x) * frametime * 4.0;
+      }
+      v6 = *m_flCondExpireTimeLeft - frametime;
+      if ( v6 <= 0.0 )
+        v6 = 0.0;
+      *m_flCondExpireTimeLeft = v6;
+      if ( v6 == 0.0 )
+      {
+        LODWORD(info.m_vecDamageForce.x) = p_m_nPlayerCond->m_Value & ~(1 << v2);
+        CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(
+          (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond,
+          (const int *)&info);
+        *m_flCondExpireTimeLeft = 0.0;
+        CTFPlayerShared::OnConditionRemoved(this, v2);
+      }
+    }
+    ++v2;
+    ++m_flCondExpireTimeLeft;
+  }
+  while ( v2 < 14 );
+  m_Value = p_m_nPlayerCond->m_Value;
+  nHealthToAdd_2 = 1;
+  if ( (p_m_nPlayerCond->m_Value & 0x1000) == 0 )
+    goto LABEL_44;
+  m_pOuter = this->m_pOuter;
+  val = gpGlobals->curtime - m_pOuter->m_flLastDamageTime;
+  flScale = RemapValClamped(val, 10.0, 15.0, 1.0, 3.0);
+  v10 = 0.0;
+  *(float *)&nHealthToDrain = 0.0;
+  nHealthToAdd_3 = m_pOuter->m_iHealth.m_Value >= m_pOuter->m_iMaxHealth.m_Value;
+  v11 = 0;
+  if ( this->m_aHealers.m_Size > 0 )
+  {
+    p_flAmount = &this->m_aHealers.m_Memory.m_pMemory->flAmount;
+    do
+    {
+      if ( !nHealthToAdd_3 || !*((_BYTE *)p_flAmount + 4) )
+      {
+        nHealthToAdd_2 = 0;
+        v13 = gpGlobals->frametime * *p_flAmount;
+        if ( !*((_BYTE *)p_flAmount + 4) )
+          v13 = v13 * flScale;
+        this->m_flHealFraction = v13 + this->m_flHealFraction;
+        v10 = v10 + *p_flAmount;
+      }
+      ++v11;
+      p_flAmount += 3;
+    }
+    while ( v11 < this->m_aHealers.m_Size );
+    *(float *)&nHealthToDrain = v10;
+  }
+  m_flHealFraction = (int)this->m_flHealFraction;
+  fTotalHealAmount = m_flHealFraction;
+  if ( m_flHealFraction > 0 )
+  {
+    this->m_flHealFraction = this->m_flHealFraction - (double)m_flHealFraction;
+    v15 = 5 * (int)floor((double)m_pOuter->m_iMaxHealth.m_Value * tf_max_health_boost.m_pParent->m_fValue * 0.2);
+    if ( (m_Value & 0x80) != 0 )
+    {
+      p_m_iDisguiseHealth = &this->m_iDisguiseHealth;
+      v17 = v15 - this->m_iDisguiseHealth.m_Value;
+      if ( m_flHealFraction <= v17 )
+        v17 = m_flHealFraction;
+      LODWORD(info.m_vecDamageForce.x) = v17 + p_m_iDisguiseHealth->m_Value;
+      CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDisguiseHealth>::Set(p_m_iDisguiseHealth, (const int *)&info);
+    }
+    v18 = this->m_pOuter;
+    if ( m_flHealFraction > v15 - v18->m_iHealth.m_Value )
+      fTotalHealAmount = v15 - v18->m_iHealth.m_Value;
+    fTotalHealAmounta = (float)fTotalHealAmount;
+    ((void (__stdcall *)(float, int))v18->TakeHealth)(COERCE_FLOAT(LODWORD(fTotalHealAmounta)), 2);
+    v19 = 0;
+    v20 = this->m_aHealers.m_Size <= 0;
+    info.m_vecDamageForce.x = 0.0;
+    if ( !v20 )
+    {
+      *(float *)&nHealthToDraina = 1.0 / *(float *)&nHealthToDrain;
+      do
+      {
+        m_Index = this->m_aHealers.m_Memory.m_pMemory[v19].pPlayer.m_Index;
+        if ( m_Index == -1
+          || g_pEntityList->m_EntPtrArray[this->m_aHealers.m_Memory.m_pMemory[v19].pPlayer.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+        {
+          m_pEntity = 0;
+        }
+        else
+        {
+          m_pEntity = (CTFPlayer *)g_pEntityList->m_EntPtrArray[this->m_aHealers.m_Memory.m_pMemory[v19].pPlayer.m_Index & 0xFFF].m_pEntity;
+        }
+        TeamNumber = CBaseEntity::GetTeamNumber(m_pEntity);
+        if ( TeamNumber == CBaseEntity::GetTeamNumber(this->m_pOuter) )
+        {
+          C_4 = this->m_aHealers.m_Memory.m_pMemory[v19].flAmount * *(float *)&nHealthToDraina * fTotalHealAmounta;
+          CTFGameStats::Event_PlayerHealedOther(&CTF_GameStats, m_pEntity, C_4);
+        }
+        else
+        {
+          C_4a = this->m_aHealers.m_Memory.m_pMemory[v19].flAmount * *(float *)&nHealthToDraina * fTotalHealAmounta;
+          CTFGameStats::Event_PlayerLeachedHealth(&CTF_GameStats, this->m_pOuter, C_4a);
+        }
+        ++v19;
+        v20 = ++LODWORD(info.m_vecDamageForce.x) < this->m_aHealers.m_Size;
+      }
+      while ( v20 );
+    }
+  }
+  p_m_nPlayerCond = (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond;
+  if ( (this->m_nPlayerCond.m_Value & 0x2000) != 0 )
+    this->m_flFlameRemoveTime = this->m_flFlameRemoveTime - (gpGlobals->frametime + gpGlobals->frametime);
+  if ( nHealthToAdd_2 )
+  {
+LABEL_44:
+    v24 = this->m_pOuter;
+    v25 = v24->m_iMaxHealth.m_Value;
+    p_m_iHealth = &v24->m_iHealth;
+    if ( v24->m_iHealth.m_Value > v25 )
+    {
+      LODWORD(info.m_vecDamageForce.x) = 5
+                                       * (int)floor(
+                                                (double)v24->m_iMaxHealth.m_Value
+                                              * tf_max_health_boost.m_pParent->m_fValue
+                                              * 0.2)
+                                       - v25;
+      v27 = (double)SLODWORD(info.m_vecDamageForce.x) / tf_boost_drain_time.m_pParent->m_fValue * gpGlobals->frametime
+          + this->m_flHealFraction;
+      this->m_flHealFraction = v27;
+      LODWORD(info.m_vecDamageForce.x) = (int)v27;
+      if ( (int)v27 > 0 )
+      {
+        this->m_flHealFraction = v27 - (double)SLODWORD(info.m_vecDamageForce.x);
+        LODWORD(info.m_vecDamageForce.x) = p_m_iHealth->m_Value - (int)v27;
+        CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(p_m_iHealth, (const int *)&info);
+      }
+    }
+    if ( (p_m_nPlayerCond->m_Value & 0x80) != 0 )
+    {
+      v28 = this->m_pOuter->m_iMaxHealth.m_Value;
+      if ( this->m_iDisguiseHealth.m_Value > v28 )
+      {
+        LODWORD(info.m_vecDamageForce.x) = 5
+                                         * (int)floor(
+                                                  (double)this->m_pOuter->m_iMaxHealth.m_Value
+                                                * tf_max_health_boost.m_pParent->m_fValue
+                                                * 0.2)
+                                         - v28;
+        v29 = (double)SLODWORD(info.m_vecDamageForce.x) / tf_boost_drain_time.m_pParent->m_fValue * gpGlobals->frametime
+            + this->m_flDisguiseHealFraction;
+        this->m_flDisguiseHealFraction = v29;
+        LODWORD(info.m_vecDamageForce.x) = (int)v29;
+        if ( (int)v29 > 0 )
+        {
+          this->m_flDisguiseHealFraction = v29 - (double)SLODWORD(info.m_vecDamageForce.x);
+          LODWORD(info.m_vecDamageForce.x) = this->m_iDisguiseHealth.m_Value - (int)v29;
+          CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDisguiseHealth>::Set(
+            &this->m_iDisguiseHealth,
+            (const int *)&info);
+        }
+      }
+    }
+  }
+  if ( (p_m_nPlayerCond->m_Value & 0x800) != 0 && this->m_flTauntRemoveTime < (double)gpGlobals->curtime )
+  {
+    this->m_pOuter->m_hTauntScene.m_Index = -1;
+    LODWORD(info.m_vecDamageForce.x) = p_m_nPlayerCond->m_Value & 0xFFFFF7FF;
+    CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(p_m_nPlayerCond, (const int *)&info);
+    this->m_flCondExpireTimeLeft[11] = 0.0;
+  }
+  
+  // if ( InCond( TF_COND_BURNING ) )
+  if ( (p_m_nPlayerCond->m_Value & 0x2000) != 0 )
+  {
+    if ( this->m_flFlameRemoveTime < (double)gpGlobals->curtime || this->m_pOuter->m_nWaterLevel.m_Value >= 2u )
+    {
+      LODWORD(info.m_vecDamageForce.x) = p_m_nPlayerCond->m_Value & 0xFFFFDFFF;
+      CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(p_m_nPlayerCond, (const int *)&info);
+      this->m_flCondExpireTimeLeft[13] = 0.0;
+      this->m_hBurnAttacker.m_Index = -1;
+    }
+    else if ( this->m_flFlameBurnTime <= (double)gpGlobals->curtime )
+    {
+      v30 = this->m_hBurnAttacker.m_Index;
+      if ( v30 == -1 || g_pEntityList->m_EntPtrArray[this->m_hBurnAttacker.m_Index & 0xFFF].m_SerialNumber != v30 >> 12 )
+        v31 = 0;
+      else
+        v31 = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hBurnAttacker.m_Index & 0xFFF].m_pEntity;
+      v32 = this->m_hBurnAttacker.m_Index;
+      if ( v32 == -1 || g_pEntityList->m_EntPtrArray[this->m_hBurnAttacker.m_Index & 0xFFF].m_SerialNumber != v32 >> 12 )
+        v33 = 0;
+      else
+        v33 = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hBurnAttacker.m_Index & 0xFFF].m_pEntity;
+      CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&info.m_vecDamageForce.y, v33, v31, 3.0, 2056, 3);
+      CBaseEntity::TakeDamage(this->m_pOuter, (CTakeDamageInfo *)&info.m_vecDamageForce.y);
+      this->m_flFlameBurnTime = gpGlobals->curtime + 0.5;
+    }
+    if ( gpGlobals->curtime > (double)this->m_flNextBurningSound )
+    {
+      this->m_pOuter->SpeakConceptIfAllowed(this->m_pOuter, 43, 0, 0, 0, 0);
+      this->m_flNextBurningSound = gpGlobals->curtime + 2.5;
+    }
+  }
+  if ( (p_m_nPlayerCond->m_Value & 0x40) != 0 && this->m_flDisguiseCompleteTime < (double)gpGlobals->curtime )
+    CTFPlayerShared::CompleteDisguise(this);
+	
+  //if ( InCond( TF_COND_INVULNERABLE )  )
+  if ( (p_m_nPlayerCond->m_Value & 0x200) != 0 )
+  {
+    p_m_flInvulnerableOffTime = &this->m_flInvulnerableOffTime;
+    if ( 0.0 != this->m_flInvulnerableOffTime.m_Value && p_m_flInvulnerableOffTime->m_Value < (double)gpGlobals->curtime )
+    {
+      info.m_vecDamageForce.x = 0.0;
+      CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvulnerableOffTime>::Set(
+        p_m_flInvulnerableOffTime,
+        &info.m_vecDamageForce.x);
+      LODWORD(info.m_vecDamageForce.x) = p_m_nPlayerCond->m_Value & 0xFFFFFDFF;
+      CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(p_m_nPlayerCond, (const int *)&info);
+      this->m_flCondExpireTimeLeft[9] = 0.0;
+    }
+  }
+}

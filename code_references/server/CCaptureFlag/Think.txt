@@ -1,0 +1,67 @@
+void __thiscall CCaptureFlag::Think(CCaptureFlag *this)
+{
+  int i; // edi
+  CTFTeamManager *v3; // eax
+  float v4; // [esp+0h] [ebp-14h]
+  float thinkTime; // [esp+4h] [ebp-10h]
+  int val; // [esp+10h] [ebp-4h] BYREF
+
+  if ( !this->m_bDisabled.m_Value )
+  {
+    if ( !((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].Think)(g_pGameRules) )
+    {
+      thinkTime = gpGlobals->curtime + 1.0;
+      CBaseEntity::SetNextThink(this, thinkTime, 0);
+      return;
+    }
+    if ( this->m_bCaptured )
+    {
+      this->m_bCaptured = 0;
+      this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CCaptureFlag::FlagTouch;
+    }
+    if ( this->m_nFlagStatus.m_Value != 2 )
+      goto LABEL_25;
+    if ( !this->m_bAllowOwnerPickup
+      && 0.0 != this->m_flOwnerPickupTime
+      && this->m_flOwnerPickupTime < (double)gpGlobals->curtime )
+    {
+      this->m_bAllowOwnerPickup = 1;
+    }
+    if ( this->m_nGameType.m_Value == 3 )
+    {
+      if ( 0.0 == this->m_flResetTime.m_Value || this->m_flResetTime.m_Value >= (double)gpGlobals->curtime )
+      {
+        if ( 0.0 != this->m_flNeutralTime.m_Value && this->m_flNeutralTime.m_Value < (double)gpGlobals->curtime )
+        {
+          for ( i = 2; i < 4; ++i )
+          {
+            v3 = TFTeamMgr();
+            CTFTeamManager::TeamCenterPrint(v3, i, "#TF_Invade_FlagNeutral", 0, 0, 0, 0);
+          }
+          this->ChangeTeam(this, this->m_iOriginalTeam);
+          if ( CBaseEntity::GetTeamNumber(this) )
+            val = CBaseEntity::GetTeamNumber(this) - 2;
+          else
+            val = 2;
+          CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+            (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+            &val);
+          *(float *)&val = 0.0;
+          CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(
+            &this->m_flNeutralTime,
+            (const float *)&val);
+        }
+        goto LABEL_25;
+      }
+    }
+    else if ( 0.0 == this->m_flResetTime.m_Value || this->m_flResetTime.m_Value >= (double)gpGlobals->curtime )
+    {
+      goto LABEL_25;
+    }
+    CCaptureFlag::Reset(this);
+    CCaptureFlag::ResetMessage(this);
+LABEL_25:
+    v4 = gpGlobals->curtime + 1.0;
+    CBaseEntity::SetNextThink(this, v4, 0);
+  }
+}

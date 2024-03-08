@@ -1,0 +1,73 @@
+void __thiscall CTFPlayerShared::RecalculateInvuln(CTFPlayerShared *this, bool bInstantRemove)
+{
+  int v3; // ebx
+  CBaseEntityList *v4; // ebp
+  CTFPlayerShared::healers_t *m_pMemory; // ecx
+  unsigned int m_Index; // eax
+  CTFPlayerShared::healers_t *v7; // edx
+  CEntInfo *v8; // ecx
+  unsigned int v9; // eax
+  int v10; // edx
+  CEntInfo *v11; // ecx
+  CTFPlayer *m_pEntity; // esi
+  int i; // [esp+4h] [ebp-8h]
+  int v14; // [esp+8h] [ebp-4h]
+
+  LOBYTE(i) = 0;
+  if ( !CTFPlayer::HasTheFlag(this->m_pOuter) )
+  {
+    if ( CTFPlayerShared::IsProvidingInvuln(this, this->m_pOuter) )
+    {
+      LOBYTE(i) = 1;
+    }
+    else
+    {
+      v3 = 0;
+      v14 = 0;
+      if ( this->m_aHealers.m_Size > 0 )
+      {
+        v4 = g_pEntityList;
+        do
+        {
+          m_pMemory = this->m_aHealers.m_Memory.m_pMemory;
+          m_Index = m_pMemory[v3].pPlayer.m_Index;
+          v7 = &m_pMemory[v3];
+          if ( m_Index != -1 )
+          {
+            v8 = &v4->m_EntPtrArray[m_pMemory[v3].pPlayer.m_Index & 0xFFF];
+            if ( v8->m_SerialNumber == m_Index >> 12 )
+            {
+              if ( v8->m_pEntity )
+              {
+                v9 = v7->pPlayer.m_Index;
+                if ( v7->pPlayer.m_Index != -1 )
+                {
+                  v10 = v7->pPlayer.m_Index & 0xFFF;
+                  v11 = &v4->m_EntPtrArray[v10];
+                  if ( v4->m_EntPtrArray[v10].m_SerialNumber == v9 >> 12 )
+                  {
+                    m_pEntity = (CTFPlayer *)v11->m_pEntity;
+                    if ( v11->m_pEntity )
+                    {
+                      if ( m_pEntity->IsPlayer((CBaseEntity *)v11->m_pEntity)
+                        && CTFPlayerShared::IsProvidingInvuln(this, m_pEntity) )
+                      {
+                        LOBYTE(i) = 1;
+                        break;
+                      }
+                      v4 = g_pEntityList;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          ++v3;
+          ++v14;
+        }
+        while ( v14 < this->m_aHealers.m_Size );
+      }
+    }
+  }
+  CTFPlayerShared::SetInvulnerable(this, i, bInstantRemove);
+}

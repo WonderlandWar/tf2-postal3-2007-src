@@ -1,0 +1,4 @@
+int __thiscall CTFGrenadeLauncher::GetWeaponID(CTFGrenadeLauncher *this)
+{
+  return 20;
+}

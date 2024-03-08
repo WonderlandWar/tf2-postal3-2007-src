@@ -1,0 +1,202 @@
+void __thiscall CCaptureFlag::Drop(CCaptureFlag *this, CTFPlayer *pPlayer, bool bVisible, bool bThrown, bool bMessage)
+{
+  float z; // edx
+  float y; // ecx
+  CBaseEntity::NetworkVar_m_Collision_vtbl *v8; // eax
+  const Vector *(__thiscall *OBBMaxs)(ICollideable *); // edx
+  const Vector *v10; // eax
+  int m_Value; // eax
+  int k; // edi
+  int v13; // eax
+  int v14; // eax
+  CTFTeamManager *v15; // eax
+  CTFTeamManager *v16; // eax
+  int i; // edi
+  CTFTeamManager *v18; // eax
+  int v19; // eax
+  int j; // edi
+  int v21; // eax
+  int v22; // eax
+  int v23; // eax
+  int v24; // eax
+  bool v25; // zf
+  CBaseEntity *v26; // eax
+  const Vector *v27; // [esp-Ch] [ebp-B8h]
+  const char *v28; // [esp-8h] [ebp-B4h]
+  const char *v29; // [esp-8h] [ebp-B4h]
+  float soundtime; // [esp+0h] [ebp-ACh]
+  float soundtimea; // [esp+0h] [ebp-ACh]
+  float val; // [esp+14h] [ebp-98h] BYREF
+  Vector vecEnd; // [esp+18h] [ebp-94h] BYREF
+  Vector vecStart; // [esp+24h] [ebp-88h] BYREF
+  CTeamRecipientFilter filter; // [esp+30h] [ebp-7Ch] BYREF
+  CGameTrace trace; // [esp+50h] [ebp-5Ch] BYREF
+
+  if ( this->m_bDisabled.m_Value )
+    return;
+  CTFItem::Drop(this, pPlayer, bVisible, 0, 1);
+  CTFPlayer::TeamFortress_SetSpeed(pPlayer);
+  if ( bThrown )
+  {
+    this->m_bAllowOwnerPickup = 0;
+    this->m_flOwnerPickupTime = gpGlobals->curtime + 3.0;
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  y = this->m_vecAbsOrigin.y;
+  z = this->m_vecAbsOrigin.z;
+  vecStart.y = this->m_vecAbsOrigin.x;
+  vecEnd.y = vecStart.y;
+  vecStart.x = z - 8000.0;
+  v8 = this->m_Collision.CTFItem::CDynamicProp::CBreakableProp::CBaseProp::CBaseAnimating::CBaseEntity::__vftable;
+  vecStart.z = y;
+  *(float *)&filter.__vftable = z;
+  OBBMaxs = v8->OBBMaxs;
+  vecEnd.z = y;
+  v27 = OBBMaxs(&this->m_Collision);
+  v10 = this->m_Collision.OBBMins(&this->m_Collision);
+  UTIL_TraceHull(
+    (Vector *)&vecStart.y,
+    (Vector *)&vecEnd.y,
+    v10,
+    v27,
+    0x200400Bu,
+    this,
+    1,
+    (CGameTrace *)&trace.startpos.y);
+  CBaseEntity::SetAbsOrigin(this, (const Vector *)&trace.endpos.y);
+  m_Value = this->m_nGameType.m_Value;
+  if ( m_Value )
+  {
+    if ( m_Value == 3 )
+    {
+      if ( bMessage )
+      {
+        v15 = TFTeamMgr();
+        CTFTeamManager::PlayerCenterPrint(v15, pPlayer, "#TF_Invade_PlayerFlagDrop", 0, 0, 0, 0);
+        v16 = TFTeamMgr();
+        CTFTeamManager::PlayerTeamCenterPrint(v16, pPlayer, "#TF_Invade_FlagDrop", 0, 0, 0, 0);
+        for ( i = 2; i < 4; ++i )
+        {
+          if ( i == CBaseEntity::GetTeamNumber(pPlayer) )
+          {
+            CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, i, 1);
+            soundtime = 0.0;
+            v28 = "Invade.TeamDropped";
+          }
+          else
+          {
+            v18 = TFTeamMgr();
+            CTFTeamManager::TeamCenterPrint(v18, i, "#TF_Invade_FlagDrop", 0, 0, 0, 0);
+            CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, i, 1);
+            soundtime = 0.0;
+            v28 = "Invade.EnemyDropped";
+          }
+          v19 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v19, v28, 0, soundtime, 0);
+          CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+        }
+      }
+      vecEnd.x = 60.0;
+      val = gpGlobals->curtime + 60.0;
+      CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(&this->m_flResetTime, &val);
+      CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flMaxResetTime>::Set(&this->m_flMaxResetTime, &vecEnd.x);
+      vecEnd.x = 30.0;
+      val = gpGlobals->curtime + 30.0;
+      CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(&this->m_flNeutralTime, &val);
+      CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flMaxResetTime>::Set(&this->m_flMaxResetTime, &vecEnd.x);
+    }
+    else if ( m_Value == 1 )
+    {
+      if ( bMessage )
+      {
+        for ( j = 2; j < 4; ++j )
+        {
+          if ( j == CBaseEntity::GetTeamNumber(pPlayer) )
+          {
+            CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, j, 1);
+            soundtimea = 0.0;
+            v29 = "AttackDefend.TeamDropped";
+          }
+          else
+          {
+            CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, j, 1);
+            soundtimea = 0.0;
+            v29 = "AttackDefend.EnemyDropped";
+          }
+          v21 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v21, v29, 0, soundtimea, 0);
+          CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+        }
+      }
+      CCaptureFlag::SetFlagReturnIn(this, 60.0);
+    }
+  }
+  else
+  {
+    if ( bMessage )
+    {
+      for ( k = 2; k < 4; ++k )
+      {
+        if ( k == CBaseEntity::GetTeamNumber(pPlayer) )
+        {
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+          v14 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v14, "CaptureFlag.TeamDropped", 0, 0.0, 0);
+          CTFGameRules::SendHudNotification(
+            (CTFGameRules *)g_pGameRules,
+            (IRecipientFilter *)&filter.m_bReliable,
+            HUD_NOTIFY_ENEMY_FLAG_DROPPED);
+        }
+        else
+        {
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+          v13 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v13, "CaptureFlag.EnemyDropped", 0, 0.0, 0);
+          CTFGameRules::SendHudNotification(
+            (CTFGameRules *)g_pGameRules,
+            (IRecipientFilter *)&filter.m_bReliable,
+            HUD_NOTIFY_YOUR_FLAG_DROPPED);
+        }
+        CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+      }
+    }
+    val = 60.0;
+    vecEnd.x = gpGlobals->curtime + 60.0;
+    CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(&this->m_flResetTime, &vecEnd.x);
+    CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flMaxResetTime>::Set(&this->m_flMaxResetTime, &val);
+  }
+  CBaseEntity::SetAbsAngles(this, &this->m_vecResetAng);
+  this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CCaptureFlag::FlagTouch;
+  LODWORD(val) = 2;
+  CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nFlagStatus>::Set(&this->m_nFlagStatus, (const int *)&val);
+  v22 = this->m_nFlagStatus.m_Value;
+  if ( !v22 )
+    goto LABEL_33;
+  v23 = v22 - 1;
+  if ( !v23 )
+  {
+    v24 = CBaseAnimating::LookupSequence(this, "idle");
+    goto LABEL_34;
+  }
+  if ( v23 == 1 )
+  {
+LABEL_33:
+    v24 = CBaseAnimating::LookupSequence(this, "spin");
+LABEL_34:
+    CBaseAnimating::ResetSequence(this, v24);
+  }
+  COutputEvent::FireOutput(&this->m_outputOnDrop, this, this, 0.0);
+  v25 = (this->m_iEFlags & 0x800) == 0;
+  vecStart.x = cl_flag_return_height.m_pParent->m_fValue;
+  if ( !v25 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  vecStart.y = this->m_vecAbsOrigin.x;
+  vecStart.z = this->m_vecAbsOrigin.y;
+  *(float *)&filter.__vftable = this->m_vecAbsOrigin.z + vecStart.x;
+  v26 = CBaseEntity::Create("item_teamflag_return_icon", (Vector *)&vecStart.y, &vec3_angle, this);
+  if ( v26 )
+    this->m_hReturnIcon.m_Index = v26->GetRefEHandle(v26)->m_Index;
+  else
+    this->m_hReturnIcon.m_Index = -1;
+}

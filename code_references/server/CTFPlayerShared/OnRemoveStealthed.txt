@@ -1,0 +1,5 @@
+void __thiscall CTFPlayerShared::OnRemoveStealthed(CTFPlayerShared *this)
+{
+  CTFPlayer::HolsterOffHandWeapon(this->m_pOuter);
+  CTFPlayer::TeamFortress_SetSpeed(this->m_pOuter);
+}

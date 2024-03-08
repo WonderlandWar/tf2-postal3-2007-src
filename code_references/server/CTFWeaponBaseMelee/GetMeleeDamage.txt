@@ -1,0 +1,7 @@
+double __thiscall CTFWeaponBaseMelee::GetMeleeDamage(
+        CTFWeaponBaseMelee *this,
+        CBaseEntity *pTarget,
+        int *iCustomDamage)
+{
+  return (double)this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_nDamage;
+}

@@ -1,0 +1,14 @@
+void __thiscall CCaptureFlag::Activate(CCaptureFlag *this)
+{
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  CBaseProp::Activate(this);
+  this->m_iOriginalTeam = CBaseEntity::GetTeamNumber(this);
+  if ( CBaseEntity::GetTeamNumber(this) )
+    val = CBaseEntity::GetTeamNumber(this) - 2;
+  else
+    val = 2;
+  CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+    (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+    &val);
+}

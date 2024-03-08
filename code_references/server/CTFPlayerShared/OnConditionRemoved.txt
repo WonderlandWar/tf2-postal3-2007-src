@@ -1,0 +1,30 @@
+void __thiscall CTFPlayerShared::OnConditionRemoved(CTFPlayerShared *this, int nCond)
+{
+  switch ( nCond )
+  {
+    case 5:
+      CTFPlayerShared::OnRemoveZoomed(this);
+      break;
+    case 6:
+      nCond = 0;
+      CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseTeam>::Set(
+        &this->m_nDesiredDisguiseTeam,
+        &nCond);
+      break;
+    case 7:
+      CTFPlayerShared::OnRemoveDisguised(this);
+      break;
+    case 8:
+      CTFPlayerShared::OnRemoveStealthed(this);
+      break;
+    case 12:
+      this->m_flHealFraction = 0.0;
+      this->m_flDisguiseHealFraction = 0.0;
+      break;
+    case 13:
+      this->m_hBurnAttacker.m_Index = -1;
+      break;
+    default:
+      return;
+  }
+}

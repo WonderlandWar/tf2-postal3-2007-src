@@ -1,0 +1,82 @@
+class CWeaponMedigun : public CTFWeaponBaseGun
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    private void CWeaponMedigun(class CWeaponMedigun & );
+    public void CWeaponMedigun();
+    public void ~CWeaponMedigun();
+    public void Precache();
+    public bool Deploy();
+    public bool Holster(class CBaseCombatWeapon * );
+    public void UpdateOnRemove();
+    public void ItemHolsterFrame();
+    public void ItemPostFrame();
+    public bool Lower();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public void WeaponIdle();
+    public void DrainCharge();
+    public void WeaponReset();
+    public float GetTargetRange();
+    public float GetStickRange();
+    public float GetHealRate();
+    public bool AppliesModifier();
+    public int GetWeaponID();
+    public bool IsReleasingCharge();
+    public float GetChargeLevel();
+    private bool FindAndHealTargets();
+    private void MaintainTargetInSlot(int );
+    private void FindNewTargetForSlot(int );
+    private void RemoveHealingTarget(int ,bool );
+    private bool HealingTarget(class CBaseEntity * );
+    private bool CouldHealTarget(class CBaseEntity * );
+    class NetworkVar_m_hHealingTargets
+    {
+        public class CHandle<CBaseEntity> & operator[](int );
+        public class CHandle<CBaseEntity> & Get(int );
+        public class CHandle<CBaseEntity> & GetForModify(int );
+        public void Set(int ,class CHandle<CBaseEntity> & );
+        public class CHandle<CBaseEntity> * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected class CHandle<CBaseEntity> m_Value[1];
+        public void NetworkVar_m_hHealingTargets(class CWeaponMedigun::NetworkVar_m_hHealingTargets & );
+        public void NetworkVar_m_hHealingTargets();
+    };
+    public class CWeaponMedigun::NetworkVar_m_hHealingTargets m_hHealingTargets;
+    class NetworkVar_m_bHealing
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bHealing> m_bHealing;
+    class NetworkVar_m_bAttacking
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking> m_bAttacking;
+    protected float m_flNextBuzzTime;
+    protected float m_flHealEffectLifetime;
+    protected float m_flReleaseStartedAt;
+    class NetworkVar_m_bHolstered
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bHolstered> m_bHolstered;
+    class NetworkVar_m_bChargeRelease
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bChargeRelease> m_bChargeRelease;
+    class NetworkVar_m_flChargeLevel
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CWeaponMedigun::NetworkVar_m_flChargeLevel> m_flChargeLevel;
+    protected float m_flNextTargetCheckTime;
+    protected class CDamageModifier m_DamageModifier;
+    protected bool m_bHealingSelf;
+    public class CWeaponMedigun & operator=(class CWeaponMedigun & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

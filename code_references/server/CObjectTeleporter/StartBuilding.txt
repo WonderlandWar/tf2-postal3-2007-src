@@ -1,0 +1,5 @@
+bool __thiscall CObjectTeleporter::StartBuilding(CObjectTeleporter *this, CBaseEntity *pBuilder)
+{
+  this->SetModel(this, "models/buildables/teleporter.mdl");
+  return CBaseObject::StartBuilding(this, pBuilder);
+}

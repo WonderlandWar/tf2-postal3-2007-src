@@ -1,0 +1,5 @@
+void __thiscall CTFMinigun::ItemPreFrame(CTFMinigun *this)
+{
+  CTFMinigun::UpdateBarrelMovement(this);
+  CBaseCombatWeapon::ItemPreFrame(this);
+}

@@ -1,0 +1,57 @@
+void __thiscall CObjectTeleporter::TeleporterTouch(CObjectTeleporter *this, CBaseEntity *pOther)
+{
+  CTFPlayer *v3; // ebx
+  CTFPlayer *v4; // eax
+  int TeamNumber; // ebp
+  int m_Value; // eax
+  Vector *AbsVelocity; // eax
+  CSingleUserRecipientFilter filter; // [esp+0h] [ebp-24h] BYREF
+
+  if ( !this->m_bDisabled.m_Value && pOther->IsPlayer(pOther) )
+  {
+    v3 = pOther->IsPlayer(pOther) ? (CTFPlayer *)pOther : 0;
+    v4 = this->GetBuilder(this);
+    if ( v4 )
+    {
+      TeamNumber = CBaseEntity::GetTeamNumber(v4);
+      if ( TeamNumber == CBaseEntity::GetTeamNumber(pOther) )
+      {
+        if ( this->GetType(this) == 1 )
+        {
+          m_Value = this->m_iState.m_Value;
+          if ( m_Value == 2 )
+          {
+            if ( CTFPlayer::HasTheFlag(v3) )
+            {
+              CSingleUserRecipientFilter::CSingleUserRecipientFilter(
+                (CSingleUserRecipientFilter *)&filter.m_bReliable,
+                v3);
+              CTFGameRules::SendHudNotification(
+                (CTFGameRules *)g_pGameRules,
+                (IRecipientFilter *)&filter.m_bReliable,
+                HUD_NOTIFY_NO_TELE_WITH_FLAG);
+              CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+            }
+            else
+            {
+              AbsVelocity = (Vector *)CBaseEntity::GetAbsVelocity(v3);
+              if ( Vector::Length(AbsVelocity) < 5.0 )
+              {
+                if ( CObjectTeleporter::GetMatchingTeleporter(this) )
+                  this->TeleporterSend(this, v3);
+              }
+            }
+          }
+          else if ( m_Value == 1 )
+          {
+            ClientPrint(v3, 4, "#Teleporter_entrance_idle", 0, 0, 0, 0);
+          }
+        }
+        else if ( this->m_iState.m_Value == 1 )
+        {
+          ClientPrint(v3, 4, "#Teleporter_exit_idle", 0, 0, 0, 0);
+        }
+      }
+    }
+  }
+}

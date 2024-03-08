@@ -1,0 +1,47 @@
+class CObjectDispenser : public CBaseObject
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CObjectDispenser(class CObjectDispenser & );
+    public void CObjectDispenser();
+    public void ~CObjectDispenser();
+    public class CObjectDispenser * Create(class Vector & ,class QAngle & );
+    public void Spawn();
+    public void GetControlPanelInfo(int ,char &** );
+    public void Precache();
+    public bool ClientCommand(class CTFPlayer * ,class CCommand & );
+    public void DetonateObject();
+    public void OnGoActive();
+    public bool StartBuilding(class CBaseEntity * );
+    public int DrawDebugTextOverlays();
+    public void SetModel(char * );
+    public void RefillThink();
+    public void DispenseThink();
+    public void StartTouch(class CBaseEntity * );
+    public void EndTouch(class CBaseEntity * );
+    public int ObjectCaps();
+    public bool DispenseAmmo(class CTFPlayer * );
+    public void StartHealing(class CBaseEntity * );
+    public void StopHealing(class CBaseEntity * );
+    public void AddHealingTarget(class CBaseEntity * );
+    public void RemoveHealingTarget(class CBaseEntity * );
+    public bool IsHealingTarget(class CBaseEntity * );
+    public bool CouldHealTarget(class CBaseEntity * );
+    public class Vector GetHealOrigin();
+    public class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_hHealingTargets;
+    private class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_hTouchingEntities;
+    class NetworkVar_m_iAmmoMetal
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectDispenser::NetworkVar_m_iAmmoMetal> m_iAmmoMetal;
+    private float m_flNextAmmoDispense;
+    private class CHandle<CBaseEntity> m_hTouchTrigger;
+    private struct datamap_t m_DataMap;
+    private struct datamap_t * GetBaseMap();
+    private struct datamap_t * GetDataDescMap();
+    public class CObjectDispenser & operator=(class CObjectDispenser & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

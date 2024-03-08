@@ -1,0 +1,35 @@
+class CObjectInfo
+{
+    public void CObjectInfo(char * );
+    public void ~CObjectInfo();
+    public char * m_pObjectName;
+	
+    public char * m_pClassName;
+    public char * m_pStatusName;
+    public float m_flBuildTime;
+    public int m_nMaxObjects;
+    public int m_Cost;
+    public float m_CostMultiplierPerInstance;
+    public int m_UpgradeCost;
+    public int m_MaxUpgradeLevel;
+    public char * m_pBuilderWeaponName;
+    public char * m_pBuilderPlacementString;
+    public int m_SelectionSlot;
+    public int m_SelectionPosition;
+    public bool m_bSolidToPlayerMovement;
+    public char * m_pViewModel;
+    public char * m_pPlayerModel;
+    public int m_iDisplayPriority;
+    public bool m_bVisibleInWeaponSelection;
+    public char * m_pExplodeSound;
+    public bool m_bAutoSwitchTo;
+	
+    public char * m_pIconActive;
+    public char * m_pIconInactive;
+	
+    public char * m_pHudStatusIcon;
+	
+    public int m_iMetalToDropInGibs;
+	
+    public void * __vecDelDtor(unsigned int );
+};

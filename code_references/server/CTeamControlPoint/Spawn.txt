@@ -1,0 +1,29 @@
+void __thiscall CTeamControlPoint::Spawn(CTeamControlPoint *this)
+{
+  const char *DebugName; // eax
+  unsigned int v3; // ecx
+  float thinkTime; // [esp+0h] [ebp-10h]
+  float val; // [esp+Ch] [ebp-4h] BYREF
+
+  if ( this->m_iDefaultOwner < 0 || this->m_iDefaultOwner >= GetNumberOfTeams() )
+  {
+    DebugName = CBaseEntity::GetDebugName(this);
+    _Warning("team_control_point '%s' has bad point_default_owner.\n", DebugName);
+    this->m_iDefaultOwner = 0;
+  }
+  this->Precache(this);
+  CTeamControlPoint::InternalSetOwner(this, this->m_iDefaultOwner, 0, 0, 0);
+  LOBYTE(v3) = !this->m_bStartDisabled;
+  CTeamControlPoint::SetActive(this, v3);
+  vgui::ListViewPanel::Paint((vgui::ListViewPanel *)this);
+  val = 1.0;
+  CNetworkVarBase<float,CSprite::NetworkVar_m_flGlowProxySize>::Set(&this->m_flPlaybackRate, &val);
+  CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CEnvEffectsScript::Think, 0.0, 0);
+  thinkTime = gpGlobals->curtime + 0.1;
+  CBaseEntity::SetNextThink(this, thinkTime, 0);
+  if ( (this->m_spawnflags.m_Value & 2) != 0 )
+    CBaseEntity::AddEffects(this, 32);
+  if ( (this->m_spawnflags.m_Value & 4) != 0 )
+    CBaseEntity::AddEffects(this, 16);
+  this->m_flLastContestedAt = -1.0;
+}

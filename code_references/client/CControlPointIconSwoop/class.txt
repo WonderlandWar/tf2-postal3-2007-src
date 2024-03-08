@@ -1,0 +1,39 @@
+class CControlPointIconSwoop : public vgui::ImagePanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CControlPointIconSwoop_RegisterMap
+    {
+        public void CControlPointIconSwoop_RegisterMap();
+    };
+    public class CControlPointIconSwoop::CControlPointIconSwoop_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CControlPointIconSwoop_Register
+    {
+        public void CControlPointIconSwoop_Register();
+    };
+    public class CControlPointIconSwoop::CControlPointIconSwoop_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CControlPointIconSwoop_RegisterKBMap
+    {
+        public void CControlPointIconSwoop_RegisterKBMap();
+    };
+    public class CControlPointIconSwoop::CControlPointIconSwoop_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CControlPointIconSwoop(class CControlPointIconSwoop & );
+    public void CControlPointIconSwoop(class vgui::Panel * ,char * );
+    public void PaintBackground();
+    public bool IsVisible();
+    public void StartSwoop();
+    private float m_flStartCapAnimStart;
+    public void ~CControlPointIconSwoop();
+    public class CControlPointIconSwoop & operator=(class CControlPointIconSwoop & );
+    public void * __vecDelDtor(unsigned int );
+};

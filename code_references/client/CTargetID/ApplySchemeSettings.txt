@@ -1,0 +1,62 @@
+void __thiscall CTargetID::ApplySchemeSettings(CTargetID *this, vgui::IScheme *scheme)
+{
+  vgui::IScheme *v3; // edi
+  vgui::Panel *ChildByName; // eax
+  vgui::Panel *v5; // eax
+  vgui::Panel *v6; // eax
+  void *v7; // eax
+  int v8; // ecx
+  vgui::IScheme *v9; // eax
+  Color *(__thiscall *GetColor)(vgui::IScheme *, Color *, const char *, Color); // edx
+
+  ((void (__thiscall *)(CTargetID *, const char *, _DWORD, _DWORD))this->CHudElement::CGameEventListener::IGameEventListener2::__vftable[12].SetActive)(
+    this,
+    "resource/UI/TargetID.res",
+    0,
+    0);
+  v3 = scheme;
+  vgui::Panel::ApplySchemeSettings((vgui::Panel *)this, scheme);
+  ChildByName = vgui::Panel::FindChildByName((vgui::Panel *)this, "TargetNameLabel", 0);
+  LODWORD(this->m_flLastChangeTime) = __RTDynamicCast(
+                                        ChildByName,
+                                        0,
+                                        &vgui::Panel `RTTI Type Descriptor',
+                                        &vgui::Label `RTTI Type Descriptor',
+                                        0);
+  v5 = vgui::Panel::FindChildByName((vgui::Panel *)this, "TargetDataLabel", 0);
+  this->m_iTargetEntIndex = (int)__RTDynamicCast(
+                                   v5,
+                                   0,
+                                   &vgui::Panel `RTTI Type Descriptor',
+                                   &vgui::Label `RTTI Type Descriptor',
+                                   0);
+  v6 = vgui::Panel::FindChildByName((vgui::Panel *)this, "TargetIDBG", 0);
+  v7 = __RTDynamicCast(v6, 0, &vgui::Panel `RTTI Type Descriptor', &CTFImagePanel `RTTI Type Descriptor', 0);
+  scheme = (vgui::IScheme *)-12566273;
+  *(_DWORD *)&this->m_bLayoutOnUpdate = v7;
+  v8 = *(_DWORD *)((int (__thiscall *)(vgui::IScheme *, vgui::IScheme **, const char *, int))v3->GetColor)(
+                    v3,
+                    &scheme,
+                    "TeamBlue",
+                    -12566273);
+  LOBYTE(scheme) = -1;
+  *(_WORD *)((char *)&scheme + 1) = 16448;
+  HIBYTE(scheme) = -1;
+  v9 = scheme;
+  *(int *)((char *)&this->m_iConfigID + 1) = v8;
+  *(_DWORD *)&this->m_RegisterAnimationClass = *(_DWORD *)((int (__thiscall *)(vgui::IScheme *, vgui::IScheme **, const char *, vgui::IScheme *))v3->GetColor)(
+                                                            v3,
+                                                            &scheme,
+                                                            "TeamRed",
+                                                            v9);
+  GetColor = v3->GetColor;
+  LOBYTE(scheme) = -1;
+  *(_WORD *)((char *)&scheme + 1) = 160;
+  HIBYTE(scheme) = -1;
+  *(unsigned int *)((char *)&this->m_hFont + 1) = *(_DWORD *)((int (__thiscall *)(vgui::IScheme *, vgui::IScheme **, const char *, vgui::IScheme *))GetColor)(
+                                                               v3,
+                                                               &scheme,
+                                                               "TeamSpec",
+                                                               scheme);
+  this->m_NavGroup._mainPanel = (vgui::Panel *)v3->GetFont(v3, "TargetID", 1);
+}

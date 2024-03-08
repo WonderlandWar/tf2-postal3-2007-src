@@ -1,0 +1,37 @@
+void __thiscall CTeamplayRoundBasedRules::ResetScores(CTeamplayRoundBasedRules *this)
+{
+  int i; // esi
+  CTeam *GlobalTeam; // eax
+  int j; // edi
+  CBasePlayer *v5; // eax
+  const edict_t **v6; // esi
+
+  if ( this->m_bResetTeamScores )
+  {
+    for ( i = 0; i < GetNumberOfTeams(); ++i )
+    {
+      GlobalTeam = GetGlobalTeam(i);
+      GlobalTeam->ResetScores(GlobalTeam);
+    }
+  }
+  if ( this->m_bResetPlayerScores )
+  {
+    for ( j = 1; j <= gpGlobals->maxClients; ++j )
+    {
+      v5 = UTIL_PlayerByIndex(j);
+      v6 = (const edict_t **)v5;
+      if ( v5 && v5->IsPlayer(v5) && v6[86] )
+      {
+        if ( engine->IndexOfEdict(engine, v6[86]) )
+          ((void (__thiscall *)(const edict_t **))(*v6)[76].m_fStateFlags)(v6);
+      }
+    }
+    this->m_bResetTeamScores = 1;
+    this->m_bResetPlayerScores = 1;
+  }
+  else
+  {
+    this->m_bResetTeamScores = 1;
+    this->m_bResetPlayerScores = 1;
+  }
+}

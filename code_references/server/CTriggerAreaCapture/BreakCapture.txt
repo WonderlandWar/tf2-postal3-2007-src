@@ -1,0 +1,20 @@
+void __thiscall CTriggerAreaCapture::BreakCapture(CTriggerAreaCapture *this, bool bNotEnoughPlayers)
+{
+  if ( this->m_bCapturing )
+  {
+    if ( this->m_nCapturingTeam == 2 )
+    {
+      COutputEvent::FireOutput(&this->m_OnBreakTeam1, this, this, 0.0);
+    }
+    else if ( this->m_nCapturingTeam == 3 )
+    {
+      COutputEvent::FireOutput(&this->m_OnBreakTeam2, this, this, 0.0);
+    }
+    COutputEvent::FireOutput(&this->m_BreakOutput, this, this, 0.0);
+    this->m_bCapturing = 0;
+    CTriggerAreaCapture::UpdateCappingTeam(this, 0);
+    if ( bNotEnoughPlayers )
+      CTriggerAreaCapture::IncrementCapAttemptNumber(this);
+    CTriggerAreaCapture::SetCapTimeRemaining(this, 0.0);
+  }
+}

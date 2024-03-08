@@ -1,0 +1,249 @@
+class CTFPlayerShared
+{
+    public void NetworkStateChanged(void * );
+    public void NetworkStateChanged();
+    public void CTFPlayerShared(class CTFPlayerShared & );
+    public void CTFPlayerShared();
+    public void Init(class CTFPlayer * );
+    public int GetState();
+    public void SetState(int );
+    public bool InState(int );
+    public int GetCond();
+    public void SetCond(int );
+    public void AddCond(int ,float );
+    public void RemoveCond(int );
+    public bool InCond(int );
+    public void RemoveAllCond(class CTFPlayer * );
+    public void OnConditionAdded(int );
+    public void OnConditionRemoved(int );
+    public void ConditionThink();
+    public float GetConditionDuration(int );
+    public void ConditionGameRulesThink();
+    public void InvisibilityThink();
+    public int GetMaxBuffedHealth();
+    public void Disguise(int ,int );
+    public void CompleteDisguise();
+    public void RemoveDisguise();
+    public void FindDisguiseTarget();
+    public int GetDisguiseTeam();
+    public int GetDisguiseClass();
+    public int GetDesiredDisguiseClass();
+    public int GetDesiredDisguiseTeam();
+    public class CHandle<CBaseEntity> GetDisguiseTarget();
+    public int GetDisguiseHealth();
+    public void SetDisguiseHealth(int );
+    public void Heal(class CTFPlayer * ,float ,bool );
+    public void StopHealing(class CTFPlayer * );
+    public void RecalculateInvuln(bool );
+    public int FindHealerIndex(class CTFPlayer * );
+    public class CHandle<CBaseEntity> GetFirstHealer();
+    public int GetNumHealers();
+    public void Burn(class CTFPlayer * );
+    public class CTFWeaponBase * GetActiveTFWeapon();
+    public bool IsAlly(class CBaseEntity * );
+    public bool IsSeparationEnabled();
+    public void SetSeparation(bool );
+    public class Vector & GetSeparationVelocity();
+    public void SetSeparationVelocity(class Vector & );
+    public void FadeInvis(float );
+    public float GetPercentInvisible();
+    public void NoteLastDamageTime(int );
+    public void OnSpyTouchedByEnemy();
+    public float GetLastStealthExposedTime();
+    public int GetDesiredPlayerClassIndex();
+    public float GetSpyCloakMeter();
+    public void SetSpyCloakMeter(float );
+    public bool IsJumping();
+    public void SetJumping(bool );
+    public bool IsAirDashing();
+    public void SetAirDash(bool );
+    public void DebugPrintConditions();
+    public float GetStealthNoAttackExpireTime();
+    public bool IsInvulnerableFading();
+    public void SetPlayerDominated(int ,bool );
+    public bool IsPlayerDominated(int );
+    public void SetPlayerPushTime(int ,float );
+    public float GetPlayerPushTime(int );
+    private void ImpactWaterTrace(class CGameTrace & ,class Vector & );
+    private void OnAddStealthed();
+    private void OnAddInvulnerable();
+    private void OnAddTeleported();
+    private void OnAddBurning();
+    private void OnAddDisguising();
+    private void OnAddDisguised();
+    private void OnRemoveZoomed();
+    private void OnRemoveBurning();
+    private void OnRemoveStealthed();
+    private void OnRemoveDisguised();
+    private void OnRemoveDisguising();
+    private void OnRemoveInvulnerable();
+    private void OnRemoveTeleported();
+    private float GetCritMult();
+    private void UpdateCritMult();
+    private void RecordDamageEvent(class CTakeDamageInfo & ,bool );
+    private void ClearDamageEvents();
+    private int GetNumKillsInTime(float );
+    private bool IsProvidingInvuln(class CTFPlayer * );
+    private void SetInvulnerable(bool ,bool );
+    class NetworkVar_m_nPlayerState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nPlayerState> m_nPlayerState;
+    class NetworkVar_m_nPlayerCond
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nPlayerCond> m_nPlayerCond;
+    private float m_flCondExpireTimeLeft[14];
+    class NetworkVar_m_nDisguiseTeam
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDisguiseTeam> m_nDisguiseTeam;
+    class NetworkVar_m_nDisguiseClass
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDisguiseClass> m_nDisguiseClass;
+    class NetworkVar_m_hDisguiseTarget
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<CHandle<CBaseEntity>,CTFPlayerShared::NetworkVar_m_hDisguiseTarget> m_hDisguiseTarget;
+    class NetworkVar_m_iDisguiseHealth
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDisguiseHealth> m_iDisguiseHealth;
+    class NetworkVar_m_nDesiredDisguiseClass
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseClass> m_nDesiredDisguiseClass;
+    class NetworkVar_m_nDesiredDisguiseTeam
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseTeam> m_nDesiredDisguiseTeam;
+    class NetworkVar_m_bEnableSeparation
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CTFPlayerShared::NetworkVar_m_bEnableSeparation> m_bEnableSeparation;
+    class NetworkVar_m_vSeparationVelocity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity> m_vSeparationVelocity;
+    private float m_flInvisibility;
+    class NetworkVar_m_flInvisChangeCompleteTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeCompleteTime> m_flInvisChangeCompleteTime;
+    class NetworkVar_m_flInvisChangeTotalTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeTotalTime> m_flInvisChangeTotalTime;
+    class NetworkVar_m_flLastStealthExposeTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flLastStealthExposeTime> m_flLastStealthExposeTime;
+    class NetworkVar_m_nNumHealers
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nNumHealers> m_nNumHealers;
+    private class CTFPlayer * m_pOuter;
+    struct healers_t
+    {
+        class CHandle<CBaseEntity> pPlayer;
+        float flAmount;
+        bool bDispenserHeal;
+        void healers_t(struct CTFPlayerShared::healers_t & );
+        void healers_t();
+    };
+    private class CUtlVector<CTFPlayerShared::healers_t,CUtlMemory<CTFPlayerShared::healers_t,int> > m_aHealers;
+    private float m_flHealFraction;
+    private float m_flDisguiseHealFraction;
+    private class CHandle<CTFPlayer> m_hBurnAttacker;
+    class NetworkVar_m_nNumFlames
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nNumFlames> m_nNumFlames;
+    private float m_flFlameBurnTime;
+    private float m_flFlameRemoveTime;
+    private float m_flTauntRemoveTime;
+    class NetworkVar_m_flInvulnerableOffTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvulnerableOffTime> m_flInvulnerableOffTime;
+    private float m_flDisguiseCompleteTime;
+    private int m_nOldConditions;
+    private int m_nOldDisguiseClass;
+    class NetworkVar_m_iDesiredPlayerClass
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDesiredPlayerClass> m_iDesiredPlayerClass;
+    private float m_flNextBurningSound;
+    class NetworkVar_m_flCloakMeter
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flCloakMeter> m_flCloakMeter;
+    class NetworkVar_m_bJumping
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CTFPlayerShared::NetworkVar_m_bJumping> m_bJumping;
+    class NetworkVar_m_bAirDash
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CTFPlayerShared::NetworkVar_m_bAirDash> m_bAirDash;
+    class NetworkVar_m_flStealthNoAttackExpire
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flStealthNoAttackExpire> m_flStealthNoAttackExpire;
+    class NetworkVar_m_flCritMult
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flCritMult> m_flCritMult;
+    class NetworkVar_m_bPlayerDominated
+    {
+        public bool & operator[](int );
+        public bool & Get(int );
+        public bool & GetForModify(int );
+        public void Set(int ,bool & );
+        public bool * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected bool m_Value[33];
+    };
+    private class CTFPlayerShared::NetworkVar_m_bPlayerDominated m_bPlayerDominated;
+    class NetworkVar_m_flPlayerPushTime
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[33];
+    };
+    private class CTFPlayerShared::NetworkVar_m_flPlayerPushTime m_flPlayerPushTime;
+    private float m_flNextCritUpdate;
+    private class CUtlVector<CTFDamageEvent,CUtlMemory<CTFDamageEvent,int> > m_DamageEvents;
+    public void ~CTFPlayerShared();
+    public class CTFPlayerShared & operator=(class CTFPlayerShared & );
+    public void * __vecDelDtor(unsigned int );
+};

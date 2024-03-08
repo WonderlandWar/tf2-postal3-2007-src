@@ -1,0 +1,103 @@
+void __thiscall CCaptureFlag::ResetMessage(CCaptureFlag *this)
+{
+  int m_Value; // eax
+  int k; // edi
+  int v4; // eax
+  int v5; // eax
+  int v6; // eax
+  int i; // edi
+  CTFTeamManager *v8; // eax
+  CTFTeamManager *v9; // eax
+  int v10; // eax
+  int j; // edi
+  CTFTeamManager *v12; // eax
+  int v13; // eax
+  unsigned int m_Index; // eax
+  unsigned int v15; // eax
+  CBaseEntity *m_pEntity; // ecx
+  const char *v17; // [esp-4h] [ebp-58h]
+  float soundtime; // [esp+4h] [ebp-50h]
+  CTeamRecipientFilter v19; // [esp+14h] [ebp-40h] BYREF
+  CPASAttenuationFilter v20; // [esp+34h] [ebp-20h] BYREF
+
+  m_Value = this->m_nGameType.m_Value;
+  if ( m_Value )
+  {
+    if ( m_Value == 1 )
+    {
+      for ( i = 2; i < 4; ++i )
+      {
+        if ( i == CBaseEntity::GetTeamNumber(this) )
+        {
+          v8 = TFTeamMgr();
+          CTFTeamManager::TeamCenterPrint(v8, i, "#TF_AD_FlagReturned", 0, 0, 0, 0);
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&v20, i, 1);
+          soundtime = 0.0;
+          v17 = "AttackDefend.TeamReturned";
+        }
+        else
+        {
+          v9 = TFTeamMgr();
+          CTFTeamManager::TeamCenterPrint(v9, i, "#TF_AD_FlagReturned", 0, 0, 0, 0);
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&v20, i, 1);
+          soundtime = 0.0;
+          v17 = "AttackDefend.EnemyReturned";
+        }
+        v10 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound(&v20, v10, v17, 0, soundtime, 0);
+        CRecipientFilter::~CRecipientFilter(&v20);
+      }
+    }
+    else if ( m_Value == 3 )
+    {
+      for ( j = 2; j < 4; ++j )
+      {
+        v12 = TFTeamMgr();
+        CTFTeamManager::TeamCenterPrint(v12, j, "#TF_Invade_FlagReturned", 0, 0, 0, 0);
+        CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&v20, j, 1);
+        v13 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound(&v20, v13, "Invade.FlagReturned", 0, 0.0, 0);
+        CRecipientFilter::~CRecipientFilter(&v20);
+      }
+    }
+  }
+  else
+  {
+    for ( k = 2; k < 4; ++k )
+    {
+      if ( k == CBaseEntity::GetTeamNumber(this) )
+      {
+        CTeamRecipientFilter::CTeamRecipientFilter(&v19, k, 1);
+        v4 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound(&v19, v4, "CaptureFlag.EnemyReturned", 0, 0.0, 0);
+        CTFGameRules::SendHudNotification((CTFGameRules *)g_pGameRules, &v19, HUD_NOTIFY_YOUR_FLAG_RETURNED);
+      }
+      else
+      {
+        CTeamRecipientFilter::CTeamRecipientFilter(&v19, k, 1);
+        v5 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound(&v19, v5, "CaptureFlag.TeamReturned", 0, 0.0, 0);
+        CTFGameRules::SendHudNotification((CTFGameRules *)g_pGameRules, &v19, HUD_NOTIFY_ENEMY_FLAG_RETURNED);
+      }
+      CRecipientFilter::~CRecipientFilter(&v19);
+    }
+    CPASAttenuationFilter::CPASAttenuationFilter(&v20, this, "CaptureFlag.FlagSpawn");
+    v6 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+    CBaseEntity::EmitSound(&v20, v6, "CaptureFlag.FlagSpawn", 0, 0.0, 0);
+    CRecipientFilter::~CRecipientFilter(&v20);
+  }
+  COutputEvent::FireOutput(&this->m_outputOnReturn, this, this, 0.0);
+  m_Index = this->m_hReturnIcon.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_pEntity )
+  {
+    v15 = this->m_hReturnIcon.m_Index;
+    if ( v15 == -1 || g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_SerialNumber != v15 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_pEntity;
+    UTIL_Remove(m_pEntity);
+    this->m_hReturnIcon.m_Index = -1;
+  }
+}

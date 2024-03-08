@@ -1,0 +1,21 @@
+void __thiscall CTriggerAreaCapture::ForceOwner(CTriggerAreaCapture *this, int team)
+{
+  unsigned int m_Index; // eax
+  unsigned int v4; // esi
+
+  CTriggerAreaCapture::BreakCapture(this, 0);
+  CTriggerAreaCapture::HandleRespawnTimeAdjustments(this, this->m_nOwningTeam, team);
+  this->m_nOwningTeam = team;
+  CTriggerAreaCapture::UpdateOwningTeam(this);
+  m_Index = this->m_hPoint.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+  {
+    v4 = this->m_hPoint.m_Index;
+    if ( v4 == -1 || g_pEntityList->m_EntPtrArray[v4 & 0xFFF].m_SerialNumber != v4 >> 12 )
+      CTeamControlPoint::ForceOwner(0, team);
+    else
+      CTeamControlPoint::ForceOwner((CTeamControlPoint *)g_pEntityList->m_EntPtrArray[v4 & 0xFFF].m_pEntity, team);
+  }
+}

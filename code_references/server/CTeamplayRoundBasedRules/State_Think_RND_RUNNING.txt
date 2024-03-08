@@ -1,0 +1,58 @@
+void __thiscall CTeamplayRoundBasedRules::State_Think_RND_RUNNING(CTeamplayRoundBasedRules *this)
+{
+  int v2; // esi
+  int v3; // ecx
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  if ( CTeamplayRoundBasedRules::CountActivePlayers(this) > 0 )
+  {
+    CTeamplayRoundBasedRules::CheckRespawnWaves(this);
+    if ( this->m_flRestartRoundTime.m_Value > 0.0 && gpGlobals->curtime > (double)this->m_flRestartRoundTime.m_Value )
+    {
+      CTeamplayRoundBasedRules::State_Transition(this, GR_STATE_RESTART);
+      val = -1.0;
+      CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flRestartRoundTime>::Set(
+        (CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flMapResetTime> *)&this->m_flRestartRoundTime,
+        &val);
+    }
+    if ( this->m_bAwaitingReadyRestart.m_Value )
+    {
+      v2 = 2;
+      if ( GetNumberOfTeams() <= 2 )
+      {
+LABEL_10:
+        val = gpGlobals->curtime + 5.0;
+        CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flRestartRoundTime>::Set(
+          (CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flMapResetTime> *)&this->m_flRestartRoundTime,
+          &val);
+        if ( this->m_bAwaitingReadyRestart.m_Value )
+        {
+          v3 = 1;
+          if ( !this->m_bAwaitingReadyRestart.m_Value )
+            v3 = -1;
+        }
+        else
+        {
+          v3 = 0;
+        }
+        if ( v3 )
+        {
+          CGameRulesProxy::NotifyNetworkStateChanged();
+          this->m_bAwaitingReadyRestart.m_Value = 0;
+        }
+      }
+      else
+      {
+        while ( this->m_bTeamReady[v2] )
+        {
+          if ( ++v2 >= GetNumberOfTeams() )
+            goto LABEL_10;
+        }
+      }
+    }
+  }
+  else
+  {
+    CTeamplayRoundBasedRules::State_Transition(this, GR_STATE_PREGAME);
+  }
+}

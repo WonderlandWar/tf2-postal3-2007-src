@@ -1,0 +1,51 @@
+bool __thiscall CObjectTeleporter::IsMatchingTeleporterReady(CObjectTeleporter *this)
+{
+  unsigned int m_Index; // eax
+  CBaseEntityList *v3; // edx
+  CEntInfo *v4; // ecx
+  CObjectTeleporter *Match; // eax
+  unsigned int v6; // eax
+  unsigned int v7; // eax
+  IHandleEntity *m_pEntity; // ecx
+  unsigned int v9; // eax
+  IHandleEntity *v10; // ecx
+  bool result; // al
+
+  m_Index = this->m_hMatchingTeleporter.m_Index;
+  if ( m_Index == -1
+    || (v3 = g_pEntityList,
+        v4 = &g_pEntityList->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF],
+        v4->m_SerialNumber != m_Index >> 12)
+    || !v4->m_pEntity )
+  {
+    Match = CObjectTeleporter::FindMatch(this);
+    if ( Match )
+      this->m_hMatchingTeleporter.m_Index = Match->GetRefEHandle(Match)->m_Index;
+    else
+      this->m_hMatchingTeleporter.m_Index = -1;
+    v3 = g_pEntityList;
+  }
+  v6 = this->m_hMatchingTeleporter.m_Index;
+  result = 0;
+  if ( v6 != -1
+    && v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_SerialNumber == v6 >> 12
+    && v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_pEntity )
+  {
+    v7 = this->m_hMatchingTeleporter.m_Index;
+    if ( v7 == -1 || v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_SerialNumber != v7 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_pEntity;
+    if ( m_pEntity[601].__vftable )
+    {
+      v9 = this->m_hMatchingTeleporter.m_Index;
+      if ( v9 == -1 || v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_SerialNumber != v9 >> 12 )
+        v10 = 0;
+      else
+        v10 = v3->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_pEntity;
+      if ( !LOBYTE(v10[573].__vftable) )
+        return 1;
+    }
+  }
+  return result;
+}

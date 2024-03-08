@@ -1,0 +1,115 @@
+bool __thiscall CWeaponMedigun::FindAndHealTargets(CWeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  CTFPlayer *m_pEntity; // ecx
+  IHandleEntity *v5; // ebx
+  IHandleEntity *v7; // ebp
+  unsigned int v8; // eax
+  CEntInfo *v9; // ecx
+  IHandleEntity *v10; // esi
+  int v11; // eax
+  double v12; // st7
+  double v13; // st7
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime> *p_m_flChargeLevel; // edi
+  float flAmount; // [esp+8h] [ebp-24h]
+  float flAmounta; // [esp+8h] [ebp-24h]
+  CTFPlayer *iCurrentTargets; // [esp+20h] [ebp-Ch]
+  int flNewLevel; // [esp+24h] [ebp-8h]
+  float val; // [esp+28h] [ebp-4h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+  if ( v3->m_SerialNumber != m_Index >> 12 )
+    return 0;
+  m_pEntity = (CTFPlayer *)v3->m_pEntity;
+  v5 = 0;
+  iCurrentTargets = m_pEntity;
+  if ( !m_pEntity || !m_pEntity->IsPlayer(m_pEntity) )
+    return 0;
+  flNewLevel = 0;
+  if ( this->m_hHealingTargets.m_Value[0].m_Index == -1
+    || g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber != this->m_hHealingTargets.m_Value[0].m_Index >> 12 )
+  {
+    v7 = 0;
+  }
+  else
+  {
+    v7 = g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity;
+  }
+  if ( v7 && v7->__vftable[20].GetRefEHandle(v7) )
+    CWeaponMedigun::MaintainTargetInSlot(this, 0);
+  else
+    CWeaponMedigun::FindNewTargetForSlot(this, 0);
+  v8 = this->m_hHealingTargets.m_Value[0].m_Index;
+  if ( v8 != -1 )
+  {
+    v9 = &g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF];
+    if ( g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber == v8 >> 12 )
+    {
+      v10 = v9->m_pEntity;
+      if ( v9->m_pEntity )
+      {
+        if ( v10->__vftable[20].GetRefEHandle(v9->m_pEntity) )
+        {
+          if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v10->__vftable[25].SetRefEHandle)(v10) )
+          {
+            v5 = v10;
+            if ( v7 != v10 && ((unsigned __int8 (__thiscall *)(IHandleEntity *))v10->__vftable[25].SetRefEHandle)(v10) )
+            {
+              flAmount = this->GetHealRate(this);
+              CTFPlayerShared::Heal((CTFPlayerShared *)&v10[948], iCurrentTargets, flAmount, 0);
+            }
+            CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&v10[948], 0);
+          }
+          if ( 0.0 != this->m_flReleaseStartedAt && gpGlobals->curtime + 0.2 > this->m_flReleaseStartedAt )
+          {
+            flAmounta = (float)(int)v10[34].__vftable;
+            ((void (__thiscall *)(IHandleEntity *, _DWORD, _DWORD))v10->__vftable[20].SetRefEHandle)(
+              v10,
+              LODWORD(flAmounta),
+              0);
+          }
+          flNewLevel = 1;
+          if ( !this->m_bChargeRelease.m_Value )
+          {
+            if ( v5 )
+            {
+              val = COERCE_FLOAT(CTFPlayerShared::GetMaxBuffedHealth((CTFPlayerShared *)&v5[948]));
+              v11 = (int)floor((double)SLODWORD(val) * 0.95);
+              if ( 0.0 != weapon_medigun_charge_rate.m_pParent->m_fValue )
+              {
+                v12 = gpGlobals->frametime / weapon_medigun_charge_rate.m_pParent->m_fValue;
+                if ( (int)v10[35].__vftable >= v11 )
+                  v12 = v12 * 0.5;
+                val = *(float *)&v5[979].__vftable;
+                if ( SLODWORD(val) > 1 )
+                  v12 = v12 / (double)SLODWORD(val);
+                v13 = v12 + this->m_flChargeLevel.m_Value;
+                p_m_flChargeLevel = (CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime> *)&this->m_flChargeLevel;
+                if ( v13 >= 1.0 )
+                  v13 = 1.0;
+                val = v13;
+                if ( v13 >= 1.0 && p_m_flChargeLevel->m_Value < 1.0 )
+                {
+                  iCurrentTargets->SpeakConceptIfAllowed(iCurrentTargets, 36, 0, 0, 0, 0);
+                  ((void (__thiscall *)(IHandleEntity *, int, _DWORD, _DWORD, _DWORD, _DWORD))v5->__vftable[131].SetRefEHandle)(
+                    v5,
+                    53,
+                    0,
+                    0,
+                    0,
+                    0);
+                }
+                CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(p_m_flChargeLevel, &val);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return flNewLevel > 0;
+}

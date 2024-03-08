@@ -1,0 +1,41 @@
+void __thiscall CTriggerAreaCapture::SetCapTimeRemaining(CTriggerAreaCapture *this, float flTime)
+{
+  double v2; // st7
+  int m_nCapturingTeam; // eax
+  double v5; // st6
+  double v6; // st7
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // eax
+  unsigned int v9; // eax
+  unsigned int v10; // eax
+  float v11; // [esp+0h] [ebp-8h]
+
+  v2 = flTime;
+  m_nCapturingTeam = this->m_nCapturingTeam;
+  this->m_fTimeRemaining = flTime;
+  v5 = 0.0;
+  if ( m_nCapturingTeam && (v5 = v2 / this->m_flCapTime, mp_capstyle.m_pParent->m_nValue == 1) )
+    v6 = v2
+       / ((double)this->m_TeamData.m_Memory.m_pMemory[m_nCapturingTeam].iNumRequiredToCap
+        * (this->m_flCapTime + this->m_flCapTime));
+  else
+    v6 = v5;
+  m_Index = this->m_hPoint.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+  v11 = v6;
+  CBaseTeamObjectiveResource::SetCPCapPercentage(g_pObjectiveResource, (int)m_pEntity[343].__vftable, v11);
+  v9 = this->m_hPoint.m_Index;
+  if ( v9 != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == v9 >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+  {
+    v10 = this->m_hPoint.m_Index;
+    if ( v10 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v10 >> 12 )
+      CTeamControlPoint::UpdateCapPercentage(0);
+    else
+      CTeamControlPoint::UpdateCapPercentage((CTeamControlPoint *)g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity);
+  }
+}

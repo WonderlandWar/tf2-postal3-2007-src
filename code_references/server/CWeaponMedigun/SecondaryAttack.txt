@@ -1,0 +1,82 @@
+void __thiscall CWeaponMedigun::SecondaryAttack(CWeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  CTFPlayer *m_pEntity; // esi
+  unsigned int v5; // eax
+  CWeaponMedigun::NetworkVar_m_hHealingTargets *p_m_hHealingTargets; // esi
+  IHandleEntity *v7; // ecx
+  CBaseEntity *v8; // eax
+  CBasePlayer *v9; // esi
+  CSingleUserRecipientFilter filter; // [esp+10h] [ebp-24h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (CTFPlayer *)v3->m_pEntity;
+      if ( v3->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((CBaseEntity *)v3->m_pEntity)
+          && CTFWeaponBase::CanAttack(this)
+          && this->m_flChargeLevel.m_Value >= 1.0 )
+        {
+          if ( CTFPlayer::HasTheFlag(m_pEntity) )
+          {
+            CSingleUserRecipientFilter::CSingleUserRecipientFilter(
+              (CSingleUserRecipientFilter *)&filter.m_bReliable,
+              m_pEntity);
+            CTFGameRules::SendHudNotification(
+              (CTFGameRules *)g_pGameRules,
+              (IRecipientFilter *)&filter.m_bReliable,
+              HUD_NOTIFY_NO_INVULN_WITH_FLAG);
+            CBaseEntity::EmitSound(m_pEntity, "Player.DenyWeaponSelection", 0.0, 0);
+            CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+          }
+          else
+          {
+            HIBYTE(filter.__vftable) = 1;
+            CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bChargeRelease>::Set(
+              &this->m_bChargeRelease,
+              (const bool *)&filter.__vftable + 3);
+            this->m_flReleaseStartedAt = 0.0;
+            CTFGameStats::Event_PlayerInvulnerable(&CTF_GameStats, m_pEntity);
+            CTFPlayerShared::RecalculateInvuln(&m_pEntity->m_Shared, 0);
+            m_pEntity->SpeakConceptIfAllowed(m_pEntity, 38, 0, 0, 0, 0);
+            v5 = this->m_hHealingTargets.m_Value[0].m_Index;
+            p_m_hHealingTargets = &this->m_hHealingTargets;
+            if ( v5 != -1
+              && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber == v5 >> 12
+              && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity )
+            {
+              if ( p_m_hHealingTargets->m_Value[0].m_Index == -1
+                || g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF].m_SerialNumber != p_m_hHealingTargets->m_Value[0].m_Index >> 12 )
+              {
+                v7 = 0;
+              }
+              else
+              {
+                v7 = g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF].m_pEntity;
+              }
+              if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v7->__vftable[25].SetRefEHandle)(v7) )
+              {
+                v8 = CHandle<CBaseAnimating>::operator CBaseAnimating *(this->m_hHealingTargets.m_Value);
+                v9 = ToBaseMultiplayerPlayer(v8);
+                CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&v9[1].m_nRenderFX, 0);
+                ((void (__thiscall *)(CBasePlayer *, int, _DWORD, _DWORD, _DWORD, _DWORD))v9->__vftable[1].GetNetworkable)(
+                  v9,
+                  55,
+                  0,
+                  0,
+                  0,
+                  0);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

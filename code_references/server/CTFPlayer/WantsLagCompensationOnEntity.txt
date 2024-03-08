@@ -1,0 +1,52 @@
+bool __thiscall CTFPlayer::WantsLagCompensationOnEntity(
+        CTFPlayer *this,
+        const CBasePlayer *pPlayer,
+        const CUserCmd *pCmd,
+        const CBitVec<2048> *pEntityTransmitBits)
+{
+  int TeamNumber; // ebx
+  unsigned int v8; // eax
+  double v9; // st4
+  double v10; // st7
+  double v11; // st4
+  double v12; // st5
+  float _X; // [esp+4h] [ebp-28h]
+  Vector vDiff; // [esp+10h] [ebp-1Ch] BYREF
+  Vector vForward; // [esp+1Ch] [ebp-10h] BYREF
+  float v16; // [esp+28h] [ebp-4h]
+  float pPlayera; // [esp+30h] [ebp+4h]
+  float pEntityTransmitBitsa; // [esp+38h] [ebp+Ch]
+
+  TeamNumber = CBaseEntity::GetTeamNumber(&pPlayer->CBaseCombatCharacter);
+  if ( TeamNumber == CBaseEntity::GetTeamNumber(this)
+    && !friendlyfire.m_pParent->m_nValue
+    && (this == (CTFPlayer *)-4340 || this->m_PlayerClass.m_iClass.m_Value != 5) )
+  {
+    return 0;
+  }
+  if ( pEntityTransmitBits )
+  {
+    v8 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+    if ( ((1 << (v8 & 0x1F)) & pEntityTransmitBits->m_Ints[v8 >> 5]) == 0 )
+      return 0;
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  if ( (pPlayer->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(&pPlayer->CBaseCombatCharacter);
+  pPlayera = pPlayer->m_flMaxspeed.m_Value;
+  pEntityTransmitBitsa = sv_maxunlag.m_pParent->m_fValue;
+  v9 = pPlayer->m_vecAbsOrigin.x - this->m_vecAbsOrigin.x;
+  v10 = v9 * v9;
+  v11 = pPlayer->m_vecAbsOrigin.y - this->m_vecAbsOrigin.y;
+  v12 = pPlayer->m_vecAbsOrigin.z - this->m_vecAbsOrigin.z;
+  _X = v12 * v12 + v11 * v11 + v10;
+  if ( pPlayera * pEntityTransmitBitsa * 1.5 > pfSqrt(_X) )
+    return 1;
+  AngleVectors(&pCmd->viewangles, (Vector *)&vForward.y);
+  vDiff.y = pPlayer->m_vecAbsOrigin.x - this->m_vecAbsOrigin.x;
+  vDiff.z = pPlayer->m_vecAbsOrigin.y - this->m_vecAbsOrigin.y;
+  vForward.x = pPlayer->m_vecAbsOrigin.z - this->m_vecAbsOrigin.z;
+  pfVectorNormalize((Vector *)&vDiff.y);
+  return vDiff.y * vForward.y + v16 * vForward.x + vForward.z * vDiff.z >= 0.70710701;
+}

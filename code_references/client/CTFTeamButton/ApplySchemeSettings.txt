@@ -1,0 +1,26 @@
+void __thiscall CTFTeamButton::ApplySchemeSettings(CTFTeamButton *this, vgui::IScheme *pScheme)
+{
+  CTFTeamButton_vtbl *v3; // edi
+  Color *v4; // eax
+  CTFTeamButton_vtbl *v5; // edi
+  Color *v6; // eax
+  CTFTeamButton_vtbl *v7; // edi
+  Color *v8; // eax
+
+  CTFButton::ApplySchemeSettings(this, pScheme);
+  v3 = this->__vftable;
+  v4 = this->GetButtonFgColor(this, &pScheme);
+  ((void (__thiscall *)(CTFTeamButton *, _DWORD, _DWORD))v3->SetDefaultColor)(
+    this,
+    *v4,
+    *(_DWORD *)&this->m_clrDefaultBG);
+  v5 = this->__vftable;
+  v6 = this->GetButtonFgColor(this, &pScheme);
+  ((void (__thiscall *)(CTFTeamButton *, _DWORD, _DWORD))v5->SetArmedColor)(this, *v6, *(_DWORD *)&this->m_clrArmedBG);
+  v7 = this->__vftable;
+  v8 = this->GetButtonFgColor(this, &pScheme);
+  ((void (__thiscall *)(CTFTeamButton *, _DWORD, _DWORD))v7->SetDepressedColor)(
+    this,
+    *v8,
+    *(_DWORD *)&this->m_clrDepressedBG);
+}

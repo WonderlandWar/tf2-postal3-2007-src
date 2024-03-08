@@ -1,0 +1,51 @@
+void __thiscall CObjectSentrygun::SetModel(CObjectSentrygun *this, const char *pModel)
+{
+  int m_iPitchPoseParameter; // eax
+  int v4; // eax
+  bool v5; // zf
+  int v6; // eax
+  int v7; // edi
+  int m_iYawPoseParameter; // edi
+  float flPoseParam1; // [esp+Ch] [ebp-20h]
+  float flValue; // [esp+10h] [ebp-1Ch]
+  Vector vecMax; // [esp+14h] [ebp-18h] BYREF
+  Vector vecMin; // [esp+20h] [ebp-Ch] BYREF
+
+  flPoseParam1 = 0.0;
+  m_iPitchPoseParameter = this->m_iPitchPoseParameter;
+  flValue = 0.0;
+  if ( m_iPitchPoseParameter >= 0 )
+    flPoseParam1 = CBaseAnimating::GetPoseParameter(this, m_iPitchPoseParameter);
+  if ( this->m_iYawPoseParameter >= 0 )
+    flValue = CBaseAnimating::GetPoseParameter(this, this->m_iYawPoseParameter);
+  CBaseObject::SetModel(this, pModel);
+  vecMax.x = 20.0;
+  vecMax.y = 20.0;
+  vecMax.z = 66.0;
+  vecMin.x = -20.0;
+  vecMin.y = -20.0;
+  vecMin.z = 0.0;
+  UTIL_SetSize(this, &vecMin, &vecMax);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  v4 = CBaseAnimating::LookupPoseParameter(this, this->m_pStudioHdr, "aim_pitch");
+  v5 = this->m_pStudioHdr == 0;
+  this->m_iPitchPoseParameter = v4;
+  if ( v5 && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  v6 = CBaseAnimating::LookupPoseParameter(this, this->m_pStudioHdr, "aim_yaw");
+  v5 = this->m_pStudioHdr == 0;
+  v7 = this->m_iPitchPoseParameter;
+  this->m_iYawPoseParameter = v6;
+  if ( v5 && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, v7, flPoseParam1);
+  m_iYawPoseParameter = this->m_iYawPoseParameter;
+  if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, m_iYawPoseParameter, flValue);
+  CBaseObject::CreateBuildPoints(this);
+  CBaseObject::ReattachChildren(this);
+  CBaseAnimating::ResetSequenceInfo(this);
+}

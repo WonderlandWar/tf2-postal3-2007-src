@@ -1,0 +1,112 @@
+void __thiscall CObjectSentrygun::Attack(CObjectSentrygun *this)
+{
+  unsigned int v2; // eax
+  CBaseEntity *v3; // ecx
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  float *v6; // eax
+  float v7; // ecx
+  float v8; // edx
+  float v9; // eax
+  double v10; // st7
+  double y; // st6
+  double v12; // st5
+  double v13; // st5
+  double v14; // rt1
+  double v15; // st5
+  double v16; // st4
+  double v17; // st6
+  double v18; // st5
+  double v19; // st7
+  float _X; // [esp+4h] [ebp-3Ch]
+  QAngle angToTarget; // [esp+Ch] [ebp-34h] BYREF
+  Vector vecMidEnemy; // [esp+18h] [ebp-28h]
+  Vector vecMid; // [esp+24h] [ebp-1Ch] BYREF
+  Vector vecDirToEnemy; // [esp+30h] [ebp-10h] BYREF
+  float v25; // [esp+3Ch] [ebp-4h]
+
+  this->StudioFrameAdvance(this);
+  CObjectSentrygun::FindTarget(this, (int)this);
+  if ( this->m_bDisabled.m_Value
+    || ((v2 = this->m_hEnemy.m_Index, v2 == -1)
+     || g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_SerialNumber != v2 >> 12
+      ? (v3 = 0)
+      : (v3 = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_pEntity),
+        !CObjectSentrygun::ValidTarget(this, v3)) )
+  {
+    LODWORD(angToTarget.x) = 1;
+    CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(&this->m_iState, (const int *)&angToTarget);
+    this->m_hEnemy.m_Index = -1;
+  }
+  else
+  {
+    this->EyePosition(this, (Vector *)&vecMid.y);
+    m_Index = this->m_hEnemy.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_pEntity;
+    v6 = (float *)m_pEntity->__vftable[45].GetRefEHandle(m_pEntity);
+    v7 = *v6;
+    v8 = v6[1];
+    v9 = v6[2];
+    vecMidEnemy.y = v7;
+    vecMidEnemy.z = v8;
+    vecMid.x = v9;
+    vecDirToEnemy.y = v7 - vecMid.y;
+    vecDirToEnemy.z = v8 - vecMid.z;
+    v25 = v9 - vecDirToEnemy.x;
+    VectorAngles((Vector *)&vecDirToEnemy.y, (QAngle *)&angToTarget.y);
+    LODWORD(angToTarget.x) = (unsigned __int16)(int)(angToTarget.z * 182.04445);
+    v10 = (double)SLODWORD(angToTarget.x) * 0.0054931641;
+    angToTarget.z = v10;
+    y = angToTarget.y;
+    v12 = 360.0;
+    if ( angToTarget.y < -180.0 )
+    {
+      v13 = y + 360.0;
+      angToTarget.y = v13;
+      v14 = v13;
+      v12 = 360.0;
+      y = v14;
+    }
+    if ( y > 180.0 )
+    {
+      y = y - v12;
+      angToTarget.y = y;
+    }
+    if ( y <= 50.0 )
+    {
+      if ( y < -50.0 )
+      {
+        y = -50.0;
+        angToTarget.y = -50.0;
+      }
+    }
+    else
+    {
+      y = 50.0;
+      angToTarget.y = 50.0;
+    }
+    this->m_vecGoalAngles.y = v10;
+    this->m_vecGoalAngles.x = y;
+    CObjectSentrygun::MoveTurret(this);
+    if ( gpGlobals->curtime >= (double)this->m_flNextAttack )
+    {
+      v15 = this->m_vecGoalAngles.z - this->m_vecCurAngles.z;
+      v16 = this->m_vecGoalAngles.y - this->m_vecCurAngles.y;
+      v17 = v16 * v16 + v15 * v15;
+      v18 = this->m_vecGoalAngles.x - this->m_vecCurAngles.x;
+      _X = v18 * v18 + v17;
+      if ( pfSqrt(_X) <= 10.0 )
+      {
+        CObjectSentrygun::Fire(this);
+        if ( this->m_iUpgradeLevel.m_Value == 1 )
+          v19 = gpGlobals->curtime + 0.2;
+        else
+          v19 = gpGlobals->curtime + 0.1;
+        this->m_flNextAttack = v19;
+      }
+    }
+  }
+}

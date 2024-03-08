@@ -1,0 +1,351 @@
+class CBaseAnimating : public CBaseEntity
+{
+    public void CBaseAnimating(class CBaseAnimating & );
+    public void CBaseAnimating();
+    public void ~CBaseAnimating();
+    enum _unnamed_18960
+    {
+        NUM_POSEPAREMETERS=24,
+        NUM_BONECTRLS=4
+    };
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void SetModel(char * );
+    public void Activate();
+    public void Spawn();
+    public void SetTransmit(class CCheckTransmitInfo * ,bool );
+    public int Restore(class IRestore & );
+    public void OnRestore();
+    public class CStudioHdr * GetModelPtr();
+    public class CBaseAnimating * GetBaseAnimating();
+    public void SetCycle(float );
+    public float GetCycle();
+    public float GetAnimTimeInterval();
+    public void UseClientSideAnimation();
+    public bool IsUsingClientSideAnimation();
+    public float GetIdealSpeed();
+    public float GetIdealAccel();
+    public void StudioFrameAdvance();
+    public void StudioFrameAdvanceManual(float );
+    public bool IsValidSequence(int );
+    public float GetPlaybackRate();
+    public void SetPlaybackRate(float );
+    public int GetSequence();
+    public void SetSequence(int );
+    public void ResetSequence(int );
+    public bool IsActivityFinished();
+    public bool IsSequenceFinished();
+    public bool SequenceLoops();
+    public bool IsSequenceLooping(int );
+    public bool IsSequenceLooping(class CStudioHdr * ,int );
+    public float SequenceDuration(int );
+    public float SequenceDuration(class CStudioHdr * ,int );
+    public float SequenceDuration();
+    public float GetSequenceCycleRate(int );
+    public float GetSequenceCycleRate(class CStudioHdr * ,int );
+    public float GetLastVisibleCycle(class CStudioHdr * ,int );
+    public float GetSequenceGroundSpeed(int );
+    public float GetSequenceGroundSpeed(class CStudioHdr * ,int );
+    public void ResetActivityIndexes();
+    public void ResetEventIndexes();
+    public int SelectWeightedSequence(enum Activity ,int );
+    public int SelectWeightedSequence(enum Activity );
+    public int SelectHeaviestSequence(enum Activity );
+    public int LookupActivity(char * );
+    public int LookupSequence(char * );
+    public class KeyValues * GetSequenceKeyValues(int );
+    public float GetSequenceMoveYaw(int );
+    public float GetSequenceMoveDist(int );
+    public float GetSequenceMoveDist(class CStudioHdr * ,int );
+    public void GetSequenceLinearMotion(int ,class Vector * );
+    public char * GetSequenceName(int );
+    public char * GetSequenceActivityName(int );
+    public enum Activity GetSequenceActivity(int );
+    public void ResetSequenceInfo();
+    public void StopAnimation();
+    public void ClampRagdollForce(class Vector & ,class Vector * );
+    public bool BecomeRagdollOnClient(class Vector & );
+    public bool IsRagdoll();
+    public bool CanBecomeRagdoll();
+    public void GetSkeleton(class CStudioHdr * ,class Vector * ,class Quaternion * ,int );
+    public void GetBoneTransform(int ,struct matrix3x4_t & );
+    public void SetupBones(struct matrix3x4_t * ,int );
+    public void CalculateIKLocks(float );
+    public void Teleport(class Vector * ,class QAngle * ,class Vector * );
+    public bool HasAnimEvent(int ,int );
+    public void DispatchAnimEvents(class CBaseAnimating * );
+    public void HandleAnimEvent(struct animevent_t * );
+    public int LookupPoseParameter(char * );
+    public int LookupPoseParameter(class CStudioHdr * ,char * );
+    public float SetPoseParameter(int ,float );
+    public float SetPoseParameter(class CStudioHdr * ,int ,float );
+    public float SetPoseParameter(char * ,float );
+    public float SetPoseParameter(class CStudioHdr * ,char * ,float );
+    public float GetPoseParameter(int );
+    public float GetPoseParameter(char * );
+    public bool GetPoseParameterRange(int ,float & ,float & );
+    public bool HasPoseParameter(int ,int );
+    public bool HasPoseParameter(int ,char * );
+    public float EdgeLimitPoseParameter(int ,float ,float );
+    protected void PopulatePoseParameters();
+    public int LookupBone(char * );
+    public void GetBonePosition(int ,class Vector & ,class QAngle & );
+    public void GetBonePosition(char * ,class Vector & ,class QAngle & );
+    public int GetPhysicsBone(int );
+    public int GetNumBones();
+    public int FindTransitionSequence(int ,int ,int * );
+    public bool GotoSequence(int ,float ,float ,int ,int & ,float & ,int & );
+    public int GetEntryNode(int );
+    public int GetExitNode(int );
+    public void GetEyeballs(class Vector & ,class QAngle & );
+    public int LookupAttachment(char * );
+    public bool GetAttachment(int ,class Vector & ,class Vector * ,class Vector * ,class Vector * );
+    public bool GetAttachment(char * ,class Vector & ,class Vector * ,class Vector * ,class Vector * );
+    public bool GetAttachment(int ,struct matrix3x4_t & );
+    public bool GetAttachment(int ,class Vector & ,class QAngle & );
+    public bool GetAttachment(char * ,class Vector & ,class QAngle & );
+    public int GetAttachmentBone(int );
+    public bool GetAttachmentLocal(int ,struct matrix3x4_t & );
+    public bool GetAttachmentLocal(int ,class Vector & ,class QAngle & );
+    public bool GetAttachmentLocal(char * ,class Vector & ,class QAngle & );
+    public void SetBodygroup(int ,int );
+    public int GetBodygroup(int );
+    public char * GetBodygroupName(int );
+    public int FindBodygroupByName(char * );
+    public int GetBodygroupCount(int );
+    public int GetNumBodyGroups();
+    public void SetHitboxSet(int );
+    public void SetHitboxSetByName(char * );
+    public int GetHitboxSet();
+    public char * GetHitboxSetName();
+    public int GetHitboxSetCount();
+    public int GetHitboxBone(int );
+    public bool LookupHitbox(char * ,int & ,int & );
+    public bool ComputeHitboxSurroundingBox(class Vector * ,class Vector * );
+    public bool ComputeEntitySpaceHitboxSurroundingBox(class Vector * ,class Vector * );
+    public void CopyAnimationDataFrom(class CBaseAnimating * );
+    public int ExtractBbox(int ,class Vector & ,class Vector & );
+    public void SetSequenceBox();
+    public int RegisterPrivateActivity(char * );
+    public void ResetClientsideFrame();
+    public void InitBoneControllers();
+    public float GetBoneController(int );
+    public float SetBoneController(int ,float );
+    public void GetVelocity(class Vector * ,class Vector * );
+    public enum LocalFlexController_t GetNumFlexControllers();
+    public char * GetFlexDescFacs(int );
+    public char * GetFlexControllerName(enum LocalFlexController_t );
+    public char * GetFlexControllerType(enum LocalFlexController_t );
+    public class Vector GetGroundSpeedVelocity();
+    public bool GetIntervalMovement(float ,bool & ,class Vector & ,class QAngle & );
+    public bool GetSequenceMovement(int ,float ,float ,class Vector & ,class QAngle & );
+    public float GetInstantaneousVelocity(float );
+    public float GetEntryVelocity(int );
+    public float GetExitVelocity(int );
+    public float GetMovementFrame(float );
+    public bool HasMovement(int );
+    public void ReportMissingActivity(int );
+    public bool TestCollision(struct Ray_t & ,unsigned int ,class CGameTrace & );
+    public bool TestHitboxes(struct Ray_t & ,unsigned int ,class CGameTrace & );
+    public class CBoneCache * GetBoneCache();
+    public void InvalidateBoneCache();
+    public void InvalidateBoneCacheIfOlderThan(float );
+    public int DrawDebugTextOverlays();
+    public void DrawServerHitboxes(float ,bool );
+    public void DrawRawSkeleton(struct matrix3x4_t * ,int ,bool ,float ,bool );
+    public void SetModelWidthScale(float ,float );
+    public float GetModelWidthScale();
+    public void UpdateModelWidthScale();
+    public void EnableServerIK();
+    public void DisableServerIK();
+    public int GetHitboxesFrontside(int * ,int ,class Vector & ,float );
+    public void GetInputDispatchEffectPosition(char * ,class Vector & ,class QAngle & );
+    public void ModifyOrAppendCriteria(class AI_CriteriaSet & );
+    public void DoMuzzleFlash();
+    public void Ignite(float ,bool ,float ,bool );
+    public void IgniteLifetime(float );
+    public void IgniteNumHitboxFires(int );
+    public void IgniteHitboxFireScale(float );
+    public void Extinguish();
+    public bool IsOnFire();
+    public void Scorch(int ,int );
+    public void InputIgnite(struct inputdata_t & );
+    public void InputIgniteLifetime(struct inputdata_t & );
+    public void InputIgniteNumHitboxFires(struct inputdata_t & );
+    public void InputIgniteHitboxFireScale(struct inputdata_t & );
+    public void InputBecomeRagdoll(struct inputdata_t & );
+    public bool Dissolve(char * ,float ,bool ,int ,class Vector ,int );
+    public bool IsDissolving();
+    public void TransferDissolveFrom(class CBaseAnimating * );
+    public float m_flGroundSpeed;
+    public float m_flLastEventCheck;
+    public void SetLightingOriginRelative(struct string_t );
+    public void SetLightingOriginRelative(class CBaseEntity * );
+    public class CBaseEntity * GetLightingOriginRelative();
+    public void SetLightingOrigin(struct string_t );
+    public void SetLightingOrigin(class CBaseEntity * );
+    public class CBaseEntity * GetLightingOrigin();
+    public float * GetPoseParameterArray();
+    public float * GetEncodedControllerArray();
+    public void BuildMatricesWithBoneMerge(class CStudioHdr * ,class QAngle & ,class Vector & ,class Vector * ,class Quaternion * ,struct matrix3x4_t * ,class CBaseAnimating * ,class CBoneCache * );
+    public void SetFadeDistance(float ,float );
+    public int GetBoneCacheFlags();
+    public void SetBoneCacheFlags(unsigned int );
+    public void ClearBoneCacheFlags(unsigned int );
+    public bool PrefetchSequence(int );
+    private void LockStudioHdr();
+    private void UnlockStudioHdr();
+    private void StudioFrameAdvanceInternal(class CStudioHdr * ,float );
+    private void InputSetLightingOriginRelative(struct inputdata_t & );
+    private void InputSetLightingOrigin(struct inputdata_t & );
+    private bool CanSkipAnimation();
+    class NetworkVar_m_nForceBone
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nForceBone> m_nForceBone;
+    class NetworkVar_m_vecForce
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVectorBase<Vector,CBaseAnimating::NetworkVar_m_vecForce> m_vecForce;
+    class NetworkVar_m_nSkin
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nSkin> m_nSkin;
+    class NetworkVar_m_nBody
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nBody> m_nBody;
+    class NetworkVar_m_nHitboxSet
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nHitboxSet> m_nHitboxSet;
+    class NetworkVar_m_flModelWidthScale
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_flModelWidthScale> m_flModelWidthScale;
+    class NetworkVar_m_flPlaybackRate
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_flPlaybackRate> m_flPlaybackRate;
+    public void InitStepHeightAdjust();
+    public void SetIKGroundContactInfo(float ,float );
+    public void UpdateStepOrigin();
+    protected float m_flIKGroundContactTime;
+    protected float m_flIKGroundMinHeight;
+    protected float m_flIKGroundMaxHeight;
+    protected float m_flEstIkFloor;
+    protected float m_flEstIkOffset;
+    protected class CIKContext * m_pIk;
+    protected int m_iIKCounter;
+    public class Vector GetStepOrigin();
+    public class QAngle GetStepAngles();
+    private bool m_bSequenceFinished;
+    private bool m_bSequenceLoops;
+    private float m_flDissolveStartTime;
+    class NetworkVar_m_flCycle
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_flCycle> m_flCycle;
+    class NetworkVar_m_nSequence
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nSequence> m_nSequence;
+    class NetworkVar_m_flPoseParameter
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[24];
+    };
+    private class CBaseAnimating::NetworkVar_m_flPoseParameter m_flPoseParameter;
+    class NetworkVar_m_flEncodedController
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[4];
+    };
+    private class CBaseAnimating::NetworkVar_m_flEncodedController m_flEncodedController;
+    class NetworkVar_m_bClientSideAnimation
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseAnimating::NetworkVar_m_bClientSideAnimation> m_bClientSideAnimation;
+    class NetworkVar_m_bClientSideFrameReset
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseAnimating::NetworkVar_m_bClientSideFrameReset> m_bClientSideFrameReset;
+    class NetworkVar_m_nNewSequenceParity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nNewSequenceParity> m_nNewSequenceParity;
+    class NetworkVar_m_nResetEventsParity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseAnimating::NetworkVar_m_nResetEventsParity> m_nResetEventsParity;
+    class NetworkVar_m_nMuzzleFlashParity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<unsigned char,CBaseAnimating::NetworkVar_m_nMuzzleFlashParity> m_nMuzzleFlashParity;
+    class NetworkVar_m_hLightingOrigin
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CBaseEntity,CBaseAnimating::NetworkVar_m_hLightingOrigin> m_hLightingOrigin;
+    class NetworkVar_m_hLightingOriginRelative
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CBaseEntity,CBaseAnimating::NetworkVar_m_hLightingOriginRelative> m_hLightingOriginRelative;
+    private struct string_t m_iszLightingOriginRelative;
+    private struct string_t m_iszLightingOrigin;
+    private struct memhandle_t__ * m_boneCacheHandle;
+    private unsigned int m_fBoneCacheFlags;
+    class NetworkVar_m_fadeMinDist
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_fadeMinDist> m_fadeMinDist;
+    class NetworkVar_m_fadeMaxDist
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_fadeMaxDist> m_fadeMaxDist;
+    class NetworkVar_m_flFadeScale
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_flFadeScale> m_flFadeScale;
+    public class COutputEvent m_OnIgnite;
+    private class CStudioHdr * m_pStudioHdr;
+    private class CThreadFastMutex m_StudioHdrInitLock;
+    private class CThreadFastMutex m_BoneSetupMutex;
+    public class CBaseAnimating & operator=(class CBaseAnimating & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

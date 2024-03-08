@@ -1,0 +1,131 @@
+void __thiscall CTriggerAreaCapture::InputRoundSpawn(CTriggerAreaCapture *this, inputdata_t *inputdata)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  const char *pszValue; // eax
+  CBaseEntity *EntityByName; // eax
+  void *v7; // eax
+  unsigned int v8; // eax
+  unsigned int v9; // eax
+  CTeamControlPoint *m_pEntity; // ecx
+  int v11; // edi
+  int v12; // ebx
+  unsigned int v13; // eax
+  unsigned int v14; // edx
+  CTeamControlPoint *v15; // ecx
+  unsigned int v16; // eax
+  IHandleEntity *v17; // eax
+  unsigned int v18; // eax
+  IHandleEntity *v19; // eax
+  unsigned int v20; // eax
+  unsigned int v21; // edx
+  IHandleEntity *v22; // eax
+  int v23; // eax
+  double m_flCapTime; // st7
+  IHandleEntity *v25; // ecx
+  float flTime; // [esp+0h] [ebp-10h]
+
+  m_Index = this->m_hPoint.m_Index;
+  if ( m_Index == -1
+    || (v4 = &g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF], v4->m_SerialNumber != m_Index >> 12)
+    || !v4->m_pEntity )
+  {
+    pszValue = this->m_iszCapPointName.pszValue;
+    if ( !pszValue )
+      pszValue = locale;
+    EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, pszValue, 0, 0, 0, 0);
+    v7 = __RTDynamicCast(
+           EntityByName,
+           0,
+           &CBaseEntity `RTTI Type Descriptor',
+           &CTeamControlPoint `RTTI Type Descriptor',
+           0);
+    if ( v7 )
+      this->m_hPoint.m_Index = *(_DWORD *)(*(int (__thiscall **)(void *))(*(_DWORD *)v7 + 8))(v7);
+    else
+      this->m_hPoint.m_Index = -1;
+    v8 = this->m_hPoint.m_Index;
+    if ( v8 != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == v8 >> 12
+      && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+    {
+      v9 = this->m_hPoint.m_Index;
+      if ( v9 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v9 >> 12 )
+        m_pEntity = 0;
+      else
+        m_pEntity = (CTeamControlPoint *)g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+      this->m_nOwningTeam = CTeamControlPoint::GetOwner(m_pEntity);
+      v11 = 2;
+      if ( GetNumberOfTeams() > 2 )
+      {
+        v12 = 2;
+        do
+        {
+          v13 = this->m_hPoint.m_Index;
+          if ( v13 == -1
+            || (v14 = this->m_hPoint.m_Index & 0xFFF, g_pEntityList->m_EntPtrArray[v14].m_SerialNumber != v13 >> 12) )
+          {
+            v15 = 0;
+          }
+          else
+          {
+            v15 = (CTeamControlPoint *)g_pEntityList->m_EntPtrArray[v14].m_pEntity;
+          }
+          CTeamControlPoint::SetCappersRequiredForTeam(
+            v15,
+            v11,
+            this->m_TeamData.m_Memory.m_pMemory[v12].iNumRequiredToCap);
+          v16 = this->m_hPoint.m_Index;
+          if ( v16 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v16 >> 12 )
+            v17 = 0;
+          else
+            v17 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+          CBaseTeamObjectiveResource::SetCPRequiredCappers(
+            g_pObjectiveResource,
+            (int)v17[343].__vftable,
+            v11,
+            this->m_TeamData.m_Memory.m_pMemory[v12].iNumRequiredToCap);
+          v18 = this->m_hPoint.m_Index;
+          if ( v18 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v18 >> 12 )
+            v19 = 0;
+          else
+            v19 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+          CBaseTeamObjectiveResource::SetTeamCanCap(
+            g_pObjectiveResource,
+            (int)v19[343].__vftable,
+            v11,
+            this->m_TeamData.m_Memory.m_pMemory[v12].bCanCap);
+          v20 = this->m_hPoint.m_Index;
+          if ( mp_capstyle.m_pParent->m_nValue == 1 )
+          {
+            if ( v20 == -1
+              || (v21 = this->m_hPoint.m_Index & 0xFFF, g_pEntityList->m_EntPtrArray[v21].m_SerialNumber != v20 >> 12) )
+            {
+              v22 = 0;
+            }
+            else
+            {
+              v22 = g_pEntityList->m_EntPtrArray[v21].m_pEntity;
+            }
+            v23 = (int)v22[343].__vftable;
+            m_flCapTime = (double)this->m_TeamData.m_Memory.m_pMemory[v12].iNumRequiredToCap
+                        * (this->m_flCapTime + this->m_flCapTime);
+          }
+          else
+          {
+            if ( v20 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v20 >> 12 )
+              v25 = 0;
+            else
+              v25 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+            m_flCapTime = this->m_flCapTime;
+            v23 = (int)v25[343].__vftable;
+          }
+          flTime = m_flCapTime;
+          CBaseTeamObjectiveResource::SetCPCapTime(g_pObjectiveResource, v23, v11++, flTime);
+          ++v12;
+        }
+        while ( v11 < GetNumberOfTeams() );
+      }
+    }
+  }
+}

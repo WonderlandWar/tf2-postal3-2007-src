@@ -1,0 +1,291 @@
+class C_TFPlayer : public C_BasePlayer
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFPlayer(class C_TFPlayer & );
+    public void C_TFPlayer();
+    public void ~C_TFPlayer();
+	
+    public class C_TFPlayer * GetLocalTFPlayer();
+	
+    public void UpdateOnRemove();
+	
+    public class QAngle & GetRenderAngles();
+    public void UpdateClientSideAnimation();
+    public void SetDormant(bool );
+    public void OnPreDataChanged(enum DataUpdateType_t );
+    public void OnDataChanged(enum DataUpdateType_t );
+    public void ProcessMuzzleFlashEvent();
+    public void ValidateModelIndex();
+	
+    public class Vector GetObserverCamOrigin();
+    public int DrawModel(int );
+	
+    public void CreateMove(float ,class CUserCmd * );
+	
+    public bool IsAllowedToSwitchWeapons();
+	
+    public void ClientThink();
+	
+    public void GetToolRecordingState(class KeyValues * );
+	
+    public class C_TFWeaponBase * GetActiveTFWeapon();
+	
+    public void Simulate();
+    public void FireEvent(class Vector & ,class QAngle & ,int ,char * );
+	
+    public void FireBullet(struct FireBulletsInfo_t & ,bool ,int ,int );
+	
+    public void ImpactWaterTrace(class CGameTrace & ,class Vector & );
+	
+    public bool CanAttack();
+	
+    public class C_TFPlayerClass * GetPlayerClass();
+    public bool IsPlayerClass(int );
+    public int GetMaxHealth();
+	
+    public int GetRenderTeamNumber();
+	
+    public bool IsWeaponLowered();
+	
+    public void UpdateIDTarget();
+    public int GetIDTarget();
+    public void SetForcedIDTarget(int );
+	
+    public void SetAnimation(enum PLAYER_ANIM );
+	
+    public float GetMinFOV();
+	
+    public class QAngle & EyeAngles();
+	
+    public int GetBuildResources();
+	
+    public void SetSelectedObject(class C_BaseObject * );
+	
+    public void GetTeamColor(class Color & );
+	
+    public void ComputeFxBlend();
+	
+    public bool StartSceneEvent(class CSceneEventInfo * ,class CChoreoScene * ,class CChoreoEvent * ,class CChoreoActor * ,class C_BaseEntity * );
+    public bool StartGestureSceneEvent(class CSceneEventInfo * ,class CChoreoScene * ,class CChoreoEvent * ,class CChoreoActor * ,class C_BaseEntity * );
+    public void TurnOnTauntCam();
+    public void TurnOffTauntCam();
+	
+    public void InitPhonemeMappings();
+	
+    public void InitPlayerGibs();
+    public void CreatePlayerGibs(class Vector & ,class Vector & ,float );
+    public void DropPartyHat(struct breakablepropparams_t & ,class Vector & );
+	
+    public int GetObjectCount();
+    public class C_BaseObject * GetObject(int );
+    public class C_BaseObject * GetObjectOfType(int );
+    public int GetNumObjects(int );
+	
+    public bool ShouldCollide(int ,int );
+	
+    public float GetPercentInvisible();
+	
+    public void AddDecal(class Vector & ,class Vector & ,class Vector & ,int ,int ,bool ,class CGameTrace & ,int );
+	
+    public void CalcDeathCamView(class Vector & ,class QAngle & ,float & );
+    public class Vector GetChaseCamViewOffset(class C_BaseEntity * );
+	
+    public void ClientPlayerRespawn();
+	
+    public void CreateSaveMeEffect();
+	
+    public bool IsOverridingViewmodel();
+    public int DrawOverriddenViewmodel(class C_BaseViewModel * ,int );
+	
+    public void SetHealer(class C_TFPlayer * ,float );
+    public void GetHealer(class C_TFPlayer ** ,float * );
+    public float MedicGetChargeLevel();
+    public class C_BaseEntity * MedicGetHealTarget();
+	
+    public void StartBurningSound();
+    public void StopBurningSound();
+    public void OnAddTeleported();
+    public void OnRemoveTeleported();
+	
+    public bool CanShowClassMenu();
+	
+    public void InitializePoseParams();
+    public void UpdateLookAt();
+	
+    public bool IsEnemyPlayer();
+    public void ShowNemesisIcon(bool );
+	
+    public class CUtlVector<CHandle<C_BaseEntity>,CUtlMemory<CHandle<C_BaseEntity>,int> > * GetSpawnedGibs();
+	
+    public class Vector & GetClassEyeHeight();
+	
+    public void TeamFortress_SetSpeed();
+    public bool HasItem();
+    public void SetItem(class C_TFItem * );
+    public class C_TFItem * GetItem();
+    public bool HasTheFlag();
+    public float GetCritMult();
+	
+    public void ItemPostFrame();
+	
+    public void SetOffHandWeapon(class C_TFWeaponBase * );
+    public void HolsterOffHandWeapon();
+	
+    public int GetSkin();
+	
+    public bool Weapon_ShouldSetLast(class C_BaseCombatWeapon * ,class C_BaseCombatWeapon * );
+    public bool Weapon_Switch(class C_BaseCombatWeapon * ,int );
+	
+    public class C_TFWeaponBase * Weapon_OwnsThisID(int );
+    public class C_TFWeaponBase * Weapon_GetWeaponByType(int );
+	
+    public void GetStepSoundVelocities(float * ,float * );
+    public void SetStepSoundTime(enum stepsoundtimes_t ,bool );
+	
+    public bool DoClassSpecialSkill();
+    public bool CanGoInvisible();
+	
+    public class C_BaseAnimating * BecomeRagdollOnClient();
+    public class IRagdoll * GetRepresentativeRagdoll();
+    public class CHandle<C_BaseEntity> m_hRagdoll;
+    public class Vector m_vecRagdollVelocity;
+	
+    public int CanBuild(int );
+    public class CUtlVector<CHandle<C_BaseObject>,CUtlMemory<CHandle<C_BaseObject>,int> > m_aObjects;
+	
+    public class CStudioHdr * OnNewModel();
+    public class CHintSystem * Hints();
+    public void DisplaysHintsForTarget(class C_BaseEntity * );
+	
+    public enum ShadowType_t ShadowCastType();
+    public void GetShadowRenderBounds(class Vector & ,class Vector & ,enum ShadowType_t );
+    public void GetRenderBounds(class Vector & ,class Vector & );
+    public bool GetShadowCastDirection(class Vector * ,enum ShadowType_t );
+	
+    public class CMaterialReference * GetInvulnMaterialRef();
+    public bool IsNemesisOfLocalPlayer();
+    public bool ShouldShowNemesisIcon();
+	
+    public class IMaterial * GetHeadLabelMaterial();
+	
+    protected void ResetFlexWeights(class CStudioHdr * );
+	
+    private void HandleTaunting();
+	
+    private void OnPlayerClassChange();
+    private void UpdatePartyHat();
+	
+    private void InitInvulnerableMaterial();
+	
+    private bool m_bWasTaunting;
+    private struct CameraThirdData_t m_TauntCameraData;
+	
+    private class QAngle m_angTauntPredViewAngles;
+    private class QAngle m_angTauntEngViewAngles;
+	
+    private class C_TFPlayerClass m_PlayerClass;
+	
+    private int m_iIDEntIndex;
+    private int m_iForcedIDTarget;
+	
+    private class CNewParticleEffect * m_pTeleporterEffect;
+    private bool m_bToolRecordingVisibility;
+	
+    private int m_iOldState;
+    private int m_iOldSpawnCounter;
+	
+    private class CHandle<C_TFPlayer> m_hHealer;
+    private float m_flHealerChargeLevel;
+    private int m_iOldHealth;
+	
+    class NetworkVar_m_iPlayerModelIndex
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,C_TFPlayer::NetworkVar_m_iPlayerModelIndex> m_iPlayerModelIndex;
+	
+    private class CNewParticleEffect * m_pCigaretteSmoke;
+	
+    class NetworkVar_m_iActivePipebombs
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,C_TFPlayer::NetworkVar_m_iActivePipebombs> m_iActivePipebombs;
+	
+    public class CTFPlayerShared m_Shared;
+	
+    public void DoAnimationEvent(enum PlayerAnimEvent_t ,int );
+	
+    public class CTFPlayerAnimState * m_PlayerAnimState;
+	
+    public class QAngle m_angEyeAngles;
+    public class CInterpolatedVar<QAngle> m_iv_angEyeAngles;
+	
+    class NetworkVar_m_hItem
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkHandleBase<C_TFItem,C_TFPlayer::NetworkVar_m_hItem> m_hItem;
+	
+    class NetworkVar_m_hOffHandWeapon
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkHandleBase<C_TFWeaponBase,C_TFPlayer::NetworkVar_m_hOffHandWeapon> m_hOffHandWeapon;
+	
+    public int m_iOldPlayerClass;
+    public bool m_bIsDisplayingNemesisIcon;
+	
+    public int m_iSpawnCounter;
+    public class CHintSystem m_Hints;
+    public bool m_bSaveMeParity;
+    public bool m_bOldSaveMeParity;
+	
+    public class CMaterialReference m_InvulnerableMaterial;
+	
+    class NetworkVar_m_nPlayerModelIndex
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,C_TFPlayer::NetworkVar_m_nPlayerModelIndex> m_nPlayerModelIndex;
+    class NetworkVar_m_nDisguiseModelIndex
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,C_TFPlayer::NetworkVar_m_nDisguiseModelIndex> m_nDisguiseModelIndex;
+	
+    public class CSoundPatch * m_pBurningSound;
+    public class CNewParticleEffect * m_pBurningEffect;
+    public float m_flBurnEffectStartTime;
+    public float m_flBurnEffectEndTime;
+	
+    public class CNewParticleEffect * m_pDisguisingEffect;
+    public float m_flDisguiseEffectStartTime;
+    public float m_flDisguiseEndEffectStartTime;
+	
+    public class CHandle<C_BaseEntity> m_hFirstGib;
+    public class CUtlVector<CHandle<C_BaseEntity>,CUtlMemory<CHandle<C_BaseEntity>,int> > m_hSpawnedGibs;
+	
+    public int m_iOldTeam;
+    public int m_iOldClass;
+    public int m_iOldDisguiseTeam;
+    public int m_iOldDisguiseClass;
+	
+    public bool m_bDisguised;
+    public int m_iPreviousMetal;
+	
+    public int GetNumActivePipebombs();
+	
+    public int m_iSpyMaskBodygroup;
+	
+    public bool m_bUpdatePartyHat;
+    public class CHandle<C_PlayerAttachedModel> m_hPartyHat;
+	
+    private class CUtlVector<breakmodel_t,CUtlMemory<breakmodel_t,int> > m_aGibs;
+};

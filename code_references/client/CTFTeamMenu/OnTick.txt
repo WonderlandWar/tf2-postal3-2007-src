@@ -1,0 +1,40 @@
+void __thiscall CTFTeamMenu::OnTick(CTFTeamMenu *this)
+{
+  C_Team *GlobalTeam; // esi
+  C_Team *v3; // eax
+  C_TFPlayer *LocalTFPlayer; // esi
+  C_TeamplayRoundBasedRules *v5; // ebp
+  C_TeamplayRoundBasedRules *v6; // ecx
+  bool v7; // bl
+  int v8; // eax
+  int v9; // esi
+  int iLightTeam; // [esp+8h] [ebp-8h] BYREF
+  int iLightestTeam; // [esp+Ch] [ebp-4h] BYREF
+
+  GlobalTeam = GetGlobalTeam(2);
+  v3 = GetGlobalTeam(3);
+  if ( GlobalTeam )
+  {
+    if ( v3 )
+    {
+      LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+      if ( LocalTFPlayer )
+      {
+        v5 = (C_TeamplayRoundBasedRules *)g_pGameRules;
+        if ( g_pGameRules )
+        {
+          v6 = (C_TeamplayRoundBasedRules *)g_pGameRules;
+          this->m_bBlueDisabled = 0;
+          this->m_bRedDisabled = 0;
+          v7 = C_TeamplayRoundBasedRules::AreTeamsUnbalanced(v6, &iLightTeam, &iLightestTeam);
+          v8 = LocalTFPlayer->GetTeamNumber(LocalTFPlayer);
+          v9 = v8;
+          if ( v7 && iLightTeam == 2 || C_TeamplayRoundBasedRules::WouldChangeUnbalanceTeams(v5, 2, v8) )
+            this->m_bRedDisabled = 1;
+          if ( v7 && iLightTeam == 3 || C_TeamplayRoundBasedRules::WouldChangeUnbalanceTeams(v5, 3, v9) )
+            this->m_bBlueDisabled = 1;
+        }
+      }
+    }
+  }
+}

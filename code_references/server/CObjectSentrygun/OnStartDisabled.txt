@@ -1,0 +1,6 @@
+void __thiscall CObjectSentrygun::OnStartDisabled(CObjectSentrygun *this)
+{
+  this->m_vecGoalAngles.x = this->m_vecCurAngles.x;
+  this->m_vecGoalAngles.y = this->m_vecCurAngles.y;
+  CBaseTempEntity::Precache((vgui::Panel *)this);
+}

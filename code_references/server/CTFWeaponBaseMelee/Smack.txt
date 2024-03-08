@@ -1,0 +1,101 @@
+void __usercall CTFWeaponBaseMelee::Smack(CTFWeaponBaseMelee *this@<ecx>, int a2@<edi>)
+{
+  CBasePlayer *PlayerOwner; // eax
+  CBasePlayer *v4; // ebx
+  bool v5; // zf
+  void (__thiscall *WeaponSound)(CBaseCombatWeapon *, WeaponSound_t, float); // eax
+  CTFPlayer *TFPlayerOwner; // eax
+  CBaseEntity *v8; // edi
+  const QAngle *v9; // eax
+  float (__thiscall *GetMeleeDamage)(CTFWeaponBaseMelee *, CBaseEntity *, int *); // eax
+  double v11; // st7
+  int v12; // eax
+  int TeamNumber; // edi
+  float v14; // [esp+20h] [ebp-E0h]
+  int flScale; // [esp+28h] [ebp-D8h]
+  float flScalea; // [esp+28h] [ebp-D8h]
+  float v17; // [esp+2Ch] [ebp-D4h]
+  Vector vecForward; // [esp+38h] [ebp-C8h] BYREF
+  Vector vecSwingStart; // [esp+44h] [ebp-BCh] BYREF
+  Vector vecSwingEnd; // [esp+50h] [ebp-B0h] BYREF
+  CTakeDamageInfo info; // [esp+5Ch] [ebp-A4h] BYREF
+  CGameTrace trace; // [esp+A4h] [ebp-5Ch] BYREF
+  CBaseEntity *v23; // [esp+F8h] [ebp-8h]
+
+  PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+  v4 = PlayerOwner;
+  if ( PlayerOwner )
+  {
+    ((void (__thiscall *)(ILagCompensationManager *, CBasePlayer *, CUserCmd *, int))lagcompensation->StartLagCompensation)(
+      lagcompensation,
+      PlayerOwner,
+      PlayerOwner->m_pCurrentCommand,
+      a2);
+    if ( !CTFWeaponBaseMelee::DoSwingTrace(this, (CGameTrace *)&trace.startpos.z) )
+    {
+LABEL_12:
+      lagcompensation->FinishLagCompensation(lagcompensation, v4);
+      return;
+    }
+    v5 = !v23->IsPlayer(v23);
+    v17 = 0.0;
+    WeaponSound = this->WeaponSound;
+    if ( v5 )
+      ((void (__thiscall *)(CTFWeaponBaseMelee *, int, _DWORD))WeaponSound)(this, 10, LODWORD(v17));
+    else
+      ((void (__thiscall *)(CTFWeaponBaseMelee *, int, _DWORD))WeaponSound)(this, 9, LODWORD(v17));
+    TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+    v8 = TFPlayerOwner;
+    if ( TFPlayerOwner )
+    {
+      v9 = TFPlayerOwner->EyeAngles(TFPlayerOwner);
+      AngleVectors(v9, (Vector *)&vecForward.y);
+      ((void (__thiscall *)(CBaseEntity *, float *, int))v8->__vftable[1].CanBeHitByMeleeAttack)(
+        v8,
+        &vecSwingStart.y,
+        flScale);
+      GetMeleeDamage = this->GetMeleeDamage;
+      vecForward.x = 0.0;
+      vecSwingEnd.z = vecForward.z * 48.0 + vecSwingStart.z;
+      info.m_vecDamageForce.x = vecSwingStart.x * 48.0 + vecSwingEnd.x;
+      info.m_vecDamageForce.y = 48.0 * vecSwingStart.y + vecSwingEnd.y;
+      v11 = ((double (__thiscall *)(CTFWeaponBaseMelee *, CBaseEntity *, Vector *))GetMeleeDamage)(
+              this,
+              v23,
+              &vecForward);
+      v5 = !this->m_bCurrentAttackIsCrit;
+      vecForward.y = v11;
+      v12 = 4226;
+      if ( !v5 )
+        v12 = 1052802;
+      v14 = v11;
+      CTakeDamageInfo::CTakeDamageInfo(
+        (CTakeDamageInfo *)&info.m_vecDamageForce.z,
+        v8,
+        v8,
+        v14,
+        v12,
+        SLODWORD(vecForward.x));
+      flScalea = 1.0 / vecForward.y;
+      CalculateMeleeDamageForce(
+        (CTakeDamageInfo *)&info.m_vecDamageForce.z,
+        (Vector *)&vecForward.z,
+        (Vector *)&vecSwingEnd.z,
+        flScalea);
+      CBaseEntity::DispatchTraceAttack(
+        v23,
+        (CTakeDamageInfo *)&info.m_vecDamageForce.z,
+        (Vector *)&vecForward.z,
+        (CGameTrace *)&trace.startpos.z);
+      ApplyMultiDamage();
+      this->OnEntityHit(this, v23);
+      if ( v23 )
+      {
+        TeamNumber = CBaseEntity::GetTeamNumber(v8);
+        if ( CBaseEntity::GetTeamNumber(v23) != TeamNumber )
+          this->m_bConnected = 1;
+      }
+      goto LABEL_12;
+    }
+  }
+}

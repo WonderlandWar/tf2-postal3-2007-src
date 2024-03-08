@@ -1,0 +1,4 @@
+int __thiscall CSecondaryTargetID::GetPrepend(C_BaseEntity *this)
+{
+  return this->m_iEFlags;
+}

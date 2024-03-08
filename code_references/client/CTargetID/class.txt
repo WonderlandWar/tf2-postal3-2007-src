@@ -1,0 +1,57 @@
+class CTargetID : public CHudElement, public vgui::EditablePanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTargetID_RegisterMap
+    {
+        public void CTargetID_RegisterMap();
+    };
+    public class CTargetID::CTargetID_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTargetID_Register
+    {
+        public void CTargetID_Register();
+    };
+    public class CTargetID::CTargetID_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTargetID_RegisterKBMap
+    {
+        public void CTargetID_RegisterKBMap();
+    };
+    public class CTargetID::CTargetID_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTargetID(class CTargetID & );
+    public void CTargetID(char * );
+    public void Reset();
+    public void VidInit();
+    public bool ShouldDraw();
+    public void PerformLayout();
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    public void UpdateID();
+    public int CalculateTargetIndex(class C_TFPlayer * );
+    public wchar_t * GetPrepend();
+    public int GetTargetIndex();
+    protected class Color GetColorForTargetTeam(int );
+    protected unsigned long m_hFont;
+    protected int m_iLastEntIndex;
+    protected float m_flLastChangeTime;
+    protected int m_iTargetEntIndex;
+    protected bool m_bLayoutOnUpdate;
+    protected class Color m_cBlueColor;
+    protected class Color m_cRedColor;
+    protected class Color m_cSpecColor;
+    protected class vgui::Label * m_pTargetNameLabel;
+    protected class vgui::Label * m_pTargetDataLabel;
+    protected class CTFImagePanel * m_pBGPanel;
+    protected class CTFSpectatorGUIHealth * m_pTargetHealth;
+    public void ~CTargetID();
+    public class CTargetID & operator=(class CTargetID & );
+    public void * __vecDelDtor(unsigned int );
+};

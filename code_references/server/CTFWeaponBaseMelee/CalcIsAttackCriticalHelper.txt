@@ -1,0 +1,14 @@
+// positive sp value has been detected, the output may be wrong!
+bool __thiscall CTFWeaponBaseMelee::CalcIsAttackCriticalHelper(CTFWeaponBaseMelee *this)
+{
+  CBasePlayer *PlayerOwner; // esi
+  IUniformRandomStream *v3; // ecx
+  float flPlayerCritMult; // [esp+8h] [ebp-8h]
+  float v5; // [esp+Ch] [ebp-4h]
+
+  PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+  if ( !PlayerOwner || !PlayerOwner->IsPlayer(PlayerOwner) )
+    return 0;
+  CTFPlayerShared::GetCritMult((CTFPlayerShared *)&PlayerOwner[1].m_nRenderFX);
+  return flPlayerCritMult * v5 * 10000.0 >= (double)_RandomInt(v3, 0, 9999);
+}

@@ -1,0 +1,65 @@
+void __thiscall CTriggerAreaCapture::EndCapture(CTriggerAreaCapture *this, int team)
+{
+  int v3; // ebp
+  int v4; // ebx
+  CBasePlayer *v5; // eax
+  CBaseEntity *v6; // edi
+  unsigned int m_Index; // eax
+  unsigned int v8; // eax
+  CTeamControlPoint *m_pEntity; // ecx
+  int cappingplayers[9]; // [esp+14h] [ebp-28h] BYREF
+
+  CTriggerAreaCapture::IncrementCapAttemptNumber(this);
+  v3 = 1;
+  if ( team == 2 )
+  {
+    COutputEvent::FireOutput(&this->m_OnCapTeam1, this, this, 0.0);
+  }
+  else if ( team == 3 )
+  {
+    COutputEvent::FireOutput(&this->m_OnCapTeam2, this, this, 0.0);
+  }
+  COutputEvent::FireOutput(&this->m_CapOutput, this, this, 0.0);
+  v4 = 0;
+  cappingplayers[0] = 0;
+  if ( gpGlobals->maxClients < 1 )
+    goto LABEL_14;
+  do
+  {
+    v5 = UTIL_PlayerByIndex(v3);
+    if ( v5 )
+    {
+      v6 = v5->IsPlayer(v5) ? v5 : 0;
+      if ( CBaseTrigger::IsTouching(this, v6) )
+      {
+        if ( !cappingplayers[0] )
+          cappingplayers[0] = (int)v6;
+        if ( v4 < 8 )
+          cappingplayers[++v4] = v3;
+      }
+    }
+    ++v3;
+  }
+  while ( v3 <= gpGlobals->maxClients );
+  if ( v4 < 9 )
+LABEL_14:
+    cappingplayers[v4 + 1] = 0;
+  CTriggerAreaCapture::HandleRespawnTimeAdjustments(this, this->m_nOwningTeam, team);
+  this->m_nOwningTeam = team;
+  this->m_bCapturing = 0;
+  CTriggerAreaCapture::SetCapTimeRemaining(this, 0.0);
+  m_Index = this->m_hPoint.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+  {
+    this->OnEndCapture(this, this->m_nOwningTeam);
+    CTriggerAreaCapture::UpdateOwningTeam(this);
+    v8 = this->m_hPoint.m_Index;
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v8 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = (CTeamControlPoint *)g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+    CTeamControlPoint::SetOwner(m_pEntity, this->m_nOwningTeam, 1, v4, &cappingplayers[1]);
+  }
+}

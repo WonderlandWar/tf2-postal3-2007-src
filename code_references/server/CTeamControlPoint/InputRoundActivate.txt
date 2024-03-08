@@ -1,0 +1,11 @@
+void __thiscall CTeamControlPoint::InputRoundActivate(CTeamControlPoint *this, inputdata_t *inputdata)
+{
+  if ( this->m_iTeam == 2 )
+  {
+    COutputEvent::FireOutput(&this->m_OnRoundStartOwnedByTeam1, this, this, 0.0);
+  }
+  else if ( this->m_iTeam == 3 )
+  {
+    COutputEvent::FireOutput(&this->m_OnRoundStartOwnedByTeam2, this, this, 0.0);
+  }
+}

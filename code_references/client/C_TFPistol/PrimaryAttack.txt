@@ -1,0 +1,27 @@
+void __thiscall C_TFPistol::PrimaryAttack(C_TFPistol *this)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *p_m_flAccuracyPenaltyTime; // ecx
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+    (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flLastAttackTime,
+    (const float *)(gpGlobals.m_Index + 12));
+  val = *(float *)(gpGlobals.m_Index + 12) + 0.1;
+  CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+    (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flSoonestPrimaryAttack,
+    &val);
+  Owner = C_BaseCombatWeapon::GetOwner(this);
+  if ( Owner )
+    Owner->IsPlayer(Owner);
+  if ( C_TFWeaponBase::CanAttack(this) )
+  {
+    C_TFWeaponBaseGun::PrimaryAttack(this);
+    p_m_flAccuracyPenaltyTime = (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flAccuracyPenaltyTime;
+    if ( *(float *)(gpGlobals.m_Index + 12) <= (double)this->m_flAccuracyPenaltyTime.m_Value )
+      val = p_m_flAccuracyPenaltyTime->m_Value + 0.2;
+    else
+      val = *(float *)(gpGlobals.m_Index + 12) + 0.2;
+    CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(p_m_flAccuracyPenaltyTime, &val);
+  }
+}

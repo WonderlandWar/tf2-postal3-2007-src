@@ -1,0 +1,9 @@
+void __thiscall CTFWeaponBaseMelee::ItemPostFrame(CTFWeaponBaseMelee *this)
+{
+  if ( this->m_flSmackTime > 0.0 && this->m_flSmackTime < (double)gpGlobals->curtime )
+  {
+    this->Smack(this);
+    this->m_flSmackTime = -1.0;
+  }
+  CTFWeaponBase::ItemPostFrame(this);
+}

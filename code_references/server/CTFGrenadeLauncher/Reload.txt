@@ -1,0 +1,4 @@
+bool __thiscall CTFGrenadeLauncher::Reload(CTFGrenadeLauncher *this)
+{
+  return this->m_flChargeBeginTime <= 0.0 && CTFWeaponBase::Reload(this);
+}

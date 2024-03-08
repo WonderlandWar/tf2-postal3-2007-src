@@ -1,0 +1,4 @@
+void __thiscall CTargetID::Reset(CTargetID *this)
+{
+  this->m_pTargetHealth->Reset(this->m_pTargetHealth);
+}

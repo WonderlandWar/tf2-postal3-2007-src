@@ -1,0 +1,4 @@
+void __thiscall CCaptureFlag::InputEnable(CCaptureFlag *this, inputdata_t *inputdata)
+{
+  CCaptureFlag::SetDisabled(this, 0);
+}

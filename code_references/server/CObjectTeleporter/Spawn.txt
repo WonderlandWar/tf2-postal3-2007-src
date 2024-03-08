@@ -1,0 +1,36 @@
+void __thiscall CObjectTeleporter::Spawn(CObjectTeleporter *this)
+{
+  int v2; // ecx
+  bool v3; // zf
+  int val; // [esp+8h] [ebp-4h] BYREF
+
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  if ( this->m_takedamage.m_Value )
+  {
+    v2 = 1;
+    if ( !this->m_takedamage.m_Value )
+      v2 = -1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  if ( v2 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    this->m_takedamage.m_Value = 0;
+  }
+  v3 = this->m_iState.m_Value == 0;
+  *(float *)&val = 0.0;
+  if ( !v3 )
+  {
+    CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(
+      (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> *)&this->m_iState,
+      &val);
+    this->m_flLastStateChangeTime = gpGlobals->curtime;
+  }
+  this->m_flNextEnemyTouchHint = gpGlobals->curtime;
+  *(float *)&val = 0.0;
+  CNetworkVarBase<float,CObjectTeleporter::NetworkVar_m_flYawToExit>::Set(&this->m_flYawToExit, (const float *)&val);
+  CBaseObject::Spawn(this);
+}

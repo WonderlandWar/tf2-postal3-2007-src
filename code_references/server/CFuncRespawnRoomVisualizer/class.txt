@@ -1,0 +1,12 @@
+void __thiscall CFuncRespawnRoomVisualizer::Spawn(CFuncRespawnRoomVisualizer *this)
+{
+  CFuncRespawnRoomVisualizer *v1; // esi
+  int m_Value; // eax
+
+  v1 = this;
+  CFuncBrush::Spawn(this);
+  m_Value = v1->m_Collision.m_usSolidFlags.m_Value;
+  v1 = (CFuncRespawnRoomVisualizer *)((char *)v1 + 240);
+  CCollisionProperty::SetSolidFlags((CCollisionProperty *)v1, m_Value & 0xFFFFFFF7);
+  CCollisionProperty::SetSolidFlags((CCollisionProperty *)v1, *(_WORD *)&v1->m_clrRender.m_Value.r & 0xFFFB);
+}

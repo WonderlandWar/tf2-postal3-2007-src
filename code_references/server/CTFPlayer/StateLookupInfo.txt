@@ -1,0 +1,88 @@
+CPlayerStateInfo *__thiscall CTFPlayer::StateLookupInfo(CTFPlayer *this, int nState)
+{
+  int v2; // ecx
+  unsigned int v3; // eax
+
+  if ( (_S8_14 & 1) == 0 )
+  {
+    dword_104A9F0C = 0;
+    _S8_14 |= 1u;
+    dword_104A9F1C = -1;
+    dword_104A9F2C = -1;
+    dword_104A9F00 = (int)CTFPlayer::StateEnterACTIVE;
+    dword_104A9F10 = 0;
+    dword_104A9F20 = 0;
+    dword_104A9F44 = 0;
+    dword_104A9F38 = (int)CTFPlayer::StateEnterWELCOME;
+    dword_104A9F48 = 0;
+    dword_104A9F54 = -1;
+    dword_104A9F58 = 0;
+    dword_104A9F64 = -1;
+    dword_104A9F70 = (int)CTFPlayer::StateEnterOBSERVER;
+    dword_104A9F7C = 0;
+    dword_104A9F80 = 0;
+    dword_104A9F8C = -1;
+    dword_104A9F90 = (int)CBaseTempEntity::Precache;
+    dword_104A9F9C = 0;
+    dword_104A9FA8 = (int)CTFPlayer::StateEnterDYING;
+    dword_104A9FB4 = 0;
+    dword_104A9FB8 = 0;
+    dword_104A9FC4 = -1;
+    dword_104A9F04 = 0;
+    dword_104A9F08 = 0;
+    dword_104A9F14 = 0;
+    dword_104A9F18 = 0;
+    dword_104A9F24 = 0;
+    dword_104A9F28 = 0;
+    dword_104A9F30 = 1;
+    dword_104A9F34 = (int)"TF_STATE_WELCOME";
+    dword_104A9F3C = 0;
+    dword_104A9F40 = 0;
+    dword_104A9F4C = 0;
+    dword_104A9F50 = 0;
+    dword_104A9F5C = 0;
+    dword_104A9F60 = 0;
+    dword_104A9F68 = 2;
+    dword_104A9F6C = (int)"TF_STATE_OBSERVER";
+    dword_104A9F74 = 0;
+    dword_104A9F78 = 0;
+    dword_104A9F84 = 0;
+    dword_104A9F88 = 0;
+    dword_104A9F94 = 0;
+    dword_104A9F98 = 0;
+    dword_104A9FA0 = 3;
+    dword_104A9FA4 = (int)"TF_STATE_DYING";
+    dword_104A9FAC = 0;
+    dword_104A9FB0 = 0;
+    dword_104A9FBC = 0;
+    dword_104A9FC0 = 0;
+    dword_104A9FC8 = (int)CTFPlayer::StateThinkDYING;
+    dword_104A9FCC = 0;
+    dword_104A9FD0 = 0;
+    dword_104A9FD4 = 0;
+    dword_104A9FD8 = 4;
+    dword_104A9FDC = (int)"TF_STATE_WATCHINGROUNDINFO";
+    dword_104A9FEC = 0;
+    dword_104A9FE0 = (int)CTFPlayer::StateEnterWATCHINGROUNDINFO;
+    dword_104A9FFC = -1;
+    dword_104AA00C = -1;
+    dword_104A9FE4 = 0;
+    dword_104A9FE8 = 0;
+    dword_104A9FF0 = 0;
+    dword_104A9FF4 = 0;
+    dword_104A9FF8 = 0;
+    dword_104AA000 = 0;
+    dword_104AA004 = 0;
+    dword_104AA008 = 0;
+  }
+  v2 = 0;
+  v3 = 0;
+  while ( playerStateInfos_0[v3].m_nPlayerState != nState )
+  {
+    ++v3;
+    ++v2;
+    if ( v3 >= 5 )
+      return 0;
+  }
+  return &playerStateInfos_0[v2];
+}

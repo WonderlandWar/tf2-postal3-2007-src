@@ -1,0 +1,124 @@
+// local variable allocation has failed, the output may be wrong!
+void __thiscall CTFGameRules::SetRoundOverlayDetails(CTFGameRules *this)
+{
+  CBaseEntity *EntityByClassname; // eax
+  CTeamControlPointMaster *v3; // eax
+  CTeamControlPointMaster *m_Index; // esi
+  int m_iCurrentRoundIndex; // eax
+  const char *v6; // edi
+  CTeamControlPointRound *v7; // ebx
+  const char *pszValue; // eax
+  const char *v9; // esi
+  const char *v10; // eax
+  const char *v11; // eax
+  int v12; // edi
+  CTeamControlPoint *ControlPoint; // eax
+  CBaseEntity *v14; // esi
+  const char *v15; // eax
+  bool v16; // zf
+  CHandle<CTeamControlPoint> pRedPoint; // [esp+8h] [ebp-50h]
+  CHandle<CTeamControlPoint> pBluePoint; // [esp+Ch] [ebp-4Ch] BYREF
+  _BYTE temp[68]; // [esp+10h] [ebp-48h] OVERLAPPED BYREF
+
+  EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "team_control_point_master");
+  v3 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                    EntityByClassname,
+                                    0,
+                                    &CBaseEntity `RTTI Type Descriptor',
+                                    &CTeamControlPointMaster `RTTI Type Descriptor',
+                                    0);
+  m_Index = v3;
+  pRedPoint.m_Index = (unsigned int)v3;
+  if ( v3 && v3->m_ControlPointRounds.m_Size > 0 )
+  {
+    memset(&temp[4], 0, 0x40u);
+    m_iCurrentRoundIndex = m_Index->m_iCurrentRoundIndex;
+    v6 = 0;
+    if ( m_iCurrentRoundIndex != -1 )
+    {
+      v7 = m_Index->m_ControlPointRounds.m_Memory.m_pMemory[m_iCurrentRoundIndex];
+      if ( v7 )
+      {
+        pszValue = v7->m_iszPrintName.pszValue;
+        if ( !pszValue )
+          pszValue = locale;
+        V_strncpy(this->m_szCurrentRoundName, pszValue, 32);
+        v6 = gpGlobals->mapname.pszValue;
+        if ( !v6 )
+          v6 = locale;
+        v9 = v7->m_iName.pszValue;
+        if ( !v9 )
+          v9 = "round";
+        CTeamControlPointRound::GetPointOwnedBy(v7, &pBluePoint, 2);
+        CTeamControlPointRound::GetPointOwnedBy(v7, (CHandle<CTeamControlPoint> *)temp, 3);
+        if ( pBluePoint.m_Index != -1
+          && g_pEntityList->m_EntPtrArray[pBluePoint.m_Index & 0xFFF].m_SerialNumber == pBluePoint.m_Index >> 12
+          && g_pEntityList->m_EntPtrArray[pBluePoint.m_Index & 0xFFF].m_pEntity
+          && CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)temp) )
+        {
+          v10 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&pBluePoint)->m_iName.pszValue;
+          if ( !v10 )
+            v10 = "cp_red";
+          V_snprintf(&temp[4], 64, "%s_%s_%s_%s", v6, v9, v10, "red");
+          strlwr(&temp[4]);
+          CTFGameRules::SetCurrentRoundImageRed(this, &temp[4]);
+          _DevMsg(2, "**** Set red overlay %s for round %s\n", &temp[4], v9);
+          v11 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)temp)->m_iName.pszValue;
+          if ( !v11 )
+            v11 = "cp_blue";
+          V_snprintf(&temp[4], 64, "%s_%s_%s_%s", v6, v9, v11, "blue");
+          strlwr(&temp[4]);
+          CTFGameRules::SetCurrentRoundImageBlue(this, &temp[4]);
+          _DevMsg(2, "**** Set blue overlay %s for round %s\n", &temp[4], v9);
+        }
+        else
+        {
+          V_snprintf(&temp[4], 64, "%s_%s_%s", v6, v9, "red");
+          strlwr(&temp[4]);
+          V_strncpy(this->m_szCurrentRoundImageRed, &temp[4], 64);
+          _DevMsg(2, "**** Set red overlay %s for round %s\n", &temp[4], v9);
+          V_snprintf(&temp[4], 64, "%s_%s_%s", v6, v9, "blue");
+          strlwr(&temp[4]);
+          V_strncpy(this->m_szCurrentRoundImageBlue, &temp[4], 64);
+          _DevMsg(2, "**** Set blue overlay %s for round %s\n", &temp[4], v9);
+        }
+        m_Index = (CTeamControlPointMaster *)pRedPoint.m_Index;
+      }
+    }
+    V_snprintf(&temp[4], 64, "%s_", v6);
+    v12 = 0;
+    if ( m_Index->m_ControlPoints.m_Tree.m_NumElements )
+    {
+      while ( 1 )
+      {
+        ControlPoint = CTeamControlPointMaster::GetControlPoint(m_Index, v12);
+        v14 = ControlPoint;
+        if ( ControlPoint )
+        {
+          if ( CBaseEntity::GetTeamNumber(ControlPoint) == 2 )
+          {
+            v15 = "r";
+          }
+          else
+          {
+            v16 = CBaseEntity::GetTeamNumber(v14) == 3;
+            v15 = "b";
+            if ( !v16 )
+              v15 = "n";
+          }
+          V_strncat(&temp[4], v15, 0x40u, -1);
+        }
+        if ( ++v12 >= *(unsigned __int16 *)(pRedPoint.m_Index + 874) )
+          break;
+        m_Index = (CTeamControlPointMaster *)pRedPoint.m_Index;
+      }
+    }
+    V_strncpy(this->m_szCurrentRoundStateImage, &temp[4], 64);
+  }
+  else
+  {
+    V_strncpy(this->m_szCurrentRoundImageRed, locale, 64);
+    V_strncpy(this->m_szCurrentRoundImageBlue, locale, 64);
+    V_strncpy(this->m_szCurrentRoundStateImage, locale, 64);
+  }
+}

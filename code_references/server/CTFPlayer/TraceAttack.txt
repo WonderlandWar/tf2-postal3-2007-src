@@ -1,0 +1,94 @@
+void __thiscall CTFPlayer::TraceAttack(CTFPlayer *this, CTakeDamageInfo *info, const Vector *vecDir, CGameTrace *ptr)
+{
+  CTFPlayer *v4; // ebx
+  CTakeDamageInfo *v5; // edi
+  unsigned int m_Index; // eax
+  CEntInfo *v7; // ecx
+  CBaseCombatCharacter *v8; // esi
+  unsigned int v9; // eax
+  CBaseCombatCharacter *v10; // ebp
+  IHandleEntity *m_pEntity; // ecx
+  CGameRules *v12; // esi
+  CGameRules_vtbl *v13; // ebx
+  CBaseEntity *Attacker; // eax
+  CGameTrace *v15; // esi
+  CBaseCombatWeapon *ActiveWeapon; // eax
+  double v17; // st6
+  double v18; // rt0
+  IPredictionSystem *v19; // eax
+  float v21[3]; // [esp+34h] [ebp-60h] BYREF
+  float v22[2]; // [esp+40h] [ebp-54h] BYREF
+  CTakeDamageInfo info_modified; // [esp+48h] [ebp-4Ch] BYREF
+
+  v4 = this;
+  if ( this->m_takedamage.m_Value == 2 )
+  {
+    v5 = info;
+    m_Index = info->m_hAttacker.m_Index;
+    if ( m_Index != -1
+      && (v7 = &g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF],
+          g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12)
+      && (v8 = (CBaseCombatCharacter *)v7->m_pEntity) != 0
+      && v8->IsPlayer((CBaseEntity *)v7->m_pEntity) )
+    {
+      v9 = v5->m_hAttacker.m_Index;
+      v10 = v8;
+      if ( v9 == -1 || g_pEntityList->m_EntPtrArray[v5->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v9 >> 12 )
+        m_pEntity = 0;
+      else
+        m_pEntity = g_pEntityList->m_EntPtrArray[v5->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+      if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(m_pEntity) )
+      {
+        v12 = g_pGameRules;
+        v13 = g_pGameRules->__vftable;
+        Attacker = CTakeDamageInfo::GetAttacker(v5);
+        if ( !v13->FPlayerCanTakeDamage(v12, this, Attacker) )
+          return;
+        v4 = this;
+      }
+    }
+    else
+    {
+      v10 = 0;
+    }
+    v15 = ptr;
+    info = (CTakeDamageInfo *)ptr->physicsbone;
+    CNetworkVarBase<int,CBaseTeamObjectiveResource::NetworkVar_m_iUpdateCapHudParity>::Set(
+      &v4->m_nForceBone,
+      (const int *)&info);
+    v4->m_LastHitGroup = v15->hitgroup;
+    CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&info_modified.m_vecDamageForce.y, v5);
+    if ( (info_modified.m_iDamageCustom & 0x2000000) != 0 && v15->hitgroup == 1 )
+    {
+      info_modified.m_iDamageCustom |= 0x100000u;
+      info_modified.m_iDamageStats = 1;
+      ActiveWeapon = CBaseCombatCharacter::GetActiveWeapon(v10);
+      if ( ActiveWeapon )
+        ((void (__thiscall *)(CBaseCombatWeapon *, int, _DWORD))ActiveWeapon->WeaponSound)(ActiveWeapon, 5, 0.0);
+    }
+    if ( !CTFPlayerShared::InCond(&this->m_Shared, 7) )
+    {
+      if ( CTFPlayerShared::InCond(&this->m_Shared, 9) )
+      {
+        v21[0] = -vecDir->x;
+        v21[1] = -vecDir->y;
+        v21[2] = -vecDir->z;
+        v17 = 8.0 * vecDir->z;
+        v18 = vecDir->y * 8.0;
+        v22[0] = v15->endpos.x - vecDir->x * 8.0;
+        v22[1] = v15->endpos.y - v18;
+        info_modified.m_vecDamageForce.x = v15->endpos.z - v17;
+        g_pEffects->Ricochet(g_pEffects, (const Vector *)v22, (const Vector *)v21);
+      }
+      else
+      {
+        v19 = IPredictionSystem::g_pPredictionSystems;
+        for ( LOBYTE(info) = 1; v19; v19 = v19->m_pNextSystem )
+          ++v19->m_nStatusPushed;
+        CBaseEntity::TraceBleed(this, info_modified.m_flMaxDamage, vecDir, v15, info_modified.m_iDamageCustom);
+        CDisablePredictionFiltering::~CDisablePredictionFiltering((CDisablePredictionFiltering *)&info);
+      }
+    }
+    AddMultiDamage((CTakeDamageInfo *)&info_modified.m_vecDamageForce.y, this);
+  }
+}

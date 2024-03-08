@@ -1,0 +1,83 @@
+class CObjectTeleporter : public CBaseObject
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void CObjectTeleporter(class CObjectTeleporter & );
+    public void CObjectTeleporter();
+	
+    public void Spawn();
+    public void Precache();
+    public bool StartBuilding(class CBaseEntity * );
+    public void OnGoActive();
+    public int DrawDebugTextOverlays();
+    public bool IsPlacementPosValid();
+    public void SetModel(char * );
+	
+    public void FinishedBuilding();
+	
+    public void SetState(int );
+    public void DeterminePlaybackRate();
+	
+    public void TeleporterThink();
+    public void TeleporterTouch(class CBaseEntity * );
+	
+    public void TeleporterSend(class CTFPlayer * );
+    public void TeleporterReceive(class CTFPlayer * ,float );
+	
+    public class CObjectTeleporter * GetMatchingTeleporter();
+    public class CObjectTeleporter * FindMatch();
+	
+    public bool IsMatchingTeleporterReady();
+	
+    public int GetState();
+	
+    public void SetTeleportingPlayer(class CTFPlayer * );
+	
+    class NetworkVar_m_iState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState> m_iState;
+    class NetworkVar_m_flRechargeTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CObjectTeleporter::NetworkVar_m_flRechargeTime> m_flRechargeTime;
+    class NetworkVar_m_iTimesUsed
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iTimesUsed> m_iTimesUsed;
+    class NetworkVar_m_flYawToExit
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CObjectTeleporter::NetworkVar_m_flYawToExit> m_flYawToExit;
+	
+    protected class CHandle<CObjectTeleporter> m_hMatchingTeleporter;
+	
+    protected float m_flLastStateChangeTime;
+	
+    protected float m_flMyNextThink;
+	
+    protected class CHandle<CTFPlayer> m_hTeleportingPlayer;
+	
+    protected float m_flNextEnemyTouchHint;
+	
+    protected void ShowDirectionArrow(bool );
+	
+    protected bool m_bShowDirectionArrow;
+    protected int m_iDirectionBodygroup;
+    protected int m_iBlurBodygroup;
+	
+    private struct datamap_t m_DataMap;
+    private struct datamap_t * GetBaseMap();
+    private struct datamap_t * GetDataDescMap();
+	
+    public void ~CObjectTeleporter();
+    public class CObjectTeleporter & operator=(class CObjectTeleporter & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

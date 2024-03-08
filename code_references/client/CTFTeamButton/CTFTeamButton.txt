@@ -1,0 +1,36 @@
+void __thiscall CTFTeamButton::CTFTeamButton(CTFTeamButton *this, vgui::Panel *parent, const char *panelName)
+{
+  vgui::PanelMessageMap *v4; // edi
+  PanelAnimationMap *v5; // edi
+  vgui::PanelKeyBindingMap *v6; // edi
+
+  CTFButton::CTFButton(this, parent, panelName, locale);
+  this->__vftable = (CTFTeamButton_vtbl *)&CTFTeamButton::`vftable';
+  if ( !`CTFTeamButton::ChainToMap'::`2'::chained )
+  {
+    `CTFTeamButton::ChainToMap'::`2'::chained = 1;
+    v4 = vgui::FindOrAddPanelMessageMap("CTFTeamButton");
+    v4->pfnClassName = CTFTeamButton::GetPanelClassName;
+    v4->baseMap = vgui::FindOrAddPanelMessageMap("CTFButton");
+  }
+  if ( !`CTFTeamButton::ChainToAnimationMap'::`2'::chained )
+  {
+    `CTFTeamButton::ChainToAnimationMap'::`2'::chained = 1;
+    v5 = FindOrAddPanelAnimationMap("CTFTeamButton");
+    v5->pfnClassName = CTFTeamButton::GetPanelClassName;
+    v5->baseMap = FindOrAddPanelAnimationMap("CTFButton");
+  }
+  if ( !`CTFTeamButton::KB_ChainToMap'::`2'::chained )
+  {
+    `CTFTeamButton::KB_ChainToMap'::`2'::chained = 1;
+    v6 = vgui::FindOrAddPanelKeyBindingMap("CTFTeamButton");
+    v6->pfnClassName = CTFTeamButton::GetPanelClassName;
+    v6->baseMap = vgui::FindOrAddPanelKeyBindingMap("CTFButton");
+  }
+  CTFTeamButton::PanelAnimationVar_m_clrDefaultBG::InitVar();
+  this->m_clrDefaultBG = 0;
+  CTFTeamButton::PanelAnimationVar_m_clrArmedBG::InitVar();
+  this->m_clrArmedBG = 0;
+  CTFTeamButton::PanelAnimationVar_m_clrDepressedBG::InitVar();
+  this->m_clrDepressedBG = 0;
+}

@@ -1,0 +1,97 @@
+void __usercall CTFMinigun::WeaponSoundUpdate(CTFMinigun *this@<ecx>, int a2@<ebp>, int a3@<edi>)
+{
+  int v4; // ebx
+  int m_iMinigunSoundCur; // eax
+  CSoundEnvelopeController *Controller; // eax
+  CSoundEnvelopeController *v7; // eax
+  CSoundEnvelopeController *v8; // edi
+  int v9; // ebp
+  CBasePlayer *PlayerOwner; // eax
+  int v11; // eax
+  CSoundPatch *v12; // eax
+  CPASAttenuationFilter filter; // [esp+3Ch] [ebp-24h] BYREF
+
+  v4 = -1;
+  switch ( this->m_iWeaponState.m_Value )
+  {
+    case AC_STATE_IDLE:
+      if ( this->m_flBarrelCurrentVelocity <= 0.0 )
+        v4 = -1;
+      else
+        v4 = 12;
+      break;
+    case AC_STATE_STARTFIRING:
+      v4 = 11;
+      break;
+    case AC_STATE_FIRING:
+      v4 = 2 * this->m_bCritShot.m_Value + 3;
+      break;
+    case AC_STATE_SPINNING:
+      v4 = 13;
+      break;
+    case AC_STATE_DRYFIRE:
+      v4 = 0;
+      break;
+    default:
+      break;
+  }
+  m_iMinigunSoundCur = this->m_iMinigunSoundCur;
+  if ( m_iMinigunSoundCur != v4 )
+  {
+    if ( this->m_pSoundCur )
+    {
+      if ( m_iMinigunSoundCur == 12 && v4 == -1 )
+      {
+        Controller = CSoundEnvelopeController::GetController();
+        ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, int))Controller->SoundFadeOut)(
+          Controller,
+          this->m_pSoundCur,
+          0.2,
+          1);
+      }
+      else
+      {
+        v7 = CSoundEnvelopeController::GetController();
+        v7->SoundDestroy(v7, this->m_pSoundCur);
+      }
+      this->m_pSoundCur = 0;
+    }
+    this->m_iMinigunSoundCur = v4;
+    if ( v4 != -1 )
+    {
+      v8 = CSoundEnvelopeController::GetController();
+      v9 = ((int (__thiscall *)(CTFMinigun *, int, int, int))this->GetShootSound)(this, v4, a3, a2);
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount);
+      filter.m_Recipients.m_Memory.m_nAllocationCount = (int)&CPASFilter::`vftable';
+      CRecipientFilter::AddRecipientsByPAS(
+        (CRecipientFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount,
+        &this->m_vecAbsOrigin);
+      filter.m_Recipients.m_Memory.m_nAllocationCount = (int)&CPASAttenuationFilter::`vftable';
+      CPASAttenuationFilter::Filter(
+        (CPASAttenuationFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount,
+        &this->m_vecAbsOrigin,
+        0.80000001);
+      PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+      CRecipientFilter::RemoveRecipient(
+        (CRecipientFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount,
+        PlayerOwner);
+      v11 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+      v12 = v8->SoundCreate(v8, (IRecipientFilter *)&filter.m_Recipients.m_Memory.m_nGrowSize, v11, (const char *)v9);
+      this->m_pSoundCur = v12;
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))v8->Play)(
+        v8,
+        v12,
+        1.0,
+        100.0,
+        0.0);
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))v8->SoundChangeVolume)(
+        v8,
+        this->m_pSoundCur,
+        1.0,
+        0.1);
+      CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+    }
+  }
+}

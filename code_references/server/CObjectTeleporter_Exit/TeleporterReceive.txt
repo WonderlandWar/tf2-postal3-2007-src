@@ -1,0 +1,46 @@
+void __thiscall CObjectTeleporter_Exit::TeleporterReceive(
+        CObjectTeleporter_Exit *this,
+        CTFPlayer *pPlayer,
+        float flDelay)
+{
+  CTFPlayer *v3; // edi
+  int v5; // eax
+  bool v6; // zf
+
+  v3 = pPlayer;
+  if ( pPlayer )
+  {
+    this->m_hTeleportingPlayer.m_Index = pPlayer->GetRefEHandle(pPlayer)->m_Index;
+    v5 = CBaseEntity::GetTeamNumber(v3) - 2;
+    if ( v5 )
+    {
+      if ( v5 == 1 )
+      {
+        if ( (this->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        DispatchParticleEffect("teleportedin_blue", this->m_vecAbsOrigin, vec3_angle, 0);
+      }
+    }
+    else
+    {
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      DispatchParticleEffect("teleportedin_red", this->m_vecAbsOrigin, vec3_angle, 0);
+    }
+    CBaseEntity::EmitSound(this, "Building_Teleporter.Receive", 0.0, 0);
+    v6 = this->m_iState.m_Value == 4;
+    pPlayer = (CTFPlayer *)4;
+    if ( !v6 )
+    {
+      CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(
+        (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> *)&this->m_iState,
+        (const int *)&pPlayer);
+      this->m_flLastStateChangeTime = gpGlobals->curtime;
+    }
+    this->m_flMyNextThink = gpGlobals->curtime + 0.25;
+    pPlayer = (CTFPlayer *)(this->m_iTimesUsed.m_Value + 1);
+    CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel>::Set(
+      (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel> *)&this->m_iTimesUsed,
+      (const int *)&pPlayer);
+  }
+}

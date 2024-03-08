@@ -1,0 +1,72 @@
+void __thiscall CTFFreezePanel::CTFFreezePanel(CTFFreezePanel *this, const char *pElementName)
+{
+  vgui::PanelMessageMap *v3; // edi
+  PanelAnimationMap *v4; // edi
+  vgui::PanelKeyBindingMap *v5; // edi
+  vgui::Panel *v6; // eax
+  CTFHudPlayerHealth *v7; // eax
+  CTFHudPlayerHealth *v8; // edi
+  vgui::EditablePanel *v9; // eax
+  vgui::EditablePanel *v10; // eax
+
+  vgui::EditablePanel::EditablePanel(this, 0, "FreezePanel");
+  CHudElement::CHudElement(&this->CHudElement, pElementName);
+  this->vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable = (CTFFreezePanel_vtbl *)&CTFFreezePanel::`vftable'{for `vgui::EditablePanel'};
+  this->CHudElement::CGameEventListener::IGameEventListener2::__vftable = (CHudElement_vtbl *)&CTFFreezePanel::`vftable'{for `CHudElement'};
+  if ( !`CTFFreezePanel::ChainToMap'::`2'::chained )
+  {
+    `CTFFreezePanel::ChainToMap'::`2'::chained = 1;
+    v3 = vgui::FindOrAddPanelMessageMap("CTFFreezePanel");
+    v3->pfnClassName = CTFFreezePanel::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelMessageMap("EditablePanel");
+  }
+  if ( !`CTFFreezePanel::ChainToAnimationMap'::`2'::chained )
+  {
+    `CTFFreezePanel::ChainToAnimationMap'::`2'::chained = 1;
+    v4 = FindOrAddPanelAnimationMap("CTFFreezePanel");
+    v4->pfnClassName = CTFFreezePanel::GetPanelClassName;
+    v4->baseMap = FindOrAddPanelAnimationMap("EditablePanel");
+  }
+  if ( !`CTFFreezePanel::KB_ChainToMap'::`2'::chained )
+  {
+    `CTFFreezePanel::KB_ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelKeyBindingMap("CTFFreezePanel");
+    v5->pfnClassName = CTFFreezePanel::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelKeyBindingMap("EditablePanel");
+  }
+  this->m_pCalloutPanels.m_Memory.m_pMemory = 0;
+  this->m_pCalloutPanels.m_Memory.m_nAllocationCount = 0;
+  this->m_pCalloutPanels.m_Memory.m_nGrowSize = 0;
+  this->m_pCalloutPanels.m_Size = 0;
+  this->m_pCalloutPanels.m_pElements = 0;
+  v6 = g_pClientMode->GetViewport(g_pClientMode);
+  vgui::Panel::SetParent(this, v6);
+  vgui::Panel::SetVisible(this, 0);
+  vgui::Panel::SetScheme(this, "ClientScheme");
+  this->m_iKillerIndex = 0;
+  v7 = (CTFHudPlayerHealth *)operator new(0x12Cu);
+  v8 = v7;
+  if ( v7 )
+  {
+    CTFHudPlayerHealth::CTFHudPlayerHealth(v7, this, "FreezePanelHealth");
+    v8->__vftable = (CTFHudPlayerHealth_vtbl *)&CTFFreezePanelHealth::`vftable';
+  }
+  else
+  {
+    v8 = 0;
+  }
+  this->m_flShowCalloutsAt = 0.0;
+  this->m_pKillerHealth = v8;
+  this->m_iShowNemesisPanel = 0;
+  this->m_iYBase = -1;
+  v9 = (vgui::EditablePanel *)operator new(0xE8u);
+  if ( v9 )
+  {
+    vgui::EditablePanel::EditablePanel(v9, this, "NemesisSubPanel");
+    this->m_pNemesisSubPanel = v10;
+  }
+  else
+  {
+    this->m_pNemesisSubPanel = 0;
+  }
+}

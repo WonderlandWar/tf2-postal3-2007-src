@@ -1,0 +1,11 @@
+class CObjectTeleporter_Entrance : public CObjectTeleporter
+{
+    public void CObjectTeleporter_Entrance(class CObjectTeleporter_Entrance & );
+    public void CObjectTeleporter_Entrance();
+    public void Spawn();
+    public void TeleporterSend(class CTFPlayer * );
+    public void ~CObjectTeleporter_Entrance();
+    public class CObjectTeleporter_Entrance & operator=(class CObjectTeleporter_Entrance & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

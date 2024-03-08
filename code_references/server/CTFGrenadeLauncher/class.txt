@@ -1,0 +1,30 @@
+class CTFGrenadeLauncher : public CTFWeaponBaseGun, public ITFChargeUpWeapon
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    private void CTFGrenadeLauncher(class CTFGrenadeLauncher & );
+    public void CTFGrenadeLauncher();
+    public void ~CTFGrenadeLauncher();
+    public void Spawn();
+    public int GetWeaponID();
+    public void ItemBusyFrame();
+    public void SecondaryAttack();
+    public bool Holster(class CBaseCombatWeapon * );
+    public bool Deploy();
+    public void PrimaryAttack();
+    public void WeaponIdle();
+    public float GetProjectileSpeed();
+    public bool Reload();
+    public void WeaponReset();
+    public float GetChargeBeginTime();
+    public float GetChargeMaxTime();
+    public void LaunchGrenade();
+    private float m_flChargeBeginTime;
+    public class CTFGrenadeLauncher & operator=(class CTFGrenadeLauncher & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

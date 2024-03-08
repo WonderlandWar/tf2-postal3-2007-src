@@ -1,0 +1,22 @@
+void __thiscall CTFWeaponBaseMelee::SecondaryAttack(CTFWeaponBaseMelee *this)
+{
+  CTFPlayer *TFPlayerOwner; // edi
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  if ( !this->m_bInAttack2 )
+  {
+    TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+    if ( TFPlayerOwner )
+    {
+      if ( CTFWeaponBase::CanAttack(this) )
+      {
+        CTFPlayer::DoClassSpecialSkill(TFPlayerOwner);
+        this->m_bInAttack2 = 1;
+        val = gpGlobals->curtime + 0.5;
+        CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flNextSecondaryAttack>::Set(
+          &this->m_flNextSecondaryAttack,
+          &val);
+      }
+    }
+  }
+}

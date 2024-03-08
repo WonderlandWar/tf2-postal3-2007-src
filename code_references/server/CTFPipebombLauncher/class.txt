@@ -1,0 +1,41 @@
+class CTFPipebombLauncher : public CTFWeaponBaseGun, public ITFChargeUpWeapon, public IEntityListener
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    private void CTFPipebombLauncher(class CTFPipebombLauncher & );
+    public void CTFPipebombLauncher();
+    public void ~CTFPipebombLauncher();
+    public void Spawn();
+    public int GetWeaponID();
+    public class CBaseEntity * FireProjectile(class CTFPlayer * );
+    public void ItemBusyFrame();
+    public void SecondaryAttack();
+    public bool Holster(class CBaseCombatWeapon * );
+    public bool Deploy();
+    public void PrimaryAttack();
+    public void WeaponIdle();
+    public float GetProjectileSpeed();
+    public bool Reload();
+    public void WeaponReset();
+    public float GetChargeBeginTime();
+    public float GetChargeMaxTime();
+    public void LaunchGrenade();
+    public void UpdateOnRemove();
+    public void DeathNotice(class CBaseEntity * );
+    public void DetonateRemotePipebombs(bool );
+    private class CUtlVector<CHandle<CTFGrenadePipebombProjectile>,CUtlMemory<CHandle<CTFGrenadePipebombProjectile>,int> > m_Pipebombs;
+    class NetworkVar_m_iPipebombCount
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPipebombLauncher::NetworkVar_m_iPipebombCount> m_iPipebombCount;
+    private float m_flChargeBeginTime;
+    private float m_flLastGrenadeLaunchTime;
+    public class CTFPipebombLauncher & operator=(class CTFPipebombLauncher & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

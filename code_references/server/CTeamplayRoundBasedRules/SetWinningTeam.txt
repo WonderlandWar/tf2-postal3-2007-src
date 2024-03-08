@@ -1,0 +1,81 @@
+void __userpurge CTeamplayRoundBasedRules::SetWinningTeam(
+        CTeamplayRoundBasedRules *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<ebp>,
+        int team,
+        int iWinReason,
+        int bForceMapReset,
+        int bSwitchTeams)
+{
+  void (__thiscall *SetSwitchTeams)(CTeamplayRules *, bool); // edx
+  int v9; // ebx
+  int v10; // ebp
+  CTeam *GlobalTeam; // eax
+  CGameRulesRoundStateInfo *m_pCurStateInfo; // eax
+  void (__thiscall *pfnLeaveState)(CTeamplayRoundBasedRules *); // edx
+  IGameEvent *v14; // eax
+  IGameEvent *v15; // esi
+  int i; // edi
+  CBasePlayer *v17; // eax
+  CBasePlayer *v18; // esi
+  int v19; // [esp+20h] [ebp-14h]
+  float v20; // [esp+20h] [ebp-14h]
+
+  if ( !team || team > 1 && team < GetNumberOfTeams() )
+  {
+    SetSwitchTeams = this->SetSwitchTeams;
+    v9 = bForceMapReset;
+    v19 = bSwitchTeams;
+    this->m_bForceMapReset = bForceMapReset;
+    ((void (__thiscall *)(CTeamplayRoundBasedRules *, int, int, int))SetSwitchTeams)(this, v19, a3, a2);
+    CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason>::Set(
+      (CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason> *)&this->m_iWinningTeam,
+      &bForceMapReset);
+    CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason>::Set(&this->m_iWinReason, &bSwitchTeams);
+    v10 = bForceMapReset;
+    CTeamplayRoundBasedRules::PlayWinSong(this, bForceMapReset);
+    if ( (_BYTE)v9 && v10 )
+    {
+      GlobalTeam = GetGlobalTeam(v10);
+      GlobalTeam->AddScore(GlobalTeam, 1);
+    }
+    m_pCurStateInfo = this->m_pCurStateInfo;
+    if ( m_pCurStateInfo )
+    {
+      pfnLeaveState = m_pCurStateInfo->pfnLeaveState;
+      if ( pfnLeaveState )
+        pfnLeaveState((CTeamplayRoundBasedRules *)((char *)this + *(_DWORD *)m_pCurStateInfo->gap1C));
+    }
+    CTeamplayRoundBasedRules::State_Enter(this, GR_STATE_TEAM_WIN);
+    v14 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_round_win", 0);
+    v15 = v14;
+    if ( v14 )
+    {
+      v14->SetInt(v14, "team", v10);
+      v15->SetBool(v15, "full_round", v9);
+      v20 = gpGlobals->curtime - this->m_flMapResetTime.m_Value;
+      ((void (__thiscall *)(IGameEvent *, const char *, _DWORD))v15->SetFloat)(v15, "round_time", LODWORD(v20));
+      gameeventmanager->FireEvent(gameeventmanager, v15, 0);
+    }
+    this->SendTeamScoresEvent(this);
+    if ( !v10 )
+    {
+      for ( i = 1; i <= gpGlobals->maxClients; ++i )
+      {
+        v17 = UTIL_PlayerByIndex(i);
+        v18 = v17;
+        if ( v17 )
+        {
+          if ( v17->IsPlayer(v17) )
+            ((void (__thiscall *)(CBasePlayer *, int, _DWORD, _DWORD, _DWORD, _DWORD))v18->__vftable[1].GetNetworkable)(
+              v18,
+              44,
+              0,
+              0,
+              0,
+              0);
+        }
+      }
+    }
+  }
+}

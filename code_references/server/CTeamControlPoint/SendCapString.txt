@@ -1,0 +1,36 @@
+void __userpurge CTeamControlPoint::SendCapString(
+        CTeamControlPoint *this@<ecx>,
+        int a2@<esi>,
+        int iCapTeam,
+        int iNumCappers,
+        int *pCappingPlayers,
+        int a6)
+{
+  const char *pszValue; // eax
+  IGameEvent *v8; // esi
+  const char *v9; // eax
+  int i; // eax
+  char cappers[9]; // [esp+20h] [ebp-14h]
+
+  pszValue = this->m_iszPrintName.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  if ( strlen(pszValue) )
+  {
+    v8 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_point_captured", 0);
+    if ( v8 )
+    {
+      ((void (__thiscall *)(IGameEvent *, const char *, int, int))v8->SetInt)(v8, "cp", this->m_iPointIndex, a2);
+      v9 = this->m_iszPrintName.pszValue;
+      if ( !v9 )
+        v9 = locale;
+      v8->SetString(v8, "cpname", v9);
+      for ( i = 0; i < (int)pCappingPlayers; ++i )
+        cappers[i + 8] = *(_BYTE *)(a6 + 4 * i);
+      cappers[i + 8] = 0;
+      ((void (__thiscall *)(IGameEvent *, const char *))v8->SetString)(v8, "cappers");
+      v8->SetInt(v8, "priority", 9);
+      gameeventmanager->FireEvent(gameeventmanager, v8, 0);
+    }
+  }
+}

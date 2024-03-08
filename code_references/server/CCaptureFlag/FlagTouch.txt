@@ -1,0 +1,45 @@
+void __thiscall CCaptureFlag::FlagTouch(CCaptureFlag *this, CBaseEntity *pOther)
+{
+  int v3; // ebx
+  int m_Value; // eax
+  int v5; // ebx
+  int TeamNumber; // ebx
+  CBasePlayer *v7; // eax
+  CTFPlayer *v8; // edi
+  const Vector *v9; // eax
+
+  if ( !this->m_bDisabled.m_Value
+    && pOther->IsPlayer(pOther)
+    && pOther->IsAlive(pOther)
+    && (!CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPrevOwner)
+     || CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPrevOwner) != pOther
+     || this->m_bAllowOwnerPickup) )
+  {
+    if ( this->m_nGameType.m_Value || (v3 = CBaseEntity::GetTeamNumber(pOther), v3 != CBaseEntity::GetTeamNumber(this)) )
+    {
+      if ( (m_Value = this->m_nGameType.m_Value, m_Value != 1) && m_Value != 2
+        || (v5 = CBaseEntity::GetTeamNumber(pOther), v5 == CBaseEntity::GetTeamNumber(this)) )
+      {
+        if ( this->m_nGameType.m_Value != 3
+          || !CBaseEntity::GetTeamNumber(this)
+          || (TeamNumber = CBaseEntity::GetTeamNumber(pOther), TeamNumber == CBaseEntity::GetTeamNumber(this)) )
+        {
+          if ( !LOBYTE(g_pGameRules[68].m_pNext) )
+          {
+            v7 = ToBaseMultiplayerPlayer(pOther);
+            v8 = (CTFPlayer *)v7;
+            if ( v7 )
+            {
+              if ( !CTFPlayerShared::InCond((CTFPlayerShared *)&v7[1].m_nRenderFX, 9) )
+              {
+                v9 = v8->WorldSpaceCenter(v8);
+                if ( !PointInRespawnRoom(v8, v9) )
+                  this->PickUp(this, v8, 1);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+void __thiscall CTFPlayer::Taunt(CTFPlayer *this)
+{
+  CTFPlayerShared *p_m_Shared; // edi
+  CTFWeaponBase *ActiveTFWeapon; // eax
+  CTFSniperRifle *v4; // ebx
+  bool (__thiscall *SpeakConceptIfAllowed)(CBaseMultiplayerPlayer *, int, const char *, char *, unsigned int, IRecipientFilter *); // edx
+  char szResponse[64]; // [esp+24h] [ebp-48h] BYREF
+
+  p_m_Shared = &this->m_Shared;
+  if ( !CTFPlayerShared::InCond(&this->m_Shared, 11)
+    && this->m_nWaterLevel.m_Value <= 2u
+    && CBaseEntity::GetGroundEntity(this) )
+  {
+    if ( this->m_PlayerClass.m_iClass.m_Value == 2 )
+    {
+      ActiveTFWeapon = CTFPlayer::GetActiveTFWeapon(this);
+      if ( ActiveTFWeapon->GetWeaponID(ActiveTFWeapon) == 14 )
+      {
+        v4 = (CTFSniperRifle *)CTFPlayer::GetActiveTFWeapon(this);
+        if ( CTFPlayerShared::InCond(p_m_Shared, 3) )
+          CTFWeaponBaseGun::ToggleZoom(v4);
+        CTFSniperRifle::ResetTimers(v4);
+      }
+    }
+    SpeakConceptIfAllowed = this->SpeakConceptIfAllowed;
+    this->m_bInitTaunt = 1;
+    if ( SpeakConceptIfAllowed(this, 11, 0, &szResponse[4], 64u, 0) )
+    {
+      *(float *)szResponse = GetSceneDuration(&szResponse[4]) + 0.2;
+      CTFPlayerShared::AddCond(p_m_Shared, 11, -1.0);
+      this->m_Shared.m_flTauntRemoveTime = gpGlobals->curtime + *(float *)szResponse;
+      CBaseEntity::SetAbsVelocity(this, &vec3_origin);
+    }
+  }
+}

@@ -1,0 +1,52 @@
+void __thiscall CTFFlameEntity::Spawn(CTFFlameEntity *this)
+{
+  double m_fValue; // st7
+  int v3; // ecx
+  float v4; // [esp+1Ch] [ebp-1Ch]
+  Vector vecMax; // [esp+20h] [ebp-18h] BYREF
+  Vector vecMin; // [esp+2Ch] [ebp-Ch] BYREF
+
+  CBaseTempEntity::Precache((vgui::Panel *)this);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, 12);
+  CBaseEntity::SetMoveType(this, MOVETYPE_FLY, MOVECOLLIDE_FLY_CUSTOM);
+  this->m_iEFlags |= 0x20000000u;
+  CBaseEntity::SetCollisionGroup(this, 24);
+  m_fValue = tf_flamethrower_boxsize.m_pParent->m_fValue;
+  vecMax.x = m_fValue;
+  vecMax.y = m_fValue;
+  vecMax.z = m_fValue;
+  vecMin.x = -m_fValue;
+  vecMin.y = vecMin.x;
+  vecMin.z = vecMin.x;
+  UTIL_SetSize(this, &vecMin, &vecMax);
+  if ( this->m_takedamage.m_Value )
+  {
+    v3 = 1;
+    if ( !this->m_takedamage.m_Value )
+      v3 = -1;
+  }
+  else
+  {
+    v3 = 0;
+  }
+  if ( v3 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    this->m_takedamage.m_Value = 0;
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  this->m_vecInitialPos.x = this->m_vecAbsOrigin.x;
+  this->m_vecInitialPos.y = this->m_vecAbsOrigin.y;
+  this->m_vecInitialPos.z = this->m_vecAbsOrigin.z;
+  v4 = tf_flamethrower_flametime.m_pParent->m_fValue;
+  this->m_flTimeRemove = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(
+                           random,
+                           0.89999998,
+                           1.1)
+                       * v4
+                       + gpGlobals->curtime;
+  CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CTFFlameEntity::FlameThink, 0.0, 0);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

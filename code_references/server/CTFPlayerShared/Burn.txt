@@ -1,0 +1,23 @@
+void __thiscall CTFPlayerShared::Burn(CTFPlayerShared *this, CTFPlayer *pPlayer)
+{
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *p_m_nPlayerCond; // ecx
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  if ( this->m_pOuter->IsAlive(this->m_pOuter) )
+  {
+    p_m_nPlayerCond = (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond;
+    if ( (this->m_nPlayerCond.m_Value & 0x2000) == 0 )
+    {
+      val = p_m_nPlayerCond->m_Value | 0x2000;
+      CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(p_m_nPlayerCond, &val);
+      this->m_flCondExpireTimeLeft[13] = -1.0;
+      CBaseEntity::EmitSound(this->m_pOuter, "Fire.Engulf", 0.0, 0);
+      this->m_flFlameBurnTime = gpGlobals->curtime;
+    }
+    this->m_flFlameRemoveTime = gpGlobals->curtime + 10.0;
+    if ( pPlayer )
+      this->m_hBurnAttacker.m_Index = pPlayer->GetRefEHandle(pPlayer)->m_Index;
+    else
+      this->m_hBurnAttacker.m_Index = -1;
+  }
+}

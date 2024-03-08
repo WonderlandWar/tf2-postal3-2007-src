@@ -1,0 +1,578 @@
+void __thiscall CTriggerAreaCapture::CaptureThink(CTriggerAreaCapture *this)
+{
+  CBaseEntity *EntityByClassname; // eax
+  CTeamControlPointMaster *v3; // eax
+  unsigned int m_Index; // edx
+  unsigned int v5; // ecx
+  unsigned int v6; // edx
+  unsigned int v7; // ecx
+  CTeamControlPoint *m_pEntity; // edi
+  char v9; // dl
+  int v10; // edi
+  int v11; // eax
+  CTriggerAreaCapture::perteamdata_t *m_pMemory; // ecx
+  bool v13; // zf
+  int *p_iNumTouching; // ecx
+  int i; // edi
+  char *v16; // eax
+  unsigned int v17; // eax
+  CEntInfo *v18; // ecx
+  IHandleEntity *v19; // edi
+  CBaseMultiplayerPlayer *v20; // ebx
+  int TeamNumber; // edi
+  IHandleEntity *v22; // eax
+  unsigned int v23; // eax
+  IHandleEntity *v24; // eax
+  unsigned int v25; // eax
+  IHandleEntity *v26; // eax
+  int v27; // ebp
+  int *v28; // edi
+  char v29; // bl
+  int v30; // edi
+  int v31; // ebp
+  int v32; // eax
+  CTriggerAreaCapture::perteamdata_t *v33; // edx
+  int v34; // edi
+  int v35; // ebp
+  CTriggerAreaCapture::perteamdata_t *v36; // ecx
+  unsigned int v37; // eax
+  unsigned int v38; // eax
+  CTeamControlPoint *v39; // ecx
+  double v40; // st7
+  double v41; // st6
+  CTriggerAreaCapture::perteamdata_t *v42; // edi
+  int v43; // eax
+  double v44; // st7
+  unsigned int v45; // eax
+  unsigned int v46; // edx
+  int v47; // edi
+  CBaseMultiplayerPlayer *v48; // ebx
+  int v49; // ebp
+  CBaseEntityList *j; // edi
+  CTriggerAreaCapture::blockers_t *v51; // edx
+  unsigned int v52; // eax
+  CTriggerAreaCapture::blockers_t *v53; // edx
+  CBaseMultiplayerPlayer *v54; // ecx
+  CBaseEntity *v55; // ecx
+  unsigned int v56; // eax
+  CTeamControlPoint *v57; // ecx
+  int m_Size; // ebp
+  int m_nAllocationCount; // eax
+  CUtlVector<CTriggerAreaCapture::blockers_t,CUtlMemory<CTriggerAreaCapture::blockers_t,int> > *p_m_Blockers; // edi
+  CTriggerAreaCapture::blockers_t *v61; // ecx
+  int v62; // eax
+  int v63; // ebx
+  CTriggerAreaCapture::blockers_t *v64; // eax
+  CTriggerAreaCapture::blockers_t *v65; // ebp
+  unsigned int v66; // eax
+  unsigned int v67; // eax
+  IHandleEntity *v68; // ecx
+  int m_nCapturingTeam; // ebp
+  int m_nTeamInZone; // eax
+  double v71; // st7
+  unsigned int v72; // eax
+  unsigned int v73; // eax
+  IHandleEntity *v74; // eax
+  double v75; // st7
+  double v76; // st7
+  COutputEvent *p_m_OnBreakTeam1; // ecx
+  int v78; // edi
+  int k; // ebp
+  CTriggerAreaCapture::perteamdata_t *v80; // eax
+  int iNumTouching; // ecx
+  float thinkTime; // [esp+18h] [ebp-84h]
+  float flTime; // [esp+1Ch] [ebp-80h]
+  float flTimea; // [esp+1Ch] [ebp-80h]
+  int v85; // [esp+20h] [ebp-7Ch]
+  CBaseMultiplayerPlayer *pBlockingPlayer; // [esp+30h] [ebp-6Ch]
+  CBaseMultiplayerPlayer *pBlockingPlayera; // [esp+30h] [ebp-6Ch]
+  float pBlockingPlayerb; // [esp+30h] [ebp-6Ch]
+  int flTimeDelta; // [esp+34h] [ebp-68h]
+  float flTimeDeltaa; // [esp+34h] [ebp-68h]
+  CBaseMultiplayerPlayer *flTimeDeltab; // [esp+34h] [ebp-68h]
+  int iNumPlayers[8]; // [esp+38h] [ebp-64h] BYREF
+  CBaseMultiplayerPlayer *pFirstPlayerTouching[8]; // [esp+58h] [ebp-44h]
+  int iNumBlockablePlayers[8]; // [esp+78h] [ebp-24h]
+
+  thinkTime = gpGlobals->curtime + 0.1;
+  CBaseEntity::SetNextThink(this, thinkTime, 0);
+  EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "team_control_point_master");
+  v3 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                    EntityByClassname,
+                                    0,
+                                    &CBaseEntity `RTTI Type Descriptor',
+                                    &CTeamControlPointMaster `RTTI Type Descriptor',
+                                    0);
+  if ( v3 )
+  {
+    m_Index = this->m_hPoint.m_Index;
+    if ( m_Index != -1 )
+    {
+      v5 = this->m_hPoint.m_Index & 0xFFF;
+      if ( g_pEntityList->m_EntPtrArray[v5].m_SerialNumber == m_Index >> 12 )
+      {
+        if ( g_pEntityList->m_EntPtrArray[v5].m_pEntity )
+        {
+          v6 = this->m_hPoint.m_Index;
+          if ( v6 == -1
+            || (v7 = this->m_hPoint.m_Index & 0xFFF, g_pEntityList->m_EntPtrArray[v7].m_SerialNumber != v6 >> 12) )
+          {
+            m_pEntity = 0;
+          }
+          else
+          {
+            m_pEntity = (CTeamControlPoint *)g_pEntityList->m_EntPtrArray[v7].m_pEntity;
+          }
+          if ( !CTeamControlPointMaster::PointCanBeCapped(v3, m_pEntity) )
+            return;
+        }
+      }
+    }
+  }
+  if ( !((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].~IGameSystem)(g_pGameRules) )
+  {
+    v9 = 0;
+    v10 = 0;
+    if ( this->m_TeamData.m_Size > 0 )
+    {
+      v11 = 0;
+      do
+      {
+        m_pMemory = this->m_TeamData.m_Memory.m_pMemory;
+        v13 = m_pMemory[v11].iNumTouching == 0;
+        p_iNumTouching = &m_pMemory[v11].iNumTouching;
+        if ( !v13 )
+        {
+          *p_iNumTouching = 0;
+          v9 = 1;
+          this->m_TeamData.m_Memory.m_pMemory[v11].iBlockedTouching = 0;
+        }
+        ++v10;
+        ++v11;
+      }
+      while ( v10 < this->m_TeamData.m_Size );
+      if ( v9 )
+      {
+        CTriggerAreaCapture::UpdateNumPlayers(this);
+        CTriggerAreaCapture::UpdateCappingTeam(this, 0);
+      }
+    }
+    return;
+  }
+  for ( i = 2; i < GetNumberOfTeams(); ++i )
+  {
+    iNumPlayers[i + 1] = 0;
+    iNumBlockablePlayers[i + 1] = 0;
+    pFirstPlayerTouching[i + 1] = 0;
+  }
+  v16 = 0;
+  for ( pBlockingPlayer = 0;
+        (int)pBlockingPlayer < this->m_hTouchingEntities.m_Size;
+        pBlockingPlayer = (CBaseMultiplayerPlayer *)((char *)pBlockingPlayer + 1) )
+  {
+    v17 = this->m_hTouchingEntities.m_Memory.m_pMemory[(_DWORD)v16].m_Index;
+    if ( v17 != -1 )
+    {
+      v18 = &g_pEntityList->m_EntPtrArray[v17 & 0xFFF];
+      if ( g_pEntityList->m_EntPtrArray[v17 & 0xFFF].m_SerialNumber == v17 >> 12 )
+      {
+        v19 = v18->m_pEntity;
+        if ( v18->m_pEntity )
+        {
+          if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v19->__vftable[25].SetRefEHandle)(v18->m_pEntity) )
+          {
+            v20 = ((unsigned __int8 (__thiscall *)(IHandleEntity *))v19->__vftable[25].SetRefEHandle)(v19) != 0
+                ? (CBaseMultiplayerPlayer *)v19
+                : 0;
+            if ( v20->IsAlive(v20) )
+            {
+              TeamNumber = CBaseEntity::GetTeamNumber(v20);
+              flTimeDelta = TeamNumber;
+              if ( this->m_hPoint.m_Index == -1
+                || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != this->m_hPoint.m_Index >> 12 )
+              {
+                v22 = 0;
+              }
+              else
+              {
+                v22 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+              }
+              if ( ((unsigned __int8 (__stdcall *)(int, IHandleEntity_vtbl *))g_pGameRules->__vftable[1].OnRestore)(
+                     TeamNumber,
+                     v22[343].__vftable) )
+              {
+                v23 = this->m_hPoint.m_Index;
+                if ( v23 == -1
+                  || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v23 >> 12 )
+                {
+                  v24 = 0;
+                }
+                else
+                {
+                  v24 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+                }
+                if ( ((unsigned __int8 (__stdcall *)(CBaseMultiplayerPlayer *, IHandleEntity_vtbl *, _DWORD, _DWORD))g_pGameRules->__vftable[1].SafeRemoveIfDesired)(
+                       v20,
+                       v24[343].__vftable,
+                       0,
+                       0) )
+                {
+                  if ( TeamNumber >= 2 )
+                  {
+                    v27 = iNumPlayers[TeamNumber + 1];
+                    v28 = &iNumPlayers[TeamNumber + 1];
+                    if ( !v27 )
+                      pFirstPlayerTouching[flTimeDelta + 1] = v20;
+                    *v28 = v27
+                         + ((int (__thiscall *)(CGameRules *, CBaseMultiplayerPlayer *))g_pGameRules->__vftable[1].OnSave)(
+                             g_pGameRules,
+                             v20);
+                  }
+                }
+                else
+                {
+                  v25 = this->m_hPoint.m_Index;
+                  if ( v25 == -1
+                    || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v25 >> 12 )
+                  {
+                    v26 = 0;
+                  }
+                  else
+                  {
+                    v26 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+                  }
+                  if ( ((unsigned __int8 (__stdcall *)(CBaseMultiplayerPlayer *, IHandleEntity_vtbl *, _DWORD, _DWORD))g_pGameRules->__vftable[1].IsPerFrame)(
+                         v20,
+                         v26[343].__vftable,
+                         0,
+                         0) )
+                  {
+                    iNumBlockablePlayers[TeamNumber + 1] += ((int (__thiscall *)(CGameRules *, CBaseMultiplayerPlayer *))g_pGameRules->__vftable[1].OnSave)(
+                                                              g_pGameRules,
+                                                              v20);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    v16 = (char *)&pBlockingPlayer->CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable
+        + 1;
+  }
+  pBlockingPlayera = 0;
+  v29 = 0;
+  this->m_nTeamInZone = 0;
+  v30 = 2;
+  if ( GetNumberOfTeams() > 2 )
+  {
+    v31 = 2;
+    do
+    {
+      v32 = iNumPlayers[v30 + 1] * mp_simulatemultiplecappers.m_pParent->m_nValue;
+      v33 = this->m_TeamData.m_Memory.m_pMemory;
+      v13 = v33[v31].iNumTouching == v32;
+      iNumPlayers[v30 + 1] = v32;
+      if ( !v13 )
+      {
+        v33[v31].iNumTouching = v32;
+        v29 = 1;
+      }
+      this->m_TeamData.m_Memory.m_pMemory[v31].iBlockedTouching = this->m_TeamData.m_Memory.m_pMemory[v31].iNumTouching;
+      if ( this->m_TeamData.m_Memory.m_pMemory[v31].iNumTouching )
+      {
+        pBlockingPlayera = (CBaseMultiplayerPlayer *)((char *)pBlockingPlayera + 1);
+        this->m_nTeamInZone = v30;
+      }
+      ++v30;
+      ++v31;
+    }
+    while ( v30 < GetNumberOfTeams() );
+    if ( (int)pBlockingPlayera > 1 )
+      this->m_nTeamInZone = 0;
+  }
+  CTriggerAreaCapture::UpdateTeamInZone(this);
+  if ( mp_blockstyle.m_pParent->m_nValue == 1 && this->m_bCapturing && (int)pBlockingPlayera > 1 )
+  {
+    v34 = 2;
+    if ( GetNumberOfTeams() > 2 )
+    {
+      v35 = 2;
+      do
+      {
+        v36 = this->m_TeamData.m_Memory.m_pMemory;
+        v13 = v36[v35].iNumTouching == 0;
+        iNumPlayers[v34 + 1] = 0;
+        if ( !v13 )
+        {
+          v36[v35].iNumTouching = 0;
+          v29 = 1;
+        }
+        ++v34;
+        ++v35;
+      }
+      while ( v34 < GetNumberOfTeams() );
+    }
+  }
+  if ( v29 )
+    CTriggerAreaCapture::UpdateNumPlayers(this);
+  if ( this->m_bCapturing )
+  {
+    v37 = this->m_hPoint.m_Index;
+    if ( v37 != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == v37 >> 12
+      && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+    {
+      v38 = this->m_hPoint.m_Index;
+      if ( v38 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v38 >> 12 )
+        v39 = 0;
+      else
+        v39 = (CTeamControlPoint *)g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+      CTeamControlPoint::SetLastContestedAt(v39, gpGlobals->curtime);
+    }
+    v40 = gpGlobals->curtime - this->m_flLastReductionTime;
+    *(float *)iNumPlayers = v40;
+    v41 = v40;
+    flTimeDeltaa = v40;
+    if ( mp_capstyle.m_pParent->m_nValue == 1 )
+    {
+      v42 = this->m_TeamData.m_Memory.m_pMemory;
+      v43 = 1;
+      if ( v42[this->m_nTeamInZone].iNumTouching > 1 )
+      {
+        do
+          v41 = v41 + v40 / (double)++v43;
+        while ( v43 < v42[this->m_nTeamInZone].iNumTouching );
+        v40 = v41;
+        flTimeDeltaa = v41;
+      }
+    }
+    this->m_flLastReductionTime = gpGlobals->curtime;
+    if ( (int)pBlockingPlayera > 1 )
+    {
+      if ( !this->m_bBlocked )
+      {
+        this->m_bBlocked = 1;
+        CTriggerAreaCapture::UpdateBlocked(this);
+      }
+      v44 = this->m_fTimeRemaining / this->m_flCapTime;
+      if ( mp_capstyle.m_pParent->m_nValue == 1 )
+        v44 = this->m_fTimeRemaining
+            / ((double)this->m_TeamData.m_Memory.m_pMemory[this->m_nCapturingTeam].iNumRequiredToCap
+             * (this->m_flCapTime + this->m_flCapTime));
+      if ( v44 <= 0.5 )
+      {
+        v45 = this->m_hPoint.m_Index;
+        if ( v45 != -1 )
+        {
+          v46 = this->m_hPoint.m_Index & 0xFFF;
+          if ( g_pEntityList->m_EntPtrArray[v46].m_SerialNumber == v45 >> 12 )
+          {
+            if ( g_pEntityList->m_EntPtrArray[v46].m_pEntity )
+            {
+              v47 = 2;
+              if ( GetNumberOfTeams() > 2 )
+              {
+                while ( this->m_nCapturingTeam == v47 || !pFirstPlayerTouching[v47 + 1] )
+                {
+                  if ( ++v47 >= GetNumberOfTeams() )
+                    goto LABEL_121;
+                }
+                v48 = pFirstPlayerTouching[v47 + 1];
+                flTimeDeltab = v48;
+                if ( v48 )
+                {
+                  v49 = this->m_Blockers.m_Size - 1;
+                  for ( j = g_pEntityList; v49 >= 0; --v49 )
+                  {
+                    v51 = this->m_Blockers.m_Memory.m_pMemory;
+                    v52 = v51[v49].hPlayer.m_Index;
+                    v53 = &v51[v49];
+                    if ( v52 == -1 || j->m_EntPtrArray[v52 & 0xFFF].m_SerialNumber != v52 >> 12 )
+                      v54 = 0;
+                    else
+                      v54 = (CBaseMultiplayerPlayer *)j->m_EntPtrArray[v52 & 0xFFF].m_pEntity;
+                    if ( v54 == v48 )
+                    {
+                      if ( v53->iCapAttemptNumber == this->m_iCapAttemptNumber )
+                      {
+                        v55 = v53->hPlayer.m_Index == -1
+                           || j->m_EntPtrArray[v53->hPlayer.m_Index & 0xFFF].m_SerialNumber != v53->hPlayer.m_Index >> 12
+                            ? 0
+                            : (CBaseEntity *)j->m_EntPtrArray[v53->hPlayer.m_Index & 0xFFF].m_pEntity;
+                        if ( CBaseTrigger::IsTouching(this, v55) )
+                          goto LABEL_121;
+                      }
+                      if ( this->m_Blockers.m_Size - v49 - 1 > 0 )
+                        memmove(
+                          (unsigned __int8 *)&this->m_Blockers.m_Memory.m_pMemory[v49],
+                          (unsigned __int8 *)&this->m_Blockers.m_Memory.m_pMemory[v49 + 1],
+                          8 * (this->m_Blockers.m_Size - v49 - 1));
+                      --this->m_Blockers.m_Size;
+                      j = g_pEntityList;
+                    }
+                  }
+                  v56 = this->m_hPoint.m_Index;
+                  if ( v56 == -1 || j->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v56 >> 12 )
+                    v57 = 0;
+                  else
+                    v57 = (CTeamControlPoint *)j->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+                  CTeamControlPoint::CaptureBlocked(v57, (int)j, (int)this, v48, v85);
+                  m_Size = this->m_Blockers.m_Size;
+                  m_nAllocationCount = this->m_Blockers.m_Memory.m_nAllocationCount;
+                  p_m_Blockers = &this->m_Blockers;
+                  if ( m_Size + 1 > m_nAllocationCount )
+                    CUtlMemory<CEntityDataInstantiator<StepSimulationData>::HashEntry,int>::Grow(
+                      (CUtlMemory<CUtlHandleTable<vgui::BuildGroup,20>::EntryType_t,int> *)&this->m_Blockers,
+                      m_Size - m_nAllocationCount + 1);
+                  ++this->m_Blockers.m_Size;
+                  v61 = p_m_Blockers->m_Memory.m_pMemory;
+                  v62 = this->m_Blockers.m_Size - m_Size - 1;
+                  v13 = this->m_Blockers.m_Size - m_Size == 1;
+                  this->m_Blockers.m_pElements = this->m_Blockers.m_Memory.m_pMemory;
+                  if ( v62 >= 0 && !v13 )
+                    memmove((unsigned __int8 *)&v61[m_Size + 1], (unsigned __int8 *)&v61[m_Size], 8 * v62);
+                  v63 = m_Size;
+                  v64 = &p_m_Blockers->m_Memory.m_pMemory[m_Size];
+                  if ( v64 )
+                    v64->hPlayer.m_Index = -1;
+                  v65 = &p_m_Blockers->m_Memory.m_pMemory[v63];
+                  v65->hPlayer.m_Index = flTimeDeltab->GetRefEHandle(flTimeDeltab)->m_Index;
+                  p_m_Blockers->m_Memory.m_pMemory[v63].iCapAttemptNumber = this->m_iCapAttemptNumber;
+                }
+              }
+            }
+          }
+        }
+      }
+LABEL_121:
+      if ( !mp_blockstyle.m_pParent->m_nValue && this->m_bCapturing )
+      {
+        if ( this->m_nCapturingTeam == 2 )
+        {
+          COutputEvent::FireOutput(&this->m_OnBreakTeam1, this, this, 0.0);
+        }
+        else if ( this->m_nCapturingTeam == 3 )
+        {
+          COutputEvent::FireOutput(&this->m_OnBreakTeam2, this, this, 0.0);
+        }
+        COutputEvent::FireOutput(&this->m_BreakOutput, this, this, 0.0);
+        this->m_bCapturing = 0;
+        v66 = this->m_hPoint.m_Index;
+        if ( v66 != -1
+          && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == v66 >> 12
+          && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+        {
+          v67 = this->m_hPoint.m_Index;
+          if ( v67 == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v67 >> 12 )
+            v68 = 0;
+          else
+            v68 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+          CBaseTeamObjectiveResource::SetCappingTeam(g_pObjectiveResource, (int)v68[343].__vftable, 0);
+        }
+        CTriggerAreaCapture::SetCapTimeRemaining(this, 0.0);
+      }
+      return;
+    }
+    if ( this->m_bBlocked )
+    {
+      this->m_bBlocked = 0;
+      CTriggerAreaCapture::UpdateBlocked(this);
+      v40 = flTimeDeltaa;
+    }
+    pBlockingPlayerb = this->m_flCapTime;
+    if ( mp_capstyle.m_pParent->m_nValue == 1 )
+      pBlockingPlayerb = (double)this->m_TeamData.m_Memory.m_pMemory[this->m_nCapturingTeam].iNumRequiredToCap
+                       * (this->m_flCapTime + this->m_flCapTime);
+    m_nCapturingTeam = this->m_nCapturingTeam;
+    m_nTeamInZone = this->m_nTeamInZone;
+    if ( m_nCapturingTeam == m_nTeamInZone )
+    {
+      v71 = this->m_fTimeRemaining - v40;
+    }
+    else if ( this->m_nOwningTeam || !m_nTeamInZone )
+    {
+      if ( g_pGameRules
+        && (v72 = this->m_hPoint.m_Index, v72 != -1)
+        && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == v72 >> 12
+        && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity
+        && ((v73 = this->m_hPoint.m_Index, v73 == -1)
+         || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != v73 >> 12
+          ? (v74 = 0)
+          : (v74 = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity),
+            ((unsigned __int8 (__stdcall *)(int, IHandleEntity_vtbl *))g_pGameRules->__vftable[1].OnRestore)(
+              m_nCapturingTeam,
+              v74[343].__vftable)) )
+      {
+        v75 = pBlockingPlayerb / mp_capdeteriorate_time.m_pParent->m_fValue * *(float *)iNumPlayers;
+        if ( g_pGameRules && LOBYTE(g_pGameRules[67].m_pNext) )
+          v75 = v75 * 6.0;
+        v71 = v75 + this->m_fTimeRemaining;
+      }
+      else
+      {
+        v71 = pBlockingPlayerb;
+      }
+    }
+    else
+    {
+      v71 = v40 + this->m_fTimeRemaining;
+    }
+    flTime = v71;
+    CTriggerAreaCapture::SetCapTimeRemaining(this, flTime);
+    v76 = 0.0;
+    if ( this->m_fTimeRemaining <= 0.0 )
+    {
+      CTriggerAreaCapture::EndCapture(this, this->m_nCapturingTeam);
+      return;
+    }
+    if ( pBlockingPlayerb <= (double)this->m_fTimeRemaining && this->m_bCapturing )
+    {
+      if ( this->m_nCapturingTeam == 2 )
+      {
+        p_m_OnBreakTeam1 = &this->m_OnBreakTeam1;
+      }
+      else
+      {
+        if ( this->m_nCapturingTeam != 3 )
+        {
+LABEL_168:
+          flTimea = v76;
+          COutputEvent::FireOutput(&this->m_BreakOutput, this, this, flTimea);
+          this->m_bCapturing = 0;
+          CTriggerAreaCapture::UpdateCappingTeam(this, 0);
+          CTriggerAreaCapture::SetCapTimeRemaining(this, 0.0);
+          return;
+        }
+        p_m_OnBreakTeam1 = &this->m_OnBreakTeam2;
+      }
+      COutputEvent::FireOutput(p_m_OnBreakTeam1, this, this, 0.0);
+      v76 = 0.0;
+      goto LABEL_168;
+    }
+  }
+  else if ( (int)pBlockingPlayera > 0 )
+  {
+    v78 = 2;
+    if ( GetNumberOfTeams() > 2 )
+    {
+      for ( k = 2; ; ++k )
+      {
+        v80 = &this->m_TeamData.m_Memory.m_pMemory[k];
+        if ( v80->bCanCap && this->m_nOwningTeam != v78 )
+        {
+          iNumTouching = v80->iNumTouching;
+          if ( iNumTouching )
+          {
+            if ( mp_capstyle.m_pParent->m_nValue || iNumTouching >= v80->iNumRequiredToCap )
+              break;
+          }
+        }
+        if ( ++v78 >= GetNumberOfTeams() )
+          return;
+      }
+      CTriggerAreaCapture::StartCapture(this, v78, 0);
+    }
+  }
+}

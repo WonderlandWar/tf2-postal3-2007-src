@@ -1,0 +1,25 @@
+void __usercall CWeaponMedigun::WeaponReset(CWeaponMedigun *this@<ecx>, int a2@<ebx>, int a3@<ebp>)
+{
+  bool val; // [esp+7h] [ebp-5h] BYREF
+  float v5; // [esp+8h] [ebp-4h] BYREF
+
+  CTFWeaponBase::WeaponReset(this);
+  this->m_flHealEffectLifetime = 0.0;
+  val = 0;
+  CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+    (CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bHealing,
+    &val);
+  val = 0;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking>::Set(&this->m_bAttacking, &val);
+  val = 1;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bHolstered>::Set(&this->m_bHolstered, &val);
+  val = 0;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bChargeRelease>::Set(&this->m_bChargeRelease, &val);
+  this->m_flNextBuzzTime = 0.0;
+  this->m_flReleaseStartedAt = 0.0;
+  v5 = 0.0;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(
+    (CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime> *)&this->m_flChargeLevel,
+    &v5);
+  CWeaponMedigun::RemoveHealingTarget(this, a2, a3, (int)this, -1, 1);
+}

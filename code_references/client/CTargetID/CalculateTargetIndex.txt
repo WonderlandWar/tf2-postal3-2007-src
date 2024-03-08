@@ -1,0 +1,12 @@
+int __thiscall CTargetID::CalculateTargetIndex(CTargetID *this, C_TFPlayer *pLocalTFPlayer)
+{
+  int IDTarget; // esi
+  CTargetID *Element; // eax
+
+  IDTarget = C_TFPlayer::GetIDTarget(pLocalTFPlayer);
+  Element = (CTargetID *)CHud::FindElement(&gHUD, "CSecondaryTargetID");
+  if ( Element && Element != this && Element->m_iTargetEntIndex == IDTarget )
+    return 0;
+  else
+    return IDTarget;
+}

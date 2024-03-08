@@ -1,0 +1,9 @@
+double __thiscall CTFPistol::GetWeaponSpread(CTFPistol *this)
+{
+  float val; // [esp+0h] [ebp-1Ch]
+  float WeaponSpread; // [esp+18h] [ebp-4h]
+
+  WeaponSpread = CTFWeaponBaseGun::GetWeaponSpread(this);
+  val = this->m_flAccuracyPenaltyTime.m_Value - gpGlobals->curtime;
+  return RemapValClamped(val, 0.0, 1.5, 1.0, 10.0) * WeaponSpread;
+}

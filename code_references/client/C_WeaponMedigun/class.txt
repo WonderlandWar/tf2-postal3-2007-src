@@ -1,0 +1,102 @@
+class C_WeaponMedigun : public C_TFWeaponBaseGun
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+    private void C_WeaponMedigun(class C_WeaponMedigun & );
+    public void C_WeaponMedigun();
+    public void ~C_WeaponMedigun();
+    public void Precache();
+    public bool Deploy();
+    public bool Holster(class C_BaseCombatWeapon * );
+    public void UpdateOnRemove();
+    public void ItemHolsterFrame();
+    public void ItemPostFrame();
+    public bool Lower();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public void WeaponIdle();
+    public void DrainCharge();
+    public void WeaponReset();
+    public float GetTargetRange();
+    public float GetStickRange();
+    public float GetHealRate();
+    public bool AppliesModifier();
+    public int GetWeaponID();
+    public bool IsReleasingCharge();
+    public void StopHealSound(bool ,bool );
+    public void OnDataChanged(enum DataUpdateType_t );
+    public void ClientThink();
+    public void UpdateEffects();
+    public void ForceHealingTargetUpdate();
+    public class C_BaseEntity * GetHealTarget();
+    public void ManageChargeEffect();
+    public float GetChargeLevel();
+    private bool FindAndHealTargets();
+    private void MaintainTargetInSlot(int );
+    private void FindNewTargetForSlot(int );
+    private void RemoveHealingTarget(int ,bool );
+    private bool HealingTarget(class C_BaseEntity * );
+    private bool CouldHealTarget(class C_BaseEntity * );
+    class NetworkVar_m_hHealingTargets
+    {
+        public class CHandle<C_BaseEntity> & operator[](int );
+        public class CHandle<C_BaseEntity> & Get(int );
+        public class CHandle<C_BaseEntity> & GetForModify(int );
+        public void Set(int ,class CHandle<C_BaseEntity> & );
+        public class CHandle<C_BaseEntity> * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected class CHandle<C_BaseEntity> m_Value[1];
+        public void NetworkVar_m_hHealingTargets(class C_WeaponMedigun::NetworkVar_m_hHealingTargets & );
+        public void NetworkVar_m_hHealingTargets();
+    };
+    public class C_WeaponMedigun::NetworkVar_m_hHealingTargets m_hHealingTargets;
+    class NetworkVar_m_bHealing
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bHealing> m_bHealing;
+    class NetworkVar_m_bAttacking
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bAttacking> m_bAttacking;
+    protected float m_flNextBuzzTime;
+    protected float m_flHealEffectLifetime;
+    protected float m_flReleaseStartedAt;
+    class NetworkVar_m_bHolstered
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bHolstered> m_bHolstered;
+    class NetworkVar_m_bChargeRelease
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bChargeRelease> m_bChargeRelease;
+    class NetworkVar_m_flChargeLevel
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,C_WeaponMedigun::NetworkVar_m_flChargeLevel> m_flChargeLevel;
+    protected float m_flNextTargetCheckTime;
+    protected bool m_bPlayingSound;
+    protected bool m_bUpdateHealingTargets;
+    struct healingtargeteffects_t
+    {
+        class C_BaseEntity * pTarget;
+        class CNewParticleEffect * pEffect;
+    };
+    protected class CUtlVector<C_WeaponMedigun::healingtargeteffects_t,CUtlMemory<C_WeaponMedigun::healingtargeteffects_t,int> > m_hHealingTargetEffects;
+    protected float m_flFlashCharge;
+    protected bool m_bOldChargeRelease;
+    protected class CNewParticleEffect * m_pChargeEffect;
+    protected class CSoundPatch * m_pChargedSound;
+    public class C_WeaponMedigun & operator=(class C_WeaponMedigun & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

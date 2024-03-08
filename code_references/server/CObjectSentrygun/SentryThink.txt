@@ -1,0 +1,23 @@
+void __thiscall CObjectSentrygun::SentryThink(CObjectSentrygun *this)
+{
+  float thinkTime; // [esp+0h] [ebp-Ch]
+
+  if ( this->m_iState.m_Value == 1 )
+  {
+    CObjectSentrygun::SentryRotate(this);
+  }
+  else if ( this->m_iState.m_Value == 2 )
+  {
+    CObjectSentrygun::Attack(this);
+  }
+  else if ( this->m_iState.m_Value == 3 && this->m_flUpgradeCompleteTime < (double)gpGlobals->curtime )
+  {
+    CObjectSentrygun::FinishUpgrading(this);
+  }
+  thinkTime = gpGlobals->curtime + 0.05;
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CObjectSentrygun::SentryThink,
+    thinkTime,
+    "SentrygunContext");
+}

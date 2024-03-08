@@ -1,0 +1,63 @@
+class CTFFreezePanel : public vgui::EditablePanel, public CHudElement
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFFreezePanel_RegisterMap
+    {
+        public void CTFFreezePanel_RegisterMap();
+    };
+    public class CTFFreezePanel::CTFFreezePanel_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFFreezePanel_Register
+    {
+        public void CTFFreezePanel_Register();
+    };
+    public class CTFFreezePanel::CTFFreezePanel_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFFreezePanel_RegisterKBMap
+    {
+        public void CTFFreezePanel_RegisterKBMap();
+    };
+    public class CTFFreezePanel::CTFFreezePanel_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFFreezePanel(class CTFFreezePanel & );
+    public void CTFFreezePanel(char * );
+    public void Reset();
+    public void Init();
+    public void FireGameEvent(class IGameEvent * );
+    public void ShowSnapshotPanel(bool );
+    public void UpdateCallout();
+    public void ShowCalloutsIn(float );
+    public void ShowSnapshotPanelIn(float );
+    public void Show();
+    public void Hide();
+    public bool ShouldDraw();
+    public void OnThink();
+    public int HudElementKeyInput(int ,enum ButtonCode_t ,char * );
+    protected class CTFFreezePanelCallout * TestAndAddCallout(class Vector & ,class Vector & ,class Vector & ,class CUtlVector<Vector,CUtlMemory<Vector,int> > * ,class CUtlVector<Vector,CUtlMemory<Vector,int> > * ,class Vector & ,class Vector & ,class Vector & ,class Vector & ,int * ,int * );
+    private void ShowNemesisPanel(bool );
+    private int m_iYBase;
+    private int m_iKillerIndex;
+    private class CTFHudPlayerHealth * m_pKillerHealth;
+    private int m_iShowNemesisPanel;
+    private class CUtlVector<CTFFreezePanelCallout *,CUtlMemory<CTFFreezePanelCallout *,int> > m_pCalloutPanels;
+    private float m_flShowCalloutsAt;
+    private float m_flShowSnapshotReminderAt;
+    private class vgui::EditablePanel * m_pNemesisSubPanel;
+    enum _unnamed_11818
+    {
+        SHOW_NO_NEMESIS=0,
+        SHOW_NEW_NEMESIS=1,
+        SHOW_REVENGE=2
+    };
+    public void ~CTFFreezePanel();
+    public class CTFFreezePanel & operator=(class CTFFreezePanel & );
+    public void * __vecDelDtor(unsigned int );
+};

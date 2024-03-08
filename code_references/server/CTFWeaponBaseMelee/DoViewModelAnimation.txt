@@ -1,0 +1,4 @@
+void __thiscall CTFWeaponBaseMelee::DoViewModelAnimation(CTFWeaponBaseMelee *this)
+{
+  ((void (__stdcall *)(int))this->SendWeaponAnim)(this->m_iWeaponMode != 0 ? 197 : 188);
+}

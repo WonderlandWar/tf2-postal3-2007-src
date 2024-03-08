@@ -1,0 +1,16 @@
+char __thiscall CSecondaryTargetID::ShouldDraw(CSecondaryTargetID *this)
+{
+  CHudElement *Element; // eax
+
+  Element = CHud::FindElement(&gHUD, "CTFStatPanel");
+  if ( Element
+    && Element != (CHudElement *)232
+    && (*(unsigned __int8 (__thiscall **)(bool *))(*(_DWORD *)&Element[-10].m_bActive + 128))(&Element[-10].m_bActive) )
+  {
+    return 0;
+  }
+  else
+  {
+    return CTargetID::ShouldDraw(this);
+  }
+}

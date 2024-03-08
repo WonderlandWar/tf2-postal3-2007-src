@@ -1,0 +1,37 @@
+void __thiscall CWeaponInvisProxy::OnBind(CWeaponInvisProxy *this, C_BaseEntity *pEnt)
+{
+  CEntInfo *v3; // ecx
+  C_BaseEntity *m_pEntity; // esi
+  C_TFPlayer *v5; // esi
+  C_TFPlayer *LocalTFPlayer; // eax
+  int v7; // ebx
+  float flPercentInvisible; // [esp+10h] [ebp+4h]
+
+  if ( this->m_pPercentInvisible && pEnt )
+  {
+    if ( pEnt->m_pMoveParent.m_Index != -1
+      && (v3 = &g_pEntityList->m_EntPtrArray[pEnt->m_pMoveParent.m_Index & 0xFFF],
+          g_pEntityList->m_EntPtrArray[pEnt->m_pMoveParent.m_Index & 0xFFF].m_SerialNumber == pEnt->m_pMoveParent.m_Index >> 12)
+      && (m_pEntity = (C_BaseEntity *)v3->m_pEntity) != 0
+      && m_pEntity->IsPlayer((C_BaseEntity *)v3->m_pEntity) )
+    {
+      v5 = (C_TFPlayer *)ToBasePlayer(m_pEntity);
+      flPercentInvisible = C_TFPlayer::GetPercentInvisible(v5);
+      LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+      if ( LocalTFPlayer
+        && (v7 = LocalTFPlayer->GetTeamNumber(LocalTFPlayer), v7 == v5->GetTeamNumber(v5))
+        && flPercentInvisible > (double)tf_teammate_max_invis.m_pParent->m_fValue )
+      {
+        ((void (__stdcall *)(_DWORD))this->m_pPercentInvisible->SetFloatValue)(tf_teammate_max_invis.m_pParent->m_fValue);
+      }
+      else
+      {
+        ((void (__stdcall *)(_DWORD))this->m_pPercentInvisible->SetFloatValue)(LODWORD(flPercentInvisible));
+      }
+    }
+    else
+    {
+      ((void (__stdcall *)(_DWORD))this->m_pPercentInvisible->SetFloatValue)(0.0);
+    }
+  }
+}

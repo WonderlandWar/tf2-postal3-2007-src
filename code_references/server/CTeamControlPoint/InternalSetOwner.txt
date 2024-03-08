@@ -1,0 +1,192 @@
+void __thiscall CTeamControlPoint::InternalSetOwner(
+        CTeamControlPoint *this,
+        int iCapTeam,
+        bool bMakeSound,
+        int iNumCappers,
+        int *pCappingPlayers)
+{
+  int v5; // eax
+  CBroadcastRecipientFilter_vtbl *m_iTeam; // ebp
+  CTeamControlPoint_vtbl *v8; // edx
+  const char *pszValue; // ecx
+  int v10; // eax
+  const char *v11; // eax
+  int v12; // eax
+  int v13; // eax
+  int v14; // edi
+  int v15; // ebx
+  CStudioHdr *m_pStudioHdr; // ecx
+  const char *v17; // ebp
+  const char *v18; // eax
+  int BodygroupByName; // eax
+  int v20; // eax
+  COutputEvent *p_m_OnCapTeam2; // ecx
+  int v22; // eax
+  int v23; // ebx
+  CBasePlayer *v24; // eax
+  CBaseEntity *v25; // edi
+  int v26; // ebp
+  int i; // edi
+  CBaseMultiplayerPlayer *v28; // ebx
+  COutputEvent *p_m_OnOwnerChangedToTeam1; // ecx
+  int v30; // eax
+  const char *v31; // eax
+  CBaseEntity *j; // edi
+  CTeamControlPointMaster *v33; // eax
+  const char *v34; // eax
+  const char *v35; // [esp+18h] [ebp-44h]
+  int v36; // [esp+28h] [ebp-34h]
+  CBroadcastRecipientFilter filter; // [esp+38h] [ebp-24h] BYREF
+
+  v5 = iCapTeam;
+  m_iTeam = (CBroadcastRecipientFilter_vtbl *)this->m_iTeam;
+  v8 = this->__vftable;
+  this->m_iTeam = iCapTeam;
+  filter.__vftable = m_iTeam;
+  ((void (__stdcall *)(int))v8->ChangeTeam)(v5);
+  if ( bMakeSound )
+  {
+    CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+    *(_DWORD *)&filter.m_bReliable = &CBroadcastRecipientFilter::`vftable';
+    CRecipientFilter::AddAllPlayers((CRecipientFilter *)&filter.m_bReliable);
+    pszValue = this->m_TeamData.m_Memory.m_pMemory[this->m_iTeam].iszCapSound.pszValue;
+    if ( !pszValue )
+      pszValue = locale;
+    v35 = pszValue;
+    v10 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+    CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v10, v35, 0, 0.0, 0);
+    CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+  }
+  v11 = this->m_TeamData.m_Memory.m_pMemory[this->m_iTeam].iszModel.pszValue;
+  if ( !v11 )
+    v11 = locale;
+  this->SetModel(this, v11);
+  CBaseAnimating::SetBodygroup(this, 0, this->m_TeamData.m_Memory.m_pMemory[this->m_iTeam].iModelBodygroup);
+  v12 = this->m_iTeam;
+  if ( v12 )
+    iCapTeam = v12 - 2;
+  else
+    iCapTeam = 2;
+  CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+    (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+    &iCapTeam);
+  v13 = CBaseAnimating::LookupSequence(this, "idle");
+  CBaseAnimating::ResetSequence(this, v13);
+  v14 = 0;
+  if ( this->m_TeamData.m_Size > 0 )
+  {
+    v15 = 0;
+    do
+    {
+      if ( v14 != 1 )
+      {
+        if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+          CBaseAnimating::LockStudioHdr(this);
+        m_pStudioHdr = this->m_pStudioHdr;
+        if ( m_pStudioHdr && CStudioHdr::SequencesAvailable(m_pStudioHdr) )
+        {
+          v17 = UTIL_VarArgs("cappoint_%d_percentage", v14);
+          if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+            CBaseAnimating::LockStudioHdr(this);
+          this->m_TeamData.m_Memory.m_pMemory[v15].iTeamPoseParam = CBaseAnimating::LookupPoseParameter(
+                                                                      this,
+                                                                      this->m_pStudioHdr,
+                                                                      v17);
+          v18 = UTIL_VarArgs("cappoint_%d_bodygroup", v14);
+          BodygroupByName = CBaseAnimating::FindBodygroupByName(this, v18);
+          if ( BodygroupByName != -1 )
+            this->m_TeamData.m_Memory.m_pMemory[v15].iModelBodygroup = BodygroupByName;
+        }
+        else
+        {
+          this->m_TeamData.m_Memory.m_pMemory[v15].iTeamPoseParam = -1;
+        }
+      }
+      ++v14;
+      ++v15;
+    }
+    while ( v14 < this->m_TeamData.m_Size );
+    m_iTeam = filter.__vftable;
+  }
+  CTeamControlPoint::UpdateCapPercentage(this);
+  v20 = this->m_iTeam;
+  if ( v20 )
+  {
+    v22 = v20 - 2;
+    if ( v22 )
+    {
+      if ( v22 != 1 )
+        goto LABEL_33;
+      p_m_OnCapTeam2 = &this->m_OnCapTeam2;
+    }
+    else
+    {
+      p_m_OnCapTeam2 = &this->m_OnCapTeam1;
+    }
+  }
+  else
+  {
+    p_m_OnCapTeam2 = &this->m_OnCapReset;
+  }
+  COutputEvent::FireOutput(p_m_OnCapTeam2, this, this, 0.0);
+LABEL_33:
+  if ( !bMakeSound )
+    goto LABEL_55;
+  v23 = 1;
+  if ( (int)m_iTeam > 1 && m_iTeam != (CBroadcastRecipientFilter_vtbl *)this->m_iTeam && gpGlobals->maxClients >= 1 )
+  {
+    do
+    {
+      v24 = UTIL_PlayerByIndex(v23);
+      v25 = v24;
+      if ( v24 && v24->IsPlayer(v24) && (CBroadcastRecipientFilter_vtbl *)CBaseEntity::GetTeamNumber(v25) == m_iTeam )
+        ((void (__thiscall *)(CBaseEntity *, int, _DWORD, _DWORD, _DWORD, _DWORD))v25->__vftable[2].DispatchResponse)(
+          v25,
+          49,
+          0,
+          0,
+          0,
+          0);
+      ++v23;
+    }
+    while ( v23 <= gpGlobals->maxClients );
+  }
+  v26 = iNumCappers;
+  for ( i = 0; i < v26; ++i )
+  {
+    v28 = (CBaseMultiplayerPlayer *)UTIL_PlayerByIndex(pCappingPlayers[i]);
+    if ( !v28 || !v28->IsPlayer(v28) )
+      v28 = 0;
+    this->PlayerCapped(this, v28);
+  }
+  if ( this->m_iTeam == 2 )
+  {
+    p_m_OnOwnerChangedToTeam1 = &this->m_OnOwnerChangedToTeam1;
+    goto LABEL_51;
+  }
+  if ( this->m_iTeam == 3 )
+  {
+    p_m_OnOwnerChangedToTeam1 = &this->m_OnOwnerChangedToTeam2;
+LABEL_51:
+    COutputEvent::FireOutput(p_m_OnOwnerChangedToTeam1, this, this, 0.0);
+  }
+  v30 = this->m_iTeam;
+  if ( v30 && v26 )
+    CTeamControlPoint::SendCapString(this, (int)this, v30, v26, pCappingPlayers, v36);
+LABEL_55:
+  v31 = this->GetControlPointMasterName(this);
+  for ( j = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, v31);
+        j;
+        j = CGlobalEntityList::FindEntityByClassname(&gEntList, j, v34) )
+  {
+    v33 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                       j,
+                                       0,
+                                       &CBaseEntity `RTTI Type Descriptor',
+                                       &CTeamControlPointMaster `RTTI Type Descriptor',
+                                       0);
+    if ( !v33->m_bDisabled )
+      CTeamControlPointMaster::CheckWinConditions(v33);
+    v34 = this->GetControlPointMasterName(this);
+  }
+}

@@ -1,0 +1,43 @@
+void __thiscall CTFTeamMenu::OnCommand(CTFTeamMenu *this, char *command)
+{
+  C_TFPlayer *LocalTFPlayer; // edi
+  int v4; // eax
+  int v5; // ebp
+  bool v6; // zf
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( !_stricmp(command, "vguicancel") )
+    goto LABEL_13;
+  if ( !LocalTFPlayer )
+    goto LABEL_13;
+  strstr((unsigned __int8 *)command, "jointeam ");
+  if ( !v4 )
+    goto LABEL_13;
+  v5 = -1;
+  if ( !_stricmp(command + 9, "spectate") )
+  {
+    v5 = 1;
+    goto LABEL_11;
+  }
+  if ( !_stricmp(command + 9, "red") )
+  {
+    v6 = !this->m_bRedDisabled;
+    v5 = 2;
+    goto LABEL_10;
+  }
+  if ( !_stricmp(command + 9, "blue") )
+  {
+    v6 = !this->m_bBlueDisabled;
+    v5 = 3;
+LABEL_10:
+    if ( !v6 )
+      return;
+  }
+LABEL_11:
+  if ( LocalTFPlayer->GetTeamNumber(LocalTFPlayer) != v5 )
+    engine->ClientCmd(engine, command);
+LABEL_13:
+  vgui::Frame::OnCommand(this, command);
+  this->ShowPanel(&this->IViewPortPanel, 0);
+  this->OnClose(this);
+}

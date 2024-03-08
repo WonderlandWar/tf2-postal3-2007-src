@@ -1,0 +1,13 @@
+void __thiscall CTFFreezePanel::Hide(CTFFreezePanel *this)
+{
+  int i; // esi
+  CTFFreezePanelCallout *v3; // ecx
+
+  this->SetVisible(this, 0);
+  for ( i = this->m_pCalloutPanels.m_Size - 1; i >= 0; --i )
+  {
+    v3 = this->m_pCalloutPanels.m_Memory.m_pMemory[i];
+    v3->MarkForDeletion(v3);
+  }
+  this->m_pCalloutPanels.m_Size = 0;
+}

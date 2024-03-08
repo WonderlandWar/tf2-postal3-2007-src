@@ -1,0 +1,39 @@
+// positive sp value has been detected, the output may be wrong!
+void __thiscall CTFPlayer::UpdateExpression(CTFPlayer *this)
+{
+  AI_Response *v2; // eax
+  IUniformRandomStream *v3; // ecx
+  double v4; // st7
+  const char *pszValue; // eax
+  float v6; // [esp+14h] [ebp-114h] BYREF
+  char v7[4]; // [esp+18h] [ebp-110h] BYREF
+
+  v2 = CBaseMultiplayerPlayer::SpeakConcept(this, 2);
+  if ( !v2 )
+  {
+    CTFPlayer::ClearExpression(this);
+    v4 = _RandomFloat(v3, 30.0, 40.0) + gpGlobals->curtime;
+LABEL_12:
+    this->m_flNextRandomExpressionTime = v4;
+    return;
+  }
+  AI_Response::GetResponse(v2, v7, 0x104u);
+  if ( !this->m_iszExpressionScene.pszValue )
+    goto LABEL_8;
+  pszValue = this->m_iszExpressionScene.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  if ( _stricmp(pszValue, v7) )
+  {
+LABEL_8:
+    if ( this->m_hExpressionSceneEnt.m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hExpressionSceneEnt.m_Index & 0xFFF].m_SerialNumber == this->m_hExpressionSceneEnt.m_Index >> 12 )
+    {
+      if ( g_pEntityList->m_EntPtrArray[this->m_hExpressionSceneEnt.m_Index & 0xFFF].m_pEntity )
+        CTFPlayer::ClearExpression(this);
+    }
+    this->m_iszExpressionScene.pszValue = *(const char **)AllocPooledString((const char *)&v6).pszValue;
+    v4 = InstancedScriptedScene(this, v7, &this->m_hExpressionSceneEnt, 0.0, 1, 0, 1, 0) + gpGlobals->curtime;
+    goto LABEL_12;
+  }
+}

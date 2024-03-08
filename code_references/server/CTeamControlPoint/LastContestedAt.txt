@@ -1,0 +1,4 @@
+double __thiscall CTeamControlPoint::LastContestedAt(CTeamControlPoint *this)
+{
+  return this->m_flLastContestedAt;
+}

@@ -1,0 +1,31 @@
+void __thiscall CTriggerAreaCapture::StartCapture(CTriggerAreaCapture *this, int team, int capmode)
+{
+  double m_flCapTime; // st7
+  int m_nCapturingTeam; // edx
+  float fDelay; // [esp+0h] [ebp-Ch]
+
+  if ( team == 2 )
+  {
+    COutputEvent::FireOutput(&this->m_OnStartTeam1, this, this, 0.0);
+  }
+  else if ( team == 3 )
+  {
+    COutputEvent::FireOutput(&this->m_OnStartTeam2, this, this, 0.0);
+  }
+  COutputEvent::FireOutput(&this->m_StartOutput, this, this, 0.0);
+  this->m_nCapturingTeam = team;
+  if ( mp_capstyle.m_pParent->m_nValue == 1 )
+    m_flCapTime = (double)this->m_TeamData.m_Memory.m_pMemory[team].iNumRequiredToCap
+                * (this->m_flCapTime + this->m_flCapTime);
+  else
+    m_flCapTime = this->m_flCapTime;
+  fDelay = m_flCapTime;
+  CTriggerAreaCapture::SetCapTimeRemaining(this, fDelay);
+  m_nCapturingTeam = this->m_nCapturingTeam;
+  this->m_bCapturing = 1;
+  this->m_bBlocked = 0;
+  this->m_iCapMode = capmode;
+  this->m_flLastReductionTime = gpGlobals->curtime;
+  CTriggerAreaCapture::UpdateCappingTeam(this, m_nCapturingTeam);
+  CTriggerAreaCapture::UpdateBlocked(this);
+}

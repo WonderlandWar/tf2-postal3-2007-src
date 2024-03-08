@@ -1,0 +1,48 @@
+class CTFFlameThrower : public CTFWeaponBaseGun
+{
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    private void CTFFlameThrower(class CTFFlameThrower & );
+    public void CTFFlameThrower();
+    public void ~CTFFlameThrower();
+	
+    public void Spawn();
+	
+    public int GetWeaponID();
+	
+    public bool Holster(class CBaseCombatWeapon * );
+    public void ItemPostFrame();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public bool Lower();
+    public void WeaponReset();
+	
+    public void DestroySounds();
+	
+    public class Vector GetVisualMuzzlePos();
+    public class Vector GetFlameOriginPos();
+	
+    private class Vector GetMuzzlePosHelper(bool );
+	
+    class NetworkVar_m_iWeaponState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFFlameThrower::NetworkVar_m_iWeaponState> m_iWeaponState;
+    class NetworkVar_m_bCritFire
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> m_bCritFire;
+	
+    private float m_flStartFiringTime;
+    private float m_flNextPrimaryAttackAnim;
+	
+    private int m_iParticleWaterLevel;
+    private float m_flAmmoUseRemainder;
+};

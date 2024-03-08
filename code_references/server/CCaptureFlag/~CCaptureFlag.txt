@@ -1,0 +1,20 @@
+void __thiscall CCaptureFlag::~CCaptureFlag(CCaptureFlag *this)
+{
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_outputOnCapture);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_outputOnDrop);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_outputOnPickUp);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_outputOnReturn);
+  CBoneFollowerManager::~CBoneFollowerManager(&this->m_BoneFollowerManager);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_pOutputAnimOver);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_pOutputAnimBegun);
+  if ( this )
+  {
+    this->CTFItem::CDynamicProp::IPositionWatcher::IWatcherCallback::__vftable = (IPositionWatcher_vtbl *)&IWatcherCallback::`vftable';
+    CBreakableProp::~CBreakableProp(this);
+  }
+  else
+  {
+    MEMORY[0] = &IWatcherCallback::`vftable';
+    CBreakableProp::~CBreakableProp(0);
+  }
+}

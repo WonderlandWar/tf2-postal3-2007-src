@@ -1,0 +1,26 @@
+void __thiscall CTFPlayerShared::Disguise(CTFPlayerShared *this, int nTeam, int nClass)
+{
+  int TeamNumber; // eax
+
+  TeamNumber = CBaseEntity::GetTeamNumber(this->m_pOuter);
+  if ( this->m_pOuter->m_PlayerClass.m_iClass.m_Value == 8 )
+  {
+    if ( TeamNumber == nTeam && nClass == 8 )
+    {
+      CTFPlayerShared::RemoveDisguise(this);
+    }
+    else if ( (nTeam != this->m_nDisguiseTeam.m_Value || nClass != this->m_nDisguiseClass.m_Value)
+           && (unsigned int)(nTeam - 2) <= 1
+           && (unsigned int)(nClass - 1) <= 8 )
+    {
+      CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseClass>::Set(
+        &this->m_nDesiredDisguiseClass,
+        &nClass);
+      CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseTeam>::Set(
+        &this->m_nDesiredDisguiseTeam,
+        &nTeam);
+      CTFPlayerShared::AddCond(this, 6, -1.0);
+      this->m_flDisguiseCompleteTime = gpGlobals->curtime + 2.0;
+    }
+  }
+}

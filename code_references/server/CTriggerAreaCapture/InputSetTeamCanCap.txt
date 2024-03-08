@@ -1,0 +1,61 @@
+void __thiscall CTriggerAreaCapture::InputSetTeamCanCap(CTriggerAreaCapture *this, inputdata_t *inputdata)
+{
+  variant_t *p_value; // ecx
+  const char *iVal; // ecx
+  const char *v5; // eax
+  char *v6; // eax
+  int v7; // edi
+  char *v8; // eax
+  bool v9; // bl
+  CBaseEntity *v10; // eax
+  const char *pszValue; // esi
+  const char *DebugName; // eax
+  bool bCanCap; // [esp-4h] [ebp-118h]
+  char parseString[255]; // [esp+Ch] [ebp-108h] BYREF
+
+  p_value = &inputdata->value;
+  if ( inputdata->value.fieldType == FIELD_STRING )
+  {
+    iVal = (const char *)p_value->iVal;
+    if ( iVal )
+      v5 = iVal;
+    else
+      v5 = locale;
+  }
+  else
+  {
+    v5 = variant_t::ToString(p_value);
+  }
+  V_strncpy(&parseString[4], v5, 255);
+  v6 = strtok(&parseString[4], " ");
+  if ( v6
+    && *v6
+    && (v7 = atoi(v6), (v8 = strtok(0, " ")) != 0)
+    && *v8
+    && (v9 = atoi(v8) != 0, v7 >= 0)
+    && v7 < GetNumberOfTeams() )
+  {
+    this->m_TeamData.m_Memory.m_pMemory[v7].bCanCap = v9;
+    if ( CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint) )
+    {
+      bCanCap = this->m_TeamData.m_Memory.m_pMemory[v7].bCanCap;
+      v10 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint);
+      CBaseTeamObjectiveResource::SetTeamCanCap(
+        g_pObjectiveResource,
+        LODWORD(v10[1].m_flShadowCastDistance.m_Value),
+        v7,
+        bCanCap);
+    }
+  }
+  else
+  {
+    pszValue = this->m_iClassname.pszValue;
+    if ( !pszValue )
+      pszValue = locale;
+    DebugName = CBaseEntity::GetDebugName(this);
+    _Warning(
+      "%s(%s) received SetTeamCanCap input with invalid format. Format should be: <team number> <can cap (0/1)>.\n",
+      pszValue,
+      DebugName);
+  }
+}

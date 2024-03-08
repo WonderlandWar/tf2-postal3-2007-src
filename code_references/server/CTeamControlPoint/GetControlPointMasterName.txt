@@ -1,0 +1,4 @@
+const char *__thiscall CTeamControlPoint::GetControlPointMasterName(CTeamControlPoint *this)
+{
+  return "team_control_point_master";
+}

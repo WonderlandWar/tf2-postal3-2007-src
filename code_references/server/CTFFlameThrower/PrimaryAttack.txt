@@ -1,0 +1,148 @@
+void __usercall CTFFlameThrower::PrimaryAttack(CTFFlameThrower *this@<ecx>, int a2@<ebx>)
+{
+  CBasePlayer *PlayerOwner; // eax
+  CTFPlayer *v4; // edi
+  int m_Value; // eax
+  int v6; // eax
+  double v7; // st7
+  bool v8; // zf
+  const QAngle *PunchAngle; // ebp
+  float *v10; // eax
+  int v11; // ebp
+  const QAngle *v12; // eax
+  double v13; // st7
+  float flDmgAmount; // [esp+18h] [ebp-C8h]
+  float flDamage; // [esp+28h] [ebp-B8h] BYREF
+  float m_flTimeFireDelay; // [esp+2Ch] [ebp-B4h]
+  QAngle vAngles; // [esp+30h] [ebp-B0h] BYREF
+  float v18; // [esp+3Ch] [ebp-A4h]
+  float v19; // [esp+40h] [ebp-A0h]
+  Vector result; // [esp+44h] [ebp-9Ch] BYREF
+  Vector vUp; // [esp+54h] [ebp-8Ch] BYREF
+  Vector vRight; // [esp+60h] [ebp-80h] BYREF
+  Vector vForward; // [esp+6Ch] [ebp-74h] BYREF
+  Vector vOrigin; // [esp+78h] [ebp-68h] BYREF
+  CGameTrace trace; // [esp+84h] [ebp-5Ch] BYREF
+
+  if ( gpGlobals->curtime >= (double)this->m_flNextPrimaryAttack.m_Value )
+  {
+    PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+    v4 = (CTFPlayer *)PlayerOwner;
+    if ( PlayerOwner )
+    {
+      if ( PlayerOwner->IsPlayer(PlayerOwner) )
+      {
+        if ( CTFWeaponBase::CanAttack(this) )
+        {
+          CTFWeaponBase::CalcIsAttackCritical(this);
+          v4->EyePosition(v4, (Vector *)&result.z);
+          CTFFlameThrower::GetMuzzlePosHelper(this, (Vector *)&vAngles.y, 1);
+          UTIL_TraceLine(
+            (Vector *)&result.z,
+            (const Vector *)&vAngles.y,
+            0x200400Bu,
+            this,
+            0,
+            (CGameTrace *)&trace.startpos.y);
+          if ( *(float *)&trace.contents >= 1.0 || trace.hitbox && *(_BYTE *)(trace.hitbox + 145) )
+          {
+            m_Value = this->m_iWeaponState.m_Value;
+            if ( m_Value )
+            {
+              v6 = m_Value - 1;
+              if ( v6 )
+              {
+                if ( v6 == 1 && this->m_flNextPrimaryAttackAnim <= (double)gpGlobals->curtime )
+                {
+                  CTFPlayer::DoAnimationEvent(v4, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+                  this->m_flNextPrimaryAttackAnim = gpGlobals->curtime + 1.4;
+                }
+              }
+              else if ( this->m_flStartFiringTime < (double)gpGlobals->curtime )
+              {
+                LODWORD(flDamage) = 2;
+                CNetworkVarBase<int,CTFFlameThrower::NetworkVar_m_iWeaponState>::operator=<enum FlameThrowerState_t>(
+                  &this->m_iWeaponState,
+                  (const FlameThrowerState_t *)&flDamage);
+                this->m_flNextPrimaryAttackAnim = gpGlobals->curtime;
+              }
+            }
+            else
+            {
+              CTFPlayer::DoAnimationEvent(v4, PLAYERANIMEVENT_ATTACK_PRE, 0);
+              this->SendWeaponAnim(this, 180);
+              v7 = gpGlobals->curtime + 0.16;
+              LODWORD(flDamage) = 1;
+              this->m_flStartFiringTime = v7;
+              CNetworkVarBase<int,CTFFlameThrower::NetworkVar_m_iWeaponState>::operator=<enum FlameThrowerState_t>(
+                &this->m_iWeaponState,
+                (const FlameThrowerState_t *)&flDamage);
+            }
+            CTFPlayer::NoteWeaponFired(v4);
+            CTFPlayer::SpeakWeaponFire(v4, -1);
+            CTFGameStats::Event_PlayerFiredWeapon(&CTF_GameStats, v4, this->m_bCritFire.m_Value);
+            ((void (__thiscall *)(ILagCompensationManager *, CTFPlayer *, CUserCmd *, int))lagcompensation->StartLagCompensation)(
+              lagcompensation,
+              v4,
+              v4->m_pCurrentCommand,
+              a2);
+            v8 = v4->m_nWaterLevel.m_Value == 3;
+            m_flTimeFireDelay = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flTimeFireDelay;
+            if ( !v8 )
+            {
+              v4->Weapon_ShootPosition(v4, (Vector *)&vOrigin.z);
+              PunchAngle = CBasePlayer::GetPunchAngle(v4);
+              v10 = (float *)v4->EyeAngles(v4);
+              vAngles.z = PunchAngle->x + *v10;
+              v18 = v10[1] + PunchAngle->y;
+              v19 = v10[2] + PunchAngle->z;
+              AngleVectors((QAngle *)&vAngles.z, (Vector *)&vForward.z, (Vector *)&vRight.z, (Vector *)&vUp.z);
+              v11 = g_aWeaponDamageTypes[this->GetWeaponID(this)];
+              HIBYTE(vAngles.y) = this->m_bCurrentAttackIsCrit;
+              CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+                &this->m_bCritFire,
+                (const bool *)&vAngles.y + 3);
+              if ( this->m_bCritFire.m_Value )
+                v11 |= 0x100000u;
+              vAngles.x = (double)this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_nDamage * m_flTimeFireDelay;
+              CTFFlameThrower::GetMuzzlePosHelper(this, &result, 0);
+              flDmgAmount = vAngles.x;
+              v12 = v4->EyeAngles(v4);
+              CTFFlameEntity::Create(&result, v12, this, v11, flDmgAmount);
+            }
+            v13 = m_flTimeFireDelay * 14.0 + this->m_flAmmoUseRemainder;
+            this->m_flAmmoUseRemainder = v13;
+            LODWORD(vAngles.x) = (int)v13;
+            if ( (int)v13 > 0 )
+            {
+              CBaseCombatCharacter::RemoveAmmo(v4, (int)v13, this->m_iPrimaryAmmoType.m_Value);
+              LODWORD(vAngles.x) = (int)((this->m_flAmmoUseRemainder - (double)SLODWORD(vAngles.x)) * 100.0);
+              this->m_flAmmoUseRemainder = (double)SLODWORD(vAngles.x) * 0.0099999998;
+            }
+            vAngles.x = gpGlobals->curtime + m_flTimeFireDelay;
+            CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &vAngles.x);
+            vAngles.x = gpGlobals->curtime + m_flTimeFireDelay;
+            CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle>::Set(
+              &this->m_flTimeWeaponIdle,
+              &vAngles.x);
+            ((void (__thiscall *)(ILagCompensationManager *))lagcompensation->FinishLagCompensation)(lagcompensation);
+          }
+          else if ( this->m_iWeaponState.m_Value > 0 )
+          {
+            flDamage = 0.0;
+            CNetworkVarBase<int,CTFFlameThrower::NetworkVar_m_iWeaponState>::operator=<enum FlameThrowerState_t>(
+              &this->m_iWeaponState,
+              (const FlameThrowerState_t *)&flDamage);
+          }
+        }
+        else
+        {
+          flDamage = 0.0;
+          CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+            (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+            (const int *)&flDamage);
+        }
+      }
+    }
+  }
+}

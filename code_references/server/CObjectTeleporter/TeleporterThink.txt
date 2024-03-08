@@ -1,0 +1,190 @@
+void __usercall CObjectTeleporter::TeleporterThink(CObjectTeleporter *this@<ecx>, CTFPlayer *a2@<ebx>)
+{
+  IHandleEntity *m_pEntity; // ebp
+  IHandleEntity_vtbl *v4; // edi
+  CBaseEntity *v5; // eax
+  const Vector *AbsOrigin; // eax
+  const CViewVectors *v7; // eax
+  double v8; // st6
+  double v9; // st7
+  const CViewVectors *v10; // eax
+  double v11; // st7
+  double v12; // st6
+  double v13; // st5
+  double v14; // st7
+  CTFPlayer *v15; // edi
+  int v16; // eax
+  int v17; // ebp
+  int v18; // ebx
+  CObjectTeleporter *v19; // ecx
+  const CTakeDamageInfo *v20; // eax
+  void (__thiscall **p_Teleport)(CTFPlayer *, float *, const QAngle *, Vector *); // ebx
+  const QAngle *AbsAngles; // eax
+  CTFWeaponBaseGun *ActiveTFWeapon; // ebx
+  CTFPlayer *v24; // eax
+  CTFPlayer *v25; // edi
+  CTFPlayer *v26; // eax
+  bool v27; // zf
+  int m_iDirectionBodygroup; // eax
+  float thinkTime; // [esp+1Ch] [ebp-480h]
+  long double val; // [esp+28h] [ebp-474h] BYREF
+  float x; // [esp+30h] [ebp-46Ch] BYREF
+  float y; // [esp+34h] [ebp-468h]
+  Vector maxs; // [esp+38h] [ebp-464h] BYREF
+  Vector mins; // [esp+44h] [ebp-458h] BYREF
+  float v35; // [esp+50h] [ebp-44Ch]
+  CTakeDamageInfo v36; // [esp+54h] [ebp-448h] BYREF
+  CBaseEntity *v37[256]; // [esp+9Ch] [ebp-400h] BYREF
+
+  thinkTime = gpGlobals->curtime + 0.05;
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CObjectTeleporter::TeleporterThink,
+    thinkTime,
+    "TeleporterContext");
+  if ( this->m_bDisabled.m_Value || !CObjectTeleporter::IsMatchingTeleporterReady(this) )
+  {
+    if ( this->m_iState.m_Value != 1 )
+    {
+      LODWORD(val) = 1;
+      CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(
+        (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> *)&this->m_iState,
+        (const int *)&val);
+      v27 = !this->m_bShowDirectionArrow;
+      this->m_flLastStateChangeTime = gpGlobals->curtime;
+      if ( !v27 )
+      {
+        m_iDirectionBodygroup = this->m_iDirectionBodygroup;
+        if ( m_iDirectionBodygroup >= 0 )
+          CBaseAnimating::SetBodygroup(this, m_iDirectionBodygroup, 0);
+        this->m_bShowDirectionArrow = 0;
+      }
+    }
+  }
+  else if ( 0.0 == this->m_flMyNextThink || gpGlobals->curtime >= (double)this->m_flMyNextThink )
+  {
+    if ( this->m_hMatchingTeleporter.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_SerialNumber != this->m_hMatchingTeleporter.m_Index >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_pEntity;
+    }
+    switch ( this->m_iState.m_Value )
+    {
+      case 0:
+      case 2:
+        return;
+      case 3:
+        v4 = m_pEntity->__vftable;
+        v5 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hTeleportingPlayer);
+        ((void (__thiscall *)(IHandleEntity *, CBaseEntity *, _DWORD))v4[106].SetRefEHandle)(m_pEntity, v5, 1.0);
+        val = gpGlobals->curtime + 10.5;
+        CNetworkVarBase<float,CObjectTeleporter::NetworkVar_m_flRechargeTime>::operator=<double>(
+          &this->m_flRechargeTime,
+          &val);
+        CObjectTeleporter::SetState(this, 6);
+        break;
+      case 4:
+        AbsOrigin = CBaseEntity::GetAbsOrigin(this);
+        x = AbsOrigin->x;
+        y = AbsOrigin->y;
+        maxs.x = AbsOrigin->z + 13.0;
+        v7 = g_pGameRules->GetViewVectors(g_pGameRules);
+        v8 = v7->m_vHullMin.y + y - 4.0;
+        v9 = v7->m_vHullMin.z + maxs.x - 4.0;
+        mins.y = v7->m_vHullMin.x + x - 4.0;
+        mins.z = v8;
+        v35 = v9;
+        v10 = g_pGameRules->GetViewVectors(g_pGameRules);
+        v11 = v10->m_vHullMax.x + x;
+        v10 = (const CViewVectors *)((char *)v10 + 24);
+        v12 = v10->m_vView.y + y + 4.0;
+        v13 = v11 + 4.0;
+        v14 = v10->m_vView.z + maxs.x + 4.0;
+        maxs.y = v13;
+        maxs.z = v12;
+        mins.x = v14;
+        v15 = (CTFPlayer *)CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hTeleportingPlayer);
+        if ( v15 )
+        {
+          v16 = UTIL_EntitiesInBox(v37, 256, (Vector *)&mins.y, (Vector *)&maxs.y, 128);
+          v17 = v16;
+          if ( v16 )
+          {
+            v18 = 0;
+            if ( v16 > 0 )
+            {
+              do
+              {
+                v19 = (CObjectTeleporter *)v37[v18];
+                if ( v19 && v19 != this && v19->IsPlayer(v19) && !CBaseEntity::InSameTeam(v15, v37[v18]) )
+                {
+                  CTakeDamageInfo::CTakeDamageInfo(&v36, v15, this, 1000.0, 1, 0);
+                  CBaseEntity::TakeDamage(v37[v18], v20);
+                }
+                ++v18;
+              }
+              while ( v18 < v17 );
+            }
+          }
+          p_Teleport = (void (__thiscall **)(CTFPlayer *, float *, const QAngle *, Vector *))&v15->Teleport;
+          AbsAngles = CBaseEntity::GetAbsAngles(this);
+          (*p_Teleport)(v15, &x, AbsAngles, &vec3_origin);
+          if ( v15->m_PlayerClass.m_iClass.m_Value == 2 && CTFPlayerShared::InCond(&v15->m_Shared, 3) )
+          {
+            ActiveTFWeapon = (CTFWeaponBaseGun *)CTFPlayer::GetActiveTFWeapon(v15);
+            if ( ActiveTFWeapon )
+            {
+              if ( ActiveTFWeapon->GetWeaponID(ActiveTFWeapon) == 14 )
+                CTFWeaponBaseGun::ToggleZoom(ActiveTFWeapon);
+            }
+          }
+          CBasePlayer::SetFOV(
+            v15,
+            v15,
+            75,
+            tf_teleporter_fov_time.m_pParent->m_fValue,
+            tf_teleporter_fov_start.m_pParent->m_nValue);
+          LODWORD(val) = 1694498815;
+          UTIL_ScreenFade(v15, (const color32_s *)&val, 0.25, 0.40000001, 1);
+        }
+        CObjectTeleporter::SetState(this, 5);
+        this->m_flMyNextThink = gpGlobals->curtime + 0.25;
+        break;
+      case 5:
+        v24 = (CTFPlayer *)CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hTeleportingPlayer);
+        v25 = v24;
+        if ( v24 )
+        {
+          CTFPlayer::TeleportEffect(v24);
+          v26 = (CTFPlayer *)((int (__thiscall *)(CObjectTeleporter *, CTFPlayer *))this->GetBuilder)(this, v25);
+          CTFGameStats::Event_PlayerUsedTeleport(&CTF_GameStats, v26, a2);
+          ((void (__thiscall *)(CTFPlayer *, int, _DWORD, _DWORD, _DWORD))v25->SpeakConceptIfAllowed)(v25, 48, 0, 0, 0);
+        }
+        this->m_hTeleportingPlayer.m_Index = -1;
+        m_pEntity[608].__vftable = (IHandleEntity_vtbl *)-1;
+        CObjectTeleporter::SetState(this, 6);
+        this->m_flMyNextThink = gpGlobals->curtime + 10.0;
+        break;
+      case 6:
+        if ( this->m_flRechargeTime.m_Value < (double)gpGlobals->curtime )
+        {
+          CObjectTeleporter::SetState(this, 2);
+          CBaseEntity::EmitSound(this, "Building_Teleporter.Ready", 0.0, 0);
+        }
+        break;
+      default:
+        if ( CObjectTeleporter::IsMatchingTeleporterReady(this) )
+        {
+          CObjectTeleporter::SetState(this, 2);
+          CBaseEntity::EmitSound(this, "Building_Teleporter.Ready", 0.0, 0);
+          if ( this->GetType(this) == 1 )
+            CObjectTeleporter::ShowDirectionArrow(this, 1);
+        }
+        break;
+    }
+  }
+}

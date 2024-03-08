@@ -1,0 +1,12 @@
+void __thiscall CTeamControlPoint::~CTeamControlPoint(CTeamControlPoint *this)
+{
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnRoundStartOwnedByTeam2);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnRoundStartOwnedByTeam1);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnOwnerChangedToTeam2);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnOwnerChangedToTeam1);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnCapTeam2);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnCapTeam1);
+  CBaseEntityOutput::~CBaseEntityOutput(&this->m_OnCapReset);
+  CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&this->m_TeamData);
+  CBaseAnimating::~CBaseAnimating(this);
+}

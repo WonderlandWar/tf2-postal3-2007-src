@@ -1,0 +1,12 @@
+double __thiscall CTFGrenadeLauncher::GetProjectileSpeed(CTFGrenadeLauncher *this)
+{
+  float val; // [esp+0h] [ebp-14h]
+
+  val = gpGlobals->curtime - this->m_flChargeBeginTime;
+  return RemapValClamped(
+           val,
+           0.0,
+           tf_grenadelauncher_max_chargetime.m_pParent->m_fValue,
+           tf_grenadelauncher_min_vel.m_pParent->m_fValue,
+           tf_grenadelauncher_max_vel.m_pParent->m_fValue);
+}

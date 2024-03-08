@@ -1,0 +1,224 @@
+void __thiscall CTeamplayRoundBasedRules::CheckWaitingForPlayers(CTeamplayRoundBasedRules *this)
+{
+  double v2; // st7
+  unsigned int m_Index; // eax
+  double v4; // st7
+  CBaseEntity *v5; // ebx
+  void (__thiscall **p_AcceptInput)(_DWORD, _DWORD, _DWORD, _DWORD); // esi
+  unsigned int v7; // eax
+  unsigned int v8; // eax
+  IHandleEntity *m_pEntity; // eax
+  void *v10; // eax
+  void *v11; // esi
+  CBaseEntity *EntityByClassname; // eax
+  CTeamControlPointMaster *v13; // eax
+  CTeamControlPointMaster *v14; // esi
+  unsigned int v15; // eax
+  CBaseEntity *v16; // eax
+  unsigned int v17; // eax
+  unsigned int v18; // edx
+  IHandleEntity *v19; // eax
+  unsigned int v20; // eax
+  unsigned int v21; // edx
+  IHandleEntity *v22; // ecx
+  unsigned int v23; // ebx
+  unsigned int v24; // eax
+  int v25; // edx
+  IHandleEntity *v26; // ecx
+  _fieldtypes fieldType; // esi
+  int v28; // ebp
+  unsigned int v29; // eax
+  IHandleEntity *v30; // ecx
+  int v31; // [esp-10h] [ebp-64h]
+  int v32; // [esp-Ch] [ebp-60h]
+  int v33; // [esp-8h] [ebp-5Ch]
+  int v34; // [esp-4h] [ebp-58h]
+  _fieldtypes v35; // [esp+0h] [ebp-54h]
+  int v36; // [esp+4h] [ebp-50h]
+  int v37; // [esp+14h] [ebp-40h]
+  variant_t v38; // [esp+18h] [ebp-3Ch] BYREF
+  int v39; // [esp+2Ch] [ebp-28h]
+  variant_t sVariant; // [esp+3Ch] [ebp-18h] BYREF
+  int v41; // [esp+50h] [ebp-4h]
+
+  if ( !g_pGameRules || !CMultiplayRules::IsLoadingBugBaitReport((CMultiplayRules *)g_pGameRules) )
+  {
+    if ( mp_waitingforplayers_restart.m_pParent->m_nValue )
+    {
+      if ( this->m_bInWaitingForPlayers.m_Value )
+      {
+        v2 = mp_waitingforplayers_time.m_pParent->m_fValue + gpGlobals->curtime;
+        this->m_flWaitingForPlayersTimeEnds = v2;
+        m_Index = this->m_hWaitingForPlayersTimer.m_Index;
+        if ( m_Index != -1
+          && g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+          && g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_pEntity )
+        {
+          v4 = v2 - gpGlobals->curtime;
+          sVariant.fieldType = -1;
+          LODWORD(sVariant.vecVal[1]) = (int)v4;
+          v41 = 5;
+          v39 = 0;
+          v5 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hWaitingForPlayersTimer);
+          p_AcceptInput = (void (__thiscall **)(_DWORD, _DWORD, _DWORD, _DWORD))&v5->AcceptInput;
+          variant_t::variant_t(&v38, (variant_t *)(&sVariant.flVal + 1));
+          (*p_AcceptInput)(v5, "SetTime", 0, 0);
+        }
+      }
+      else
+      {
+        CTeamplayRoundBasedRules::SetInWaitingForPlayers(this, 1);
+      }
+      CCollisionProperty::TestCollision((ConVar *)&mp_waitingforplayers_restart.IConVar, 0);
+    }
+    if ( mp_waitingforplayers_cancel.m_pParent->m_nValue )
+    {
+      v7 = this->m_hPreviousActiveTimer.m_Index;
+      if ( v7 != -1
+        && g_pEntityList->m_EntPtrArray[this->m_hPreviousActiveTimer.m_Index & 0xFFF].m_SerialNumber == v7 >> 12
+        && g_pEntityList->m_EntPtrArray[this->m_hPreviousActiveTimer.m_Index & 0xFFF].m_pEntity )
+      {
+        v8 = this->m_hPreviousActiveTimer.m_Index;
+        if ( v8 == -1
+          || g_pEntityList->m_EntPtrArray[this->m_hPreviousActiveTimer.m_Index & 0xFFF].m_SerialNumber != v8 >> 12 )
+        {
+          m_pEntity = 0;
+        }
+        else
+        {
+          m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hPreviousActiveTimer.m_Index & 0xFFF].m_pEntity;
+        }
+        v10 = __RTDynamicCast(
+                m_pEntity,
+                0,
+                &CBaseEntity `RTTI Type Descriptor',
+                &CTeamRoundTimer `RTTI Type Descriptor',
+                0);
+        v11 = v10;
+        if ( v10 )
+        {
+          if ( !(*(unsigned __int8 (__thiscall **)(void *))(*(_DWORD *)v10 + 700))(v10) )
+            (*(void (__thiscall **)(void *))(*(_DWORD *)v11 + 716))(v11);
+        }
+      }
+      CTeamplayRoundBasedRules::SetInWaitingForPlayers(this, 0);
+      CCollisionProperty::TestCollision((ConVar *)&mp_waitingforplayers_cancel.IConVar, 0);
+    }
+    if ( this->m_bInWaitingForPlayers.m_Value )
+    {
+      if ( this->m_flWaitingForPlayersTimeEnds >= (double)gpGlobals->curtime
+        || this->m_flRestartRoundTime.m_Value >= 0.0
+        || this->m_bAwaitingReadyRestart.m_Value )
+      {
+        v15 = this->m_hWaitingForPlayersTimer.m_Index;
+        if ( v15 == -1
+          || g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_SerialNumber != v15 >> 12
+          || !g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_pEntity )
+        {
+          CTeamplayRoundBasedRules::HideActiveTimer(this);
+          v16 = CBaseEntity::Create("team_round_timer", &vec3_origin, &vec3_angle, 0);
+          if ( v16 )
+            this->m_hWaitingForPlayersTimer.m_Index = v16->GetRefEHandle(v16)->m_Index;
+          else
+            this->m_hWaitingForPlayersTimer.m_Index = -1;
+          v17 = this->m_hWaitingForPlayersTimer.m_Index;
+          if ( v17 == -1
+            || (v18 = this->m_hWaitingForPlayersTimer.m_Index & 0xFFF,
+                g_pEntityList->m_EntPtrArray[v18].m_SerialNumber != v17 >> 12) )
+          {
+            v19 = 0;
+          }
+          else
+          {
+            v19 = g_pEntityList->m_EntPtrArray[v18].m_pEntity;
+          }
+          v19[45].__vftable = (IHandleEntity_vtbl *)"zz_teamplay_waiting_timer";
+          v20 = this->m_hWaitingForPlayersTimer.m_Index;
+          if ( v20 == -1
+            || (v21 = this->m_hWaitingForPlayersTimer.m_Index & 0xFFF,
+                g_pEntityList->m_EntPtrArray[v21].m_SerialNumber != v20 >> 12) )
+          {
+            v22 = 0;
+          }
+          else
+          {
+            v22 = g_pEntityList->m_EntPtrArray[v21].m_pEntity;
+          }
+          ((void (__thiscall *)(IHandleEntity *, const char *, const char *))v22->__vftable[9].GetRefEHandle)(
+            v22,
+            "show_in_hud",
+            "1");
+          v23 = (int)(this->m_flWaitingForPlayersTimeEnds - gpGlobals->curtime);
+          v24 = this->m_hWaitingForPlayersTimer.m_Index;
+          v38.eVal.m_Index = v23;
+          if ( v24 == -1 || (v25 = v24 & 0xFFF, g_pEntityList->m_EntPtrArray[v25].m_SerialNumber != v24 >> 12) )
+            v26 = 0;
+          else
+            v26 = g_pEntityList->m_EntPtrArray[v25].m_pEntity;
+          fieldType = v38.fieldType;
+          v28 = v39;
+          v35 = v38.fieldType;
+          v36 = v39;
+          ((void (__thiscall *)(IHandleEntity *, const char *, _DWORD, _DWORD, unsigned int))v26->__vftable[11].SetRefEHandle)(
+            v26,
+            "SetTime",
+            0,
+            0,
+            v23);
+          v29 = this->m_hWaitingForPlayersTimer.m_Index;
+          if ( v29 == -1
+            || g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_SerialNumber != v29 >> 12 )
+          {
+            v30 = 0;
+          }
+          else
+          {
+            v30 = g_pEntityList->m_EntPtrArray[this->m_hWaitingForPlayersTimer.m_Index & 0xFFF].m_pEntity;
+          }
+          ((void (__thiscall *)(IHandleEntity *, const char *, _DWORD, _DWORD, unsigned int, _fieldtypes, int, int, int, _DWORD, int, int, int, int, _fieldtypes, int, int, int, _DWORD, int, int))v30->__vftable[11].SetRefEHandle)(
+            v30,
+            "Resume",
+            0,
+            0,
+            v23,
+            fieldType,
+            v28,
+            -1,
+            5,
+            0,
+            v31,
+            v32,
+            v33,
+            v34,
+            v35,
+            v36,
+            -1,
+            5,
+            0,
+            v37,
+            v38.iVal);
+        }
+      }
+      else
+      {
+        CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flRestartRoundTime>::Set(
+          (CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flMapResetTime> *)&this->m_flRestartRoundTime,
+          &gpGlobals->curtime);
+        v38.iVal = 0;
+        EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "team_control_point_master");
+        v13 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                           EntityByClassname,
+                                           0,
+                                           &CBaseEntity `RTTI Type Descriptor',
+                                           &CTeamControlPointMaster `RTTI Type Descriptor',
+                                           v38.iVal);
+        v14 = v13;
+        if ( v13 && v13->m_ControlPointRounds.m_Size > 0 )
+        {
+          if ( CTeamControlPointMaster::GetCurrentRound(v13) )
+            this->m_iszRoundToPlayNext.pszValue = CTeamControlPointMaster::GetCurrentRound(v14)->m_iName.pszValue;
+        }
+      }
+    }
+  }
+}

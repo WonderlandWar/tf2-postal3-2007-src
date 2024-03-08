@@ -1,0 +1,18 @@
+void __thiscall CObjectSentrygun::OnEndDisabled(CObjectSentrygun *this)
+{
+  double m_iLeftBound; // st7
+
+  if ( this->m_bTurningRight )
+  {
+    m_iLeftBound = (double)this->m_iLeftBound;
+    this->m_bTurningRight = 0;
+  }
+  else
+  {
+    m_iLeftBound = (double)this->m_iRightBound;
+    this->m_bTurningRight = 1;
+  }
+  this->m_vecGoalAngles.y = m_iLeftBound;
+  this->m_vecGoalAngles.x = 0.0;
+  CBaseTempEntity::Precache((vgui::Panel *)this);
+}

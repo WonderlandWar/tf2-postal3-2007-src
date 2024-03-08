@@ -1,0 +1,48 @@
+class CControlPointProgressBar : public vgui::EditablePanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CControlPointProgressBar_RegisterMap
+    {
+        public void CControlPointProgressBar_RegisterMap();
+    };
+    public class CControlPointProgressBar::CControlPointProgressBar_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CControlPointProgressBar_Register
+    {
+        public void CControlPointProgressBar_Register();
+    };
+    public class CControlPointProgressBar::CControlPointProgressBar_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CControlPointProgressBar_RegisterKBMap
+    {
+        public void CControlPointProgressBar_RegisterKBMap();
+    };
+    public class CControlPointProgressBar::CControlPointProgressBar_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CControlPointProgressBar(class CControlPointProgressBar & );
+    public void CControlPointProgressBar(class vgui::Panel * );
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    public void PerformLayout();
+    public void Paint();
+    public bool IsVisible();
+    public void SetupForPoint(class CControlPointIcon * );
+    public void UpdateBarText();
+    private class CControlPointIcon * m_pAttachedToIcon;
+    private class vgui::CircularProgressBar * m_pBar;
+    private class vgui::Label * m_pBarText;
+    private class CIconPanel * m_pTeardrop;
+    private class CIconPanel * m_pTeardropSide;
+    private class CIconPanel * m_pBlocked;
+    private int m_iOrgHeight;
+    public void ~CControlPointProgressBar();
+    public class CControlPointProgressBar & operator=(class CControlPointProgressBar & );
+    public void * __vecDelDtor(unsigned int );
+};

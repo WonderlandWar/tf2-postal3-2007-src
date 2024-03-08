@@ -1,0 +1,30 @@
+char __usercall CObjectSentrygun::FindTarget@<al>(CObjectSentrygun *this@<ecx>, int a2@<esi>)
+{
+  CBaseEntity *CurrentEntity; // esi
+  int v5; // [esp+Ch] [ebp-81Ch]
+  Vector vecOrigin; // [esp+10h] [ebp-818h] BYREF
+  CEntitySphereQuery sphere; // [esp+1Ch] [ebp-80Ch] BYREF
+
+  if ( this->m_bDisabled.m_Value )
+    return 0;
+  v5 = a2;
+  this->EyePosition(this, (Vector *)&vecOrigin.y);
+  CEntitySphereQuery::CEntitySphereQuery(
+    (CEntitySphereQuery *)&sphere.m_listCount,
+    (Vector *)&vecOrigin.y,
+    1100.0,
+    33554560);
+  CurrentEntity = CEntitySphereQuery::GetCurrentEntity((CEntitySphereQuery *)&sphere.m_listCount);
+  if ( !CurrentEntity )
+    return 0;
+  while ( !CObjectSentrygun::ValidTarget(this, CurrentEntity)
+       || !CObjectSentrygun::IsBetterTarget(this, (int)this, CurrentEntity, v5) )
+  {
+    ++sphere.m_listCount;
+    CurrentEntity = CEntitySphereQuery::GetCurrentEntity((CEntitySphereQuery *)&sphere.m_listCount);
+    if ( !CurrentEntity )
+      return 0;
+  }
+  CObjectSentrygun::FoundTarget(this, CurrentEntity);
+  return 1;
+}

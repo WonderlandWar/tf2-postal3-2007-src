@@ -1,0 +1,33 @@
+void __thiscall CTeamplayRoundBasedRules::Think(CTeamplayRoundBasedRules *this)
+{
+  CGameRulesRoundStateInfo *m_pCurStateInfo; // eax
+  void (__thiscall *pfnThink)(CTeamplayRoundBasedRules *); // edx
+
+  if ( g_fGameOver )
+  {
+    if ( gpGlobals->curtime > (double)this->m_flIntermissionEndTime )
+      this->ChangeLevel(this);
+    return;
+  }
+  m_pCurStateInfo = this->m_pCurStateInfo;
+  if ( m_pCurStateInfo )
+  {
+    pfnThink = m_pCurStateInfo->pfnThink;
+    if ( pfnThink )
+      pfnThink((CTeamplayRoundBasedRules *)((char *)this + *(_DWORD *)m_pCurStateInfo->gap2C));
+  }
+  if ( this->m_flNextPeriodicThink >= (double)gpGlobals->curtime )
+  {
+LABEL_12:
+    CGameRules::Think(this);
+    return;
+  }
+  if ( this->m_iRoundState.m_Value == GR_STATE_TEAM_WIN
+    || !CTeamplayRoundBasedRules::CheckTimeLimit(this) && !CTeamplayRoundBasedRules::CheckWinLimit(this) )
+  {
+    CTeamplayRoundBasedRules::CheckRestartRound(this);
+    CTeamplayRoundBasedRules::CheckWaitingForPlayers(this);
+    this->m_flNextPeriodicThink = gpGlobals->curtime + 1.0;
+    goto LABEL_12;
+  }
+}

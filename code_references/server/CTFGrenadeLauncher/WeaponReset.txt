@@ -1,0 +1,5 @@
+void __thiscall CTFGrenadeLauncher::WeaponReset(CTFGrenadeLauncher *this)
+{
+  CTFWeaponBase::WeaponReset(this);
+  this->m_flChargeBeginTime = 0.0;
+}

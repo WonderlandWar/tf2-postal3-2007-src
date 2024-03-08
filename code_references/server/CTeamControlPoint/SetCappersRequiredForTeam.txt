@@ -1,0 +1,4 @@
+void __thiscall CTeamControlPoint::SetCappersRequiredForTeam(CTeamControlPoint *this, int iGameTeam, int iCappers)
+{
+  this->m_TeamData.m_Memory.m_pMemory[iGameTeam].iPlayersRequired = iCappers;
+}

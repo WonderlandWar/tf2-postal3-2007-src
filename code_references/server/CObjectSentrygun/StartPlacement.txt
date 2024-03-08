@@ -1,0 +1,32 @@
+void __thiscall CObjectSentrygun::StartPlacement(CObjectSentrygun *this, CTFPlayer *pPlayer)
+{
+  CObjectSentrygun *v2; // edi
+  CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMins> *p_m_vecBuildMins; // esi
+  Vector val; // [esp+8h] [ebp-Ch] BYREF
+
+  v2 = this;
+  CBaseObject::StartPlacement(this, pPlayer);
+  val.x = -20.0;
+  val.y = -20.0;
+  p_m_vecBuildMins = &v2->m_vecBuildMins;
+  val.z = 0.0;
+  CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMins>::Set(&v2->m_vecBuildMins, &val);
+  val.x = 20.0;
+  val.y = 20.0;
+  v2 = (CObjectSentrygun *)((char *)v2 + 2080);
+  val.z = 66.0;
+  CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMaxs>::Set(
+    (CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMaxs> *)v2,
+    &val);
+  val.x = p_m_vecBuildMins->m_Value.x - 4.0;
+  val.y = p_m_vecBuildMins->m_Value.y - 4.0;
+  val.z = p_m_vecBuildMins->m_Value.z;
+  CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMins>::Set(p_m_vecBuildMins, &val);
+  val.x = *(float *)&v2->CBaseObject::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable
+        + 4.0;
+  val.y = *(float *)&v2->m_pfnMoveDone + 4.0;
+  val.z = *(float *)&v2->m_pfnThink;
+  CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMaxs>::Set(
+    (CNetworkVarBase<Vector,CBaseObject::NetworkVar_m_vecBuildMaxs> *)v2,
+    &val);
+}

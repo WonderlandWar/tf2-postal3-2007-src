@@ -1,0 +1,23 @@
+void __thiscall CTFWeaponBaseMelee::Spawn(CTFWeaponBaseMelee *this)
+{
+  const char *pszValue; // eax
+  unsigned __int16 v3; // ax
+  FileWeaponInfo_t *FileWeaponInfoFromHandle; // eax
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  this->Precache(this);
+  pszValue = this->m_iClassname.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  v3 = LookupWeaponInfoSlot(pszValue);
+  FileWeaponInfoFromHandle = GetFileWeaponInfoFromHandle(v3);
+  this->m_pWeaponInfo = (CTFWeaponInfo *)__RTDynamicCast(
+                                           FileWeaponInfoFromHandle,
+                                           0,
+                                           &FileWeaponInfo_t `RTTI Type Descriptor',
+                                           &CTFWeaponInfo `RTTI Type Descriptor',
+                                           0);
+  val = -1;
+  CNetworkVarBase<int,CBaseCombatWeapon::NetworkVar_m_iClip1>::Set(&this->m_iClip1, &val);
+  CTFWeaponBase::Spawn(this);
+}

@@ -1,0 +1,13 @@
+int __thiscall CObjectSentrygun::OnTakeDamage(CObjectSentrygun *this, const CTakeDamageInfo *info)
+{
+  int result; // eax
+  CTakeDamageInfo newInfo; // [esp+4h] [ebp-4Ch] BYREF
+
+  CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&newInfo.m_vecDamageForce.y, info);
+  if ( (info->m_bitsDamageType & 2) != 0 && info->m_iDamageCustom == 5 )
+    newInfo.m_flMaxDamage = (1.0 - this->m_flHeavyBulletResist) * newInfo.m_flMaxDamage;
+  result = CBaseObject::OnTakeDamage(this, (int)&newInfo.m_vecDamageForce.y);
+  if ( result > 0 )
+    this->m_flLastAttackedTime = gpGlobals->curtime;
+  return result;
+}

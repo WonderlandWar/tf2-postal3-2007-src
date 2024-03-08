@@ -1,0 +1,15 @@
+void __thiscall CObjectTeleporter::SetState(CObjectTeleporter *this, int state)
+{
+  bool v3; // zf
+  CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState> *p_m_iState; // ecx
+
+  v3 = state == this->m_iState.m_Value;
+  p_m_iState = &this->m_iState;
+  if ( !v3 )
+  {
+    CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(
+      (CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> *)p_m_iState,
+      &state);
+    this->m_flLastStateChangeTime = gpGlobals->curtime;
+  }
+}

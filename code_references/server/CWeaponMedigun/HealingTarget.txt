@@ -1,0 +1,20 @@
+char __thiscall CWeaponMedigun::HealingTarget(CWeaponMedigun *this, CBaseEntity *pTarget)
+{
+  int v2; // esi
+  CWeaponMedigun::NetworkVar_m_hHealingTargets *i; // edx
+  CBaseEntity *v4; // ecx
+
+  v2 = 0;
+  for ( i = &this->m_hHealingTargets; ; ++i )
+  {
+    v4 = i->m_Value[0].m_Index == -1
+      || g_pEntityList->m_EntPtrArray[i->m_Value[0].m_Index & 0xFFF].m_SerialNumber != i->m_Value[0].m_Index >> 12
+       ? 0
+       : (CBaseEntity *)g_pEntityList->m_EntPtrArray[i->m_Value[0].m_Index & 0xFFF].m_pEntity;
+    if ( pTarget == v4 )
+      break;
+    if ( ++v2 >= 1 )
+      return 0;
+  }
+  return 1;
+}

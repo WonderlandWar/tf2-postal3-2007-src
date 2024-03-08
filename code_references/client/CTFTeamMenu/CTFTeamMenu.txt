@@ -1,0 +1,83 @@
+void __thiscall CTFTeamMenu::CTFTeamMenu(CTFTeamMenu *this, IViewPort *pViewPort)
+{
+  vgui::PanelMessageMap *v3; // edi
+  PanelAnimationMap *v4; // edi
+  vgui::PanelKeyBindingMap *v5; // edi
+  CTFTeamButton *v6; // eax
+  CTFTeamButton *v7; // eax
+  CTFTeamButton *v8; // eax
+  CTFTeamButton *v9; // eax
+  CTFTeamButton *v10; // eax
+  CTFTeamButton *v11; // eax
+  CTFTeamButton *v12; // eax
+  CTFTeamButton *v13; // eax
+  CTFButton *v14; // eax
+  CTFButton *v15; // eax
+
+  CTeamMenu::CTeamMenu(this, pViewPort);
+  this->CTeamMenu::vgui::Frame::vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable = (CTFTeamMenu_vtbl *)&CTFTeamMenu::`vftable'{for `vgui::Frame'};
+  this->CTeamMenu::IViewPortPanel::__vftable = (IViewPortPanel_vtbl *)&CTFTeamMenu::`vftable'{for `IViewPortPanel'};
+  if ( !`CTFTeamMenu::ChainToMap'::`2'::chained )
+  {
+    `CTFTeamMenu::ChainToMap'::`2'::chained = 1;
+    v3 = vgui::FindOrAddPanelMessageMap("CTFTeamMenu");
+    v3->pfnClassName = CTFTeamMenu::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelMessageMap("CTeamMenu");
+  }
+  if ( !`CTFTeamMenu::ChainToAnimationMap'::`2'::chained )
+  {
+    `CTFTeamMenu::ChainToAnimationMap'::`2'::chained = 1;
+    v4 = FindOrAddPanelAnimationMap("CTFTeamMenu");
+    v4->pfnClassName = CTFTeamMenu::GetPanelClassName;
+    v4->baseMap = FindOrAddPanelAnimationMap("CTeamMenu");
+  }
+  if ( !`CTFTeamMenu::KB_ChainToMap'::`2'::chained )
+  {
+    `CTFTeamMenu::KB_ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelKeyBindingMap("CTFTeamMenu");
+    v5->pfnClassName = CTFTeamMenu::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelKeyBindingMap("CTeamMenu");
+  }
+  CTFTeamMenu::CCommandMemberInitializer_Join_Team::CCommandMemberInitializer_Join_Team(&this->m_Join_Team_register);
+  vgui::Frame::SetMinimizeButtonVisible(this, 0);
+  vgui::Frame::SetMaximizeButtonVisible(this, 0);
+  vgui::Frame::SetCloseButtonVisible(this, 0);
+  vgui::Panel::SetVisible(this, 0);
+  vgui::Panel::SetKeyBoardInputEnabled(this, 1);
+  vgui::Panel::SetMouseInputEnabled(this, 1);
+  this->m_iTeamMenuKey = BUTTON_CODE_INVALID;
+  v6 = (CTFTeamButton *)operator new(0x178u);
+  if ( v6 )
+    CTFTeamButton::CTFTeamButton(v6, this, "teambutton0");
+  else
+    v7 = 0;
+  this->m_pBlueTeamButton = v7;
+  v8 = (CTFTeamButton *)operator new(0x178u);
+  if ( v8 )
+    CTFTeamButton::CTFTeamButton(v8, this, "teambutton1");
+  else
+    v9 = 0;
+  this->m_pRedTeamButton = v9;
+  v10 = (CTFTeamButton *)operator new(0x178u);
+  if ( v10 )
+    CTFTeamButton::CTFTeamButton(v10, this, "teambutton2");
+  else
+    v11 = 0;
+  this->m_pAutoTeamButton = v11;
+  v12 = (CTFTeamButton *)operator new(0x178u);
+  if ( v12 )
+    CTFTeamButton::CTFTeamButton(v12, this, "teambutton3");
+  else
+    v13 = 0;
+  this->m_pSpecTeamButton = v13;
+  v14 = (CTFButton *)operator new(0x164u);
+  if ( v14 )
+    CTFButton::CTFButton(v14, this, "CancelButton", "#TF_Cancel");
+  else
+    v15 = 0;
+  this->m_pCancelButton = v15;
+  g_pVGui->AddTickSignal(g_pVGui, this->_vpanel, 0);
+  this->m_bRedDisabled = 0;
+  this->m_bBlueDisabled = 0;
+  vgui::Frame::LoadControlSettings(this, "Resource/UI/Teammenu.res", 0, 0);
+}

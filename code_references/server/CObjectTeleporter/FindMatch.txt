@@ -1,0 +1,35 @@
+CObjectTeleporter *__thiscall CObjectTeleporter::FindMatch(CObjectTeleporter *this)
+{
+  int v2; // ebx
+  int v3; // esi
+  CTFPlayer *v4; // eax
+  CTFPlayer *v5; // ebp
+  CBaseObject *Object; // edi
+  int iNumObjects; // [esp+10h] [ebp-8h]
+  int ObjectCount; // [esp+14h] [ebp-4h]
+
+  v2 = 0;
+  v3 = 2 - (this->GetType(this) != 1);
+  iNumObjects = 0;
+  v4 = this->GetBuilder(this);
+  v5 = v4;
+  if ( !v4 )
+    return 0;
+  ObjectCount = CTFPlayer::GetObjectCount(v4);
+  if ( ObjectCount > 0 )
+  {
+    while ( 1 )
+    {
+      Object = CTFPlayer::GetObject(v5, v2);
+      if ( Object )
+      {
+        if ( Object->GetType(Object) == v3 && !Object->m_bDisabled.m_Value )
+          break;
+      }
+      if ( ++v2 >= ObjectCount )
+        return 0;
+    }
+    return (CObjectTeleporter *)Object;
+  }
+  return (CObjectTeleporter *)iNumObjects;
+}

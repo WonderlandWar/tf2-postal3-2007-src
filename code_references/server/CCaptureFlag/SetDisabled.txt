@@ -1,0 +1,25 @@
+void __thiscall CCaptureFlag::SetDisabled(CCaptureFlag *this, unsigned int bDisabled)
+{
+  edict_t *m_pPev; // eax
+
+  CNetworkVarBase<bool,CTFBottle::NetworkVar_m_bBroken>::Set(&this->m_bDisabled, (const bool *)&bDisabled);
+  if ( (_BYTE)bDisabled )
+  {
+    CBaseEntity::AddEffects(this, 32);
+    this->m_pfnTouch = 0;
+    CBaseEntity::ThinkSet(this, 0, 0.0, 0);
+  }
+  else
+  {
+    bDisabled = this->m_fEffects.m_Value & 0xFFFFFFDF;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(&this->m_fEffects, (const int *)&bDisabled);
+    m_pPev = this->m_Network.m_pPev;
+    this->m_iEFlags |= 0x10000u;
+    if ( m_pPev )
+      m_pPev->m_fStateFlags |= 0x80u;
+    CBaseEntity::DispatchUpdateTransmitState(this);
+    this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CCaptureFlag::FlagTouch;
+    CBaseEntity::ThinkSet(this,  __thiscall CGameWeaponManager::`vcall'{180,{flat}}, 0.0, 0);
+    CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+  }
+}

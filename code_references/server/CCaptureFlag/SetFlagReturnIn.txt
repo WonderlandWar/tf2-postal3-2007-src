@@ -1,0 +1,8 @@
+void __thiscall CCaptureFlag::SetFlagReturnIn(CCaptureFlag *this, float flTime)
+{
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  val = gpGlobals->curtime + flTime;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(&this->m_flResetTime, &val);
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flMaxResetTime>::Set(&this->m_flMaxResetTime, &flTime);
+}

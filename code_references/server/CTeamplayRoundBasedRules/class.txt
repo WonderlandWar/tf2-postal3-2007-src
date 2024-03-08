@@ -1,0 +1,191 @@
+class CTeamplayRoundBasedRules : public CTeamplayRules
+{
+    public void CTeamplayRoundBasedRules(class CTeamplayRoundBasedRules & );
+    public void CTeamplayRoundBasedRules();
+    public enum gamerules_roundstate_t State_Get();
+    public bool IsInWaitingForPlayers();
+    public bool InRoundRestart();
+    public bool InStalemate();
+    public bool RoundHasBeenWon();
+    public float GetNextRespawnWave(int ,class CBasePlayer * );
+    public bool HasPassedMinRespawnTime(class CBasePlayer * );
+    public float GetRespawnTimeScalar(int );
+    public float GetRespawnWaveMaxLength(int ,bool );
+    public float GetMinTimeWhenPlayerMaySpawn(class CBasePlayer * );
+    public bool PointsMayBeCaptured();
+    public int GetWinningTeam();
+    public int GetWinReason();
+    public bool InOvertime();
+    public void SetOvertime(bool );
+    public bool InSetup();
+    public void SetSetup(bool );
+    public bool RoundCleanupShouldIgnore(class CBaseEntity * );
+    public bool ShouldCreateEntity(char * );
+    public void SetupOnRoundStart();
+    public void SetupOnRoundRunning();
+    public void PreviousRoundEnd();
+    public void SendTeamScoresEvent();
+    public void SendWinPanelInfo();
+    public void SetupSpawnPointsForRound();
+    public void SetupOnStalemateStart();
+    public void SetupOnStalemateEnd();
+    public void State_Transition(enum gamerules_roundstate_t );
+    public void RespawnPlayers(bool ,bool ,int );
+    public void SetForceMapReset(bool );
+    public void SetRoundToPlayNext(struct string_t );
+    public struct string_t GetRoundToPlayNext();
+    public void AddPlayedRound(struct string_t );
+    public bool IsPreviouslyPlayedRound(struct string_t );
+    public struct string_t GetLastPlayedRound();
+    public void SetWinningTeam(int ,int ,bool ,bool );
+    public void SetStalemate(bool );
+    public void SetRoundOverlayDetails();
+    public float GetWaitingForPlayersTime();
+    public void ShouldResetScores(bool ,bool );
+    public void SetFirstRoundPlayed(struct string_t );
+    public struct string_t GetFirstRoundPlayed();
+    public void SetTeamRespawnWaveTime(int ,float );
+    public void AddTeamRespawnWaveTime(int ,float );
+    protected void Think();
+    protected void CheckChatText(class CBasePlayer * ,char * );
+    protected void CheckChatForReadySignal(class CBasePlayer * ,char * );
+    protected void GoToIntermission();
+    protected void SetInWaitingForPlayers(bool );
+    protected void CheckWaitingForPlayers();
+    protected void CheckRestartRound();
+    protected bool CheckTimeLimit();
+    protected int GetTimeLeft();
+    protected bool CheckWinLimit();
+    protected void State_Enter(enum gamerules_roundstate_t );
+    protected void State_Leave();
+    protected void State_Think();
+    protected class CGameRulesRoundStateInfo * State_LookupInfo(enum gamerules_roundstate_t );
+    protected void State_Enter_INIT();
+    protected void State_Think_INIT();
+    protected void State_Enter_PREGAME();
+    protected void State_Think_PREGAME();
+    protected void State_Enter_STARTGAME();
+    protected void State_Think_STARTGAME();
+    protected void State_Enter_PREROUND();
+    protected void State_Think_PREROUND();
+    protected void State_Enter_RND_RUNNING();
+    protected void State_Think_RND_RUNNING();
+    protected void State_Enter_TEAM_WIN();
+    protected void State_Think_TEAM_WIN();
+    protected void State_Enter_RESTART();
+    protected void State_Think_RESTART();
+    protected void State_Enter_STALEMATE();
+    protected void State_Think_STALEMATE();
+    protected void State_Leave_STALEMATE();
+    protected void InitTeams();
+    protected int CountActivePlayers();
+    protected void RoundRespawn();
+    protected void CleanUpMap();
+    protected void CheckRespawnWaves();
+    protected void ResetScores();
+    protected void ResetMapTime();
+    protected void PlayStartRoundVoice();
+    protected void PlayWinSong(int );
+    protected void PlayStalemateSong();
+    protected void PlaySuddenDeathSong();
+    protected void BroadcastSound(int ,char * );
+    protected void RespawnTeam(int );
+    protected void HideActiveTimer();
+    protected void RestoreActiveTimer();
+    protected void InternalHandleTeamWin(int );
+    protected class CGameRulesRoundStateInfo * m_pCurStateInfo;
+    protected float m_flStateTransitionTime;
+    protected float m_flWaitingForPlayersTimeEnds;
+    protected class CHandle<CTeamRoundTimer> m_hWaitingForPlayersTimer;
+    protected float m_flNextPeriodicThink;
+    protected bool m_bChangeLevelOnRoundEnd;
+    protected bool m_bResetTeamScores;
+    protected bool m_bResetPlayerScores;
+    protected class CHandle<CBaseEntity> m_hPreviousActiveTimer;
+    protected class CHandle<CTeamRoundTimer> m_hStalemateTimer;
+    protected float m_flStalemateStartTime;
+    protected bool m_bForceMapReset;
+    protected bool m_bTeamReady[32];
+    protected bool m_bInitialSpawn;
+    protected struct string_t m_iszRoundToPlayNext;
+    protected class CUtlVector<string_t,CUtlMemory<string_t,int> > m_iszPreviousRounds;
+    protected struct string_t m_iszFirstRoundPlayed;
+    protected float m_flOriginalTeamRespawnWaveTime[32];
+    public bool WouldChangeUnbalanceTeams(int ,int );
+    public bool AreTeamsUnbalanced(int & ,int & );
+    class NetworkVar_m_iRoundState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<enum gamerules_roundstate_t,CTeamplayRoundBasedRules::NetworkVar_m_iRoundState> m_iRoundState;
+    class NetworkVar_m_bInOvertime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CTeamplayRoundBasedRules::NetworkVar_m_bInOvertime> m_bInOvertime;
+    class NetworkVar_m_bInSetup
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CTeamplayRoundBasedRules::NetworkVar_m_bInSetup> m_bInSetup;
+    class NetworkVar_m_iWinningTeam
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinningTeam> m_iWinningTeam;
+    class NetworkVar_m_iWinReason
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason> m_iWinReason;
+    class NetworkVar_m_bInWaitingForPlayers
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CTeamplayRoundBasedRules::NetworkVar_m_bInWaitingForPlayers> m_bInWaitingForPlayers;
+    class NetworkVar_m_bAwaitingReadyRestart
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,CTeamplayRoundBasedRules::NetworkVar_m_bAwaitingReadyRestart> m_bAwaitingReadyRestart;
+    class NetworkVar_m_flRestartRoundTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flRestartRoundTime> m_flRestartRoundTime;
+    class NetworkVar_m_flMapResetTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CTeamplayRoundBasedRules::NetworkVar_m_flMapResetTime> m_flMapResetTime;
+    class NetworkVar_m_flNextRespawnWave
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[32];
+    };
+    protected class CTeamplayRoundBasedRules::NetworkVar_m_flNextRespawnWave m_flNextRespawnWave;
+    class NetworkVar_m_TeamRespawnWaveTimes
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[32];
+    };
+    public class CTeamplayRoundBasedRules::NetworkVar_m_TeamRespawnWaveTimes m_TeamRespawnWaveTimes;
+    private float m_flUnbalancedTeamsWarningTime;
+    private float m_flBalanceTeamsTime;
+    public void ~CTeamplayRoundBasedRules();
+    public class CTeamplayRoundBasedRules & operator=(class CTeamplayRoundBasedRules & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

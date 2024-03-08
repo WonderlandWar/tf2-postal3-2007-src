@@ -1,0 +1,442 @@
+class CTFPlayer : public CBaseMultiplayerPlayer
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    public void CTFPlayer(class CTFPlayer & );
+    public void CTFPlayer();
+    public void ~CTFPlayer();
+	
+    public class CTFPlayer * CreatePlayer(char * ,struct edict_t * );
+    public class CTFPlayer * Instance(int );
+	
+    public void Spawn();
+    public void ForceRespawn();
+    public class CBaseEntity * EntSelectSpawnPoint();
+    public void InitialSpawn();
+    public void Precache();
+    public bool IsReadyToPlay();
+    public bool IsReadyToSpawn();
+    public bool ShouldGainInstantSpawn();
+    public void ResetScores();
+	
+    public void CreateViewModel(int );
+    public class CBaseViewModel * GetOffHandViewModel();
+    public void SendOffHandViewModelActivity(enum Activity );
+	
+    public void CheatImpulseCommands(int );
+	
+    public void CommitSuicide(bool );
+	
+    public void TraceAttack(class CTakeDamageInfo & ,class Vector & ,class CGameTrace * );
+    public int TakeHealth(float ,int );
+    public void Event_KilledOther(class CBaseEntity * ,class CTakeDamageInfo & );
+    public void Event_Killed(class CTakeDamageInfo & );
+    public void PlayerDeathThink();
+	
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    public int OnTakeDamage_Alive(class CTakeDamageInfo & );
+    public void AddDamagerToHistory(class CHandle<CBaseEntity> );
+    public void ClearDamagerHistory();
+    public struct DamagerHistory_t & GetDamagerHistory(int );
+    public void DamageEffect(float ,int );
+    public bool ShouldCollide(int ,int );
+	
+    public void SetHealthBuffTime(float );
+	
+    public class CTFWeaponBase * GetActiveTFWeapon();
+	
+    public void SaveMe();
+	
+    public void FireBullet(struct FireBulletsInfo_t & ,bool ,int ,int );
+    public void ImpactWaterTrace(class CGameTrace & ,class Vector & );
+    public void NoteWeaponFired();
+	
+    public bool HasItem();
+    public void SetItem(class CTFItem * );
+    public class CTFItem * GetItem();
+	
+    public void Regenerate();
+    public float GetNextRegenTime();
+    public void SetNextRegenTime(float );
+	
+    public float GetNextChangeClassTime();
+    public void SetNextChangeClassTime(float );
+	
+    public void RemoveAllItems(bool );
+    public bool DropCurrentWeapon();
+    public void DropFlag();
+    public void TFWeaponRemove(int );
+    public bool TFWeaponDrop(class CTFWeaponBase * ,bool );
+	
+    public class CTFPlayerClass * GetPlayerClass();
+    public int GetDesiredPlayerClassIndex();
+    public void SetDesiredPlayerClassIndex(int );
+	
+    public void ForceChangeTeam(int );
+    public void ChangeTeam(int );
+	
+    public int FlashlightIsOn();
+    public void FlashlightTurnOn();
+    public void FlashlightTurnOff();
+	
+    public void PreThink();
+    public void PostThink();
+	
+    public void ItemPostFrame();
+    public void Weapon_FrameUpdate();
+    public void Weapon_HandleAnimEvent(struct animevent_t * );
+    public bool Weapon_ShouldSetLast(class CBaseCombatWeapon * ,class CBaseCombatWeapon * );
+	
+    public void GetStepSoundVelocities(float * ,float * );
+    public void SetStepSoundTime(enum stepsoundtimes_t ,bool );
+	
+    public void TF_AddFrags(int );
+	
+    public void RemoveOwnedEnt(char * ,bool );
+    public void UpdateModel();
+    public void UpdateSkin(int );
+	
+    public int GiveAmmo(int ,int ,bool );
+	
+    public bool CanAttack();
+	
+    public void DoAnimationEvent(enum PlayerAnimEvent_t ,int );
+	
+    public bool ClientCommand(class CCommand & );
+    public void ClientHearVox(char * );
+    public void DisplayLocalItemStatus(class CTFGoal * );
+	
+    public int BuildObservableEntityList();
+    public int GetNextObserverSearchStartPoint(bool );
+    public class CBaseEntity * FindNextObserverTarget(bool );
+    public bool IsValidObserverTarget(class CBaseEntity * );
+    public bool SetObserverTarget(class CBaseEntity * );
+    public bool ModeWantsSpectatorGUI(int );
+    public void FindInitialObserverTarget();
+    public class CTFPlayer * FindNearestObservablePlayer(class Vector ,float );
+    public void ValidateCurrentObserverTarget();
+	
+    public void CheckUncoveringSpies(class CTFPlayer * );
+    public void Touch(class CBaseEntity * );
+	
+    public void ResetMenu();
+	
+    public void TeamFortress_SetSpeed();
+    public class CHandle<CBaseEntity> TeamFortress_GetDisguiseTarget(int ,int );
+	
+    public void TeamFortress_ClientDisconnected();
+    public void TeamFortress_RemoveEverythingFromWorld();
+    public void TeamFortress_RemoveBuildings();
+    public void TeamFortress_RemoveRockets();
+    public void TeamFortress_RemovePipebombs();
+	
+    public class CTFTeamSpawn * GetSpawnPoint();
+	
+    public void SetAnimation(enum PLAYER_ANIM );
+	
+    public bool IsPlayerClass(int );
+	
+    public void PlayFlinch(class CTakeDamageInfo & );
+	
+    public float PlayCritReceivedSound();
+    public void PainSound(class CTakeDamageInfo & );
+    public void DeathSound(class CTakeDamageInfo & );
+	
+    public void OnDamagedByExplosion(class CTakeDamageInfo & );
+	
+    public void SetWeaponBuilder(class CTFWeaponBuilder * );
+    public class CTFWeaponBuilder * GetWeaponBuilder();
+	
+    public int GetBuildResources();
+    public void RemoveBuildResources(int );
+    public void AddBuildResources(int );
+	
+    public bool IsBuilding();
+    public int CanBuild(int );
+	
+    public class CBaseObject * GetObject(int );
+    public int GetObjectCount();
+    public int GetNumObjects(int );
+    public void RemoveAllObjects();
+    public void StopPlacement();
+    public int StartedBuildingObject(int );
+    public void StoppedBuilding(int );
+    public void FinishedObject(class CBaseObject * );
+    public void AddObject(class CBaseObject * );
+    public void OwnedObjectDestroyed(class CBaseObject * );
+    public void RemoveObject(class CBaseObject * );
+    public bool PlayerOwnsObject(class CBaseObject * );
+    public void DetonateOwnedObjectsOfType(int );
+    public void StartBuildingObjectOfType(int );
+	
+    public class CTFTeam * GetTFTeam();
+	
+    public void TeleportEffect();
+    public void RemoveTeleportEffect();
+    public bool HasTheFlag();
+	
+    public void CreateRagdollEntity(bool );
+    public void CreateRagdollEntity();
+    public void DestroyRagdoll();
+    class NetworkVar_m_hRagdoll
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkHandleBase<CBaseEntity,CTFPlayer::NetworkVar_m_hRagdoll> m_hRagdoll;
+    public bool ShouldGib(class CTakeDamageInfo & );
+	
+    public void DropAmmoPack();
+	
+    public bool CanDisguise();
+    public bool CanGoInvisible();
+    public void RemoveInvisibility();
+	
+    public void RemoveDisguise();
+	
+    public bool DoClassSpecialSkill();
+	
+    public float GetLastDamageTime();
+	
+    public class CHintSystem * Hints();
+	
+    public void SetClassMenuOpen(bool );
+    public bool IsClassMenuOpen();
+	
+    public void SetModelIndex(int );
+    public void SetDisguiseModelIndex(int );
+	
+    class NetworkVar_m_nPlayerModelIndex
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<short,CTFPlayer::NetworkVar_m_nPlayerModelIndex> m_nPlayerModelIndex;
+    class NetworkVar_m_nDisguiseModelIndex
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<short,CTFPlayer::NetworkVar_m_nDisguiseModelIndex> m_nDisguiseModelIndex;
+	
+    public float GetCritMult();
+    public void RecordDamageEvent(class CTakeDamageInfo & ,bool );
+	
+    public bool GetHudClassAutoKill();
+    public void SetHudClassAutoKill(bool );
+	
+    public void ModifyOrAppendCriteria(class AI_CriteriaSet & );
+	
+    public bool CanHearAndReadChatFrom(class CBasePlayer * );
+	
+    public class Vector & GetClassEyeHeight();
+	
+    public void UpdateExpression();
+    public void ClearExpression();
+	
+    public class IResponseSystem * GetResponseSystem();
+    public bool SpeakConceptIfAllowed(int ,char * ,char * ,unsigned int ,class IRecipientFilter * );
+	
+    public bool CanSpeakVoiceCommand();
+    public bool ShouldShowVoiceSubtitleToEnemy();
+    public void NoteSpokeVoiceCommand(char * );
+    public void SpeakWeaponFire(int );
+    public void ClearWeaponFireScene();
+	
+    public int DrawDebugTextOverlays();
+	
+    public float m_flNextVoiceCommandTime;
+    public float m_flNextSpeakWeaponFire;
+	
+	
+    public class CTFPlayerShared m_Shared;
+	
+    public int item_list;
+	
+    public float invincible_finished;
+    public float invisible_finished;
+    public float super_damage_finished;
+    public float radsuit_finished;
+	
+    public int m_flNextTimeCheck;
+	
+    public int no_sentry_message;
+    public int no_dispenser_message;
+	
+    class NetworkVar_m_bSaveMeParity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<bool,CTFPlayer::NetworkVar_m_bSaveMeParity> m_bSaveMeParity;
+	
+    public int no_entry_teleporter_message;
+    public int no_exit_teleporter_message;
+	
+    public float m_flNextNameChangeTime;
+	
+    public float current_menu;
+	
+    public int StateGet();
+	
+    public void SetOffHandWeapon(class CTFWeaponBase * );
+    public void HolsterOffHandWeapon();
+	
+    public float GetSpawnTime();
+	
+    public bool Weapon_Switch(class CBaseCombatWeapon * ,int );
+    public void Weapon_Drop(class CBaseCombatWeapon * ,class Vector * ,class Vector * );
+	
+    public void ManageRegularWeapons(struct TFPlayerClassData_t * );
+    public void ManageBuilderWeapons(struct TFPlayerClassData_t * );
+	
+    public void Taunt();
+    public bool IsTaunting();
+	
+    public float PlayScene(char * ,float ,class AI_Response * ,class IRecipientFilter * );
+    public void ResetTauntHandle();
+    public void SetDeathFlags(int );
+    public int GetDeathFlags();
+    public void SetMaxSentryKills(int );
+    public int GetMaxSentryKills();
+	
+    class NetworkVar_m_iSpawnCounter
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<bool,CTFPlayer::NetworkVar_m_iSpawnCounter> m_iSpawnCounter;
+	
+    public void SetActivePipebombs(int );
+	
+    public void CheckForIdle();
+    public void PickWelcomeObserverPoint();
+	
+    public bool WantsLagCompensationOnEntity(class CBasePlayer * ,class CUserCmd * ,class CBitVec<2048> * );
+	
+    public class CTFWeaponBase * Weapon_OwnsThisID(int );
+    public class CTFWeaponBase * Weapon_GetWeaponByType(int );
+	
+    private int GetAutoTeam();
+	
+    private void InitClass();
+    private void GiveDefaultItems();
+    private bool SelectSpawnSpot(char * ,class CBaseEntity &** );
+    private void PrecachePlayerModels();
+    private void RemoveNemesisRelationships();
+	
+    private void TFPlayerThink();
+    private void MedicRegenThink();
+    private void UpdateTimers();
+	
+    private class CHandle<CBaseEntity> m_hTauntScene;
+    private bool m_bInitTaunt;
+	
+    private void HandleCommand_JoinTeam(char * );
+    private void HandleCommand_JoinClass(char * );
+	
+    private void PhysObjectSleep();
+    private void PhysObjectWake();
+	
+    private bool CalculateAmmoPackPositionAndAngles(class CTFWeaponBase * ,class Vector & ,class QAngle & );
+    private void AmmoPackCleanUp();
+	
+    private class CPlayerStateInfo * StateLookupInfo(int );
+    private void StateEnter(int );
+    private void StateLeave();
+    private void StateTransition(int );
+    private void StateEnterWELCOME();
+    private void StateEnterPICKINGTEAM();
+    private void StateEnterACTIVE();
+    private void StateEnterOBSERVER();
+    private void StateThinkOBSERVER();
+    private void StateEnterDYING();
+    private void StateThinkDYING();
+    private void StateEnterWATCHINGROUNDINFO();
+	
+    private bool SetObserverMode(int );
+    private void AttemptToExitFreezeCam();
+	
+    private bool PlayGesture(char * );
+    private bool PlaySpecificSequence(char * );
+    private bool PlayDeathAnimation(class CTakeDamageInfo & ,class CTakeDamageInfo & );
+	
+    private int m_iIntroStep;
+    private class CHandle<CIntroViewpoint> m_hIntroView;
+    private float m_flIntroShowHintAt;
+    private float m_flIntroShowEventAt;
+    private bool m_bHintShown;
+    private bool m_bAbortFreezeCam;
+    private bool m_bSeenRoundInfo;
+    private bool m_bRegenerating;
+	
+    class NetworkVar_m_hItem
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CTFItem,CTFPlayer::NetworkVar_m_hItem> m_hItem;
+	
+    class NetworkVar_m_hOffHandWeapon
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CTFWeaponBase,CTFPlayer::NetworkVar_m_hOffHandWeapon> m_hOffHandWeapon;
+	
+    private float m_flHealthBuffTime;
+	
+    private float m_flNextRegenerateTime;
+    private float m_flNextChangeClassTime;
+	
+    private class Vector m_vecTotalBulletForce;
+	
+    private class CPlayerStateInfo * m_pStateInfo;
+	
+    private class CTFTeamSpawn * m_pSpawnPoint;
+	
+    class NetworkVar_m_angEyeAngles
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<QAngle,CTFPlayer::NetworkVar_m_angEyeAngles> m_angEyeAngles;
+	
+    private class CTFPlayerClass m_PlayerClass;
+    private class CTFPlayerAnimState * m_PlayerAnimState;
+    private int m_iLastWeaponFireUsercmd;
+    private int m_iLastSkin;
+    private float m_flLastDamageTime;
+    private float m_flNextPainSoundTime;
+    private int m_LastDamageType;
+    private int m_iDeathFlags;
+    private int m_iMaxSentryKills;
+	
+    private bool m_bPlayedFreezeCamSound;
+	
+    private class CHandle<CTFWeaponBuilder> m_hWeaponBuilder;
+	
+    private class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_aObjects;
+    private class CHintSystem m_Hints;
+    private bool m_bIsClassMenuOpen;
+	
+    private class Vector m_vecLastDeathPosition;
+	
+    private float m_flSpawnTime;
+	
+    private float m_flLastAction;
+    private bool m_bIsIdle;
+	
+    private class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_hObservableEntities;
+    private struct DamagerHistory_t m_DamagerHistory[2];
+	
+    private bool m_bHudClassAutoKill;
+	
+    class NetworkVar_m_iActivePipebombs
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs> m_iActivePipebombs;
+	
+    private struct string_t m_iszExpressionScene;
+    private class CHandle<CBaseEntity> m_hExpressionSceneEnt;
+    private float m_flNextRandomExpressionTime;
+    private class CHandle<CBaseEntity> m_hWeaponFireSceneEnt;
+};

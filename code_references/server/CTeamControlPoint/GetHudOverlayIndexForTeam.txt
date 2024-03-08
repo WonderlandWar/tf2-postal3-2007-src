@@ -1,0 +1,4 @@
+int __thiscall CTeamControlPoint::GetHudOverlayIndexForTeam(CTeamControlPoint *this, int iGameTeam)
+{
+  return this->m_TeamData.m_Memory.m_pMemory[iGameTeam].iOverlay;
+}

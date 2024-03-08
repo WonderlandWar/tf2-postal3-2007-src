@@ -1,0 +1,29 @@
+void __thiscall CTFGrenadeLauncher::PrimaryAttack(CTFGrenadeLauncher *this)
+{
+  int m_Value; // eax
+  bool (__thiscall *SendWeaponAnim)(CBaseCombatWeapon *, int); // eax
+
+  m_Value = this->m_iClip1.m_Value;
+  if ( (m_Value > 0 || m_Value == -1) && gpGlobals->curtime >= (double)this->m_flNextPrimaryAttack.m_Value )
+  {
+    if ( CTFWeaponBase::CanAttack(this) )
+    {
+      if ( this->m_flChargeBeginTime > 0.0 )
+      {
+        if ( gpGlobals->curtime - this->m_flChargeBeginTime >= tf_grenadelauncher_max_chargetime.m_pParent->m_fValue )
+          CTFGrenadeLauncher::LaunchGrenade(this);
+      }
+      else
+      {
+        SendWeaponAnim = this->SendWeaponAnim;
+        this->m_iWeaponMode = 0;
+        this->m_flChargeBeginTime = gpGlobals->curtime;
+        SendWeaponAnim(this, 175);
+      }
+    }
+    else
+    {
+      this->m_flChargeBeginTime = 0.0;
+    }
+  }
+}

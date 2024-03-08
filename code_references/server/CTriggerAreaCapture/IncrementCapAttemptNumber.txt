@@ -1,0 +1,24 @@
+void __thiscall CTriggerAreaCapture::IncrementCapAttemptNumber(CTriggerAreaCapture *this)
+{
+  bool v2; // sf
+  CTriggerAreaCapture::blockers_t *m_pMemory; // ecx
+
+  ++this->m_iCapAttemptNumber;
+  v2 = this->m_Blockers.m_Memory.m_nGrowSize < 0;
+  this->m_Blockers.m_Size = 0;
+  if ( v2 )
+  {
+    this->m_Blockers.m_pElements = this->m_Blockers.m_Memory.m_pMemory;
+  }
+  else
+  {
+    if ( this->m_Blockers.m_Memory.m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, this->m_Blockers.m_Memory.m_pMemory);
+      this->m_Blockers.m_Memory.m_pMemory = 0;
+    }
+    m_pMemory = this->m_Blockers.m_Memory.m_pMemory;
+    this->m_Blockers.m_Memory.m_nAllocationCount = 0;
+    this->m_Blockers.m_pElements = m_pMemory;
+  }
+}

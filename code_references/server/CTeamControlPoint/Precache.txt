@@ -1,0 +1,99 @@
+void __thiscall CTeamControlPoint::Precache(CTeamControlPoint *this)
+{
+  int v2; // ebp
+  int v3; // ebx
+  CTeamControlPoint::perteamdata_t *v4; // eax
+  const char *pszValue; // eax
+  CTeamControlPoint::perteamdata_t *m_pMemory; // ecx
+  const char *v7; // eax
+  CTeamControlPoint::perteamdata_t *v8; // edx
+  const char *v9; // eax
+  CTeamControlPoint::perteamdata_t *v10; // edi
+  const char *v11; // eax
+  const char *DebugName; // eax
+  string_t *p_iszOverlay; // eax
+  const char *v14; // eax
+  CTeamControlPoint::perteamdata_t *v15; // edi
+  const char *v16; // eax
+  const char *v17; // eax
+  int m_iPointIndex; // [esp-Ch] [ebp-14h]
+  int v19; // [esp-Ch] [ebp-14h]
+
+  v2 = 0;
+  if ( this->m_TeamData.m_Size > 0 )
+  {
+    v3 = 0;
+    do
+    {
+      if ( v2 != 1 )
+      {
+        v4 = &this->m_TeamData.m_Memory.m_pMemory[v3];
+        if ( v4->iszCapSound.pszValue )
+        {
+          pszValue = v4->iszCapSound.pszValue;
+          if ( !pszValue )
+            pszValue = locale;
+          CBaseEntity::PrecacheScriptSound(pszValue);
+        }
+        m_pMemory = this->m_TeamData.m_Memory.m_pMemory;
+        if ( m_pMemory[v3].iszModel.pszValue )
+        {
+          v7 = m_pMemory[v3].iszModel.pszValue;
+          if ( !v7 )
+            v7 = locale;
+          CBaseEntity::PrecacheModel(v7);
+        }
+        v8 = this->m_TeamData.m_Memory.m_pMemory;
+        if ( v8[v3].iszIcon.pszValue )
+        {
+          v9 = v8[v3].iszIcon.pszValue;
+          if ( !v9 )
+            v9 = locale;
+          PrecacheMaterial(v9);
+          v10 = &this->m_TeamData.m_Memory.m_pMemory[v3];
+          v11 = v10->iszIcon.pszValue;
+          if ( !v11 )
+            v11 = locale;
+          v10->iIcon = GetMaterialIndex(v11);
+        }
+        if ( !this->m_TeamData.m_Memory.m_pMemory[v3].iIcon )
+        {
+          m_iPointIndex = this->m_iPointIndex;
+          DebugName = CBaseEntity::GetDebugName(this);
+          _Warning(
+            "Invalid hud icon material for team %d in control point '%s' ( point index %d )\n",
+            v2,
+            DebugName,
+            m_iPointIndex);
+        }
+        p_iszOverlay = &this->m_TeamData.m_Memory.m_pMemory[v3].iszOverlay;
+        if ( p_iszOverlay->pszValue )
+        {
+          v14 = p_iszOverlay->pszValue;
+          if ( !v14 )
+            v14 = locale;
+          PrecacheMaterial(v14);
+          v15 = &this->m_TeamData.m_Memory.m_pMemory[v3];
+          v16 = v15->iszOverlay.pszValue;
+          if ( !v16 )
+            v16 = locale;
+          v15->iOverlay = GetMaterialIndex(v16);
+          if ( !this->m_TeamData.m_Memory.m_pMemory[v3].iOverlay )
+          {
+            v19 = this->m_iPointIndex;
+            v17 = CBaseEntity::GetDebugName(this);
+            _Warning(
+              "Invalid hud overlay material for team %d in control point '%s' ( point index %d )\n",
+              v2,
+              v17,
+              v19);
+          }
+        }
+      }
+      ++v2;
+      ++v3;
+    }
+    while ( v2 < this->m_TeamData.m_Size );
+  }
+  CBaseEntity::PrecacheScriptSound("Announcer.ControlPointContested");
+}

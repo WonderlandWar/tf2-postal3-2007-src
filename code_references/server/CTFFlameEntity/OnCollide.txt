@@ -1,0 +1,80 @@
+void __thiscall CTFFlameEntity::OnCollide(CTFFlameEntity *this, CBaseEntity *pOther)
+{
+  int TeamNumber; // ebx
+  double v4; // st7
+  double flMultiplier; // st7
+  CBaseEntity *v6; // eax
+  CBaseEntity *v7; // ebx
+  CBaseEntity *OwnerEntity; // eax
+  const Vector *AbsOrigin; // eax
+  const Vector *(__thiscall *WorldSpaceCenter)(CBaseEntity *); // edx
+  const Vector *v11; // eax
+  const Vector *AbsVelocity; // eax
+  float val; // [esp+0h] [ebp-C4h]
+  const Vector *vala; // [esp+0h] [ebp-C4h]
+  float A; // [esp+4h] [ebp-C0h]
+  CBaseEntity *Aa; // [esp+4h] [ebp-C0h]
+  float B; // [esp+8h] [ebp-BCh]
+  int C; // [esp+Ch] [ebp-B8h]
+  CTakeDamageInfo info; // [esp+20h] [ebp-A4h] BYREF
+  CGameTrace pTrace; // [esp+68h] [ebp-5Ch] BYREF
+
+  if ( pOther->m_takedamage.m_Value )
+  {
+    TeamNumber = CBaseEntity::GetTeamNumber(pOther);
+    if ( TeamNumber != CBaseEntity::GetTeamNumber(this) )
+    {
+      LODWORD(info.m_vecDamageForce.x) = pOther->GetRefEHandle(pOther)->m_Index;
+      if ( CUtlVector<CHandle<CBaseObject>,CUtlMemory<CHandle<CBaseObject>,int>>::Find(
+             &this->m_hEntitiesBurnt,
+             (const CHandle<CBaseEntity> *)&info) == -1 )
+      {
+        CHandle<CAI_BaseNPC>::CHandle<CAI_BaseNPC>((CHandle<CBaseEntity> *)&info, pOther);
+        CUtlVector<CGameWeaponManager *,CUtlMemory<CGameWeaponManager *,int>>::InsertBefore(
+          (CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *)&this->m_hEntitiesBurnt,
+          this->m_hEntitiesBurnt.m_Size,
+          (vgui::TreeNode *const *)&info);
+        if ( (this->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        v4 = Vector::DistTo(&this->m_vecAbsOrigin, &this->m_vecInitialPos);
+        A = tf_flamethrower_maxdamagedist.m_pParent->m_fValue * 0.5;
+        val = v4;
+        flMultiplier = RemapValClamped(val, A, tf_flamethrower_maxdamagedist.m_pParent->m_fValue, 1.0, 0.0) * this->m_flDmgAmount;
+        if ( flMultiplier <= 1.0 )
+          flMultiplier = 1.0;
+        info.m_vecDamageForce.x = flMultiplier;
+        if ( tf_debug_flamethrower.m_pParent->m_nValue )
+          _Msg("Flame touch dmg: %.1f\n", flMultiplier);
+        v6 = CHandle<CBaseAnimating>::operator CBaseAnimating *(&this->m_hAttacker);
+        v7 = v6;
+        if ( v6 )
+        {
+          C = this->m_iDmgType;
+          B = info.m_vecDamageForce.x;
+          Aa = v6;
+          OwnerEntity = CBaseEntity::GetOwnerEntity(this);
+          CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&info.m_vecDamageForce.y, OwnerEntity, Aa, B, C, 3);
+          AbsOrigin = CBaseEntity::GetAbsOrigin(v7);
+          info.m_vecReportedPosition.y = AbsOrigin->x;
+          info.m_vecReportedPosition.z = AbsOrigin->y;
+          WorldSpaceCenter = pOther->WorldSpaceCenter;
+          *(float *)&info.m_hInflictor.m_Index = AbsOrigin->z;
+          vala = WorldSpaceCenter(pOther);
+          v11 = this->WorldSpaceCenter(this);
+          UTIL_TraceLine(v11, vala, 0x4200400Bu, this, 0, (CGameTrace *)&pTrace.startpos.y);
+          AbsVelocity = CBaseEntity::GetAbsVelocity(this);
+          CBaseEntity::DispatchTraceAttack(
+            pOther,
+            (CTakeDamageInfo *)&info.m_vecDamageForce.y,
+            AbsVelocity,
+            (CGameTrace *)&pTrace.startpos.y);
+          ApplyMultiDamage();
+        }
+      }
+    }
+  }
+  else if ( !engine->IndexOfEdict(engine, pOther->m_Network.m_pPev) )
+  {
+    UTIL_Remove(this);
+  }
+}

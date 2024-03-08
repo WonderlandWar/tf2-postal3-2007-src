@@ -1,0 +1,19 @@
+void __thiscall CTFWeaponInvis::SecondaryAttack(CTFWeaponInvis *this)
+{
+  CTFPlayer *TFPlayerOwner; // eax
+  CTFPlayer *v2; // esi
+  float val; // [esp+0h] [ebp-4h] BYREF
+
+  val = *(float *)&this;
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  v2 = TFPlayerOwner;
+  if ( TFPlayerOwner )
+  {
+    if ( CTFPlayerShared::InCond(&TFPlayerOwner->m_Shared, 8) )
+    {
+      CTFPlayer::DoClassSpecialSkill(v2);
+      val = tf_spy_invis_unstealth_time.m_pParent->m_fValue + gpGlobals->curtime;
+      CNetworkVarBase<float,CBaseCombatCharacter::NetworkVar_m_flNextAttack>::Set(&v2->m_flNextAttack, &val);
+    }
+  }
+}

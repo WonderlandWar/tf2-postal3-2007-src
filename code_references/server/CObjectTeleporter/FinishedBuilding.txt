@@ -1,0 +1,9 @@
+void __thiscall CObjectTeleporter::FinishedBuilding(CObjectTeleporter *this)
+{
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  CBaseObject::FinishedBuilding(this);
+  CBaseObject::SetActivity(this, ACT_OBJ_RUNNING);
+  val = 0.0;
+  CNetworkVarBase<float,CSprite::NetworkVar_m_flGlowProxySize>::Set(&this->m_flPlaybackRate, &val);
+}

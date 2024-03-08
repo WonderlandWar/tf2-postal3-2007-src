@@ -1,0 +1,21 @@
+void __thiscall CDispenserControlPanel::CDispenserControlPanel(
+        CDispenserControlPanel *this,
+        vgui::Panel *parent,
+        const char *panelName)
+{
+  vgui::RotatingProgressBar *v4; // eax
+  vgui::RotatingProgressBar *v5; // eax
+
+  CObjectControlPanel::CObjectControlPanel(this, parent, "CDispenserControlPanel");
+  this->__vftable = (CDispenserControlPanel_vtbl *)&CDispenserControlPanel::`vftable';
+  v4 = (vgui::RotatingProgressBar *)operator new(0x114u);
+  if ( v4 )
+  {
+    vgui::RotatingProgressBar::RotatingProgressBar(v4, this, "MeterArrow");
+    this->m_pAmmoProgress = v5;
+  }
+  else
+  {
+    this->m_pAmmoProgress = 0;
+  }
+}

@@ -1,0 +1,45 @@
+void __thiscall CTargetID::PerformLayout(CTargetID *this)
+{
+  int iXIndent; // ebx
+  int iXPostdent; // ebp
+  int iWidth; // edi
+  int v5; // eax
+  int v6; // edi
+  int Tall; // eax
+  double v8; // st7
+  int v9; // eax
+  int v10; // [esp-4h] [ebp-30h]
+  int iDataW; // [esp+14h] [ebp-18h] BYREF
+  int iY; // [esp+18h] [ebp-14h] BYREF
+  int iTextH; // [esp+1Ch] [ebp-10h] BYREF
+  int iDataH; // [esp+20h] [ebp-Ch] BYREF
+  int iX; // [esp+24h] [ebp-8h] BYREF
+  int x; // [esp+28h] [ebp-4h] BYREF
+
+  iXIndent = (int)((double)ScreenWidth() * 0.0015625 * 5.0);
+  iXPostdent = (int)((double)ScreenWidth() * 0.0015625 * 10.0);
+  iWidth = iXIndent + iXPostdent + vgui::Panel::GetWide(*(vgui::Panel **)((char *)&this->m_cBlueColor + 3));
+  (*(void (__thiscall **)(_DWORD, int *, int *))(*(_DWORD *)LODWORD(this->m_flLastChangeTime) + 780))(
+    LODWORD(this->m_flLastChangeTime),
+    &iDataW,
+    &iDataH);
+  (*(void (__thiscall **)(int, int *, int *))(*(_DWORD *)this->m_iTargetEntIndex + 780))(
+    this->m_iTargetEntIndex,
+    &iY,
+    &iX);
+  v5 = iDataW;
+  if ( iDataW <= iY )
+    v5 = iY;
+  v6 = v5 + iWidth;
+  Tall = vgui::Panel::GetTall((vgui::Panel *)this);
+  vgui::Panel::SetSize((vgui::Panel *)this, v6, Tall);
+  vgui::Panel::GetPos((vgui::Panel *)this, &x, &iTextH);
+  v10 = iTextH;
+  v8 = (double)(ScreenWidth() - v6) * 0.5;
+  vgui::Panel::SetPos((vgui::Panel *)this, (int)v8, v10);
+  if ( *(_DWORD *)&this->m_bLayoutOnUpdate )
+  {
+    v9 = vgui::Panel::GetTall((vgui::Panel *)this);
+    vgui::Panel::SetSize(*(vgui::Panel **)&this->m_bLayoutOnUpdate, v6, v9);
+  }
+}

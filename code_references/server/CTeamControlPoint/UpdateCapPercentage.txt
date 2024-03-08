@@ -1,0 +1,57 @@
+void __thiscall CTeamControlPoint::UpdateCapPercentage(CTeamControlPoint *this)
+{
+  int v2; // ebx
+  int v3; // ebp
+  int m_iPointIndex; // eax
+  int v5; // edi
+  double CPCapPercentage; // st7
+  int iTeamPoseParam; // edi
+  int iModelBodygroup; // ecx
+  float flValue; // [esp+14h] [ebp-4h]
+
+  v2 = 2;
+  if ( this->m_TeamData.m_Size > 2 )
+  {
+    v3 = 2;
+    while ( v2 == 1 )
+    {
+LABEL_19:
+      ++v2;
+      ++v3;
+      if ( v2 >= this->m_TeamData.m_Size )
+        return;
+    }
+    m_iPointIndex = this->m_iPointIndex;
+    if ( m_iPointIndex < g_pObjectiveResource->m_iNumControlPoints.m_Value
+      && (v5 = g_pObjectiveResource->m_iCappingTeam.m_Value[m_iPointIndex]) != 0 )
+    {
+      CPCapPercentage = CBaseTeamObjectiveResource::GetCPCapPercentage(g_pObjectiveResource, this->m_iPointIndex);
+      if ( v2 == v5 )
+      {
+        CPCapPercentage = 1.0 - CPCapPercentage;
+        goto LABEL_12;
+      }
+      if ( v2 == this->m_iTeam )
+        goto LABEL_12;
+    }
+    else if ( v2 == this->m_iTeam )
+    {
+      CPCapPercentage = 1.0;
+LABEL_12:
+      flValue = CPCapPercentage;
+      iTeamPoseParam = this->m_TeamData.m_Memory.m_pMemory[v3].iTeamPoseParam;
+      if ( iTeamPoseParam != -1 )
+      {
+        if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+          CBaseAnimating::LockStudioHdr(this);
+        CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, iTeamPoseParam, flValue);
+      }
+      iModelBodygroup = this->m_TeamData.m_Memory.m_pMemory[v3].iModelBodygroup;
+      if ( iModelBodygroup != -1 )
+        CBaseAnimating::SetBodygroup(this, iModelBodygroup, 0.0 == flValue);
+      goto LABEL_19;
+    }
+    CPCapPercentage = 0.0;
+    goto LABEL_12;
+  }
+}

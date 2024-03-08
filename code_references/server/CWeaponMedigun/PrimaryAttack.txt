@@ -1,0 +1,44 @@
+void __usercall CWeaponMedigun::PrimaryAttack(CWeaponMedigun *this@<ecx>, int a2@<ebx>, int a3@<ebp>)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v5; // ecx
+  CTFPlayer *m_pEntity; // edi
+  bool val; // [esp+Dh] [ebp-1h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v5 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+    if ( v5->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (CTFPlayer *)v5->m_pEntity;
+      if ( v5->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((CBaseEntity *)v5->m_pEntity) && CTFWeaponBase::CanAttack(this) )
+        {
+          if ( tf_medigun_lagcomp.m_pParent->m_nValue )
+            lagcompensation->StartLagCompensation(lagcompensation, m_pEntity, m_pEntity->m_pCurrentCommand);
+          if ( CWeaponMedigun::FindAndHealTargets(this) )
+          {
+            if ( !this->m_bHealing.m_Value )
+            {
+              CTFPlayer::SpeakWeaponFire(m_pEntity, -1);
+              this->SendWeaponAnim(this, 1091);
+              CTFPlayer::DoAnimationEvent(m_pEntity, PLAYERANIMEVENT_ATTACK_PRE, 0);
+            }
+            val = 1;
+            CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+              (CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bHealing,
+              &val);
+          }
+          else
+          {
+            CWeaponMedigun::RemoveHealingTarget(this, a2, a3, (int)this, -1, 0);
+          }
+          if ( tf_medigun_lagcomp.m_pParent->m_nValue )
+            lagcompensation->FinishLagCompensation(lagcompensation, m_pEntity);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+int __thiscall CTFPlayerShared::FindHealerIndex(CTFPlayerShared *this, CTFPlayer *pPlayer)
+{
+  int m_Size; // edi
+  int result; // eax
+  CTFPlayerShared::healers_t *i; // esi
+  CTFPlayer *v5; // edx
+
+  m_Size = this->m_aHealers.m_Size;
+  result = 0;
+  if ( m_Size <= 0 )
+    return -1;
+  for ( i = this->m_aHealers.m_Memory.m_pMemory; ; ++i )
+  {
+    v5 = i->pPlayer.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[i->pPlayer.m_Index & 0xFFF].m_SerialNumber != i->pPlayer.m_Index >> 12
+       ? 0
+       : (CTFPlayer *)g_pEntityList->m_EntPtrArray[i->pPlayer.m_Index & 0xFFF].m_pEntity;
+    if ( v5 == pPlayer )
+      break;
+    if ( ++result >= m_Size )
+      return -1;
+  }
+  return result;
+}

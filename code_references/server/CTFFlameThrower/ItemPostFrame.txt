@@ -1,0 +1,41 @@
+void __thiscall CTFFlameThrower::ItemPostFrame(CTFFlameThrower *this)
+{
+  CBasePlayer *PlayerOwner; // edi
+  int AmmoCount; // ebp
+  bool (__thiscall *IsAlive)(CBaseEntity *); // eax
+  bool val[4]; // [esp+4h] [ebp-Ch] BYREF
+  int iAmmo; // [esp+8h] [ebp-8h] BYREF
+  int v7; // [esp+Ch] [ebp-4h]
+
+  if ( !this->m_bLowered.m_Value )
+  {
+    PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+    if ( PlayerOwner )
+    {
+      if ( PlayerOwner->IsPlayer(PlayerOwner) )
+      {
+        AmmoCount = CBaseCombatCharacter::GetAmmoCount(PlayerOwner, this->m_iPrimaryAmmoType.m_Value);
+        IsAlive = PlayerOwner->IsAlive;
+        v7 = AmmoCount;
+        if ( IsAlive(PlayerOwner) && (PlayerOwner->m_nButtons & 1) != 0 && AmmoCount > 0 )
+        {
+          this->PrimaryAttack(this);
+        }
+        else if ( this->m_iWeaponState.m_Value > 0 )
+        {
+          this->SendWeaponAnim(this, 1092);
+          CTFPlayer::DoAnimationEvent((CTFPlayer *)PlayerOwner, PLAYERANIMEVENT_ATTACK_POST, 0);
+          iAmmo = 0;
+          CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+            (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+            &iAmmo);
+          val[3] = 0;
+          CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(&this->m_bCritFire, &val[3]);
+        }
+        if ( PlayerOwner->IsAlive(PlayerOwner) && (PlayerOwner->m_nButtons & 0x800) != 0 && v7 > 10 )
+          this->SecondaryAttack(this);
+        CTFWeaponBase::ItemPostFrame(this);
+      }
+    }
+  }
+}

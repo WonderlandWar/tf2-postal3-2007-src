@@ -1,0 +1,22 @@
+void __thiscall CTeamControlPointMaster::SetBaseControlPoints(CTeamControlPointMaster *this)
+{
+  int v2; // esi
+  int *m_iTeamBaseIcons; // edi
+  CBaseTeamObjectiveResource *v4; // ebx
+  int BaseControlPoint; // eax
+
+  v2 = 0;
+  if ( GetNumberOfTeams() > 0 )
+  {
+    m_iTeamBaseIcons = this->m_iTeamBaseIcons;
+    do
+    {
+      CBaseTeamObjectiveResource::SetTeamBaseIcons(g_pObjectiveResource, v2, *m_iTeamBaseIcons);
+      v4 = g_pObjectiveResource;
+      BaseControlPoint = CTeamControlPointMaster::GetBaseControlPoint(this, v2);
+      CBaseTeamObjectiveResource::SetBaseCP(v4, BaseControlPoint, v2++);
+      ++m_iTeamBaseIcons;
+    }
+    while ( v2 < GetNumberOfTeams() );
+  }
+}

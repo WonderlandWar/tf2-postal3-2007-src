@@ -1,0 +1,94 @@
+void __thiscall CObjectSentrygun::Spawn(CObjectSentrygun *this)
+{
+  void (__thiscall *SetModel)(CBaseEntity *, const char *); // edx
+  CNetworkVarBase<char,CBaseEntity::NetworkVar_m_takedamage> *p_m_takedamage; // edi
+  int v4; // ecx
+  CAmmoDef *AmmoDef; // eax
+  int v6; // ecx
+  float thinkTime; // [esp+Ch] [ebp-2Ch]
+  int val; // [esp+1Ch] [ebp-1Ch] BYREF
+  Vector vecOffset; // [esp+20h] [ebp-18h] BYREF
+  Vector vecMin; // [esp+2Ch] [ebp-Ch] BYREF
+
+  SetModel = this->SetModel;
+  this->m_iPitchPoseParameter = -1;
+  this->m_iYawPoseParameter = -1;
+  ((void (__stdcall *)(const char *))SetModel)("models/buildables/sentry1_blueprint.mdl");
+  p_m_takedamage = &this->m_takedamage;
+  if ( this->m_takedamage.m_Value == 2 )
+  {
+    v4 = 0;
+  }
+  else
+  {
+    v4 = 1;
+    if ( (unsigned __int8)this->m_takedamage.m_Value - 2 <= 0 )
+      v4 = -1;
+  }
+  if ( v4 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    p_m_takedamage->m_Value = 2;
+  }
+  val = 1;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel>::Set(&this->m_iUpgradeLevel, &val);
+  val = 0;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetal>::Set(&this->m_iUpgradeMetal, &val);
+  val = tf_sentrygun_upgrade_metal_required.m_pParent->m_nValue;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetalRequired>::Set(&this->m_iUpgradeMetalRequired, &val);
+  val = 150;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iMaxHealth>::Set(&this->m_iMaxHealth, &val);
+  CBaseObject::SetHealth(this, 150.0);
+  this->m_flFieldOfView = 0.69999999;
+  this->m_iRightBound = 45;
+  this->m_iLeftBound = 315;
+  this->m_iBaseTurnRate = 6;
+  val = 0;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells>::Set(&this->m_iAmmoShells, &val);
+  val = 0;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets>::Set(&this->m_iAmmoRockets, &val);
+  val = 100;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iMaxAmmoShells>::Set(&this->m_iMaxAmmoShells, &val);
+  val = 20;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iMaxAmmoRockets>::Set(&this->m_iMaxAmmoRockets, &val);
+  AmmoDef = GetAmmoDef();
+  this->m_iAmmoType = CAmmoDef::Index(AmmoDef, "TF_AMMO_PRIMARY");
+  this->m_hEnemy.m_Index = -1;
+  if ( p_m_takedamage->m_Value == 3 )
+  {
+    v6 = 0;
+  }
+  else
+  {
+    v6 = 1;
+    if ( (unsigned __int8)p_m_takedamage->m_Value - 3 <= 0 )
+      v6 = -1;
+  }
+  if ( v6 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    p_m_takedamage->m_Value = 3;
+  }
+  this->m_flLastAttackedTime = 0.0;
+  this->m_flHeavyBulletResist = 0.0;
+  CBaseObject::Spawn(this);
+  vecOffset.x = 0.0;
+  vecOffset.y = 0.0;
+  vecOffset.z = 32.0;
+  CBaseEntity::SetViewOffset(this, &vecOffset);
+  vecOffset.x = 20.0;
+  vecOffset.y = 20.0;
+  vecOffset.z = 66.0;
+  vecMin.x = -20.0;
+  vecMin.y = -20.0;
+  vecMin.z = 0.0;
+  UTIL_SetSize(this, &vecMin, &vecOffset);
+  val = 0;
+  CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(&this->m_iState, &val);
+  thinkTime = gpGlobals->curtime + 0.05;
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CObjectSentrygun::SentryThink,
+    thinkTime,
+    "SentrygunContext");
+}

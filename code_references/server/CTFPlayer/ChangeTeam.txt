@@ -1,0 +1,52 @@
+void __thiscall CTFPlayer::ChangeTeam(CTFPlayer *this, unsigned int iTeamNum)
+{
+  int iOldTeam; // ebx
+  int i; // ebp
+  CBasePlayer *v5; // eax
+  CTFPlayer *v6; // esi
+  unsigned int m_Index; // ebx
+  CHandle<CBaseEntity> v8; // [esp+8h] [ebp-4h] BYREF
+
+  if ( GetGlobalTeam(iTeamNum) )
+  {
+    iOldTeam = CBaseEntity::GetiOldTeam(this);
+    if ( iTeamNum != iOldTeam )
+    {
+      CTFPlayer::RemoveAllObjects(this);
+      CTFPlayer::RemoveNemesisRelationships(this);
+      CBasePlayer::ChangeTeam(this, iTeamNum);
+      if ( iTeamNum > 1 )
+      {
+        if ( !CBasePlayer::IsDead(this) && (iOldTeam == 2 || iOldTeam == 3) )
+          this->CommitSuicide(this, 0);
+        for ( i = 1; i <= gpGlobals->maxClients; ++i )
+        {
+          v5 = UTIL_PlayerByIndex(i);
+          v6 = (CTFPlayer *)v5;
+          if ( v5 )
+          {
+            if ( v5->IsPlayer(v5) && v6 != this )
+            {
+              m_Index = v6->m_Shared.m_hDisguiseTarget.m_Value.m_Index;
+              v8.m_Index = m_Index;
+              if ( CHandle<CBaseEntity>::operator==(&v8, this)
+                || (v8.m_Index = m_Index, CHandle<CSpotlightEnd>::operator!((CHandle<CAI_BaseNPC> *)&v8))
+                && v6->m_Shared.m_nDisguiseTeam.m_Value == iTeamNum )
+              {
+                CTFPlayerShared::FindDisguiseTarget(&v6->m_Shared);
+              }
+            }
+          }
+        }
+      }
+      else
+      {
+        CTFPlayer::StateTransition(this, 2);
+      }
+    }
+  }
+  else
+  {
+    _Warning("CTFPlayer::ChangeTeam( %d ) - invalid team index.\n", iTeamNum);
+  }
+}

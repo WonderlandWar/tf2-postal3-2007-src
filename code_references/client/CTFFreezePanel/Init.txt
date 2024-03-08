@@ -1,0 +1,14 @@
+void __thiscall CTFFreezePanel::Init(CTFFreezePanel *this)
+{
+  this->vgui::EditablePanel::vgui::Panel::m_RegisterClass = (vgui::Panel::Panel_RegisterMap)1;
+  gameeventmanager->AddListener(gameeventmanager, (IGameEventListener2 *)this, "show_freezepanel", 0);
+  this->vgui::EditablePanel::vgui::Panel::m_RegisterClass = (vgui::Panel::Panel_RegisterMap)1;
+  gameeventmanager->AddListener(gameeventmanager, (IGameEventListener2 *)this, "hide_freezepanel", 0);
+  this->vgui::EditablePanel::vgui::Panel::m_RegisterClass = (vgui::Panel::Panel_RegisterMap)1;
+  gameeventmanager->AddListener(gameeventmanager, (IGameEventListener2 *)this, "freezecam_started", 0);
+  this->vgui::EditablePanel::vgui::Panel::m_RegisterClass = (vgui::Panel::Panel_RegisterMap)1;
+  gameeventmanager->AddListener(gameeventmanager, (IGameEventListener2 *)this, "player_death", 0);
+  this->vgui::EditablePanel::vgui::Panel::m_RegisterClass = (vgui::Panel::Panel_RegisterMap)1;
+  gameeventmanager->AddListener(gameeventmanager, (IGameEventListener2 *)this, "teamplay_win_panel", 0);
+  CTFFreezePanel::Hide((CTFFreezePanel *)((char *)this - 232));
+}

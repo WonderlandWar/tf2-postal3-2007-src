@@ -1,0 +1,26 @@
+void __thiscall CCaptureFlag::Reset(CCaptureFlag *this)
+{
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  CBaseEntity::SetAbsOrigin(this, &this->m_vecResetPos);
+  CBaseEntity::SetAbsAngles(this, &this->m_vecResetAng);
+  CCaptureFlag::SetFlagStatus(this, 0);
+  val = 0.0;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(&this->m_flResetTime, &val);
+  val = 0.0;
+  CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(&this->m_flNeutralTime, &val);
+  this->m_bAllowOwnerPickup = 1;
+  CNetworkHandleBase<CBaseEntity,CCaptureFlag::NetworkVar_m_hPrevOwner>::Set(&this->m_hPrevOwner, 0);
+  if ( this->m_nGameType.m_Value == 3 )
+  {
+    this->ChangeTeam(this, this->m_iOriginalTeam);
+    if ( CBaseEntity::GetTeamNumber(this) )
+      LODWORD(val) = CBaseEntity::GetTeamNumber(this) - 2;
+    else
+      LODWORD(val) = 2;
+    CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+      (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+      (const int *)&val);
+  }
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+}

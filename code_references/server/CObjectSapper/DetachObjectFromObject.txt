@@ -1,0 +1,11 @@
+void __thiscall CObjectSapper::DetachObjectFromObject(CObjectSapper *this)
+{
+  CBaseObject *ParentObject; // eax
+
+  if ( CBaseObject::GetParentObject(this) )
+  {
+    ParentObject = CBaseObject::GetParentObject(this);
+    CBaseObject::OnRemoveSapper(ParentObject);
+  }
+  CBaseObject::DetachObjectFromObject(this);
+}

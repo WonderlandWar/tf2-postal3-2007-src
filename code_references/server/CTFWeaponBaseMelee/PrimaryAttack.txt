@@ -1,0 +1,18 @@
+void __thiscall CTFWeaponBaseMelee::PrimaryAttack(CTFWeaponBaseMelee *this)
+{
+  CTFPlayer *TFPlayerOwner; // edi
+  float v3; // [esp+0h] [ebp-8h]
+
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  if ( TFPlayerOwner )
+  {
+    if ( CTFWeaponBase::CanAttack(this) )
+    {
+      this->m_iWeaponMode = 0;
+      this->m_bConnected = 0;
+      CTFWeaponBaseMelee::Swing(this, TFPlayerOwner, v3);
+      CTFPlayer::SpeakWeaponFire(TFPlayerOwner, -1);
+      CTFGameStats::Event_PlayerFiredWeapon(&CTF_GameStats, TFPlayerOwner, this->m_bCurrentAttackIsCrit);
+    }
+  }
+}

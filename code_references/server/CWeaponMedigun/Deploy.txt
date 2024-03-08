@@ -1,0 +1,28 @@
+char __thiscall CWeaponMedigun::Deploy(CWeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // esi
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  if ( !CTFWeaponBase::Deploy(this) )
+    return 0;
+  val = 0;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bHolstered>::Set(&this->m_bHolstered, &val);
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF],
+        g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12)
+    || (m_pEntity = v3->m_pEntity) == 0
+    || !((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(v3->m_pEntity) )
+  {
+    m_pEntity = 0;
+  }
+  if ( this->m_bChargeRelease.m_Value )
+  {
+    if ( m_pEntity )
+      CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&m_pEntity[948], 0);
+  }
+  this->m_flNextTargetCheckTime = gpGlobals->curtime;
+  return 1;
+}

@@ -1,0 +1,16 @@
+void __thiscall CObjectSapper::Precache(CObjectSapper *this)
+{
+  CBaseEntity::PrecacheModel("models/buildables/sapper_sentry1.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_sentry2.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_sentry3.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_teleporter.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_dispenser.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_placement_sentry1.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_placement_sentry2.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_placement_sentry3.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_placement_teleporter.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/sapper_placement_dispenser.mdl");
+  CBaseEntity::PrecacheScriptSound("Weapon_Sapper.Plant");
+  CBaseEntity::PrecacheScriptSound("Weapon_Sapper.Timer");
+  CBaseObject::Precache(this);
+}

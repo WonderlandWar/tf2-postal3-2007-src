@@ -1,0 +1,4 @@
+void __thiscall CTeamControlPoint::SetLastContestedAt(CTeamControlPoint *this, float flTime)
+{
+  this->m_flLastContestedAt = flTime;
+}

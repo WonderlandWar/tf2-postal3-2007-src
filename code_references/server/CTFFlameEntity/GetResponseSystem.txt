@@ -1,0 +1,12 @@
+IResponseSystem *__thiscall CTFPlayer::GetResponseSystem(CTFPlayer *this)
+{
+  int iClass; // eax
+  unsigned int m_iCurrentConcept; // esi
+
+  iClass = this->m_PlayerClass.m_iClass.m_Value;
+  m_iCurrentConcept = this->m_iCurrentConcept;
+  if ( (unsigned int)(iClass - 1) > 8 || m_iCurrentConcept > 0x37 )
+    return CBaseMultiplayerPlayer::GetResponseSystem(this);
+  else
+    return *(IResponseSystem **)(*((_DWORD *)&g_pGameRules[1].Name + 5 * iClass) + 4 * m_iCurrentConcept);
+}

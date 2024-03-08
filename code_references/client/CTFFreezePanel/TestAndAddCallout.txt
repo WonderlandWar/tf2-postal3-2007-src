@@ -1,0 +1,131 @@
+CTFFreezePanelCallout *__thiscall CTFFreezePanel::TestAndAddCallout(
+        CTFFreezePanel *this,
+        Vector *origin,
+        Vector *vMins,
+        Vector *vMaxs,
+        CUtlVector<Vector,CUtlMemory<Vector,int> > *vecCalloutsTL,
+        CUtlVector<Vector,CUtlMemory<Vector,int> > *vecCalloutsBR,
+        Vector *vecFreezeTL,
+        Vector *vecFreezeBR,
+        Vector *vecStatTL,
+        Vector *vecStatBR,
+        int *iX,
+        int *iY)
+{
+  float x; // ebp
+  Vector *m_pMemory; // ebp
+  unsigned int v14; // eax
+  const Vector *v15; // eax
+  CTFFreezePanelCallout *v16; // esi
+  vgui::Panel *v17; // eax
+  vgui::Panel *v18; // eax
+  vgui::Panel *v19; // esi
+  int m_Size; // eax
+  double v21; // st7
+  int v23; // [esp-4h] [ebp-9Ch]
+  int v24; // [esp+10h] [ebp-88h]
+  int v25; // [esp+10h] [ebp-88h]
+  int v26; // [esp+10h] [ebp-88h]
+  int iRight; // [esp+14h] [ebp-84h]
+  int iRighta; // [esp+14h] [ebp-84h]
+  int v29; // [esp+18h] [ebp-80h]
+  int v30; // [esp+18h] [ebp-80h]
+  unsigned int v31; // [esp+18h] [ebp-80h]
+  Vector vecCalloutBR; // [esp+20h] [ebp-78h] BYREF
+  Vector vecCalloutTL; // [esp+2Ch] [ebp-6Ch] BYREF
+  float v35; // [esp+38h] [ebp-60h]
+  CGameTrace tr; // [esp+3Ch] [ebp-5Ch] BYREF
+
+  x = *(float *)&vecCalloutsTL;
+  LODWORD(vecCalloutBR.x) = vecCalloutsTL;
+  LODWORD(tr.startpos.x) = vecCalloutsBR;
+  v29 = (int)((double)ScreenWidth() * 0.0015625 * 25.0);
+  v24 = (int)((double)ScreenHeight() * 0.002083333333333333 * 50.0);
+  if ( !GetVectorInScreenSpace(*origin, iX, iY, 0) )
+    return 0;
+  *iX -= v29;
+  *iY -= v24;
+  v30 = (int)((double)ScreenWidth() * 0.0015625 * 100.0 + (double)*iX);
+  iRight = *iY;
+  v25 = (int)((double)ScreenWidth() * 0.0015625 * 50.0 + (double)iRight);
+  if ( *iX <= 0 )
+    return 0;
+  if ( iRight <= 0 )
+    return 0;
+  if ( v30 >= ScreenWidth() )
+    return 0;
+  *(double *)&vecCalloutBR.y = (double)ScreenHeight();
+  *(double *)&vecCalloutTL.y = (double)v25;
+  if ( *(double *)&vecCalloutBR.y - (double)ScreenHeight() * 0.002083333333333333 * 40.0 <= *(double *)&vecCalloutTL.y )
+    return 0;
+  vecCalloutTL.y = (float)*iX;
+  vecCalloutTL.z = (float)*iY;
+  v35 = 0.0;
+  vecCalloutBR.y = (float)v30;
+  vecCalloutBR.z = (float)v25;
+  vecCalloutTL.x = 1.0;
+  if ( QuickBoxIntersectTest((Vector *)&vecCalloutTL.y, (Vector *)&vecCalloutBR.y, vecFreezeTL, vecFreezeBR)
+    || QuickBoxIntersectTest((Vector *)&vecCalloutTL.y, (Vector *)&vecCalloutBR.y, vecStatTL, vecStatBR) )
+  {
+    return 0;
+  }
+  v26 = 0;
+  iRighta = vecCalloutsTL->m_Size;
+  if ( iRighta > 0 )
+  {
+    m_pMemory = vecCalloutsTL->m_Memory.m_pMemory;
+    v14 = *(_DWORD *)LODWORD(tr.startpos.x) - (unsigned int)vecCalloutsTL->m_Memory.m_pMemory;
+    v31 = v14;
+    while ( !QuickBoxIntersectTest(
+               (Vector *)&vecCalloutTL.y,
+               (Vector *)&vecCalloutBR.y,
+               m_pMemory,
+               (Vector *)((char *)m_pMemory + v14)) )
+    {
+      ++m_pMemory;
+      if ( ++v26 >= iRighta )
+      {
+        x = vecCalloutBR.x;
+        goto LABEL_14;
+      }
+      v14 = v31;
+    }
+    return 0;
+  }
+LABEL_14:
+  v15 = MainViewOrigin();
+  UTIL_TraceLine(origin, v15, 0x4081u, 0, 0, (CGameTrace *)&tr.startpos.y);
+  if ( *(float *)&tr.contents < 1.0 )
+    return 0;
+  v16 = (CTFFreezePanelCallout *)operator new(0xF0u);
+  if ( v16 )
+  {
+    v17 = g_pClientMode->GetViewport(g_pClientMode);
+    CTFFreezePanelCallout::CTFFreezePanelCallout(v16, v17, "FreezePanelCallout");
+    v19 = v18;
+  }
+  else
+  {
+    v19 = 0;
+  }
+  vgui::Panel::MakeReadyForUse(v19);
+  m_Size = this->m_pCalloutPanels.m_Size;
+  LODWORD(vecCalloutBR.x) = v19;
+  CUtlVector<C_SlideshowDisplay *,CUtlMemory<C_SlideshowDisplay *,int>>::InsertBefore(
+    (CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *)&this->m_pCalloutPanels,
+    m_Size,
+    (vgui::TreeNode *const *)&vecCalloutBR);
+  CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+    (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)LODWORD(x),
+    *(_DWORD *)(LODWORD(x) + 12),
+    (const QAngle *)&vecCalloutTL.y);
+  CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+    (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)LODWORD(tr.startpos.x),
+    *(_DWORD *)(LODWORD(tr.startpos.x) + 12),
+    (const QAngle *)&vecCalloutBR.y);
+  v19->SetVisible(v19, 1);
+  v23 = (int)((double)ScreenWidth() * 0.0015625 * 50.0);
+  v21 = (double)ScreenWidth() * 0.0015625 * 100.0;
+  vgui::Panel::SetBounds(v19, *iX, *iY, (int)v21, v23);
+  return (CTFFreezePanelCallout *)v19;
+}

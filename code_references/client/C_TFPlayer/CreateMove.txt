@@ -1,0 +1,12 @@
+void __thiscall C_TFPlayer::CreateMove(C_TFPlayer *this, float flInputSampleTime, CUserCmd *pCmd)
+{
+  if ( CTFPlayerShared::InCond(&this->m_Shared, 11) )
+  {
+    pCmd->forwardmove = 0.0;
+    pCmd->buttons = 0;
+    pCmd->sidemove = 0.0;
+    pCmd->weaponselect = 0;
+    pCmd->upmove = 0.0;
+  }
+  C_BasePlayer::CreateMove(this, flInputSampleTime, pCmd);
+}

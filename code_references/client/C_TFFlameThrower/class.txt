@@ -1,0 +1,73 @@
+class C_TFFlameThrower : public C_TFWeaponBaseGun
+{
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFFlameThrower(class C_TFFlameThrower & );
+    public void C_TFFlameThrower();
+    public void ~C_TFFlameThrower();
+	
+    public void Spawn();
+	
+    public int GetWeaponID();
+	
+    public bool Holster(class C_BaseCombatWeapon * );
+    public void ItemPostFrame();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public bool Lower();
+    public void WeaponReset();
+	
+    public void DestroySounds();
+	
+    public class Vector GetVisualMuzzlePos();
+    public class Vector GetFlameOriginPos();
+	
+    public bool Deploy();
+	
+    public void OnDataChanged(enum DataUpdateType_t );
+    public void UpdateOnRemove();
+    public void SetDormant(bool );
+	
+    public void StartFlame();
+    public void StopFlame(bool );
+	
+    public void RestartParticleEffect();
+	
+    public void StartPilotLight();
+    public void StopPilotLight();
+	
+    private class Vector GetMuzzlePosHelper(bool );
+    class NetworkVar_m_iWeaponState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState> m_iWeaponState;
+    class NetworkVar_m_bCritFire
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,C_TFFlameThrower::NetworkVar_m_bCritFire> m_bCritFire;
+	
+    private float m_flStartFiringTime;
+    private float m_flNextPrimaryAttackAnim;
+	
+    private int m_iParticleWaterLevel;
+    private float m_flAmmoUseRemainder;
+	
+    private class CSoundPatch * m_pFiringStartSound;
+    private class CSoundPatch * m_pFiringLoop;
+    private bool m_bFiringLoopCritical;
+    private class CSoundPatch * m_pPilotLightSound;
+	
+    public class C_TFFlameThrower & operator=(class C_TFFlameThrower & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

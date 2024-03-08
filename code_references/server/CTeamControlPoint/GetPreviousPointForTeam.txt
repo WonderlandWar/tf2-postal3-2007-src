@@ -1,0 +1,25 @@
+int __thiscall CTeamControlPoint::GetPreviousPointForTeam(CTeamControlPoint *this, int iGameTeam, int iPrevPoint)
+{
+  const char *pszValue; // eax
+  CBaseEntity *EntityByName; // eax
+  _DWORD *v5; // eax
+
+  pszValue = this->m_TeamData.m_Memory.m_pMemory[iGameTeam].iszPreviousPoint[iPrevPoint].pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  EntityByName = CGlobalEntityList::FindEntityByName(&gEntList, 0, pszValue, 0, 0, 0, 0);
+  if ( EntityByName
+    && (v5 = __RTDynamicCast(
+               EntityByName,
+               0,
+               &CBaseEntity `RTTI Type Descriptor',
+               &CTeamControlPoint `RTTI Type Descriptor',
+               0)) != 0 )
+  {
+    return v5[343];
+  }
+  else
+  {
+    return -1;
+  }
+}

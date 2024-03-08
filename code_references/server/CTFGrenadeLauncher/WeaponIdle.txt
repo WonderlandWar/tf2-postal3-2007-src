@@ -1,0 +1,7 @@
+void __thiscall CTFGrenadeLauncher::WeaponIdle(CTFGrenadeLauncher *this)
+{
+  if ( this->m_flChargeBeginTime <= 0.0 || this->m_iClip1.m_Value <= 0 )
+    CTFWeaponBase::WeaponIdle(this);
+  else
+    CTFGrenadeLauncher::LaunchGrenade(this);
+}

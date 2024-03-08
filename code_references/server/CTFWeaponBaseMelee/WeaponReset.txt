@@ -1,0 +1,7 @@
+void __thiscall CTFWeaponBaseMelee::WeaponReset(CTFWeaponBaseMelee *this)
+{
+  CTFWeaponBase::WeaponReset(this);
+  this->m_flSmackTime = -1.0;
+  this->m_iWeaponMode = 0;
+  this->m_bConnected = 0;
+}

@@ -1,0 +1,26 @@
+void __thiscall CTriggerAreaCapture::StartTouch(CTriggerAreaCapture *this, CBaseEntity *pOther)
+{
+  IGameEvent *v3; // esi
+  int v4; // eax
+  IGameEvent_vtbl *v5; // ebx
+  CBaseEntity *v6; // eax
+
+  CBaseTrigger::StartTouch(this, pOther);
+  if ( this->PassesTriggerFilters(this, pOther)
+    && this->m_hPoint.m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == this->m_hPoint.m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+  {
+    v3 = gameeventmanager->CreateEvent(gameeventmanager, "controlpoint_starttouch", 0);
+    if ( v3 )
+    {
+      v4 = engine->IndexOfEdict(engine, pOther->m_Network.m_pPev);
+      v3->SetInt(v3, "player", v4);
+      v5 = v3->__vftable;
+      v6 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint);
+      v5->SetInt(v3, "area", LODWORD(v6[1].m_flShadowCastDistance.m_Value));
+      gameeventmanager->FireEvent(gameeventmanager, v3, 0);
+    }
+    CTriggerAreaCapture::CaptureThink(this);
+  }
+}

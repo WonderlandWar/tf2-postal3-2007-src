@@ -1,0 +1,51 @@
+void __thiscall CObjectSentrygun::SentryRotate(CObjectSentrygun *this)
+{
+  double m_iLeftBound; // st7
+  float soundtime; // [esp+8h] [ebp-10h]
+
+  if ( CBaseAnimatingOverlay::IsPlayingGesture(this, ACT_RANGE_ATTACK1) )
+    CBaseAnimatingOverlay::RemoveGesture(this, ACT_RANGE_ATTACK1);
+  if ( CBaseAnimatingOverlay::IsPlayingGesture(this, ACT_RANGE_ATTACK1_LOW) )
+    CBaseAnimatingOverlay::RemoveGesture(this, ACT_RANGE_ATTACK1_LOW);
+  this->StudioFrameAdvance(this);
+  if ( !CObjectSentrygun::FindTarget(this, (int)this) && !CObjectSentrygun::MoveTurret(this) )
+  {
+    soundtime = 0.0;
+    if ( this->m_bDisabled.m_Value )
+    {
+      CBaseEntity::EmitSound(this, "Building_Sentrygun.Disabled", soundtime, 0);
+      this->m_vecGoalAngles.x = 30.0;
+    }
+    else
+    {
+      if ( this->m_iUpgradeLevel.m_Value == 2 )
+      {
+        CBaseEntity::EmitSound(this, "Building_Sentrygun.Idle2", soundtime, 0);
+      }
+      else if ( this->m_iUpgradeLevel.m_Value == 3 )
+      {
+        CBaseEntity::EmitSound(this, "Building_Sentrygun.Idle3", soundtime, 0);
+      }
+      else
+      {
+        CBaseEntity::EmitSound(this, "Building_Sentrygun.Idle", soundtime, 0);
+      }
+      if ( this->m_bTurningRight )
+      {
+        m_iLeftBound = (double)this->m_iLeftBound;
+        this->m_bTurningRight = 0;
+      }
+      else
+      {
+        m_iLeftBound = (double)this->m_iRightBound;
+        this->m_bTurningRight = 1;
+      }
+      this->m_vecGoalAngles.y = m_iLeftBound;
+      if ( ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(random, 0.0, 1.0) < 0.3 )
+        this->m_vecGoalAngles.x = (float)(int)((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(
+                                                random,
+                                                -10.0,
+                                                10.0);
+    }
+  }
+}

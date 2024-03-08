@@ -1,0 +1,4 @@
+void __thiscall CTFWeaponInvis::HideThink(CTFWeaponInvis *this)
+{
+  this->SetWeaponVisible(this, 0);
+}

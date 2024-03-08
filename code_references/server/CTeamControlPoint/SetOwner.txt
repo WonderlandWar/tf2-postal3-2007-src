@@ -1,0 +1,13 @@
+void __thiscall CTeamControlPoint::SetOwner(
+        CTeamControlPoint *this,
+        int iCapTeam,
+        bool bMakeSound,
+        int iNumCappers,
+        int *pCappingPlayers)
+{
+  if ( ((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].~IGameSystem)(g_pGameRules) )
+  {
+    CTeamControlPoint::InternalSetOwner(this, iCapTeam, bMakeSound, iNumCappers, pCappingPlayers);
+    CBaseTeamObjectiveResource::SetOwningTeam(g_pObjectiveResource, this->m_iPointIndex, this->m_iTeam);
+  }
+}

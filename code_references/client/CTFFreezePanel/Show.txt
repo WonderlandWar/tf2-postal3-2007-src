@@ -1,0 +1,8 @@
+void __thiscall CTFFreezePanel::Show(CTFFreezePanel *this)
+{
+  void (__thiscall *SetVisible)(vgui::Panel *, bool); // edx
+
+  SetVisible = this->SetVisible;
+  this->m_flShowCalloutsAt = 0.0;
+  ((void (__stdcall *)(int))SetVisible)(1);
+}

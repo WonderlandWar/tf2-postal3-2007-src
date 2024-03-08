@@ -1,0 +1,40 @@
+void __thiscall CObjectSentrygun::Precache(CObjectSentrygun *this)
+{
+  int v1; // eax
+  int v2; // eax
+  int v3; // eax
+  int v4; // eax
+  int v5; // eax
+  int v6; // eax
+
+  CBaseObject::Precache(this);
+  CBaseEntity::PrecacheModel("models/buildables/sentry1_blueprint.mdl");
+  v1 = CBaseEntity::PrecacheModel("models/buildables/sentry1.mdl");
+  PrecacheGibsForModel(v1);
+  v2 = CBaseEntity::PrecacheModel("models/buildables/sentry1_heavy.mdl");
+  PrecacheGibsForModel(v2);
+  v3 = CBaseEntity::PrecacheModel("models/buildables/sentry2.mdl");
+  PrecacheGibsForModel(v3);
+  v4 = CBaseEntity::PrecacheModel("models/buildables/sentry2_heavy.mdl");
+  PrecacheGibsForModel(v4);
+  v5 = CBaseEntity::PrecacheModel("models/buildables/sentry3.mdl");
+  PrecacheGibsForModel(v5);
+  v6 = CBaseEntity::PrecacheModel("models/buildables/sentry3_heavy.mdl");
+  PrecacheGibsForModel(v6);
+  CBaseEntity::PrecacheModel("models/effects/sentry1_muzzle/sentry1_muzzle.mdl");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Fire");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Fire2");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Fire3");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.FireRocket");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Alert");
+  CBaseEntity::PrecacheScriptSound((const char *)&stru_103F8B1C);
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Idle");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Idle2");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Idle3");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Built");
+  CBaseEntity::PrecacheScriptSound("Building_Sentrygun.Empty");
+  PrecacheParticleSystem("sentrydamage_1");
+  PrecacheParticleSystem("sentrydamage_2");
+  PrecacheParticleSystem("sentrydamage_3");
+  PrecacheParticleSystem("sentrydamage_4");
+}

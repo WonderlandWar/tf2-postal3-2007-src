@@ -1,0 +1,143 @@
+class CHudControlPointIcons : public CHudElement, public vgui::Panel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CHudControlPointIcons_RegisterMap
+    {
+        public void CHudControlPointIcons_RegisterMap();
+    };
+    public class CHudControlPointIcons::CHudControlPointIcons_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CHudControlPointIcons_Register
+    {
+        public void CHudControlPointIcons_Register();
+    };
+    public class CHudControlPointIcons::CHudControlPointIcons_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CHudControlPointIcons_RegisterKBMap
+    {
+        public void CHudControlPointIcons_RegisterKBMap();
+    };
+    public class CHudControlPointIcons::CHudControlPointIcons_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CHudControlPointIcons(class CHudControlPointIcons & );
+    public void CHudControlPointIcons(char * );
+    public void ~CHudControlPointIcons();
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    public void PerformLayout();
+    public void Paint();
+    public void Init();
+    public void Reset();
+    public bool IsVisible();
+    public void LevelShutdown();
+    public void FireGameEvent(class IGameEvent * );
+    public void UpdateProgressBarFor(int );
+    public void InitIcons();
+    public void ShutdownIcons();
+    public void DrawBackgroundBox(int ,int ,int ,int ,bool );
+    public bool PaintTeamBaseIcon(int ,float ,float ,float );
+    public bool IsFakingCapture(int ,bool * ,float * );
+    private int m_iCPTextures[8];
+    private int m_iCPCappingTextures[8];
+    private int m_iTeamBaseTextures[32];
+    private int m_iBackgroundTexture;
+    private class Color m_clrBackground;
+    private class Color m_clrBorder;
+    private int m_iCurrentCP;
+    private int m_iLastCP;
+    private float m_flPulseTime;
+    private bool m_bFakingCapture;
+    private bool m_bFakingCaptureMult;
+    private float m_flFakeCaptureTime;
+    class PanelAnimationVar_m_hTextFont
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_hTextFont();
+    };
+    private void * GetVar_m_hTextFont(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_hTextFont m_m_hTextFont_register;
+    private unsigned long m_hTextFont;
+    class PanelAnimationVar_m_nCornerCutSize
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_nCornerCutSize();
+    };
+    private void * GetVar_m_nCornerCutSize(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_nCornerCutSize m_m_nCornerCutSize_register;
+    private int m_nCornerCutSize;
+    class PanelAnimationVar_m_nBackgroundOverlap
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_nBackgroundOverlap();
+    };
+    private void * GetVar_m_nBackgroundOverlap(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_nBackgroundOverlap m_m_nBackgroundOverlap_register;
+    private int m_nBackgroundOverlap;
+    class PanelAnimationVar_m_iIconStartX
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_iIconStartX();
+    };
+    private void * GetVar_m_iIconStartX(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_iIconStartX m_m_iIconStartX_register;
+    private int m_iIconStartX;
+    class PanelAnimationVar_m_iIconStartY
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_iIconStartY();
+    };
+    private void * GetVar_m_iIconStartY(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_iIconStartY m_m_iIconStartY_register;
+    private int m_iIconStartY;
+    class PanelAnimationVar_m_flIconExpand
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_flIconExpand();
+    };
+    private void * GetVar_m_flIconExpand(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_flIconExpand m_m_flIconExpand_register;
+    private float m_flIconExpand;
+    class PanelAnimationVar_m_iIconSize
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_iIconSize();
+    };
+    private void * GetVar_m_iIconSize(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_iIconSize m_m_iIconSize_register;
+    private int m_iIconSize;
+    class PanelAnimationVar_m_iIconGapWidth
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_iIconGapWidth();
+    };
+    private void * GetVar_m_iIconGapWidth(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_iIconGapWidth m_m_iIconGapWidth_register;
+    private int m_iIconGapWidth;
+    class PanelAnimationVar_m_iIconGapHeight
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_iIconGapHeight();
+    };
+    private void * GetVar_m_iIconGapHeight(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_iIconGapHeight m_m_iIconGapHeight_register;
+    private int m_iIconGapHeight;
+    class PanelAnimationVar_m_nHeightOffset
+    {
+        public void InitVar();
+        public void PanelAnimationVar_m_nHeightOffset();
+    };
+    private void * GetVar_m_nHeightOffset(class vgui::Panel * );
+    private class CHudControlPointIcons::PanelAnimationVar_m_nHeightOffset m_m_nHeightOffset_register;
+    private int m_nHeightOffset;
+    private class CUtlVector<CControlPointIcon *,CUtlMemory<CControlPointIcon *,int> > m_Icons;
+    private class CControlPointProgressBar * m_pProgressBar;
+    public class CHudControlPointIcons & operator=(class CHudControlPointIcons & );
+    public void * __vecDelDtor(unsigned int );
+};

@@ -1,0 +1,9 @@
+void __thiscall CTFWeaponBaseMelee::CTFWeaponBaseMelee(CTFWeaponBaseMelee *this)
+{
+  CTFWeaponBase::CTFWeaponBase(this);
+  this->__vftable = (CTFWeaponBaseMelee_vtbl *)&CTFWeaponBaseMelee::`vftable';
+  CTFWeaponBase::WeaponReset(this);
+  this->m_flSmackTime = -1.0;
+  this->m_iWeaponMode = 0;
+  this->m_bConnected = 0;
+}

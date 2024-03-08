@@ -1,0 +1,13 @@
+void __thiscall CWeaponMedigun::Precache(CWeaponMedigun *this)
+{
+  CTFWeaponBase::Precache(this);
+  CBaseEntity::PrecacheScriptSound("WeaponMedigun.NoTarget");
+  CBaseEntity::PrecacheScriptSound("WeaponMedigun.Healing");
+  CBaseEntity::PrecacheScriptSound("WeaponMedigun.Charged");
+  PrecacheParticleSystem("medicgun_invulnstatus_fullcharge_blue");
+  PrecacheParticleSystem("medicgun_invulnstatus_fullcharge_red");
+  PrecacheParticleSystem("medicgun_beam_red_invun");
+  PrecacheParticleSystem("medicgun_beam_red");
+  PrecacheParticleSystem("medicgun_beam_blue_invun");
+  PrecacheParticleSystem("medicgun_beam_blue");
+}

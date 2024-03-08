@@ -1,0 +1,45 @@
+void __thiscall CWeaponMedigun::DrainCharge(CWeaponMedigun *this)
+{
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bChargeRelease> *p_m_bChargeRelease; // ebp
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  IHandleEntity *m_pEntity; // esi
+  double v6; // st7
+  bool v7; // [esp+Bh] [ebp-5h] BYREF
+  float val; // [esp+Ch] [ebp-4h] BYREF
+
+  p_m_bChargeRelease = &this->m_bChargeRelease;
+  if ( this->m_bChargeRelease.m_Value )
+  {
+    m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+    if ( m_Index != -1 )
+    {
+      v4 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+      if ( g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+      {
+        m_pEntity = v4->m_pEntity;
+        if ( v4->m_pEntity )
+        {
+          if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(v4->m_pEntity) )
+          {
+            v6 = this->m_flChargeLevel.m_Value
+               - gpGlobals->frametime / weapon_medigun_chargerelease_rate.m_pParent->m_fValue;
+            if ( v6 <= 0.0 )
+              v6 = 0.0;
+            val = v6;
+            CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(
+              (CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime> *)&this->m_flChargeLevel,
+              &val);
+            if ( 0.0 == this->m_flChargeLevel.m_Value )
+            {
+              v7 = 0;
+              CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bChargeRelease>::Set(p_m_bChargeRelease, &v7);
+              this->m_flReleaseStartedAt = 0.0;
+              CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&m_pEntity[948], 0);
+            }
+          }
+        }
+      }
+    }
+  }
+}

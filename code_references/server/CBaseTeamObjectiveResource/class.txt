@@ -1,0 +1,300 @@
+class CBaseTeamObjectiveResource : public CBaseEntity
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public void CBaseTeamObjectiveResource(class CBaseTeamObjectiveResource & );
+    public void CBaseTeamObjectiveResource();
+    public void ~CBaseTeamObjectiveResource();
+    public void Spawn();
+    public int UpdateTransmitState();
+    public void ResetControlPoints();
+    public void SetNumControlPoints(int );
+    public int GetNumControlPoints();
+    public void SetCPIcons(int ,int ,int );
+    public void SetCPOverlays(int ,int ,int );
+    public void SetTeamBaseIcons(int ,int );
+    public void SetCPPosition(int ,class Vector & );
+    public void SetCPVisible(int ,bool );
+    public void SetCPRequiredCappers(int ,int ,int );
+    public void SetCPCapTime(int ,int ,float );
+    public void SetCPCapPercentage(int ,float );
+    public float GetCPCapPercentage(int );
+    public void SetTeamCanCap(int ,int ,bool );
+    public void SetBaseCP(int ,int );
+    public void SetPreviousPoint(int ,int ,int ,int );
+    public int GetPreviousPointForPoint(int ,int ,int );
+    public bool TeamCanCapPoint(int ,int );
+    public void SetCapLayoutInHUD(char * );
+    public void SetWarnOnCap(int ,bool );
+    public void SetWarnSound(int ,struct string_t );
+    public void SetNumPlayers(int ,int ,int );
+    public void StartCap(int ,int );
+    public void SetOwningTeam(int ,int );
+    public void SetCappingTeam(int ,int );
+    public void SetTeamInZone(int ,int );
+    public void SetCapBlocked(int ,bool );
+    public int GetOwningTeam(int );
+    public void AssertValidIndex(int );
+    public int GetBaseControlPointForTeam(int );
+    public int GetCappingTeam(int );
+    public void SetPlayingMiniRounds(bool );
+    public bool PlayingMiniRounds();
+    public void SetInMiniRound(int ,bool );
+    public bool IsInMiniRound(int );
+    public void UpdateCapHudElement();
+    class NetworkVar_m_iNumControlPoints
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseTeamObjectiveResource::NetworkVar_m_iNumControlPoints> m_iNumControlPoints;
+    class NetworkVar_m_bPlayingMiniRounds
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseTeamObjectiveResource::NetworkVar_m_bPlayingMiniRounds> m_bPlayingMiniRounds;
+    class NetworkVar_m_bControlPointsReset
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseTeamObjectiveResource::NetworkVar_m_bControlPointsReset> m_bControlPointsReset;
+    class NetworkVar_m_iUpdateCapHudParity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseTeamObjectiveResource::NetworkVar_m_iUpdateCapHudParity> m_iUpdateCapHudParity;
+    class NetworkVar_m_vCPPositions
+    {
+        public class Vector & operator[](int );
+        public class Vector & Get(int );
+        public class Vector & GetForModify(int );
+        public void Set(int ,class Vector & );
+        public class Vector * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected class Vector m_Value[8];
+        public void NetworkVar_m_vCPPositions();
+        public class CBaseTeamObjectiveResource::NetworkVar_m_vCPPositions & operator=(class CBaseTeamObjectiveResource::NetworkVar_m_vCPPositions & );
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_vCPPositions m_vCPPositions;
+    class NetworkVar_m_bCPIsVisible
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_bCPIsVisible m_bCPIsVisible;
+    class NetworkVar_m_iTeamIcons
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iTeamIcons m_iTeamIcons;
+    class NetworkVar_m_iTeamOverlays
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iTeamOverlays m_iTeamOverlays;
+    class NetworkVar_m_iTeamReqCappers
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iTeamReqCappers m_iTeamReqCappers;
+    class NetworkVar_m_flTeamCapTime
+    {
+        public float & operator[](int );
+        public float & Get(int );
+        public float & GetForModify(int );
+        public void Set(int ,float & );
+        public float * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected float m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_flTeamCapTime m_flTeamCapTime;
+    class NetworkVar_m_iPreviousPoints
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[192];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iPreviousPoints m_iPreviousPoints;
+    class NetworkVar_m_bTeamCanCap
+    {
+        public bool & operator[](int );
+        public bool & Get(int );
+        public bool & GetForModify(int );
+        public void Set(int ,bool & );
+        public bool * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected bool m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_bTeamCanCap m_bTeamCanCap;
+    class NetworkVar_m_iTeamBaseIcons
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[32];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iTeamBaseIcons m_iTeamBaseIcons;
+    class NetworkVar_m_iBaseControlPoints
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[32];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iBaseControlPoints m_iBaseControlPoints;
+    class NetworkVar_m_bInMiniRound
+    {
+        public bool & operator[](int );
+        public bool & Get(int );
+        public bool & GetForModify(int );
+        public void Set(int ,bool & );
+        public bool * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected bool m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_bInMiniRound m_bInMiniRound;
+    class NetworkVar_m_bWarnOnCap
+    {
+        public bool & operator[](int );
+        public bool & Get(int );
+        public bool & GetForModify(int );
+        public void Set(int ,bool & );
+        public bool * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected bool m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_bWarnOnCap m_bWarnOnCap;
+    class NetworkVar_m_iszWarnSound
+    {
+        public struct string_t & operator[](int );
+        public struct string_t & Get(int );
+        public struct string_t & GetForModify(int );
+        public void Set(int ,struct string_t & );
+        public struct string_t * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected struct string_t m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iszWarnSound m_iszWarnSound;
+    class NetworkVar_m_iNumTeamMembers
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[64];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iNumTeamMembers m_iNumTeamMembers;
+    class NetworkVar_m_iCappingTeam
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iCappingTeam m_iCappingTeam;
+    class NetworkVar_m_iTeamInZone
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iTeamInZone m_iTeamInZone;
+    class NetworkVar_m_bBlocked
+    {
+        public bool & operator[](int );
+        public bool & Get(int );
+        public bool & GetForModify(int );
+        public void Set(int ,bool & );
+        public bool * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected bool m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_bBlocked m_bBlocked;
+    class NetworkVar_m_iOwner
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[8];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_iOwner m_iOwner;
+    class NetworkVar_m_pszCapLayoutInHUD
+    {
+        public char * operator const char *();
+        public char * Get();
+        public char * GetForModify();
+        protected void NetworkStateChanged();
+        private char m_Value[32];
+    };
+    private class CBaseTeamObjectiveResource::NetworkVar_m_pszCapLayoutInHUD m_pszCapLayoutInHUD;
+    private float m_flCapPercentages[8];
+    public class CBaseTeamObjectiveResource & operator=(class CBaseTeamObjectiveResource & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

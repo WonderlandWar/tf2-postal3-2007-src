@@ -1,0 +1,33 @@
+class CTFGameMovement : public CGameMovement
+{
+    public void CTFGameMovement(class CTFGameMovement & );
+    public void CTFGameMovement();
+    public void PlayerMove();
+    public unsigned int PlayerSolidMask(bool );
+    public void ProcessMovement(class CBasePlayer * ,class CMoveData * );
+    public bool CanAccelerate();
+    public bool CheckJumpButton();
+    public bool CheckWater();
+    public void WaterMove();
+    public void FullWalkMove();
+    public void WalkMove();
+    public void AirMove();
+    public void FullTossMove();
+    public void CategorizePosition();
+    public void CheckFalling();
+    public void Duck();
+    public class Vector & GetPlayerViewOffset(bool );
+    public void TracePlayerBBox(class Vector & ,class Vector & ,unsigned int ,int ,class CGameTrace & );
+    public class CBaseHandle TestPlayerPosition(class Vector & ,int ,class CGameTrace & );
+    protected void CheckWaterJump();
+    protected void FullWalkMoveUnderwater();
+    private bool CheckWaterJumpButton();
+    private void AirDash();
+    private void AvoidPlayers();
+    private class Vector m_vecWaterPoint;
+    private class CTFPlayer * m_pTFPlayer;
+    public void ~CTFGameMovement();
+    public class CTFGameMovement & operator=(class CTFGameMovement & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

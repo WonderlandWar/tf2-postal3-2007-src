@@ -1,0 +1,5 @@
+void __thiscall CTFWeaponInvis::Spawn(CTFWeaponInvis *this)
+{
+  CTFWeaponBase::Spawn(this);
+  this->SetViewModelIndex(this, 1);
+}

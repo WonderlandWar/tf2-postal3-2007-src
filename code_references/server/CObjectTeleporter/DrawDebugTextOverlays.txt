@@ -1,0 +1,36 @@
+int __thiscall CObjectTeleporter::DrawDebugTextOverlays(CObjectTeleporter *this)
+{
+  int result; // eax
+  int v3; // edi
+  unsigned int m_Index; // eax
+  const char *v5; // eax
+  int v6; // edi
+  int v7; // edi
+  char tempstr[512]; // [esp+18h] [ebp-208h] BYREF
+
+  result = CBaseObject::DrawDebugTextOverlays(this);
+  v3 = result;
+  if ( (this->m_debugOverlays & 1) != 0 )
+  {
+    m_Index = this->m_hMatchingTeleporter.m_Index;
+    if ( m_Index == -1
+      || g_pEntityList->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+      || (v5 = "Yes", !g_pEntityList->m_EntPtrArray[this->m_hMatchingTeleporter.m_Index & 0xFFF].m_pEntity) )
+    {
+      v5 = "No";
+    }
+    V_snprintf(&tempstr[4], 512, "Match Found: %s", v5);
+    CBaseEntity::EntityText(this, v3, &tempstr[4], 0.0, 255, 255, 255, 255);
+    v6 = v3 + 1;
+    V_snprintf(&tempstr[4], 512, "State: %d", this->m_iState.m_Value);
+    CBaseEntity::EntityText(this, v6, &tempstr[4], 0.0, 255, 255, 255, 255);
+    v7 = v6 + 1;
+    if ( this->m_flRechargeTime.m_Value > (double)gpGlobals->curtime )
+    {
+      V_snprintf(&tempstr[4], 512, "Recharging: %.1f", (this->m_flRechargeTime.m_Value - gpGlobals->curtime) * 0.1);
+      CBaseEntity::EntityText(this, v7++, &tempstr[4], 0.0, 255, 255, 255, 255);
+    }
+    return v7;
+  }
+  return result;
+}

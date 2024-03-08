@@ -1,0 +1,32 @@
+void __thiscall CTFGrenadeLauncher::LaunchGrenade(CTFGrenadeLauncher *this)
+{
+  CTFPlayer *PlayerOwner; // edi
+  int m_Value; // edi
+  float v4; // [esp+Ch] [ebp-10h]
+  float val; // [esp+18h] [ebp-4h] BYREF
+
+  PlayerOwner = (CTFPlayer *)CTFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner && PlayerOwner->IsPlayer(PlayerOwner) )
+  {
+    CTFWeaponBase::CalcIsAttackCritical(this);
+    this->SendWeaponAnim(this, 180);
+    PlayerOwner->SetAnimation(PlayerOwner, PLAYER_ATTACK1);
+    CTFPlayer::DoAnimationEvent(PlayerOwner, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+    this->FireProjectile(this, PlayerOwner);
+    CTFPlayer::SpeakWeaponFire(PlayerOwner, -1);
+    CTFGameStats::Event_PlayerFiredWeapon(&CTF_GameStats, PlayerOwner, this->m_bCurrentAttackIsCrit);
+    val = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flTimeFireDelay + gpGlobals->curtime;
+    CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &val);
+    m_Value = this->m_nSequence.m_Value;
+    if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+      CBaseAnimating::LockStudioHdr(this);
+    v4 = CBaseAnimating::SequenceDuration(this, this->m_pStudioHdr, m_Value) + gpGlobals->curtime;
+    ((void (__thiscall *)(CTFGrenadeLauncher *, _DWORD))this->SetWeaponIdleTime)(this, LODWORD(v4));
+    if ( this->m_bReloadsSingly )
+    {
+      val = 0.0;
+      CNetworkVarBase<int,CTFWeaponBase::NetworkVar_m_iReloadMode>::Set(&this->m_iReloadMode, (const int *)&val);
+    }
+    this->m_flChargeBeginTime = 0.0;
+  }
+}

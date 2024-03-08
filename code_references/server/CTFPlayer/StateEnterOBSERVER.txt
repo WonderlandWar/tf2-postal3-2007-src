@@ -1,0 +1,23 @@
+void __thiscall CTFPlayer::StateEnterOBSERVER(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IPhysicsObject *m_pPhysicsObject; // ecx
+
+  this->m_iObserverLastMode = 5;
+  m_Index = this->m_hObserverTarget.m_Value.m_Index;
+  if ( m_Index == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hObserverTarget.m_Value.m_Index & 0xFFF],
+        v3->m_SerialNumber != m_Index >> 12)
+    || !v3->m_pEntity )
+  {
+    this->CheckObserverSettings(this);
+  }
+  if ( !this->m_bAbortFreezeCam )
+    CTFPlayer::FindInitialObserverTarget(this);
+  this->StartObserverMode(this, this->m_iObserverLastMode);
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    m_pPhysicsObject->Sleep(m_pPhysicsObject);
+  this->m_bIsIdle = 0;
+}

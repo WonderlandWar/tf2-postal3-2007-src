@@ -1,0 +1,71 @@
+void __thiscall CTFPlayerShared::InvisibilityThink(CTFPlayerShared *this)
+{
+  double v1; // st7
+  double v2; // st5
+  double v3; // st4
+  double v4; // st6
+  double v5; // st5
+  double v6; // rt1
+  double v7; // st5
+  double v8; // st6
+  double v9; // st4
+  double v10; // st5
+  double v11; // st4
+  float target; // [esp+0h] [ebp-10h]
+  float speed; // [esp+8h] [ebp-8h]
+
+  v1 = 1.0;
+  if ( (this->m_nPlayerCond.m_Value & 0x100) != 0 )
+  {
+    v2 = gpGlobals->curtime - this->m_flLastStealthExposeTime.m_Value;
+    v3 = 0.0;
+    if ( v2 >= 0.0 )
+    {
+      if ( v2 >= 0.75 )
+      {
+        v10 = 1.0;
+        v8 = 0.0;
+        goto LABEL_11;
+      }
+      v4 = 0.75;
+      v3 = v2;
+      v5 = 0.0;
+    }
+    else
+    {
+      v4 = 0.75;
+      v5 = 0.0;
+    }
+    v6 = v5;
+    v7 = v4 - v3;
+    v8 = v6;
+    v9 = 1.0 - v7 * 1.3333334 * 0.4;
+    v10 = 1.0;
+    if ( v9 <= 1.0 )
+    {
+      v10 = v9;
+      if ( v9 < v8 )
+        v10 = 0.0;
+    }
+  }
+  else
+  {
+    v8 = 0.0;
+    v10 = 0.0;
+  }
+LABEL_11:
+  if ( gpGlobals->curtime < (double)this->m_flInvisChangeCompleteTime.m_Value )
+  {
+    v1 = gpGlobals->frametime / this->m_flInvisChangeTotalTime.m_Value;
+    v11 = (this->m_flInvisibility - v10)
+        / (this->m_flInvisChangeCompleteTime.m_Value - gpGlobals->curtime)
+        * gpGlobals->frametime;
+    if ( v11 > v1 )
+      v1 = v11;
+  }
+  if ( v10 >= v8 )
+    v8 = v10;
+  speed = v1;
+  target = v8;
+  this->m_flInvisibility = Approach(target, this->m_flInvisibility, speed);
+}

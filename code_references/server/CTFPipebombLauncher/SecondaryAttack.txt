@@ -1,0 +1,31 @@
+void __thiscall CTFPipebombLauncher::SecondaryAttack(CTFPipebombLauncher *this)
+{
+  CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs> *Owner; // edi
+  CHintSystem *v3; // eax
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  if ( CTFWeaponBase::CanAttack(this) )
+  {
+    if ( this->m_iPipebombCount.m_Value )
+    {
+      Owner = (CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs> *)CBaseCombatWeapon::GetOwner(this);
+      if ( Owner )
+      {
+        if ( (*(unsigned __int8 (__thiscall **)(CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs> *))(Owner->m_Value + 304))(Owner) )
+        {
+          if ( gpGlobals->curtime - this->m_flLastGrenadeLaunchTime >= tf_grenadelauncher_livetime.m_pParent->m_fValue )
+          {
+            ((void (__thiscall *)(CTFPipebombLauncher *, int))this->WeaponSound)(this, 13);
+            v3 = (CHintSystem *)(*(int (__thiscall **)(CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs> *, int))(Owner->m_Value + 1500))(
+                                  Owner,
+                                  this->m_iAltFireHint);
+            CHintSystem::RemoveHintTimer(v3, COERCE_INT(0.0));
+            CTFPipebombLauncher::DetonateRemotePipebombs(this, 0);
+            val = 0;
+            CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs>::Set(Owner + 1138, &val);
+          }
+        }
+      }
+    }
+  }
+}

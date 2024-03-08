@@ -1,0 +1,177 @@
+void __thiscall CTFWeaponInfo::Parse(CTFWeaponInfo *this, KeyValues *pKeyValuesData, const char *szWeaponName)
+{
+  int v4; // esi
+  const char *String; // edi
+  const char *v6; // eax
+  int Int; // eax
+  int v8; // eax
+  int v9; // eax
+  int v10; // eax
+  const char *v11; // edi
+  int v12; // esi
+  const char *v13; // eax
+  const char *v14; // eax
+  const char *v15; // eax
+  const char *v16; // eax
+  const char *v17; // eax
+  const char *v18; // eax
+  TFPlayerClassData_t *PlayerClassData; // esi
+  const char *v20; // edi
+  KeyValues *v21; // eax
+  KeyValues *v22; // eax
+  float defaultValue; // [esp+0h] [ebp-9Ch]
+  float defaultValuea; // [esp+0h] [ebp-9Ch]
+  int defaultValueb; // [esp+0h] [ebp-9Ch]
+  char buf[128]; // [esp+14h] [ebp-88h] BYREF
+
+  FileWeaponInfo_t::Parse(this, pKeyValuesData, szWeaponName);
+  v4 = 0;
+  this->m_WeaponData[0].m_nDamage = KeyValues::GetInt(pKeyValuesData, "Damage", 0);
+  this->m_WeaponData[0].m_flRange = KeyValues::GetFloat(pKeyValuesData, "Range", 8192.0);
+  this->m_WeaponData[0].m_nBulletsPerShot = KeyValues::GetInt(pKeyValuesData, "BulletsPerShot", 0);
+  this->m_WeaponData[0].m_flSpread = KeyValues::GetFloat(pKeyValuesData, "Spread", 0.0);
+  this->m_WeaponData[0].m_flPunchAngle = KeyValues::GetFloat(pKeyValuesData, "PunchAngle", 0.0);
+  this->m_WeaponData[0].m_flTimeFireDelay = KeyValues::GetFloat(pKeyValuesData, "TimeFireDelay", 0.0);
+  this->m_WeaponData[0].m_flTimeIdle = KeyValues::GetFloat(pKeyValuesData, "TimeIdle", 0.0);
+  this->m_WeaponData[0].m_flTimeIdleEmpty = KeyValues::GetFloat(pKeyValuesData, "TimeIdleEmpy", 0.0);
+  this->m_WeaponData[0].m_flTimeReloadStart = KeyValues::GetFloat(pKeyValuesData, "TimeReloadStart", 0.0);
+  this->m_WeaponData[0].m_flTimeReload = KeyValues::GetFloat(pKeyValuesData, "TimeReload", 0.0);
+  this->m_WeaponData[0].m_bDrawCrosshair = KeyValues::GetInt(pKeyValuesData, "DrawCrosshair", 1) > 0;
+  this->m_WeaponData[0].m_iAmmoPerShot = KeyValues::GetInt(pKeyValuesData, "AmmoPerShot", 1);
+  this->m_WeaponData[0].m_bUseRapidFireCrits = KeyValues::GetInt(pKeyValuesData, "UseRapidFireCrits", 0) != 0;
+  this->m_WeaponData[0].m_iProjectile = 0;
+  String = KeyValues::GetString(pKeyValuesData, "ProjectileType", "projectile_none");
+  while ( String != g_szProjectileNames[v4] && _stricmp(String, g_szProjectileNames[v4]) )
+  {
+    if ( ++v4 >= 8 )
+      goto LABEL_7;
+  }
+  this->m_WeaponData[0].m_iProjectile = v4;
+LABEL_7:
+  this->m_WeaponData[0].m_flProjectileSpeed = KeyValues::GetFloat(pKeyValuesData, "ProjectileSpeed", 0.0);
+  this->m_WeaponData[0].m_flSmackDelay = KeyValues::GetFloat(pKeyValuesData, "SmackDelay", 0.2);
+  this->m_WeaponData[1].m_flSmackDelay = KeyValues::GetFloat(pKeyValuesData, "Secondary_SmackDelay", 0.2);
+  this->m_bDoInstantEjectBrass = KeyValues::GetInt(pKeyValuesData, "DoInstantEjectBrass", 1) != 0;
+  v6 = KeyValues::GetString(pKeyValuesData, "BrassModel", 0);
+  if ( v6 )
+    V_strncpy(this->m_szBrassModel, v6, 128);
+  Int = KeyValues::GetInt(pKeyValuesData, "Secondary_Damage", this->m_WeaponData[0].m_nDamage);
+  defaultValue = this->m_WeaponData[0].m_flRange;
+  this->m_WeaponData[1].m_nDamage = Int;
+  this->m_WeaponData[1].m_flRange = KeyValues::GetFloat(pKeyValuesData, "Secondary_Range", defaultValue);
+  v8 = KeyValues::GetInt(pKeyValuesData, "Secondary_BulletsPerShot", this->m_WeaponData[0].m_nBulletsPerShot);
+  defaultValuea = this->m_WeaponData[0].m_flSpread;
+  this->m_WeaponData[1].m_nBulletsPerShot = v8;
+  this->m_WeaponData[1].m_flSpread = KeyValues::GetFloat(pKeyValuesData, "Secondary_Spread", defaultValuea);
+  this->m_WeaponData[1].m_flPunchAngle = KeyValues::GetFloat(
+                                           pKeyValuesData,
+                                           "Secondary_PunchAngle",
+                                           this->m_WeaponData[0].m_flPunchAngle);
+  this->m_WeaponData[1].m_flTimeFireDelay = KeyValues::GetFloat(
+                                              pKeyValuesData,
+                                              "Secondary_TimeFireDelay",
+                                              this->m_WeaponData[0].m_flTimeFireDelay);
+  this->m_WeaponData[1].m_flTimeIdle = KeyValues::GetFloat(
+                                         pKeyValuesData,
+                                         "Secondary_TimeIdle",
+                                         this->m_WeaponData[0].m_flTimeIdle);
+  this->m_WeaponData[1].m_flTimeIdleEmpty = KeyValues::GetFloat(
+                                              pKeyValuesData,
+                                              "Secondary_TimeIdleEmpy",
+                                              this->m_WeaponData[0].m_flTimeIdleEmpty);
+  this->m_WeaponData[1].m_flTimeReloadStart = KeyValues::GetFloat(
+                                                pKeyValuesData,
+                                                "Secondary_TimeReloadStart",
+                                                this->m_WeaponData[0].m_flTimeReloadStart);
+  this->m_WeaponData[1].m_flTimeReload = KeyValues::GetFloat(
+                                           pKeyValuesData,
+                                           "Secondary_TimeReload",
+                                           this->m_WeaponData[0].m_flTimeReload);
+  v9 = KeyValues::GetInt(pKeyValuesData, "Secondary_DrawCrosshair", this->m_WeaponData[0].m_bDrawCrosshair);
+  defaultValueb = this->m_WeaponData[0].m_iAmmoPerShot;
+  this->m_WeaponData[1].m_bDrawCrosshair = v9 > 0;
+  this->m_WeaponData[1].m_iAmmoPerShot = KeyValues::GetInt(pKeyValuesData, "Secondary_AmmoPerShot", defaultValueb);
+  v10 = KeyValues::GetInt(pKeyValuesData, "Secondary_UseRapidFireCrits", 0);
+  this->m_WeaponData[1].m_iProjectile = this->m_WeaponData[0].m_iProjectile;
+  this->m_WeaponData[1].m_bUseRapidFireCrits = v10 != 0;
+  v11 = KeyValues::GetString(pKeyValuesData, "Secondary_ProjectileType", "projectile_none");
+  v12 = 0;
+  while ( v11 != g_szProjectileNames[v12] && _stricmp(v11, g_szProjectileNames[v12]) )
+  {
+    if ( ++v12 >= 8 )
+      goto LABEL_15;
+  }
+  this->m_WeaponData[1].m_iProjectile = v12;
+LABEL_15:
+  v13 = KeyValues::GetString(pKeyValuesData, "WeaponType", locale);
+  if ( !strcmp(v13, "primary") )
+  {
+    this->m_iWeaponType = 0;
+  }
+  else if ( !strcmp(v13, "secondary") )
+  {
+    this->m_iWeaponType = 1;
+  }
+  else if ( !strcmp(v13, "melee") )
+  {
+    this->m_iWeaponType = 2;
+  }
+  else if ( !strcmp(v13, "grenade") )
+  {
+    this->m_iWeaponType = 3;
+  }
+  else if ( !strcmp(v13, "building") )
+  {
+    this->m_iWeaponType = 4;
+  }
+  else if ( !strcmp(v13, "pda") )
+  {
+    this->m_iWeaponType = 5;
+  }
+  this->m_bGrenade = KeyValues::GetInt(pKeyValuesData, "Grenade", 0) != 0;
+  this->m_flDamageRadius = KeyValues::GetFloat(pKeyValuesData, "DamageRadius", 0.0);
+  this->m_flPrimerTime = KeyValues::GetFloat(pKeyValuesData, "PrimerTime", 0.0);
+  this->m_bSuppressGrenTimer = KeyValues::GetInt(pKeyValuesData, "PlayGrenTimer", 1) <= 0;
+  this->m_bLowerWeapon = KeyValues::GetInt(pKeyValuesData, "LowerMainWeapon", 0) != 0;
+  this->m_bHasTeamSkins_Viewmodel = KeyValues::GetInt(pKeyValuesData, "HasTeamSkins_Viewmodel", 0) != 0;
+  this->m_bHasTeamSkins_Worldmodel = KeyValues::GetInt(pKeyValuesData, "HasTeamSkins_Worldmodel", 0) != 0;
+  v14 = KeyValues::GetString(pKeyValuesData, "MuzzleFlashModel", 0);
+  if ( v14 )
+    V_strncpy(this->m_szMuzzleFlashModel, v14, 128);
+  this->m_flMuzzleFlashModelDuration = KeyValues::GetFloat(pKeyValuesData, "MuzzleFlashModelDuration", 0.2);
+  v15 = KeyValues::GetString(pKeyValuesData, "MuzzleFlashParticleEffect", 0);
+  if ( v15 )
+    V_strncpy(this->m_szMuzzleFlashParticleEffect, v15, 128);
+  v16 = KeyValues::GetString(pKeyValuesData, "TracerEffect", 0);
+  if ( v16 )
+    V_strncpy(this->m_szTracerEffect, v16, 128);
+  v17 = KeyValues::GetString(pKeyValuesData, "ExplosionSound", 0);
+  if ( v17 )
+    V_strncpy(this->m_szExplosionSound, v17, 128);
+  v18 = KeyValues::GetString(pKeyValuesData, "ExplosionEffect", 0);
+  if ( v18 )
+    V_strncpy(this->m_szExplosionEffect, v18, 128);
+  *(_DWORD *)buf = 1;
+  do
+  {
+    PlayerClassData = GetPlayerClassData(*(int *)buf);
+    V_snprintf(&buf[4], 128, "ViewModel_%s", PlayerClassData->m_szClassName);
+    v20 = KeyValues::GetString(pKeyValuesData, &buf[4], 0);
+    if ( v20 )
+    {
+      if ( !this->m_pClassViewModelKV )
+      {
+        v21 = (KeyValues *)KeyValues::operator new(0x20u);
+        if ( v21 )
+          KeyValues::KeyValues(v21, "class_viewmodels");
+        else
+          v22 = 0;
+        this->m_pClassViewModelKV = v22;
+      }
+      KeyValues::SetString(this->m_pClassViewModelKV, PlayerClassData->m_szClassName, v20);
+    }
+    ++*(_DWORD *)buf;
+  }
+  while ( *(int *)buf < 11 );
+  this->m_bDontDrop = KeyValues::GetInt(pKeyValuesData, "DontDrop", 0) > 0;
+}

@@ -1,0 +1,4 @@
+void __thiscall CTeamControlPoint::InputHideModel(CRagdollProp *this, inputdata_t *inputdata)
+{
+  CBaseEntity::AddEffects(this, 32);
+}

@@ -1,0 +1,50 @@
+void __thiscall CObjectSentrygun::FoundTarget(CObjectSentrygun *this, CBaseEntity *pNewTarget)
+{
+  CBaseEntity *v2; // edi
+  const Vector *v4; // ebx
+  CBasePlayer *v5; // edi
+  int v6; // eax
+  int v7; // eax
+  edict_t *m_pPev; // [esp-4h] [ebp-58h]
+  CPASFilter filter; // [esp+10h] [ebp-44h] BYREF
+  CSingleUserRecipientFilter singleFilter; // [esp+30h] [ebp-24h] BYREF
+
+  v2 = pNewTarget;
+  if ( pNewTarget )
+    this->m_hEnemy.m_Index = pNewTarget->GetRefEHandle(pNewTarget)->m_Index;
+  else
+    this->m_hEnemy.m_Index = -1;
+  if ( this->m_iAmmoShells.m_Value > 0 || this->m_iAmmoRockets.m_Value > 0 && this->m_iUpgradeLevel.m_Value == 3 )
+  {
+    v4 = this->WorldSpaceCenter(this);
+    CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+    *(_DWORD *)&filter.m_bReliable = &CPASFilter::`vftable';
+    CRecipientFilter::AddRecipientsByPAS((CRecipientFilter *)&filter.m_bReliable, v4);
+    if ( v2->IsPlayer(v2) )
+    {
+      v5 = v2->IsPlayer(v2) ? (CBasePlayer *)v2 : 0;
+      CRecipientFilter::CRecipientFilter((CRecipientFilter *)&singleFilter.m_Recipients);
+      singleFilter.m_Recipients.m_Memory.m_pMemory = (int *)&CSingleUserRecipientFilter::`vftable';
+      CRecipientFilter::AddRecipient((CRecipientFilter *)&singleFilter.m_Recipients, v5);
+      m_pPev = this->m_Network.m_pPev;
+      v6 = ((int (__thiscall *)(IVEngineServer *))engine->IndexOfEdict)(engine);
+      CBaseEntity::EmitSound(
+        (IRecipientFilter *)&singleFilter.m_bReliable,
+        v6,
+        (const char *)m_pPev,
+        &stru_103F8B1C,
+        0.0,
+        COERCE_FLOAT_(0.0));
+      CRecipientFilter::RemoveRecipient((CRecipientFilter *)&filter.m_bReliable, v5);
+      CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&singleFilter.m_bReliable);
+    }
+    v7 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+    CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v7, "Building_Sentrygun.Alert", 0, 0.0, 0);
+    CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+  }
+  pNewTarget = (CBaseEntity *)2;
+  CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(&this->m_iState, (const int *)&pNewTarget);
+  this->m_flNextAttack = gpGlobals->curtime + 0.05;
+  if ( gpGlobals->curtime > (double)this->m_flNextRocketAttack )
+    this->m_flNextRocketAttack = gpGlobals->curtime + 0.5;
+}

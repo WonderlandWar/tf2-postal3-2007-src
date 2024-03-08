@@ -1,0 +1,427 @@
+void __thiscall CTFGameMovement::AvoidPlayers(CTFGameMovement *this)
+{
+  float v1; // ebx
+  bool v2; // zf
+  float v3; // edi
+  int v4; // ecx
+  const Vector *AbsVelocity; // eax
+  int v6; // eax
+  float v7; // ecx
+  float v8; // edx
+  CTFPlayer *v9; // eax
+  int *v10; // ecx
+  int v11; // edx
+  int v12; // eax
+  int v13; // ecx
+  int v14; // eax
+  float v15; // eax
+  float v16; // eax
+  CBasePlayer *v17; // eax
+  float v18; // esi
+  CBaseEntity *v19; // ecx
+  int TeamNumber; // ebp
+  char v21; // cl
+  float *v22; // eax
+  const Vector *v23; // eax
+  const Vector *v24; // eax
+  double x; // st7
+  double y; // st6
+  double z; // st5
+  int v28; // eax
+  CTFPlayer *v29; // ebp
+  int v30; // ebx
+  CBaseObject *Object; // eax
+  _DWORD *v32; // esi
+  float *v33; // eax
+  int (__thiscall *v34)(_DWORD *); // edx
+  int v35; // eax
+  float *v36; // eax
+  double v37; // st7
+  double v38; // st6
+  double v39; // st5
+  bool v40; // al
+  float v41; // ecx
+  float *v42; // eax
+  double v43; // st7
+  double v44; // st6
+  double flForwardScale; // st7
+  double flPushScale; // st7
+  int v47; // esi
+  int v48; // eax
+  _BYTE *v49; // esi
+  float v50; // ecx
+  float v51; // edx
+  float v52; // eax
+  double flPushStrength; // st7
+  int v54; // esi
+  int v55; // esi
+  float v56; // edx
+  CTFPlayer *v57; // ecx
+  int v58; // eax
+  float v59; // edx
+  CTFPlayer *v60; // edx
+  int v61; // eax
+  float v62; // edx
+  double v63; // st6
+  double v64; // st5
+  double v65; // st7
+  double v66; // rt1
+  double v67; // st5
+  double v68; // rt2
+  double v69; // st5
+  double v70; // st6
+  double v71; // st7
+  double v72; // rtt
+  double v73; // st5
+  double v74; // rt0
+  double v75; // rt1
+  double v76; // st5
+  double v77; // st7
+  int v78; // eax
+  double flMaxPlayerSpeed; // st4
+  int v80; // esi
+  int v81; // eax
+  _BYTE *v82; // esi
+  int v83; // eax
+  int v84; // ecx
+  CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity> *v85; // ecx
+  QAngle angView; // [esp+4h] [ebp-F8h] BYREF
+  CTFPlayer *pIntersectPlayer; // [esp+10h] [ebp-ECh]
+  Vector vecSeparationVelocity; // [esp+14h] [ebp-E8h] BYREF
+  int iPlayer; // [esp+20h] [ebp-DCh]
+  Vector vecAvoidCenter; // [esp+24h] [ebp-D8h]
+  Vector vecAvoidMin; // [esp+30h] [ebp-CCh] BYREF
+  CBaseObject *pIntersectObject; // [esp+3Ch] [ebp-C0h]
+  int nAvoidPlayerCount; // [esp+40h] [ebp-BCh]
+  Vector vecAvoidMax; // [esp+44h] [ebp-B8h] BYREF
+  Vector vecTFPlayerMax; // [esp+50h] [ebp-ACh] BYREF
+  Vector vecTFPlayerMin; // [esp+5Ch] [ebp-A0h] BYREF
+  float v97; // [esp+68h] [ebp-94h]
+  Vector vecPush; // [esp+6Ch] [ebp-90h] BYREF
+  CTFPlayer *pAvoidPlayerList[32]; // [esp+78h] [ebp-84h]
+
+  v1 = 0.0;
+  v2 = tf_avoidteammates.m_pParent->m_nValue == 0;
+  v3 = *(float *)&this;
+  LODWORD(vecPush.x) = this;
+  if ( !v2 )
+  {
+    if ( this->m_pTFPlayer )
+    {
+      if ( !CGameMovement::IsDead(this) )
+      {
+        v4 = *(_DWORD *)(LODWORD(v3) + 384);
+        if ( *(_BYTE *)(v4 + 3884)
+          || (AbsVelocity = CBaseEntity::GetAbsVelocity((CBaseEntity *)v4),
+              AbsVelocity->z * AbsVelocity->z + AbsVelocity->y * AbsVelocity->y + AbsVelocity->x * AbsVelocity->x >= 0.1) )
+        {
+          if ( (_S2_278 & 1) == 0 )
+          {
+            _S2_278 |= 1u;
+            vecUp.x = 0.0;
+            vecUp.y = 0.0;
+            vecUp.z = 1.0;
+          }
+          v6 = (*(int (__thiscall **)(_DWORD))(**(_DWORD **)(LODWORD(v3) + 384) + 548))(*(_DWORD *)(LODWORD(v3) + 384));
+          v7 = *(float *)v6;
+          v8 = *(float *)(v6 + 4);
+          v9 = *(CTFPlayer **)(v6 + 8);
+          angView.y = v7;
+          v10 = (int *)(*(_DWORD *)(LODWORD(v3) + 384) + 240);
+          angView.z = v8;
+          v11 = *v10;
+          pIntersectPlayer = v9;
+          v12 = (*(int (__thiscall **)(int *))(v11 + 4))(v10);
+          vecTFPlayerMin.y = *(float *)v12;
+          v13 = *(_DWORD *)(LODWORD(v3) + 384);
+          vecTFPlayerMin.z = *(float *)(v12 + 4);
+          v97 = *(float *)(v12 + 8);
+          v14 = (*(int (__thiscall **)(int))(*(_DWORD *)(v13 + 240) + 8))(v13 + 240);
+          vecTFPlayerMax.y = *(float *)v14;
+          vecTFPlayerMax.z = *(float *)(v14 + 4);
+          v15 = *(float *)(v14 + 8);
+          vecTFPlayerMin.y = vecTFPlayerMin.y + angView.y;
+          vecTFPlayerMin.x = v15;
+          vecSeparationVelocity.x = 0.0;
+          nAvoidPlayerCount = 0;
+          v16 = 0.0;
+          vecTFPlayerMin.z = vecTFPlayerMin.z + angView.z;
+          v97 = v97 + *(float *)&pIntersectPlayer;
+          vecTFPlayerMax.y = angView.y + vecTFPlayerMax.y;
+          vecTFPlayerMax.z = angView.z + vecTFPlayerMax.z;
+          vecTFPlayerMin.x = *(float *)&pIntersectPlayer + vecTFPlayerMin.x;
+          do
+          {
+            LODWORD(vecAvoidCenter.x) = LODWORD(v16) + 1;
+            v17 = UTIL_PlayerByIndex(LODWORD(v16) + 1);
+            v18 = *(float *)&v17;
+            if ( v17 )
+            {
+              if ( v17->IsPlayer(v17) )
+              {
+                v19 = *(CBaseEntity **)(LODWORD(v3) + 384);
+                if ( (CBaseEntity *)LODWORD(v18) != v19 )
+                {
+                  TeamNumber = CBaseEntity::GetTeamNumber(v19);
+                  if ( CBaseEntity::GetTeamNumber((CBaseEntity *)LODWORD(v18)) == TeamNumber )
+                  {
+                    v21 = *(_BYTE *)(LODWORD(v18) + 276);
+                    *(float *)&pAvoidPlayerList[++LODWORD(v1)] = v18;
+                    if ( (v21 & 4) == 0 )
+                    {
+                      v22 = (float *)(*(int (__thiscall **)(float))(*(_DWORD *)LODWORD(v18) + 548))(COERCE_FLOAT(LODWORD(v18)));
+                      vecAvoidCenter.y = *v22;
+                      vecAvoidCenter.z = v22[1];
+                      vecAvoidMin.x = v22[2];
+                      v23 = CBaseEntity::WorldAlignMins((CBaseEntity *)LODWORD(v18));
+                      vecAvoidMin.y = v23->x;
+                      vecAvoidMin.z = v23->y;
+                      pIntersectObject = (CBaseObject *)LODWORD(v23->z);
+                      v24 = CBaseEntity::WorldAlignMaxs((CBaseEntity *)LODWORD(v18));
+                      x = v24->x;
+                      vecAvoidMax.y = v24->x;
+                      y = v24->y;
+                      vecAvoidMax.z = v24->y;
+                      z = v24->z;
+                      vecAvoidMin.y = vecAvoidMin.y + vecAvoidCenter.y;
+                      vecAvoidMin.z = vecAvoidMin.z + vecAvoidCenter.z;
+                      *(float *)&pIntersectObject = *(float *)&pIntersectObject + vecAvoidMin.x;
+                      vecAvoidMax.y = vecAvoidCenter.y + x;
+                      vecAvoidMax.z = y + vecAvoidCenter.z;
+                      vecTFPlayerMax.x = vecAvoidMin.x + z;
+                      if ( IsBoxIntersectingBox(
+                             (Vector *)&vecTFPlayerMin.y,
+                             (Vector *)&vecTFPlayerMax.y,
+                             (Vector *)&vecAvoidMin.y,
+                             (Vector *)&vecAvoidMax.y) )
+                      {
+                        vecSeparationVelocity.x = v18;
+                        goto LABEL_26;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            v16 = vecAvoidCenter.x;
+          }
+          while ( SLODWORD(vecAvoidCenter.x) < 32 );
+          v28 = 0;
+          vecAvoidMax.x = v1;
+          vecAvoidCenter.x = 0.0;
+          if ( SLODWORD(v1) <= 0 )
+          {
+LABEL_33:
+            v47 = *(_DWORD *)(LODWORD(v3) + 384);
+            v48 = *(unsigned __int8 *)(v47 + 3884);
+            v49 = (_BYTE *)(v47 + 3884);
+            if ( v48 )
+            {
+              (**((void (__thiscall ***)(int, _BYTE *))v49 - 23))((int)(v49 - 92), v49);
+              *v49 = 0;
+            }
+            v50 = vec3_origin.x;
+            v51 = vec3_origin.y;
+            v52 = vec3_origin.z;
+LABEL_59:
+            angView.y = v50;
+            v85 = (CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity> *)(*(_DWORD *)(LODWORD(v3) + 384)
+                                                                                              + 3888);
+            angView.z = v51;
+            *(float *)&pIntersectPlayer = v52;
+            CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity>::Set(
+              v85,
+              (const Vector *)&angView.y);
+            return;
+          }
+          while ( !nAvoidPlayerCount )
+          {
+            v29 = pAvoidPlayerList[v28 + 1];
+            v30 = 0;
+            if ( CTFPlayer::GetObjectCount(v29) > 0 )
+            {
+              while ( 1 )
+              {
+                Object = CTFPlayer::GetObject(v29, v30);
+                v32 = &Object->CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+                if ( Object )
+                {
+                  if ( (Object->m_Collision.m_usSolidFlags.m_Value & 4) == 0 && Object->ShouldPlayersAvoid(Object) )
+                  {
+                    v33 = (float *)(*(int (__thiscall **)(_DWORD *))(*v32 + 548))(v32);
+                    vecAvoidCenter.y = *v33;
+                    vecAvoidCenter.z = v33[1];
+                    v34 = *(int (__thiscall **)(_DWORD *))(v32[60] + 4);
+                    vecAvoidMin.x = v33[2];
+                    v35 = v34(v32 + 60);
+                    vecAvoidMin.y = *(float *)v35;
+                    vecAvoidMin.z = *(float *)(v35 + 4);
+                    pIntersectObject = *(CBaseObject **)(v35 + 8);
+                    v36 = (float *)(*(int (__thiscall **)(_DWORD *))(v32[60] + 8))(v32 + 60);
+                    v37 = *v36;
+                    vecAvoidMax.y = *v36;
+                    v38 = v36[1];
+                    vecAvoidMax.z = v36[1];
+                    v39 = v36[2];
+                    vecAvoidMin.y = vecAvoidMin.y + vecAvoidCenter.y;
+                    vecAvoidMin.z = vecAvoidMin.z + vecAvoidCenter.z;
+                    *(float *)&pIntersectObject = *(float *)&pIntersectObject + vecAvoidMin.x;
+                    vecAvoidMax.y = vecAvoidCenter.y + v37;
+                    vecAvoidMax.z = v38 + vecAvoidCenter.z;
+                    vecTFPlayerMax.x = vecAvoidMin.x + v39;
+                    v40 = IsBoxIntersectingBox(
+                            (Vector *)&vecTFPlayerMin.y,
+                            (Vector *)&vecTFPlayerMax.y,
+                            (Vector *)&vecAvoidMin.y,
+                            (Vector *)&vecAvoidMax.y);
+                    v3 = vecPush.x;
+                    if ( v40 )
+                      break;
+                  }
+                }
+                if ( ++v30 >= CTFPlayer::GetObjectCount(v29) )
+                  goto LABEL_31;
+              }
+              nAvoidPlayerCount = (int)v32;
+            }
+LABEL_31:
+            v28 = ++LODWORD(vecAvoidCenter.x);
+            if ( SLODWORD(vecAvoidCenter.x) >= SLODWORD(vecAvoidMax.x) )
+            {
+              if ( nAvoidPlayerCount )
+                break;
+              goto LABEL_33;
+            }
+          }
+LABEL_26:
+          v41 = vecSeparationVelocity.x;
+          vecAvoidCenter.x = gpGlobals->frametime * 600.0;
+          if ( !LODWORD(vecSeparationVelocity.x) )
+            v41 = *(float *)&nAvoidPlayerCount;
+          v42 = (float *)(*(int (__thiscall **)(float))(*(_DWORD *)LODWORD(v41) + 548))(COERCE_FLOAT(LODWORD(v41)));
+          v43 = *v42 - angView.y;
+          vecAvoidCenter.y = v43;
+          v44 = v42[1] - angView.z;
+          vecAvoidCenter.z = v44;
+          vecAvoidMin.x = v42[2] - *(float *)&pIntersectPlayer;
+          flForwardScale = (v43 * v43 + v44 * v44) * 0.00019000001;
+          if ( flForwardScale <= 1.0 )
+            flPushScale = 1.0 - flForwardScale;
+          else
+            flPushScale = 1.0;
+          flPushStrength = flPushScale * vecAvoidCenter.x;
+          vecSeparationVelocity.x = flPushStrength;
+          if ( flPushStrength >= 0.0099999998 )
+          {
+            v54 = *(_DWORD *)(LODWORD(v3) + 384);
+            if ( (*(_DWORD *)(v54 + 172) & 0x1000) != 0 )
+              CBaseEntity::CalcAbsoluteVelocity(*(CBaseEntity **)(LODWORD(v3) + 384));
+            if ( *(float *)(v54 + 568) * *(float *)(v54 + 568) + *(float *)(v54 + 564) * *(float *)(v54 + 564) <= 0.1 )
+            {
+              v58 = *(_DWORD *)(LODWORD(v3) + 4);
+              v59 = *(float *)(v58 + 12);
+              v58 += 12;
+              angView.y = v59;
+              angView.z = *(float *)(v58 + 4);
+              v60 = *(CTFPlayer **)(v58 + 8);
+              angView.y = 0.0;
+              pIntersectPlayer = v60;
+              AngleVectors((QAngle *)&angView.y, 0, (Vector *)&vecPush.y, 0);
+            }
+            else
+            {
+              v55 = *(_DWORD *)(LODWORD(v3) + 384);
+              if ( (*(_DWORD *)(v55 + 172) & 0x1000) != 0 )
+                CBaseEntity::CalcAbsoluteVelocity(*(CBaseEntity **)(LODWORD(v3) + 384));
+              v56 = *(float *)(v55 + 564);
+              v57 = *(CTFPlayer **)(v55 + 572);
+              angView.z = *(float *)(v55 + 568);
+              angView.y = v56;
+              pIntersectPlayer = v57;
+              vecPush.y = vecUp.y * 0.0 - angView.z * vecUp.z;
+              vecPush.z = vecUp.z * v56 - 0.0 * vecUp.x;
+              *(float *)pAvoidPlayerList = vecUp.x * angView.z - vecUp.y * v56;
+              pfVectorNormalize((Vector *)&vecPush.y);
+            }
+            v61 = *(_DWORD *)(LODWORD(v3) + 384);
+            v62 = *(float *)(v61 + 3888);
+            v61 += 3888;
+            vecSeparationVelocity.y = v62;
+            vecSeparationVelocity.z = *(float *)(v61 + 4);
+            iPlayer = *(int *)(v61 + 8);
+            v63 = vecPush.y * vecSeparationVelocity.x;
+            v64 = vecPush.z * vecSeparationVelocity.x;
+            v65 = *(float *)pAvoidPlayerList * vecSeparationVelocity.x;
+            if ( vecAvoidMin.x * *(float *)pAvoidPlayerList
+               + vecAvoidCenter.z * vecPush.z
+               + vecAvoidCenter.y * vecPush.y >= 0.0 )
+            {
+              v72 = v64;
+              v73 = vecSeparationVelocity.y - v63;
+              vecSeparationVelocity.y = v73;
+              v74 = v73;
+              v69 = vecSeparationVelocity.z - v72;
+              v70 = v74;
+              vecSeparationVelocity.z = v69;
+              v71 = *(float *)&iPlayer - v65;
+            }
+            else
+            {
+              v66 = v64;
+              v67 = v63 + vecSeparationVelocity.y;
+              vecSeparationVelocity.y = v67;
+              v68 = v67;
+              v69 = v66 + vecSeparationVelocity.z;
+              v70 = v68;
+              vecSeparationVelocity.z = v69;
+              v71 = v65 + *(float *)&iPlayer;
+            }
+            v2 = *(_BYTE *)(LODWORD(v3) + 104) == 0;
+            v75 = v69;
+            v76 = v71;
+            v77 = v75;
+            v78 = *(_DWORD *)(LODWORD(v3) + 4);
+            *(float *)&iPlayer = v76;
+            flMaxPlayerSpeed = *(float *)(v78 + 60);
+            vecSeparationVelocity.x = *(float *)(v78 + 60);
+            if ( !v2 )
+            {
+              flMaxPlayerSpeed = flMaxPlayerSpeed * 0.33333334;
+              vecSeparationVelocity.x = flMaxPlayerSpeed;
+            }
+            if ( flMaxPlayerSpeed * flMaxPlayerSpeed < v77 * v77 + v76 * v76 + v70 * v70 )
+            {
+              pfVectorNormalize((Vector *)&vecSeparationVelocity.y);
+              vecSeparationVelocity.y = vecSeparationVelocity.y * vecSeparationVelocity.x;
+              vecSeparationVelocity.z = vecSeparationVelocity.z * vecSeparationVelocity.x;
+              *(float *)&iPlayer = vecSeparationVelocity.x * *(float *)&iPlayer;
+            }
+            v80 = *(_DWORD *)(LODWORD(v3) + 384);
+            v81 = *(unsigned __int8 *)(v80 + 3884);
+            v82 = (_BYTE *)(v80 + 3884);
+            v83 = v81 - 1;
+            if ( v83 )
+            {
+              v84 = 1;
+              if ( v83 <= 0 )
+                v84 = -1;
+            }
+            else
+            {
+              v84 = 0;
+            }
+            if ( v84 )
+            {
+              (**((void (__thiscall ***)(int, _BYTE *))v82 - 23))((int)(v82 - 92), v82);
+              *v82 = 1;
+            }
+            v50 = vecSeparationVelocity.y;
+            v51 = vecSeparationVelocity.z;
+            v52 = *(float *)&iPlayer;
+            goto LABEL_59;
+          }
+        }
+      }
+    }
+  }
+}

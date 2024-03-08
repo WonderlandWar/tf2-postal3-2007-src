@@ -1,0 +1,5 @@
+void __thiscall CObjectSapper::UpdateOnRemove(CObjectSapper *this)
+{
+  CBaseEntity::StopSound(this, "Weapon_Sapper.Timer");
+  CBaseObject::UpdateOnRemove(this);
+}

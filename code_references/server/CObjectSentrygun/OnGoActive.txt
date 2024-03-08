@@ -1,0 +1,59 @@
+void __thiscall CObjectSentrygun::OnGoActive(CObjectSentrygun *this)
+{
+  CTFPlayer *v2; // edi
+  CHintSystem *v3; // eax
+  float x; // edx
+  float z; // ecx
+  double v6; // st7
+  int v7; // edi
+  int v8; // eax
+  const Vector *v9; // eax
+  __int16 v10; // ax
+  QAngle angles; // [esp+14h] [ebp-10h] BYREF
+  float v12; // [esp+20h] [ebp-4h]
+
+  v2 = this->GetBuilder(this);
+  if ( v2 )
+  {
+    ((void (__thiscall *)(CObjectSentrygun *))this->SetModel)(this);
+    v3 = (CHintSystem *)((int (__thiscall *)(CTFPlayer *, int))v2->Hints)(v2, 28);
+    CHintSystem::RemoveHintTimer(v3, (int)"models/buildables/sentry1.mdl");
+    LODWORD(angles.x) = 1;
+    CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(&this->m_iState, (const int *)&angles);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    x = this->m_angAbsRotation.x;
+    z = this->m_angAbsRotation.z;
+    angles.z = this->m_angAbsRotation.y;
+    v6 = angles.z;
+    angles.y = x;
+    v12 = z;
+    this->m_vecCurAngles.y = (double)(unsigned __int16)(int)(angles.z * 182.04445) * 0.0054931641;
+    v7 = (int)((double)(unsigned __int16)(int)((double)((int)v6 - 50) * 182.04445) * 0.0054931641);
+    this->m_iRightBound = v7;
+    LODWORD(angles.x) = (unsigned __int16)(int)(182.04445 * (double)((int)v6 + 50));
+    v8 = (int)(0.0054931641 * (double)SLODWORD(angles.x));
+    this->m_iLeftBound = v8;
+    if ( v7 > v8 )
+    {
+      this->m_iRightBound = v8;
+      this->m_iLeftBound = v7;
+    }
+    this->m_vecGoalAngles.y = (float)this->m_iRightBound;
+    this->m_bTurningRight = 1;
+    this->m_vecCurAngles.x = 0.0;
+    this->m_vecGoalAngles.x = 0.0;
+    CBaseEntity::EmitSound(this, "Building_Sentrygun.Built", 0.0, 0);
+    v9 = this->EyePosition(this, &angles.y);
+    v10 = enginetrace->GetPointContents(enginetrace, v9, 0);
+    CBaseEntity::SetWaterLevel(this, (v10 & 0x4030) != 0 ? 3 : 0);
+    CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells>::Set(
+      &this->m_iAmmoShells,
+      &this->m_iMaxAmmoShells.m_Value);
+    this->m_iAttachments[0] = CBaseAnimating::LookupAttachment(this, "muzzle");
+    this->m_iAttachments[1] = 0;
+    this->m_iAttachments[2] = 0;
+    this->m_iAttachments[3] = 0;
+    CBaseObject::OnGoActive(this);
+  }
+}

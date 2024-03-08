@@ -1,0 +1,10 @@
+class CDispenserControlPanel : public CObjectControlPanel
+{
+    public void CDispenserControlPanel(class CDispenserControlPanel & );
+    public void CDispenserControlPanel(class vgui::Panel * ,char * );
+    protected void OnTickActive(class C_BaseObject * ,class C_TFPlayer * );
+    private class vgui::RotatingProgressBar * m_pAmmoProgress;
+    public void ~CDispenserControlPanel();
+    public class CDispenserControlPanel & operator=(class CDispenserControlPanel & );
+    public void * __vecDelDtor(unsigned int );
+};

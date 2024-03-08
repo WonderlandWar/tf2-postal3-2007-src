@@ -1,0 +1,4 @@
+double __thiscall CWeaponMedigun::GetStickRange(CWeaponMedigun *this)
+{
+  return ((double (__thiscall *)(CWeaponMedigun *))this->GetTargetRange)(this) * 1.2;
+}

@@ -1,0 +1,44 @@
+void __userpurge CSpyInvisProxy::OnBind(CSpyInvisProxy *this@<ecx>, int a2@<esi>, C_BaseEntity *pEnt)
+{
+  C_TFPlayer *LocalTFPlayer; // eax
+  int v5; // ebx
+  double m_fValue; // st7
+  double r; // st7
+  float v8; // [esp+8h] [ebp-10h]
+  float v9; // [esp+10h] [ebp-8h]
+  float PercentInvisible; // [esp+20h] [ebp+8h]
+
+  if ( this->m_pPercentInvisible && this->m_pCloakColorTint && pEnt )
+  {
+    if ( ((unsigned __int8 (__thiscall *)(C_BaseEntity *, int))pEnt->IsPlayer)(pEnt, a2) )
+    {
+      PercentInvisible = CTFPlayerShared::GetPercentInvisible((CTFPlayerShared *)&pEnt[3].m_pIntermediateData[77]);
+      LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+      if ( LocalTFPlayer && (v5 = LocalTFPlayer->GetTeamNumber(LocalTFPlayer), v5 == pEnt->GetTeamNumber(pEnt)) )
+      {
+        m_fValue = tf_teammate_max_invis.m_pParent->m_fValue;
+        if ( PercentInvisible <= m_fValue )
+          m_fValue = PercentInvisible;
+      }
+      else
+      {
+        m_fValue = PercentInvisible;
+      }
+      v9 = m_fValue;
+      ((void (__stdcall *)(_DWORD))this->m_pPercentInvisible->SetFloatValue)(LODWORD(v9));
+      if ( pEnt->GetTeamNumber(pEnt) == 2 )
+        r = 1.0;
+      else
+        r = 0.40000001;
+      v8 = r;
+      ((void (__thiscall *)(IMaterialVar *, _DWORD, _DWORD))this->m_pCloakColorTint->SetVecValue)(
+        this->m_pCloakColorTint,
+        LODWORD(v8),
+        0.5);
+    }
+    else
+    {
+      ((void (__cdecl *)(_DWORD))this->m_pPercentInvisible->SetFloatValue)(0.0);
+    }
+  }
+}

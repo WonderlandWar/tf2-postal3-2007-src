@@ -1,0 +1,73 @@
+bool __thiscall CTFPlayer::SpeakConceptIfAllowed(
+        CTFPlayer *this,
+        int iConcept,
+        const char *modifiers,
+        char *pszOutResponseChosen,
+        unsigned int bufsize,
+        IRecipientFilter *filter)
+{
+  bool result; // al
+  int v8; // edi
+  CTFTeam *GlobalTFTeam; // eax
+  bool v10; // bl
+  bool v11; // bl
+  bool pExpresser_3; // [esp+29h] [ebp-E9h]
+  CBroadcastRecipientFilter undisguisedFilter; // [esp+2Ah] [ebp-E8h] BYREF
+  CRecipientFilter v14; // [esp+4Eh] [ebp-C4h] BYREF
+  CTeamRecipientFilter v15; // [esp+6Eh] [ebp-A4h] BYREF
+  char pDest[128]; // [esp+8Eh] [ebp-84h] BYREF
+
+  result = this->IsAlive(this);
+  if ( result )
+  {
+    this->m_iCurrentConcept = iConcept;
+    if ( !CTFPlayerShared::InCond(&this->m_Shared, 7) || filter )
+    {
+      v11 = this->SpeakIfAllowed(this, g_pszMPConcepts[iConcept], modifiers, pszOutResponseChosen, bufsize, filter);
+    }
+    else
+    {
+      CRecipientFilter::CRecipientFilter(&v14);
+      v14.__vftable = (CRecipientFilter_vtbl *)&CSingleUserRecipientFilter::`vftable';
+      CRecipientFilter::AddRecipient(&v14, this);
+      v8 = 3 - (CBaseEntity::GetTeamNumber(this) != 2);
+      CTeamRecipientFilter::CTeamRecipientFilter(&v15, v8, 0);
+      CRecipientFilter::AddRecipient(&v15, this);
+      undisguisedFilter.__vftable = (CBroadcastRecipientFilter_vtbl *)this->GetMultiplayerExpresser(this);
+      CMultiplayer_Expresser::AllowMultipleScenes((CMultiplayer_Expresser *)undisguisedFilter.__vftable);
+      V_snprintf(
+        pDest,
+        128,
+        "disguiseclass:%s",
+        g_aPlayerClassNames_NonLocalized[this->m_Shared.m_nDisguiseClass.m_Value]);
+      if ( modifiers )
+      {
+        V_strncat(pDest, ",", 0x80u, 1);
+        V_strncat(pDest, modifiers, 0x80u, -1);
+      }
+      pExpresser_3 = this->SpeakIfAllowed(this, g_pszMPConcepts[iConcept], pDest, pszOutResponseChosen, bufsize, &v15);
+      CRecipientFilter::CRecipientFilter((CRecipientFilter *)&undisguisedFilter.m_bReliable);
+      *(_DWORD *)&undisguisedFilter.m_bReliable = &CBroadcastRecipientFilter::`vftable';
+      CRecipientFilter::AddAllPlayers((CRecipientFilter *)&undisguisedFilter.m_bReliable);
+      GlobalTFTeam = GetGlobalTFTeam(v8);
+      CRecipientFilter::RemoveRecipientsByTeam((CRecipientFilter *)&undisguisedFilter.m_bReliable, GlobalTFTeam);
+      CRecipientFilter::RemoveRecipient((CRecipientFilter *)&undisguisedFilter.m_bReliable, this);
+      v10 = this->SpeakIfAllowed(
+              this,
+              g_pszMPConcepts[iConcept],
+              modifiers,
+              pszOutResponseChosen,
+              bufsize,
+              (IRecipientFilter *)&undisguisedFilter.m_bReliable);
+      CGlobalState::LevelShutdownPostEntity((CMultiplayer_Expresser *)undisguisedFilter.__vftable);
+      v11 = pExpresser_3 && v10;
+      CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&undisguisedFilter.m_bReliable);
+      CRecipientFilter::~CRecipientFilter(&v15);
+      CRecipientFilter::~CRecipientFilter(&v14);
+    }
+    if ( v11 && iConcept == 5 )
+      CTFPlayer::SaveMe(this);
+    return v11;
+  }
+  return result;
+}

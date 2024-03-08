@@ -1,0 +1,17 @@
+void __thiscall CTriggerAreaCapture::UpdateOwningTeam(CTriggerAreaCapture *this)
+{
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // edx
+
+  if ( this->m_hPoint.m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber == this->m_hPoint.m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity )
+  {
+    m_Index = this->m_hPoint.m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hPoint.m_Index & 0xFFF].m_pEntity;
+    CBaseTeamObjectiveResource::SetOwningTeam(g_pObjectiveResource, (int)m_pEntity[343].__vftable, this->m_nOwningTeam);
+  }
+}

@@ -1,0 +1,94 @@
+bool __thiscall CBaseObject::EstimateValidBuildPos(CBaseObject *this)
+{
+  CTFPlayer *v2; // edi
+  long double v4; // st7
+  long double v5; // st6
+  long double v6; // st7
+  long double v7; // st6
+  int v8; // eax
+  float v9; // edx
+  float v10; // ecx
+  float v11; // eax
+  CBaseEntity::NetworkVar_m_Collision_vtbl *v12; // edx
+  int v13; // eax
+  float v14; // ecx
+  long double v15; // st7
+  float v16; // edx
+  float v17; // eax
+  long double v18; // st6
+  long double v19; // st7
+  long double v20; // st6
+  double v21; // st7
+  float *v22; // eax
+  float _X; // [esp+0h] [ebp-5Ch]
+  float _Xa; // [esp+0h] [ebp-5Ch]
+  float vecObjectRadius_4; // [esp+Ch] [ebp-50h]
+  float vecObjectRadius_4a; // [esp+Ch] [ebp-50h]
+  float vecPlayerRadius; // [esp+10h] [ebp-4Ch]
+  float vecPlayerRadius_4; // [esp+14h] [ebp-48h]
+  float vecPlayerRadius_4a; // [esp+14h] [ebp-48h]
+  float v30; // [esp+18h] [ebp-44h]
+  float v31; // [esp+18h] [ebp-44h]
+  QAngle vecAngles; // [esp+1Ch] [ebp-40h] BYREF
+  Vector vecPlayerMins; // [esp+28h] [ebp-34h]
+  Vector vecPlayerMaxs; // [esp+34h] [ebp-28h]
+  Vector vecBuildOrigin; // [esp+40h] [ebp-1Ch] BYREF
+  Vector forward; // [esp+4Ch] [ebp-10h] BYREF
+  float v37; // [esp+58h] [ebp-4h]
+
+  v2 = this->GetOwner(this);
+  if ( !v2 )
+    return 0;
+  vecAngles.z = vec3_angle.y;
+  vecPlayerMins.x = vec3_angle.z;
+  vecAngles.y = vec3_angle.x;
+  vecAngles.z = v2->EyeAngles(v2)->y;
+  AngleVectors((QAngle *)&vecAngles.y, (Vector *)&forward.y);
+  v4 = fabs(this->m_vecBuildMins.m_Value.x);
+  v5 = fabs(this->m_vecBuildMaxs.m_Value.x);
+  if ( v5 >= v4 )
+    v4 = v5;
+  vecObjectRadius_4 = v4;
+  v6 = fabs(this->m_vecBuildMins.m_Value.y);
+  v7 = fabs(this->m_vecBuildMaxs.m_Value.y);
+  if ( v7 >= v6 )
+    v6 = v7;
+  vecPlayerRadius = v6;
+  v8 = (int)v2->m_Collision.OBBMins(&v2->m_Collision);
+  v9 = *(float *)(v8 + 4);
+  v10 = *(float *)v8;
+  v11 = *(float *)(v8 + 8);
+  vecPlayerMins.z = v9;
+  v12 = v2->m_Collision.CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::__vftable;
+  vecPlayerMins.y = v10;
+  vecPlayerMaxs.x = v11;
+  v13 = (int)v12->OBBMaxs(&v2->m_Collision);
+  v14 = *(float *)v13;
+  v15 = fabs(vecPlayerMins.y);
+  v16 = *(float *)(v13 + 4);
+  v17 = *(float *)(v13 + 8);
+  vecPlayerMaxs.y = v14;
+  v18 = fabs(v14);
+  vecBuildOrigin.x = v17;
+  vecPlayerMaxs.z = v16;
+  if ( v18 >= v15 )
+    v15 = v18;
+  vecPlayerRadius_4 = v15;
+  v19 = fabs(vecPlayerMins.z);
+  v20 = fabs(vecPlayerMaxs.z);
+  if ( v20 >= v19 )
+    v19 = v20;
+  v30 = v19;
+  _X = vecPlayerRadius * vecPlayerRadius + vecObjectRadius_4 * vecObjectRadius_4;
+  vecObjectRadius_4a = pfSqrt(_X);
+  _Xa = v30 * v30 + vecPlayerRadius_4 * vecPlayerRadius_4;
+  v21 = pfSqrt(_Xa) + vecObjectRadius_4a + 4.0;
+  vecPlayerRadius_4a = forward.y * v21;
+  v31 = forward.z * v21;
+  vecAngles.x = v21 * v37;
+  v22 = (float *)v2->WorldSpaceCenter(v2);
+  vecBuildOrigin.y = *v22 + vecPlayerRadius_4a;
+  vecBuildOrigin.z = v22[1] + v31;
+  forward.x = v22[2] + vecAngles.x;
+  return !PointInNoBuild((Vector *)&vecBuildOrigin.y) && !PointInRespawnRoom(0, (Vector *)&vecBuildOrigin.y);
+}

@@ -1,0 +1,30 @@
+void __usercall CTFMinigun::WindDown(CTFMinigun *this@<ecx>, int a2@<ebp>)
+{
+  CTFPlayer *PlayerOwner; // edi
+  bool (__thiscall *SendWeaponAnim)(CBaseCombatWeapon *, int); // edx
+  int val; // [esp+8h] [ebp-4h] BYREF
+
+  PlayerOwner = (CTFPlayer *)CTFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner )
+  {
+    if ( PlayerOwner->IsPlayer(PlayerOwner) )
+    {
+      SendWeaponAnim = this->SendWeaponAnim;
+      this->m_flStartedFiringAt = -1.0;
+      SendWeaponAnim(this, 1092);
+      *(float *)&val = 0.0;
+      CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+        (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+        &val);
+      CTFPlayerShared::RemoveCond(&PlayerOwner->m_Shared, 3);
+      CTFMinigun::WeaponSoundUpdate(this, a2, (int)PlayerOwner);
+      CTFPlayer::ClearWeaponFireScene(PlayerOwner);
+      *(float *)&val = gpGlobals->curtime + 2.0;
+      CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle>::Set(
+        &this->m_flTimeWeaponIdle,
+        (const float *)&val);
+      CTFPlayer::TeamFortress_SetSpeed(PlayerOwner);
+      this->m_flBarrelTargetVelocity = 0.0;
+    }
+  }
+}

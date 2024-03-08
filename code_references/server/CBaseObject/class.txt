@@ -1,0 +1,317 @@
+class CBaseObject : public CBaseCombatCharacter, public IHasBuildPoints, public IScorer
+{
+    public void CBaseObject(class CBaseObject & );
+    public void CBaseObject();
+    
+	public void UpdateOnRemove();
+	
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    
+	public bool IsBaseObject();
+    
+	public void BaseObjectThink();
+    public class CTFPlayer * GetOwner();
+    
+	public void Precache();
+    public void Spawn();
+    public void Activate();
+    
+	public bool ShouldCollide(int ,int );
+    
+	public void SetBuilder(class CTFPlayer * );
+    public void SetType(int );
+    public int ObjectType();
+    
+	public int BloodColor();
+    
+	public float GetTotalTime();
+    public void StartPlacement(class CTFPlayer * );
+    public void StopPlacement();
+    public bool FindNearestBuildPoint(class CBaseEntity * ,class CBasePlayer * ,float & ,class Vector & );
+    public bool VerifyCorner(class Vector & ,float ,float );
+    public float GetNearbyObjectCheckRadius();
+    public bool UpdatePlacement();
+    public bool UpdateAttachmentPlacement();
+    public bool IsValidPlacement();
+    public bool EstimateValidBuildPos();
+	
+    public bool CalculatePlacementPos();
+    public bool IsPlacementPosValid();
+    public bool FindSnapToBuildPos();
+    
+	public void ReattachChildren();
+	
+    public int FindObjectOnBuildPoint(class CBaseObject * );
+    
+	public bool StartBuilding(class CBaseEntity * );
+    public void BuildingThink();
+    public void SetControlPanelsActive(bool );
+    public void FinishedBuilding();
+    public bool IsBuilding();
+    public bool IsPlacing();
+    public bool IsUpgrading();
+    public bool MustBeBuiltOnAttachmentPoint();
+    
+	public void GetControlPanelInfo(int ,char &** );
+    public void GetControlPanelClassName(int ,char &** );
+    
+	public bool ClientCommand(class CTFPlayer * ,class CCommand & );
+	
+    public void SetHealth(float );
+    public void TraceAttack(class CTakeDamageInfo & ,class Vector & ,class CGameTrace * );
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    public bool PassDamageOntoChildren(class CTakeDamageInfo & ,float * );
+    public bool Repair(float );
+    
+	public void OnRepairHit(class CTFPlayer * );
+    public float GetRepairMultiplier();
+    
+	public void DetonateObject();
+    public bool ShouldAutoRemove();
+    public void Explode();
+    public void Killed(class CTakeDamageInfo & );
+    public void DestroyObject();
+    public bool IsDying();
+    public void DestroyScreens();
+    
+	public enum Class_T Classify();
+    public int GetType();
+    public class CTFPlayer * GetBuilder();
+    public class CTFTeam * GetTFTeam();
+    
+	public bool IsAnUpgrade();
+    public bool IsHostileUpgrade();
+    
+	public void InputSetHealth(struct inputdata_t & );
+    public void InputAddHealth(struct inputdata_t & );
+    public void InputRemoveHealth(struct inputdata_t & );
+    public void InputSetSolidToPlayer(struct inputdata_t & );
+	
+    public bool InputWrenchHit(class CTFPlayer * );
+    public bool OnWrenchHit(class CTFPlayer * );
+    public bool Command_Repair(class CTFPlayer * );
+    
+	public void ChangeTeam(int );
+	
+    public bool ShouldBeActive();
+    
+	public bool HasSapper();
+    public void OnAddSapper();
+    public void OnRemoveSapper();
+    
+	public int GetObjectFlags();
+    public void SetObjectFlags(int );
+	
+    public void AttemptToGoActive();
+    public void OnGoActive();
+    public void OnGoInactive();
+    
+	public bool IsDisabled();
+    public void UpdateDisabledState();
+    public void SetDisabled(bool );
+    public void OnStartDisabled();
+    public void OnEndDisabled();
+    
+	public void PlayStartupAnimation();
+	
+    public enum Activity GetActivity();
+    public void SetActivity(enum Activity );
+    public void SetObjectSequence(int );
+    public void OnActivityChanged(enum Activity );
+	
+    public void SpawnObjectPoints();
+	
+    public void SetupAttachedVersion();
+    
+	public int DrawDebugTextOverlays();
+    
+	public void RotateBuildAngles();
+    
+	public bool ShouldPlayersAvoid();
+    
+	public void IncrementKills();
+    public int GetKills();
+    
+	public void CreateObjectGibs();
+    public void SetModel(char * );
+	
+    public char * GetResponseRulesModifier();
+    
+	public bool TestHitboxes(struct Ray_t & ,unsigned int ,class CGameTrace & );
+    
+	public class CBasePlayer * GetScorer();
+    public class CBasePlayer * GetAssistant();
+    
+	public void CreateBuildPoints();
+    public void AddAndParseBuildPoint(int ,class KeyValues * );
+    public int AddBuildPoint(int );
+    public void AddValidObjectToBuildPoint(int ,int );
+    public class CBaseObject * GetBuildPointObject(int );
+    public bool IsBuiltOnAttachment();
+    public void AttachObjectToObject(class CBaseEntity * ,int ,class Vector & );
+    public void DetachObjectFromObject();
+    public class CBaseObject * GetParentObject();
+	
+    public int GetNumBuildPoints();
+    public bool GetBuildPoint(int ,class Vector & ,class QAngle & );
+    public int GetBuildPointAttachmentIndex(int );
+    public bool CanBuildObjectOnBuildPoint(int ,int );
+    public void SetObjectOnBuildPoint(int ,class CBaseObject * );
+    public float GetMaxSnapDistance(int );
+    public bool ShouldCheckForMovement();
+    public int GetNumObjectsOnMe();
+    public class CBaseEntity * GetFirstFriendlyObjectOnMe();
+    public class CBaseObject * GetObjectOfTypeOnMe(int );
+    public void RemoveAllObjects();
+	
+    public int UpdateTransmitState();
+    public int ShouldTransmit(class CCheckTransmitInfo * );
+    public void SetTransmit(class CCheckTransmitInfo * ,bool );
+	
+    protected bool ShowVGUIScreen(int ,bool );
+	
+    protected void SpawnControlPanels();
+	
+    protected void DetermineAnimation();
+    protected void DeterminePlaybackRate();
+	
+    protected void UpdateDesiredBuildRotation(float );
+	
+    private void SpawnEntityOnBuildPoint(char * ,int );
+	
+    enum OBJSOLIDTYPE
+    {
+        SOLID_TO_PLAYER_USE_DEFAULT=0,
+        SOLID_TO_PLAYER_YES=1,
+        SOLID_TO_PLAYER_NO=2
+    };
+	
+    protected bool IsSolidToPlayers();
+	
+    class NetworkVar_m_fObjectFlags
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBaseObject::NetworkVar_m_fObjectFlags> m_fObjectFlags;
+    class NetworkVar_m_hBuilder
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CTFPlayer,CBaseObject::NetworkVar_m_hBuilder> m_hBuilder;
+	
+    protected class Vector m_vecBuildOrigin;
+    class NetworkVar_m_vecBuildMaxs
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVectorBase<Vector,CBaseObject::NetworkVar_m_vecBuildMaxs> m_vecBuildMaxs;
+    class NetworkVar_m_vecBuildMins
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVectorBase<Vector,CBaseObject::NetworkVar_m_vecBuildMins> m_vecBuildMins;
+    class NetworkVar_m_hBuiltOnEntity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CBaseEntity,CBaseObject::NetworkVar_m_hBuiltOnEntity> m_hBuiltOnEntity;
+    protected int m_iBuiltOnPoint;
+	
+    protected bool m_bDying;
+	
+    protected class COutputEvent m_OnDestroyed;
+    protected class COutputEvent m_OnDamaged;
+    protected class COutputEvent m_OnRepaired;
+	
+    protected class COutputEvent m_OnBecomingDisabled;
+    protected class COutputEvent m_OnBecomingReenabled;
+    
+	protected class CEntityOutputTemplate<float,1> m_OnObjectHealthChanged;
+	
+    protected class CUtlVector<CHandle<CVGuiScreen>,CUtlMemory<CHandle<CVGuiScreen>,int> > m_hScreens;
+    
+	private void NetworkStateChanged_m_iHealth(void * );
+    private void NetworkStateChanged_m_iHealth();
+    private void NetworkStateChanged_m_takedamage(void * );
+    private void NetworkStateChanged_m_takedamage();
+	
+    private enum Activity m_Activity;
+    
+	class NetworkVar_m_iObjectType
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseObject::NetworkVar_m_iObjectType> m_iObjectType;
+	
+    private enum CBaseObject::OBJSOLIDTYPE m_SolidToPlayers;
+    private void SetSolidToPlayers(enum CBaseObject::OBJSOLIDTYPE ,bool );
+	
+    class NetworkVar_m_bDisabled
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bDisabled> m_bDisabled;
+	
+    class NetworkVar_m_bPlacing
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bPlacing> m_bPlacing;
+    class NetworkVar_m_bBuilding
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bBuilding> m_bBuilding;
+    private float m_flConstructionTimeLeft;
+    private float m_flTotalConstructionTime;
+	
+    class NetworkVar_m_flPercentageConstructed
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBaseObject::NetworkVar_m_flPercentageConstructed> m_flPercentageConstructed;
+    private float m_flHealth;
+	
+    class NetworkVar_m_bHasSapper
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bHasSapper> m_bHasSapper;
+	
+    private class CUtlVector<BuildPoint_t,CUtlMemory<BuildPoint_t,int> > m_BuildPoints;
+	
+    private class CUtlMap<int,float,unsigned short> m_RepairerList;
+	
+    private bool m_bPlacementOK;
+    
+	class NetworkVar_m_iKills
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseObject::NetworkVar_m_iKills> m_iKills;
+    
+	class NetworkVar_m_iDesiredBuildRotations
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBaseObject::NetworkVar_m_iDesiredBuildRotations> m_iDesiredBuildRotations;
+    private float m_flCurrentBuildRotation;
+    
+	private class CUtlVector<breakmodel_t,CUtlMemory<breakmodel_t,int> > m_aGibs;
+	
+    class NetworkVar_m_bServerOverridePlacement
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bServerOverridePlacement> m_bServerOverridePlacement;
+    
+	public void ~CBaseObject();
+    public class CBaseObject & operator=(class CBaseObject & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

@@ -1,0 +1,42 @@
+void __thiscall CTriggerAreaCapture::AreaTouch(CTriggerAreaCapture *this, CBaseEntity *pOther)
+{
+  CBaseEntity *EntityByClassname; // eax
+  CTeamControlPointMaster *v4; // ebx
+  CTeamControlPoint *v5; // eax
+  CTeamControlPoint *v6; // eax
+  CBaseMultiplayerPlayer *v7; // edi
+
+  if ( !this->m_bDisabled && this->PassesTriggerFilters(this, pOther) )
+  {
+    if ( ((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].~IGameSystem)(g_pGameRules) )
+    {
+      if ( pOther->IsPlayer(pOther) && pOther->IsAlive(pOther) )
+      {
+        EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "team_control_point_master");
+        v4 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                          EntityByClassname,
+                                          0,
+                                          &CBaseEntity `RTTI Type Descriptor',
+                                          &CTeamControlPointMaster `RTTI Type Descriptor',
+                                          0);
+        if ( !v4
+          || !CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint)
+          || (v5 = (CTeamControlPoint *)CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint),
+              CTeamControlPointMaster::PointCanBeCapped(v4, v5)) )
+        {
+          if ( CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint) )
+          {
+            v6 = (CTeamControlPoint *)CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPoint);
+            this->m_nOwningTeam = CTeamControlPoint::GetOwner(v6);
+          }
+          v7 = (CBaseMultiplayerPlayer *)ToBaseMultiplayerPlayer(pOther);
+          if ( CBaseEntity::GetTeamNumber(v7) != this->m_nOwningTeam
+            && this->m_TeamData.m_Memory.m_pMemory[CBaseEntity::GetTeamNumber(v7)].bCanCap )
+          {
+            this->DisplayCapHintTo(this, v7);
+          }
+        }
+      }
+    }
+  }
+}

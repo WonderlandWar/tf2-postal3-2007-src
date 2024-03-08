@@ -1,0 +1,9 @@
+void __usercall CWeaponMedigun::UpdateOnRemove(CWeaponMedigun *this@<ecx>, int a2@<ebx>, int a3@<ebp>)
+{
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  CWeaponMedigun::RemoveHealingTarget(this, a2, a3, (int)this, -1, 1);
+  val = 0;
+  CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking>::Set(&this->m_bAttacking, &val);
+  CBaseEntity::UpdateOnRemove(this);
+}

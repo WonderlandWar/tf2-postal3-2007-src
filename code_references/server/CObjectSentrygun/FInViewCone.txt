@@ -1,0 +1,37 @@
+bool __thiscall CObjectSentrygun::FInViewCone(CObjectSentrygun *this, CBaseEntity *pEntity)
+{
+  double v3; // st7
+  double v4; // st6
+  double v5; // st7
+  double v6; // st6
+  double v7; // st6
+  double v8; // st7
+  float _X; // [esp+0h] [ebp-24h]
+  float v11; // [esp+Ch] [ebp-18h]
+  float v12; // [esp+10h] [ebp-14h]
+  Vector forward; // [esp+14h] [ebp-10h] BYREF
+
+  AngleVectors(&this->m_vecCurAngles, (Vector *)&forward.y);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  if ( (pEntity->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(pEntity);
+  v3 = pEntity->m_vecAbsOrigin.x - this->m_vecAbsOrigin.x;
+  v11 = v3;
+  v4 = pEntity->m_vecAbsOrigin.y - this->m_vecAbsOrigin.y;
+  v12 = v4;
+  _X = v3 * v3 + v4 * v4;
+  v5 = pfSqrt(_X);
+  v6 = 0.0;
+  if ( 0.0 == v5 )
+  {
+    v8 = 0.0;
+  }
+  else
+  {
+    v7 = 1.0 / v5;
+    v8 = v11 * v7;
+    v6 = v7 * v12;
+  }
+  return v8 * forward.y + v6 * forward.z > this->m_flFieldOfView;
+}

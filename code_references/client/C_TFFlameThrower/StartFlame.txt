@@ -1,0 +1,81 @@
+void __usercall C_TFFlameThrower::StartFlame(C_TFFlameThrower *this@<ecx>, int a2@<ebx>)
+{
+  CSoundEnvelopeController *Controller; // edi
+  CSoundEnvelopeController *v4; // eax
+  int v5; // edx
+  CSoundEnvelopeController_vtbl *v6; // ebx
+  int v7; // eax
+  CSoundPatch *v8; // eax
+  const char *(__thiscall *GetShootSound)(C_BaseCombatWeapon *, int); // edx
+  int v10; // eax
+  CSoundEnvelopeController_vtbl *v11; // ebx
+  int v12; // eax
+  CSoundPatch *v13; // eax
+  bool v14; // c0
+  CLocalPlayerFilter filter; // [esp+60h] [ebp-24h] BYREF
+
+  Controller = CSoundEnvelopeController::GetController();
+  if ( this->m_pFiringLoop && this->m_bCritFire.m_Value != this->m_bFiringLoopCritical )
+    C_TFFlameThrower::StopFlame(this, 1);
+  if ( this->m_pPilotLightSound )
+  {
+    v4 = CSoundEnvelopeController::GetController();
+    v4->SoundDestroy(v4, this->m_pPilotLightSound);
+    this->m_pPilotLightSound = 0;
+  }
+  if ( !this->m_pFiringStartSound && !this->m_pFiringLoop )
+  {
+    C_TFFlameThrower::RestartParticleEffect(this);
+    CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+    v5 = ((int (__thiscall *)(C_TFFlameThrower *, int, int))this->GetShootSound)(this, 1, a2);
+    if ( *(float *)&filter.m_bReliable > 0.0 )
+    {
+      v6 = Controller->__vftable;
+      v7 = ((int (__thiscall *)(IClientNetworkable *, int))this->entindex)(&this->IClientNetworkable, v5);
+      v8 = (CSoundPatch *)((int (__thiscall *)(CSoundEnvelopeController *, int *, int))v6->SoundCreate)(
+                            Controller,
+                            &filter.m_Recipients.m_Memory.m_nAllocationCount,
+                            v7);
+      this->m_pFiringStartSound = v8;
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))Controller->Play)(
+        Controller,
+        v8,
+        1.0,
+        100.0,
+        0.0);
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))Controller->SoundChangeVolume)(
+        Controller,
+        this->m_pFiringStartSound,
+        0.0,
+        *(_DWORD *)&filter.m_bReliable);
+    }
+    GetShootSound = this->GetShootSound;
+    if ( this->m_bCritFire.m_Value )
+      v10 = (int)GetShootSound(this, 5);
+    else
+      v10 = (int)GetShootSound(this, 11);
+    v11 = Controller->__vftable;
+    v12 = ((int (__thiscall *)(IClientNetworkable *, int))this->entindex)(&this->IClientNetworkable, v10);
+    v13 = (CSoundPatch *)((int (__thiscall *)(CSoundEnvelopeController *, int *, int))v11->SoundCreate)(
+                           Controller,
+                           &filter.m_Recipients.m_Size,
+                           v12);
+    v14 = *(float *)&filter.m_Recipients.m_Memory.m_nAllocationCount > 0.0;
+    this->m_bFiringLoopCritical = this->m_bCritFire.m_Value;
+    this->m_pFiringLoop = v13;
+    if ( v14 )
+    {
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *))Controller->Play)(Controller, v13);
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))Controller->SoundChangeVolume)(
+        Controller,
+        this->m_pFiringLoop,
+        1.0,
+        0.0);
+    }
+    else
+    {
+      ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *))Controller->Play)(Controller, v13);
+    }
+    C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+  }
+}

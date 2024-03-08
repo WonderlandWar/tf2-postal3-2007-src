@@ -1,0 +1,135 @@
+void __thiscall C_TFMinigun::SharedAttack(C_TFMinigun *this)
+{
+  C_TFPlayer *PlayerOwner; // edi
+  int m_nButtons; // eax
+  const float *v4; // eax
+  bool v5; // zf
+  int m_Value; // [esp-8h] [ebp-1Ch]
+  bool m_bCurrentAttackIsCrit; // [esp+Bh] [ebp-9h] BYREF
+  int val[2]; // [esp+Ch] [ebp-8h] BYREF
+
+  PlayerOwner = (C_TFPlayer *)C_TFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner && PlayerOwner->IsPlayer(PlayerOwner) )
+  {
+    if ( C_TFWeaponBase::CanAttack(this) )
+    {
+      m_nButtons = PlayerOwner->m_nButtons;
+      if ( (m_nButtons & 1) != 0 )
+      {
+        this->m_iWeaponMode = 0;
+      }
+      else if ( (m_nButtons & 0x800) != 0 )
+      {
+        this->m_iWeaponMode = 1;
+      }
+      switch ( this->m_iWeaponState.m_Value )
+      {
+        case AC_STATE_STARTFIRING:
+          if ( *(float *)(gpGlobals.m_Index + 12) >= (double)this->m_flNextPrimaryAttack.m_Value )
+          {
+            if ( this->m_iWeaponMode == 1 )
+              val[0] = 3;
+            else
+              val[0] = 2;
+            CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+              (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+              val);
+            *(double *)val = *(float *)(gpGlobals.m_Index + 12) + 0.1;
+            v4 = CNetworkVarBase<float,C_TFSniperRifle::NetworkVar_m_flChargedDamage>::operator=<double>(
+                   (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flNextPrimaryAttack> *)&this->m_flTimeWeaponIdle,
+                   (const long double *)val);
+            CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+              (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flNextPrimaryAttack,
+              v4);
+          }
+          break;
+        case AC_STATE_FIRING:
+          if ( this->m_iWeaponMode == 1 )
+          {
+            val[0] = 3;
+            CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+              (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+              val);
+          }
+          else if ( C_BaseCombatCharacter::GetAmmoCount(PlayerOwner, this->m_iPrimaryAmmoType.m_Value) > 0 )
+          {
+            if ( this->m_flStartedFiringAt < 0.0 )
+              this->m_flStartedFiringAt = *(float *)(gpGlobals.m_Index + 12);
+            C_TFWeaponBaseGun::PrimaryAttack(this);
+            C_TFWeaponBase::CalcIsAttackCritical(this);
+            m_bCurrentAttackIsCrit = this->m_bCurrentAttackIsCrit;
+            CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bChargeRelease>::operator=<bool>(
+              (CNetworkVarBase<bool,C_TFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bCritShot,
+              &m_bCurrentAttackIsCrit);
+            C_TFPlayer::DoAnimationEvent(PlayerOwner, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+            *(double *)val = *(float *)(gpGlobals.m_Index + 12) + 0.2;
+            CNetworkVarBase<float,C_TFSniperRifle::NetworkVar_m_flChargedDamage>::operator=<double>(
+              (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flNextPrimaryAttack> *)&this->m_flTimeWeaponIdle,
+              (const long double *)val);
+          }
+          else
+          {
+            val[0] = 4;
+            CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+              (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+              val);
+          }
+          break;
+        case AC_STATE_SPINNING:
+          v5 = this->m_iWeaponMode == 0;
+          this->m_flStartedFiringAt = -1.0;
+          if ( v5 )
+          {
+            if ( C_BaseCombatCharacter::GetAmmoCount(PlayerOwner, this->m_iPrimaryAmmoType.m_Value) <= 0 )
+              val[0] = 4;
+            else
+              val[0] = 2;
+            CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+              (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+              val);
+          }
+          goto LABEL_32;
+        case AC_STATE_DRYFIRE:
+          m_Value = this->m_iPrimaryAmmoType.m_Value;
+          this->m_flStartedFiringAt = -1.0;
+          if ( C_BaseCombatCharacter::GetAmmoCount(PlayerOwner, m_Value) <= 0 )
+          {
+            if ( this->m_iWeaponMode == 1 )
+            {
+              val[0] = 3;
+              CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+                (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+                val);
+            }
+          }
+          else
+          {
+            val[0] = 2;
+            CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+              (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this->m_iWeaponState,
+              val);
+          }
+LABEL_32:
+          this->SendWeaponAnim(this, 181);
+          break;
+        default:
+          C_TFMinigun::WindUp(this);
+          *(float *)val = *(float *)(gpGlobals.m_Index + 12) + 1.0;
+          CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+            (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flNextPrimaryAttack,
+            (const float *)val);
+          *(float *)val = *(float *)(gpGlobals.m_Index + 12) + 1.0;
+          CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+            &this->m_flTimeWeaponIdle,
+            (const float *)val);
+          this->m_flStartedFiringAt = -1.0;
+          C_TFPlayer::DoAnimationEvent(PlayerOwner, PLAYERANIMEVENT_ATTACK_PRE, 0);
+          break;
+      }
+    }
+    else
+    {
+      this->WeaponIdle(this);
+    }
+  }
+}

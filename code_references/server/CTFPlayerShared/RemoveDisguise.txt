@@ -1,0 +1,18 @@
+void __thiscall CTFPlayerShared::RemoveDisguise(CTFPlayerShared *this)
+{
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *p_m_nPlayerCond; // edi
+  int val; // [esp+8h] [ebp-4h] BYREF
+
+  p_m_nPlayerCond = (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond;
+  val = this->m_nPlayerCond.m_Value & 0xFFFFFF7F;
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(
+    (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond,
+    &val);
+  this->m_flCondExpireTimeLeft[7] = 0.0;
+  CTFPlayerShared::OnRemoveDisguised(this);
+  val = p_m_nPlayerCond->m_Value & 0xFFFFFFBF;
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(p_m_nPlayerCond, &val);
+  this->m_flCondExpireTimeLeft[6] = 0.0;
+  val = 0;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_nDesiredDisguiseTeam>::Set(&this->m_nDesiredDisguiseTeam, &val);
+}

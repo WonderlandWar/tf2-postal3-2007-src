@@ -1,0 +1,64 @@
+class CTFTeamMenu : public CTeamMenu
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFTeamMenu_RegisterMap
+    {
+        public void CTFTeamMenu_RegisterMap();
+    };
+    public class CTFTeamMenu::CTFTeamMenu_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFTeamMenu_Register
+    {
+        public void CTFTeamMenu_Register();
+    };
+    public class CTFTeamMenu::CTFTeamMenu_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFTeamMenu_RegisterKBMap
+    {
+        public void CTFTeamMenu_RegisterKBMap();
+    };
+    public class CTFTeamMenu::CTFTeamMenu_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFTeamMenu(class CTFTeamMenu & );
+    public void CTFTeamMenu(class IViewPort * );
+    public void ~CTFTeamMenu();
+    public void Update();
+    public void ShowPanel(bool );
+    public void Join_Team(class CCommand & );
+    class CCommandMemberInitializer_Join_Team
+    {
+        public void CCommandMemberInitializer_Join_Team(class CTFTeamMenu::CCommandMemberInitializer_Join_Team & );
+        public void CCommandMemberInitializer_Join_Team();
+        private class CConCommandMemberAccessor<CTFTeamMenu> m_ConCommandAccessor;
+        public void ~CCommandMemberInitializer_Join_Team();
+        public class CTFTeamMenu::CCommandMemberInitializer_Join_Team & operator=(class CTFTeamMenu::CCommandMemberInitializer_Join_Team & );
+        public void * __vecDelDtor(unsigned int );
+    };
+    public class CTFTeamMenu::CCommandMemberInitializer_Join_Team m_Join_Team_register;
+    protected void OnKeyCodePressed(enum ButtonCode_t );
+    protected void OnCommand(char * );
+    protected void LoadMapPage(char * );
+    protected void OnTick();
+    private class CTFTeamButton * m_pBlueTeamButton;
+    private class CTFTeamButton * m_pRedTeamButton;
+    private class CTFTeamButton * m_pAutoTeamButton;
+    private class CTFTeamButton * m_pSpecTeamButton;
+    private class CTFButton * m_pCancelButton;
+    private bool m_bRedDisabled;
+    private bool m_bBlueDisabled;
+    enum _unnamed_11820
+    {
+        NUM_TEAMS=3
+    };
+    private enum ButtonCode_t m_iTeamMenuKey;
+    public class CTFTeamMenu & operator=(class CTFTeamMenu & );
+    public void * __vecDelDtor(unsigned int );
+};

@@ -1,0 +1,21 @@
+void __thiscall CTeamplayRoundBasedRules::State_Enter_TEAM_WIN(CTeamplayRoundBasedRules *this)
+{
+  double m_fValue; // st7
+  bool v3; // c0
+  bool v4; // c3
+  double v5; // st7
+  void (__thiscall *InternalHandleTeamWin)(CTeamplayRoundBasedRules *, int); // edx
+  int m_Value; // [esp-4h] [ebp-8h]
+
+  m_fValue = mp_bonusroundtime.m_pParent->m_fValue;
+  v3 = m_fValue > 5.0;
+  v4 = 5.0 == m_fValue;
+  v5 = 5.0;
+  if ( v3 || v4 )
+    v5 = mp_bonusroundtime.m_pParent->m_fValue;
+  InternalHandleTeamWin = this->InternalHandleTeamWin;
+  m_Value = this->m_iWinningTeam.m_Value;
+  this->m_flStateTransitionTime = v5 * mp_enableroundwaittime.m_pParent->m_fValue + gpGlobals->curtime;
+  InternalHandleTeamWin(this, m_Value);
+  this->SendWinPanelInfo(this);
+}

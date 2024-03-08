@@ -1,0 +1,13 @@
+class CTFProjectile_Nail : public CTFBaseProjectile
+{
+    public class CTFProjectile_Nail * Create(class Vector & ,class QAngle & ,class CBaseEntity * ,class CBaseEntity * );
+    public char * GetProjectileModelName();
+    public float GetGravity();
+    public float GetInitialVelocity();
+    public void CTFProjectile_Nail(class CTFProjectile_Nail & );
+    public void CTFProjectile_Nail();
+    public void ~CTFProjectile_Nail();
+    public class CTFProjectile_Nail & operator=(class CTFProjectile_Nail & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

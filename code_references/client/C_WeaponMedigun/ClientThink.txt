@@ -1,0 +1,65 @@
+void __thiscall C_WeaponMedigun::ClientThink(C_WeaponMedigun *this)
+{
+  C_TFPlayer *LocalTFPlayer; // ebx
+  unsigned int v3; // eax
+  CEntInfo *v4; // ecx
+  C_TFPlayer *v5; // ebp
+  char *v6; // edi
+  IHandleEntity *m_pEntity; // ecx
+  int v8; // eax
+  char v9; // al
+  C_BaseEntity *v10; // esi
+  CLocalPlayerFilter filter; // [esp+14h] [ebp-24h] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( LocalTFPlayer )
+  {
+    v3 = *(_DWORD *)&this->m_iTextureFrameIndex;
+    if ( v3 == -1
+      || (v4 = &g_pEntityList->m_EntPtrArray[*(_DWORD *)&this->m_iTextureFrameIndex & 0xFFF],
+          g_pEntityList->m_EntPtrArray[*(_DWORD *)&this->m_iTextureFrameIndex & 0xFFF].m_SerialNumber != v3 >> 12)
+      || (v5 = (C_TFPlayer *)v4->m_pEntity) == 0
+      || !v5->IsPlayer((C_BaseEntity *)v4->m_pEntity)
+      || C_BasePlayer::IsPlayerDead(v5)
+      || v5->IsDormant(&v5->IClientNetworkable) )
+    {
+      CClientThinkList::SetNextClientThink(&g_ClientThinkList, (CBaseHandle)this->m_pPredictionContext, -1.0);
+      this->m_bHolstered.m_Value = 0;
+      v10 = (C_WeaponMedigun *)((char *)this - 12);
+      C_BaseEntity::StopSound(v10, "WeaponMedigun.Healing");
+      C_BaseEntity::StopSound(v10, "WeaponMedigun.NoTarget");
+    }
+    else
+    {
+      v6 = &this->m_szTracerName[124];
+      if ( !CHandle<C_PlayerAttachedModel>::operator!((CHandle<C_BaseEntity> *)&this->m_szTracerName[124]) )
+      {
+        if ( *(_DWORD *)v6 == -1
+          || g_pEntityList->m_EntPtrArray[*(_DWORD *)v6 & 0xFFF].m_SerialNumber != *(_DWORD *)v6 >> 12 )
+        {
+          m_pEntity = 0;
+        }
+        else
+        {
+          m_pEntity = g_pEntityList->m_EntPtrArray[*(_DWORD *)v6 & 0xFFF].m_pEntity;
+        }
+        if ( LocalTFPlayer == m_pEntity )
+          C_TFPlayer::SetHealer(LocalTFPlayer, v5, this->m_flHealEffectLifetime);
+        if ( !this->m_bHolstered.m_Value )
+        {
+          this->m_bHolstered.m_Value = 1;
+          CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+          v8 = (*(int (**)(void))(*((_DWORD *)&this[-1].m_pChargedSound + 1) + 36))();
+          C_BaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v8, "WeaponMedigun.Healing", 0, 0.0, 0);
+          C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+        }
+      }
+      v9 = BYTE5(this->m_flNextBuzzTime);
+      if ( LOBYTE(this->m_hHealingTargetEffects.m_Size) != v9 )
+      {
+        LOBYTE(this->m_hHealingTargetEffects.m_Size) = v9;
+        this->m_bChargeRelease.m_Value = 1;
+      }
+    }
+  }
+}

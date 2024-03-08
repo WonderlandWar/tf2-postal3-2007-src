@@ -1,0 +1,46 @@
+const char *__thiscall CTFWeaponBase::GetViewModel(CTFWeaponBase *this, int iViewModel)
+{
+  CBaseCombatCharacter *Owner; // eax
+  const char *result; // eax
+  FileWeaponInfo_t *WpnData; // eax
+  CBaseCombatCharacter *v6; // eax
+  _DWORD *v7; // eax
+  TFPlayerClassData_t *PlayerClassData; // edi
+  FileWeaponInfo_t *v9; // eax
+  KeyValues **v10; // eax
+  FileWeaponInfo_t *v11; // eax
+
+  Owner = CBaseCombatWeapon::GetOwner(this);
+  if ( !__RTDynamicCast(Owner, 0, &CBaseCombatCharacter `RTTI Type Descriptor', &CBasePlayer `RTTI Type Descriptor', 0) )
+    return CBaseCombatWeapon::GetViewModel(this, 0);
+  WpnData = (FileWeaponInfo_t *)CBaseCombatWeapon::GetWpnData(this);
+  if ( !*((_DWORD *)__RTDynamicCast(
+                      WpnData,
+                      0,
+                      &FileWeaponInfo_t `RTTI Type Descriptor',
+                      &CTFWeaponInfo `RTTI Type Descriptor',
+                      0)
+        + 637)
+    || (v6 = CBaseCombatWeapon::GetOwner(this),
+        v7 = __RTDynamicCast(v6, 0, &CBaseCombatCharacter `RTTI Type Descriptor', &CTFPlayer `RTTI Type Descriptor', 0),
+        PlayerClassData = GetPlayerClassData(v7[1086]),
+        v9 = (FileWeaponInfo_t *)CBaseCombatWeapon::GetWpnData(this),
+        v10 = (KeyValues **)__RTDynamicCast(
+                              v9,
+                              0,
+                              &FileWeaponInfo_t `RTTI Type Descriptor',
+                              &CTFWeaponInfo `RTTI Type Descriptor',
+                              0),
+        (result = KeyValues::GetString(v10[637], PlayerClassData->m_szClassName, 0)) == 0) )
+  {
+    v11 = (FileWeaponInfo_t *)CBaseCombatWeapon::GetWpnData(this);
+    return (char *)__RTDynamicCast(
+                     v11,
+                     0,
+                     &FileWeaponInfo_t `RTTI Type Descriptor',
+                     &CTFWeaponInfo `RTTI Type Descriptor',
+                     0)
+         + 166;
+  }
+  return result;
+}

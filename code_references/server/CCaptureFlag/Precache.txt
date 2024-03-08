@@ -1,0 +1,32 @@
+void __thiscall CCaptureFlag::Precache(CCaptureFlag *this)
+{
+  CBaseEntity::PrecacheModel("models/flag/briefcase.mdl");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.FlagSpawn");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.EnemyStolen");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.EnemyDropped");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.EnemyCaptured");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.EnemyReturned");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.TeamStolen");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.TeamDropped");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.TeamCaptured");
+  CBaseEntity::PrecacheScriptSound("CaptureFlag.TeamReturned");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.Captured");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.EnemyStolen");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.EnemyDropped");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.EnemyCaptured");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.EnemyReturned");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.TeamStolen");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.TeamDropped");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.TeamCaptured");
+  CBaseEntity::PrecacheScriptSound("AttackDefend.TeamReturned");
+  CBaseEntity::PrecacheScriptSound("Invade.EnemyStolen");
+  CBaseEntity::PrecacheScriptSound("Invade.EnemyDropped");
+  CBaseEntity::PrecacheScriptSound("Invade.EnemyCaptured");
+  CBaseEntity::PrecacheScriptSound("Invade.TeamStolen");
+  CBaseEntity::PrecacheScriptSound("Invade.TeamDropped");
+  CBaseEntity::PrecacheScriptSound("Invade.TeamCaptured");
+  CBaseEntity::PrecacheScriptSound("Invade.FlagReturned");
+  PrecacheParticleSystem("player_intel_trail_blue");
+  PrecacheParticleSystem("player_intel_trail_red");
+  PrecacheParticleSystem("player_intel_papertrail");
+}

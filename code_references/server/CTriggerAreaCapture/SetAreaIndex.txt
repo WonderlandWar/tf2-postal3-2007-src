@@ -1,0 +1,4 @@
+void __thiscall CTriggerAreaCapture::SetAreaIndex(CTriggerAreaCapture *this, int index)
+{
+  this->m_iAreaIndex = index;
+}

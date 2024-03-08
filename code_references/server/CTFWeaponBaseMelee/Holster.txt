@@ -1,0 +1,14 @@
+bool __thiscall CTFWeaponBaseMelee::Holster(CTFWeaponBaseMelee *this, CBaseCombatWeapon *pSwitchingTo)
+{
+  CBasePlayer *PlayerOwner; // eax
+  float val[2]; // [esp+4h] [ebp-8h] BYREF
+
+  if ( CTFWeaponBase::GetPlayerOwner(this) )
+  {
+    *(double *)val = gpGlobals->curtime + 0.5;
+    PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+    val[0] = *(double *)val;
+    CNetworkVarBase<float,CBaseCombatCharacter::NetworkVar_m_flNextAttack>::Set(&PlayerOwner->m_flNextAttack, val);
+  }
+  return CTFWeaponBase::Holster(this, pSwitchingTo);
+}

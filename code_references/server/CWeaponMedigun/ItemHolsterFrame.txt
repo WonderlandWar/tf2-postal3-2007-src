@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CWeaponMedigun::ItemHolsterFrame(CWeaponMedigun *this)
+{
+  CWeaponMedigun::DrainCharge(this);
+}

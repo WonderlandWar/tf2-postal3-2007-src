@@ -1,0 +1,65 @@
+bool __thiscall CTFWeaponBaseMelee::DoSwingTrace(CTFWeaponBaseMelee *this, CGameTrace *trace)
+{
+  unsigned int v2; // eax
+  CTFPlayer *TFPlayerOwner; // eax
+  CBaseEntity *v4; // esi
+  const QAngle *v6; // eax
+  CBaseEntity *m_pEnt; // ecx
+  const CViewVectors *v8; // eax
+  Vector *p_m_vDuckHullMax; // [esp-Ch] [ebp-34h]
+  Vector vecSwingStart; // [esp+0h] [ebp-28h] BYREF
+  Vector vecSwingEnd; // [esp+Ch] [ebp-1Ch] BYREF
+  Vector vecForward; // [esp+18h] [ebp-10h] BYREF
+  float v13; // [esp+24h] [ebp-4h]
+
+  v2 = _S4_68;
+  if ( (_S4_68 & 1) == 0 )
+  {
+    v2 = _S4_68 | 1;
+    vecSwingMins_0.x = -18.0;
+    _S4_68 |= 1u;
+    vecSwingMins_0.y = -18.0;
+    vecSwingMins_0.z = -18.0;
+  }
+  if ( (v2 & 2) == 0 )
+  {
+    vecSwingMaxs_0.x = 18.0;
+    _S4_68 = v2 | 2;
+    vecSwingMaxs_0.y = 18.0;
+    vecSwingMaxs_0.z = 18.0;
+  }
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  v4 = TFPlayerOwner;
+  if ( !TFPlayerOwner )
+    return 0;
+  v6 = TFPlayerOwner->EyeAngles(TFPlayerOwner);
+  AngleVectors(v6, (Vector *)&vecForward.y);
+  v4->__vftable[1].CanBeHitByMeleeAttack(v4, (CBaseEntity *)&vecSwingStart.y);
+  vecSwingEnd.y = vecForward.y * 48.0 + vecSwingStart.y;
+  vecSwingEnd.z = vecForward.z * 48.0 + vecSwingStart.z;
+  vecForward.x = 48.0 * v13 + vecSwingEnd.x;
+  UTIL_TraceLine((Vector *)&vecSwingStart.y, (Vector *)&vecSwingEnd.y, 0x200400Bu, v4, 0, trace);
+  if ( trace->fraction >= 1.0 )
+  {
+    UTIL_TraceHull(
+      (Vector *)&vecSwingStart.y,
+      (Vector *)&vecSwingEnd.y,
+      &vecSwingMins_0,
+      &vecSwingMaxs_0,
+      0x200400Bu,
+      v4,
+      0,
+      trace);
+    if ( trace->fraction < 1.0 )
+    {
+      m_pEnt = trace->m_pEnt;
+      if ( !m_pEnt || CBaseEntity::IsBSPModel(m_pEnt) )
+      {
+        p_m_vDuckHullMax = &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckHullMax;
+        v8 = g_pGameRules->GetViewVectors(g_pGameRules);
+        FindHullIntersection((Vector *)&vecSwingStart.y, trace, &v8->m_vDuckHullMin, p_m_vDuckHullMax, v4);
+      }
+    }
+  }
+  return trace->fraction < 1.0;
+}

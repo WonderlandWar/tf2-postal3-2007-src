@@ -1,0 +1,24 @@
+void __thiscall CTeamplayRoundBasedRules::SetStalemate(CTeamplayRoundBasedRules *this, BOOL bForceMapReset)
+{
+  CGameRulesRoundStateInfo *m_pCurStateInfo; // eax
+  void (__thiscall *pfnLeaveState)(CTeamplayRoundBasedRules *); // edx
+  IGameEvent *v5; // eax
+
+  this->m_bForceMapReset = bForceMapReset;
+  bForceMapReset = 0;
+  CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason>::Set(
+    (CNetworkVarBase<int,CTeamplayRoundBasedRules::NetworkVar_m_iWinReason> *)&this->m_iWinningTeam,
+    &bForceMapReset);
+  CTeamplayRoundBasedRules::PlaySuddenDeathSong(this);
+  m_pCurStateInfo = this->m_pCurStateInfo;
+  if ( m_pCurStateInfo )
+  {
+    pfnLeaveState = m_pCurStateInfo->pfnLeaveState;
+    if ( pfnLeaveState )
+      pfnLeaveState((CTeamplayRoundBasedRules *)((char *)this + *(_DWORD *)m_pCurStateInfo->gap1C));
+  }
+  CTeamplayRoundBasedRules::State_Enter(this, GR_STATE_STALEMATE);
+  v5 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_round_stalemate", 0);
+  if ( v5 )
+    gameeventmanager->FireEvent(gameeventmanager, v5, 0);
+}

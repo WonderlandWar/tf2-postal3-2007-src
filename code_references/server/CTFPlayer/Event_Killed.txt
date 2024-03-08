@@ -1,0 +1,355 @@
+void __userpurge CTFPlayer::Event_Killed(CTFPlayer *this@<ecx>, int a2@<edi>, float info, char a4)
+{
+  CPlayerStateInfo *m_pStateInfo; // eax
+  const CTakeDamageInfo *v6; // esi
+  unsigned int v7; // eax
+  float x; // ebp
+  unsigned int v9; // eax
+  IHandleEntity *m_pEntity; // ecx
+  unsigned int m_Index; // eax
+  CEntInfo *v12; // ecx
+  IHandleEntity *v13; // edi
+  CTFItem *Item; // eax
+  IGameEvent *v15; // eax
+  IGameEvent *v16; // edi
+  void (__thiscall **p_SetInt)(IGameEvent *, const char *, int); // ebp
+  int v18; // eax
+  int i; // edi
+  CBaseCombatWeapon *Weapon; // eax
+  CBaseCombatWeapon *ActiveWeapon; // eax
+  double y; // st7
+  float v23; // edx
+  float v24; // eax
+  float z; // ecx
+  double m_flMaxDamage; // st7
+  float v27; // edx
+  double m_flBaseDamage; // st7
+  float v29; // eax
+  float v30; // ecx
+  float v31; // edx
+  unsigned int y_low; // eax
+  unsigned int z_low; // ecx
+  float v34; // edx
+  float v35; // eax
+  int m_bitsDamageType; // ecx
+  int m_iDamageCustom; // edx
+  int m_iDamageStats; // eax
+  void *m_iAmmoType; // ecx
+  CTFPlayer_vtbl *v40; // edx
+  unsigned int v41; // eax
+  CBaseEntityList *v42; // edx
+  unsigned int v43; // eax
+  IHandleEntity *v44; // ecx
+  unsigned int v45; // eax
+  const CBaseEntity *v46; // ecx
+  unsigned int v47; // eax
+  unsigned int v48; // eax
+  IHandleEntity *v49; // ecx
+  unsigned int v50; // eax
+  unsigned int v51; // eax
+  edict_t *m_pPev; // ecx
+  unsigned int v53; // eax
+  IHandleEntity *v54; // edi
+  unsigned int v55; // eax
+  IHandleEntity *v56; // eax
+  int v57; // eax
+  unsigned int v58; // eax
+  CEntInfo *v59; // ecx
+  CTFPlayer *v60; // edi
+  CTFPlayer *v61; // eax
+  int v62; // esi
+  unsigned int v63; // eax
+  IHandleEntity *v64; // ecx
+  CNetworkVarBase<float,CTFRagdoll::NetworkVar_m_flBurnEffectStartTime> *v65; // eax
+  int v66; // [esp+34h] [ebp-60h]
+  bool pPlayerAttacker_3; // [esp+47h] [ebp-4Dh]
+  CTakeDamageInfo info_modified; // [esp+48h] [ebp-4Ch] BYREF
+  int v69; // [esp+90h] [ebp-4h]
+  void *retaddr; // [esp+94h] [ebp+0h]
+
+  m_pStateInfo = this->m_pStateInfo;
+  if ( m_pStateInfo && m_pStateInfo->pfnLeaveState )
+    m_pStateInfo->pfnLeaveState((CTFPlayer *)((char *)this + *(_DWORD *)m_pStateInfo->gap1C));
+  v66 = a2;
+  CTFPlayer::StateEnter(this, 3);
+  v6 = (const CTakeDamageInfo *)LODWORD(info);
+  v7 = *(_DWORD *)(LODWORD(info) + 40);
+  x = 0.0;
+  info_modified.m_vecDamageForce.x = 0.0;
+  if ( v7 != -1
+    && g_pEntityList->m_EntPtrArray[*(_DWORD *)(LODWORD(info) + 40) & 0xFFF].m_SerialNumber == *(_DWORD *)(LODWORD(info) + 40) >> 12
+    && g_pEntityList->m_EntPtrArray[v7 & 0xFFF].m_pEntity )
+  {
+    v9 = *(_DWORD *)(LODWORD(info) + 40);
+    if ( v9 == -1 || g_pEntityList->m_EntPtrArray[*(_DWORD *)(LODWORD(info) + 40) & 0xFFF].m_SerialNumber != v9 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[*(_DWORD *)(LODWORD(info) + 40) & 0xFFF].m_pEntity;
+    if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *, int))m_pEntity->__vftable[25].SetRefEHandle)(m_pEntity, a2) )
+    {
+      m_Index = v6->m_hAttacker.m_Index;
+      if ( m_Index != -1
+        && (v12 = &g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF],
+            g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12)
+        && (v13 = v12->m_pEntity) != 0
+        && ((unsigned __int8 (__thiscall *)(IHandleEntity *))v13->__vftable[25].SetRefEHandle)(v12->m_pEntity) )
+      {
+        x = *(float *)&v13;
+      }
+      else
+      {
+        x = 0.0;
+      }
+      info_modified.m_vecDamageForce.x = x;
+    }
+  }
+  LOBYTE(info) = CTFPlayerShared::InCond(&this->m_Shared, 7);
+  pPlayerAttacker_3 = CTFPlayerShared::InCond(&this->m_Shared, 13);
+  CTFPlayerShared::RemoveAllCond(&this->m_Shared, 0);
+  if ( LOBYTE(info) )
+    CTFPlayer::UpdateModel(this);
+  CTFPlayerShared::RemoveCond(&this->m_Shared, 10);
+  CTFPlayerShared::RemoveCond(&this->m_Shared, 8);
+  CTFPlayer::DropAmmoPack(this);
+  if ( CTFPlayer::HasItem(this) && x != 0.0 && (CTFPlayer *)LODWORD(x) != this )
+  {
+    Item = CTFPlayer::GetItem(this);
+    if ( __RTDynamicCast(Item, 0, &CTFItem `RTTI Type Descriptor', &CCaptureFlag `RTTI Type Descriptor', 0) )
+    {
+      v15 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_flag_event", 0);
+      v16 = v15;
+      if ( v15 )
+      {
+        p_SetInt = &v15->SetInt;
+        v18 = CBaseEntity::entindex((CBaseEntity *)LODWORD(info_modified.m_vecDamageForce.x));
+        (*p_SetInt)(v16, "player", v18);
+        v16->SetInt(v16, "eventtype", 3);
+        gameeventmanager->FireEvent(gameeventmanager, v16, 0);
+        x = info_modified.m_vecDamageForce.x;
+      }
+      CTFGameStats::Event_PlayerDefendedPoint(&CTF_GameStats, (CTFPlayer *)LODWORD(x));
+    }
+  }
+  ((void (__thiscall *)(CTFPlayer *, int, int))this->RemoveAllItems)(this, 1, v66);
+  for ( i = 0; i < 5; ++i )
+  {
+    Weapon = CBaseCombatCharacter::GetWeapon(this, i);
+    if ( Weapon )
+      Weapon->__vftable[1].GetModelName(Weapon);
+  }
+  if ( CBaseCombatCharacter::GetActiveWeapon(this) )
+  {
+    ActiveWeapon = CBaseCombatCharacter::GetActiveWeapon(this);
+    ActiveWeapon->Holster(ActiveWeapon, 0);
+    CBaseCombatCharacter::SetActiveWeapon(this, 0);
+  }
+  CBasePlayer::ClearZoomOwner(this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  this->m_vecLastDeathPosition.x = this->m_vecAbsOrigin.x;
+  a4 = 1;
+  y = this->m_vecAbsOrigin.y;
+  LOBYTE(info_modified.m_vecDamageForce.y) = 0;
+  this->m_vecLastDeathPosition.y = y;
+  this->m_vecLastDeathPosition.z = this->m_vecAbsOrigin.z;
+  v23 = v6->m_vecDamageForce.x;
+  v24 = v6->m_vecDamageForce.y;
+  z = v6->m_vecDamageForce.z;
+  info_modified.m_flBaseDamage = v6->m_flDamage;
+  m_flMaxDamage = v6->m_flMaxDamage;
+  info_modified.m_vecDamageForce.z = v23;
+  v27 = v6->m_vecDamagePosition.x;
+  *(float *)&info_modified.m_bitsDamageType = m_flMaxDamage;
+  m_flBaseDamage = v6->m_flBaseDamage;
+  info_modified.m_vecDamagePosition.x = v24;
+  v29 = v6->m_vecDamagePosition.y;
+  *(float *)&info_modified.m_iDamageCustom = m_flBaseDamage;
+  info_modified.m_vecDamagePosition.y = z;
+  v30 = v6->m_vecDamagePosition.z;
+  info_modified.m_vecDamagePosition.z = v27;
+  v31 = v6->m_vecReportedPosition.x;
+  info_modified.m_vecReportedPosition.x = v29;
+  y_low = LODWORD(v6->m_vecReportedPosition.y);
+  info_modified.m_vecReportedPosition.y = v30;
+  z_low = LODWORD(v6->m_vecReportedPosition.z);
+  info_modified.m_vecReportedPosition.z = v31;
+  v34 = *(float *)&v6->m_hInflictor.m_Index;
+  info_modified.m_hInflictor.m_Index = y_low;
+  v35 = *(float *)&v6->m_hAttacker.m_Index;
+  info_modified.m_hAttacker.m_Index = z_low;
+  m_bitsDamageType = v6->m_bitsDamageType;
+  info_modified.m_flDamage = v34;
+  m_iDamageCustom = v6->m_iDamageCustom;
+  info_modified.m_flMaxDamage = v35;
+  m_iDamageStats = v6->m_iDamageStats;
+  info_modified.m_iDamageStats = m_bitsDamageType;
+  m_iAmmoType = (void *)v6->m_iAmmoType;
+  info_modified.m_iAmmoType = m_iDamageCustom;
+  v40 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  v69 = m_iDamageStats;
+  retaddr = m_iAmmoType;
+  if ( v40->ShouldGib(this, v6) )
+  {
+    LOBYTE(info_modified.m_vecDamageForce.x) = 1;
+    LOBYTE(info) = 0;
+  }
+  if ( x != 0.0 )
+  {
+    v41 = v6->m_hInflictor.m_Index;
+    if ( v41 != -1 )
+    {
+      v42 = g_pEntityList;
+      if ( g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v41 >> 12
+        || !g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_pEntity )
+      {
+LABEL_50:
+        v45 = v6->m_hAttacker.m_Index;
+        if ( v45 == -1 )
+          goto LABEL_53;
+        goto LABEL_51;
+      }
+      v43 = v6->m_hInflictor.m_Index;
+      if ( v43 == -1 || g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v43 >> 12 )
+        v44 = 0;
+      else
+        v44 = g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+      if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v44->__vftable[26].SetRefEHandle)(v44) )
+      {
+        v45 = v6->m_hInflictor.m_Index;
+        if ( v45 == -1 )
+          goto LABEL_53;
+        v42 = g_pEntityList;
+LABEL_51:
+        if ( v42->m_EntPtrArray[v45 & 0xFFF].m_SerialNumber == v45 >> 12 )
+        {
+          v46 = (const CBaseEntity *)v42->m_EntPtrArray[v45 & 0xFFF].m_pEntity;
+LABEL_54:
+          CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget>::Set(&this->m_hObserverTarget, v46);
+          CBasePlayer::SetFOV(this, this, 0, 0.0, 0);
+          goto LABEL_75;
+        }
+LABEL_53:
+        v46 = 0;
+        goto LABEL_54;
+      }
+    }
+    v42 = g_pEntityList;
+    goto LABEL_50;
+  }
+  v47 = v6->m_hAttacker.m_Index;
+  if ( v47 != -1
+    && g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_SerialNumber == v47 >> 12
+    && g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_pEntity
+    && ((v48 = v6->m_hAttacker.m_Index, v48 == -1)
+     || g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v48 >> 12
+      ? (v49 = 0)
+      : (v49 = g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_pEntity),
+        ((unsigned __int8 (__thiscall *)(IHandleEntity *))v49->__vftable[26].SetRefEHandle)(v49)) )
+  {
+    v50 = v6->m_hAttacker.m_Index;
+    if ( v50 == -1 || g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v50 >> 12 )
+      CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget>::Set(&this->m_hObserverTarget, 0);
+    else
+      CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget>::Set(
+        &this->m_hObserverTarget,
+        (const CBaseEntity *)g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_pEntity);
+  }
+  else
+  {
+    v51 = this->m_hObserverTarget.m_Value.m_Index;
+    if ( v51 != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hObserverTarget.m_Value.m_Index & 0xFFF].m_SerialNumber == v51 >> 12
+      && g_pEntityList->m_EntPtrArray[this->m_hObserverTarget.m_Value.m_Index & 0xFFF].m_pEntity )
+    {
+      if ( this->m_Network.m_TimerEvent.m_bRegistered )
+      {
+        this->m_Network.m_bPendingStateChange = 1;
+      }
+      else
+      {
+        m_pPev = this->m_Network.m_pPev;
+        if ( m_pPev )
+          CBaseEdict::StateChanged(m_pPev, 0xADCu);
+      }
+      this->m_hObserverTarget.m_Value.m_Index = -1;
+    }
+  }
+LABEL_75:
+  if ( info_modified.m_iDamageStats == 6 )
+  {
+    v53 = v6->m_hInflictor.m_Index;
+    if ( v53 == -1 || g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v53 >> 12 )
+      v54 = 0;
+    else
+      v54 = g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+    v55 = v6->m_hAttacker.m_Index;
+    if ( v55 == -1 || g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v55 >> 12 )
+      v56 = 0;
+    else
+      v56 = g_pEntityList->m_EntPtrArray[v6->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+    v57 = ((int (__stdcall *)(IHandleEntity *, IHandleEntity *, CTFPlayer *))g_pGameRules->__vftable[1].Name)(
+            v56,
+            v54,
+            this);
+    if ( v57 )
+      info_modified.m_flDamage = *(float *)(*(int (__thiscall **)(int))(*(_DWORD *)v57 + 8))(v57);
+    else
+      info_modified.m_flDamage = NAN;
+  }
+  CBasePlayer::Event_Killed(this, (CTakeDamageInfo *)&info_modified.m_vecDamageForce.y);
+  v58 = v6->m_hInflictor.m_Index;
+  if ( v58 != -1
+    && (v59 = &g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF],
+        g_pEntityList->m_EntPtrArray[v6->m_hInflictor.m_Index & 0xFFF].m_SerialNumber == v58 >> 12)
+    && (v60 = (CTFPlayer *)v59->m_pEntity) != 0
+    && v60->IsPlayer((CBaseEntity *)v59->m_pEntity) )
+  {
+    v61 = v60;
+  }
+  else
+  {
+    v61 = 0;
+  }
+  v62 = v6->m_iDamageCustom;
+  if ( v62 == 1 && v61 )
+  {
+    CTFGameStats::Event_Headshot(&CTF_GameStats, v61);
+  }
+  else if ( v62 == 2 && v61 )
+  {
+    CTFGameStats::Event_Backstab(&CTF_GameStats, v61);
+  }
+  if ( LOBYTE(info_modified.m_vecDamageForce.x) || LOBYTE(info) )
+  {
+    CTFPlayer::CreateRagdollEntity(this, SLOBYTE(info_modified.m_vecDamageForce.x));
+    if ( LOBYTE(info) )
+    {
+      if ( pPlayerAttacker_3 )
+      {
+        v63 = this->m_hRagdoll.m_Value.m_Index;
+        if ( v63 == -1
+          || g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF].m_SerialNumber != v63 >> 12 )
+        {
+          v64 = 0;
+        }
+        else
+        {
+          v64 = g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF].m_pEntity;
+        }
+        v65 = (CNetworkVarBase<float,CTFRagdoll::NetworkVar_m_flBurnEffectStartTime> *)__RTDynamicCast(
+                                                                                         v64,
+                                                                                         0,
+                                                                                         &CBaseEntity `RTTI Type Descriptor',
+                                                                                         &CTFRagdoll `RTTI Type Descriptor',
+                                                                                         0);
+        if ( v65 )
+        {
+          info = this->m_Shared.m_flFlameRemoveTime - 10.0;
+          CNetworkVarBase<float,CTFRagdoll::NetworkVar_m_flBurnEffectStartTime>::Set(v65 + 301, &info);
+        }
+      }
+    }
+  }
+  info = 0.0;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(&this->m_iHealth, (const int *)&info);
+}

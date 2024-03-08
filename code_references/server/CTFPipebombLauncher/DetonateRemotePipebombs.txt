@@ -1,0 +1,44 @@
+void __thiscall CTFPipebombLauncher::DetonateRemotePipebombs(CTFPipebombLauncher *this, int bFizzle)
+{
+  int count; // ebx
+  int i; // ebp
+  unsigned int m_Index; // eax
+  CEntInfo *v6; // ecx
+  float *m_pEntity; // esi
+  bool v8; // sf
+
+  count = this->m_Pipebombs.m_Size;
+  for ( i = 0; i < count; ++i )
+  {
+    m_Index = this->m_Pipebombs.m_Memory.m_pMemory[i].m_Index;
+    if ( m_Index != -1 )
+    {
+      v6 = &g_pEntityList->m_EntPtrArray[this->m_Pipebombs.m_Memory.m_pMemory[i].m_Index & 0xFFF];
+      if ( g_pEntityList->m_EntPtrArray[this->m_Pipebombs.m_Memory.m_pMemory[i].m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+      {
+        m_pEntity = (float *)v6->m_pEntity;
+        if ( v6->m_pEntity )
+        {
+          if ( (_BYTE)bFizzle )
+            (*(void (__thiscall **)(IHandleEntity *))(*(_DWORD *)m_pEntity + 1144))(v6->m_pEntity);
+          m_pEntity[524] = gpGlobals->curtime;
+          CBaseEntity::SetNextThink((CBaseEntity *)m_pEntity, gpGlobals->curtime, 0);
+        }
+      }
+    }
+  }
+  v8 = this->m_Pipebombs.m_Memory.m_nGrowSize < 0;
+  this->m_Pipebombs.m_Size = 0;
+  if ( !v8 )
+  {
+    if ( this->m_Pipebombs.m_Memory.m_pMemory )
+    {
+      _g_pMemAlloc->Free(_g_pMemAlloc, this->m_Pipebombs.m_Memory.m_pMemory);
+      this->m_Pipebombs.m_Memory.m_pMemory = 0;
+    }
+    this->m_Pipebombs.m_Memory.m_nAllocationCount = 0;
+  }
+  this->m_Pipebombs.m_pElements = this->m_Pipebombs.m_Memory.m_pMemory;
+  bFizzle = this->m_Pipebombs.m_Size;
+  CNetworkVarBase<int,CTFPipebombLauncher::NetworkVar_m_iPipebombCount>::Set(&this->m_iPipebombCount, &bFizzle);
+}

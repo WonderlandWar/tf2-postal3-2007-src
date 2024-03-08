@@ -1,0 +1,51 @@
+void __thiscall C_TFPlayer::ClientThink(C_TFPlayer *this)
+{
+  C_TFPlayer *LocalPlayer; // edi
+  int v3; // eax
+  float m_flHealerChargeLevel; // ecx
+
+  WeaponsResource::Reset((vgui::RotatingProgressBar *)this);
+  C_TFPlayer::UpdateIDTarget((C_TFPlayer *)((char *)this - 12));
+  C_TFPlayer::UpdateLookAt((C_TFPlayer *)((char *)this - 12));
+  CTFPlayerShared::InvisibilityThink((CTFPlayerShared *)&this->m_iPlayerModelIndex);
+  CTFPlayerShared::ConditionThink((CTFPlayerShared *)&this->m_iPlayerModelIndex);
+  *(_DWORD *)&this->m_bToolRecordingVisibility = -1;
+  C_TFPlayer::HandleTaunting((C_TFPlayer *)((char *)this - 12));
+  LocalPlayer = (C_TFPlayer *)C_BasePlayer::GetLocalPlayer();
+  if ( !LocalPlayer || !LocalPlayer->IsPlayer(LocalPlayer) )
+    LocalPlayer = 0;
+  if ( this == (C_TFPlayer *)-4508
+    || LODWORD(this->m_angTauntEngViewAngles.y) != 8
+    || !(*(unsigned __int8 (__thiscall **)(int *))(this[-1].m_aGibs.m_Size + 484))(&this[-1].m_aGibs.m_Size)
+    || CTFPlayerShared::InCond((CTFPlayerShared *)&this->m_iPlayerModelIndex, 7)
+    && C_TFPlayer::IsEnemyPlayer((C_TFPlayer *)((char *)this - 12))
+    || CTFPlayerShared::GetPercentInvisible((CTFPlayerShared *)&this->m_iPlayerModelIndex) > 0.0
+    || LocalPlayer == (C_TFPlayer *)&this[-1].m_aGibs.m_Size
+    || LocalPlayer->GetObserverMode(LocalPlayer) == 4
+    && (int *)LocalPlayer->GetObserverTarget(LocalPlayer) == &this[-1].m_aGibs.m_Size )
+  {
+    m_flHealerChargeLevel = this->m_flHealerChargeLevel;
+    if ( m_flHealerChargeLevel != 0.0 )
+    {
+      CNewParticleEffect::StopEmission((CNewParticleEffect *)LODWORD(m_flHealerChargeLevel), 0, 1);
+      this->m_flHealerChargeLevel = 0.0;
+    }
+  }
+  else if ( !LODWORD(this->m_flHealerChargeLevel) )
+  {
+    v3 = (*(int (__thiscall **)(breakmodel_t **, const char *))&this[-1].m_aGibs.m_pElements->modelName[128])(
+           &this[-1].m_aGibs.m_pElements,
+           "cig_smoke");
+    LODWORD(this->m_flHealerChargeLevel) = CParticleProperty::Create(
+                                             (CParticleProperty *)&this->m_Collision.m_vecSurroundingMaxs,
+                                             "cig_smoke",
+                                             PATTACH_POINT_FOLLOW,
+                                             v3,
+                                             vec3_origin);
+  }
+  if ( this->m_bDisguised )
+  {
+    C_TFPlayer::UpdatePartyHat((C_TFPlayer *)((char *)this - 12));
+    this->m_bDisguised = 0;
+  }
+}

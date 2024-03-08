@@ -1,0 +1,15 @@
+class CTFFlameEntity : public CBaseEntity
+{
+    public void Spawn();
+    public class CTFFlameEntity * Create(class Vector & ,class QAngle & ,class CBaseEntity * ,int ,float );
+    public void FlameThink();
+    public void OnCollide(class CBaseEntity * );
+    protected class Vector m_vecInitialPos;
+    protected class Vector m_vecBaseVelocity;
+    protected class Vector m_vecAttackerVelocity;
+    protected float m_flTimeRemove;
+    protected int m_iDmgType;
+    protected float m_flDmgAmount;
+    protected class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_hEntitiesBurnt;
+    protected class CHandle<CBaseEntity> m_hAttacker;
+};

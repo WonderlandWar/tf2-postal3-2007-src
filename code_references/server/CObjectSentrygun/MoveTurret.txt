@@ -1,0 +1,174 @@
+char __thiscall CObjectSentrygun::MoveTurret(CObjectSentrygun *this)
+{
+  int m_iBaseTurnRate; // ebp
+  bool v3; // c3
+  char bMoved; // cl
+  double v5; // st7
+  double v6; // st6
+  int m_iPitchPoseParameter; // edi
+  double v8; // st7
+  char v9; // dl
+  double v10; // st6
+  unsigned int m_Index; // eax
+  double v12; // st4
+  double v13; // st4
+  double v14; // st4
+  double v15; // st7
+  double v16; // rt2
+  double v17; // st6
+  double v18; // st7
+  double v19; // rtt
+  double v20; // st6
+  int m_iYawPoseParameter; // edi
+  float flValue; // [esp+0h] [ebp-24h]
+  int angles; // [esp+14h] [ebp-10h]
+  float anglesa; // [esp+14h] [ebp-10h]
+  int anglesb; // [esp+14h] [ebp-10h]
+  float anglesc; // [esp+14h] [ebp-10h]
+
+  m_iBaseTurnRate = this->m_iBaseTurnRate;
+  v3 = this->m_vecGoalAngles.x == this->m_vecCurAngles.x;
+  bMoved = 0;
+  if ( v3 )
+    goto LABEL_13;
+  angles = 1;
+  if ( this->m_vecCurAngles.x >= (double)this->m_vecGoalAngles.x )
+    angles = -1;
+  v5 = (double)angles;
+  v6 = (double)(5 * m_iBaseTurnRate) * v5 * 0.05 + this->m_vecCurAngles.x;
+  this->m_vecCurAngles.x = v6;
+  if ( 1.0 == v5 )
+  {
+    if ( v6 <= this->m_vecGoalAngles.x )
+      goto LABEL_9;
+  }
+  else if ( v6 >= this->m_vecGoalAngles.x )
+  {
+    goto LABEL_9;
+  }
+  this->m_vecCurAngles.x = this->m_vecGoalAngles.x;
+LABEL_9:
+  m_iPitchPoseParameter = this->m_iPitchPoseParameter;
+  anglesa = -this->m_vecCurAngles.x;
+  if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, m_iPitchPoseParameter, anglesa);
+  bMoved = 1;
+LABEL_13:
+  if ( this->m_vecGoalAngles.y != this->m_vecCurAngles.y )
+  {
+    anglesb = 1;
+    if ( this->m_vecCurAngles.y >= (double)this->m_vecGoalAngles.y )
+      anglesb = -1;
+    v8 = (double)anglesb;
+    v9 = 0;
+    v10 = fabs(this->m_vecGoalAngles.y - this->m_vecCurAngles.y);
+    if ( v10 > 180.0 )
+    {
+      v9 = 1;
+      v10 = 360.0 - v10;
+      v8 = -v8;
+    }
+    m_Index = this->m_hEnemy.m_Index;
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+      && g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF].m_pEntity )
+    {
+      if ( v10 <= 30.0 || (double)(30 * m_iBaseTurnRate) <= this->m_flTurnRate )
+      {
+LABEL_31:
+        v14 = this->m_flTurnRate * v8 * 0.05 + this->m_vecCurAngles.y;
+        this->m_vecCurAngles.y = v14;
+        if ( -1.0 != v8 )
+        {
+          if ( v9 )
+          {
+            v15 = 360.0;
+            if ( v14 >= this->m_vecGoalAngles.y )
+              goto LABEL_42;
+          }
+          else
+          {
+            v15 = 360.0;
+            if ( v14 <= this->m_vecGoalAngles.y )
+              goto LABEL_42;
+          }
+          this->m_vecCurAngles.y = this->m_vecGoalAngles.y;
+          goto LABEL_42;
+        }
+        if ( v9 )
+        {
+          v15 = 360.0;
+          if ( v14 <= this->m_vecGoalAngles.y )
+          {
+LABEL_42:
+            if ( this->m_vecCurAngles.y >= 0.0 )
+            {
+              v19 = v10;
+              v20 = v15;
+              v18 = v19;
+              if ( v20 <= this->m_vecCurAngles.y )
+                this->m_vecCurAngles.y = this->m_vecCurAngles.y - v20;
+            }
+            else
+            {
+              v16 = v10;
+              v17 = v15 + this->m_vecCurAngles.y;
+              v18 = v16;
+              this->m_vecCurAngles.y = v17;
+            }
+            if ( (double)m_iBaseTurnRate * 0.025 > v18 )
+              this->m_vecCurAngles.y = this->m_vecGoalAngles.y;
+            if ( (this->m_iEFlags & 0x800) != 0 )
+              CBaseEntity::CalcAbsolutePosition(this);
+            m_iYawPoseParameter = this->m_iYawPoseParameter;
+            anglesc = this->m_vecCurAngles.y - this->m_angAbsRotation.y;
+            if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+              CBaseAnimating::LockStudioHdr(this);
+            flValue = -anglesc;
+            CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, m_iYawPoseParameter, flValue);
+            CBaseEntity::InvalidatePhysicsRecursive(this, 8);
+            bMoved = 1;
+            goto LABEL_55;
+          }
+        }
+        else
+        {
+          v15 = 360.0;
+          if ( v14 >= this->m_vecGoalAngles.y )
+            goto LABEL_42;
+        }
+        this->m_vecCurAngles.y = this->m_vecGoalAngles.y;
+        goto LABEL_42;
+      }
+      v12 = (double)(3 * m_iBaseTurnRate);
+    }
+    else
+    {
+      if ( v10 <= 30.0 )
+      {
+        if ( (double)(5 * m_iBaseTurnRate) >= this->m_flTurnRate )
+          goto LABEL_31;
+        v13 = this->m_flTurnRate - (double)m_iBaseTurnRate;
+        goto LABEL_30;
+      }
+      if ( (double)(10 * m_iBaseTurnRate) <= this->m_flTurnRate )
+        goto LABEL_31;
+      v12 = (double)m_iBaseTurnRate;
+    }
+    v13 = v12 + this->m_flTurnRate;
+LABEL_30:
+    this->m_flTurnRate = v13;
+    goto LABEL_31;
+  }
+  if ( !bMoved )
+  {
+LABEL_56:
+    this->m_flTurnRate = (float)(5 * m_iBaseTurnRate);
+    return bMoved;
+  }
+LABEL_55:
+  if ( this->m_flTurnRate <= 0.0 )
+    goto LABEL_56;
+  return bMoved;
+}

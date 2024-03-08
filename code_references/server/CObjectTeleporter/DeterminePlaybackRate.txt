@@ -1,0 +1,89 @@
+void __thiscall CObjectTeleporter::DeterminePlaybackRate(CObjectTeleporter *this)
+{
+  double v2; // st6
+  CNetworkVarBase<float,CBaseAnimating::NetworkVar_m_flPlaybackRate> *p_m_flPlaybackRate; // edi
+  bool v4; // bl
+  double v5; // st7
+  double v6; // st5
+  double v7; // st6
+  double m_flLastStateChangeTime; // st7
+  int m_iBlurBodygroup; // eax
+  float A; // [esp+4h] [ebp-20h]
+  float B; // [esp+8h] [ebp-1Ch]
+  float Ba; // [esp+8h] [ebp-1Ch]
+  float C; // [esp+Ch] [ebp-18h]
+  float D; // [esp+10h] [ebp-14h]
+  float Da; // [esp+10h] [ebp-14h]
+  float v16; // [esp+20h] [ebp-4h] BYREF
+
+  v2 = 1.0;
+  p_m_flPlaybackRate = &this->m_flPlaybackRate;
+  v4 = this->m_flPlaybackRate.m_Value < 1.0;
+  if ( this->m_bBuilding.m_Value )
+  {
+    v5 = CBaseObject::GetRepairMultiplier(this) * 0.5;
+  }
+  else
+  {
+    if ( !this->m_bPlacing.m_Value )
+    {
+      if ( this->m_iState.m_Value == 2 )
+      {
+        v6 = 0.050000001;
+      }
+      else
+      {
+        if ( this->m_iState.m_Value == 6 )
+        {
+          v7 = gpGlobals->curtime - this->m_flLastStateChangeTime;
+          if ( v7 > 4.0 )
+          {
+            if ( v7 <= 6.0 )
+            {
+              v5 = 0.15000001;
+              goto LABEL_18;
+            }
+            D = 1.0;
+            C = 0.15000001;
+            B = this->m_flLastStateChangeTime + 10.0;
+            m_flLastStateChangeTime = this->m_flLastStateChangeTime + 6.0;
+          }
+          else
+          {
+            D = 0.15000001;
+            C = 1.0;
+            B = this->m_flLastStateChangeTime + 4.0;
+            m_flLastStateChangeTime = this->m_flLastStateChangeTime;
+          }
+          A = m_flLastStateChangeTime;
+          v5 = RemapVal(gpGlobals->curtime, A, B, C, D);
+          goto LABEL_18;
+        }
+        v2 = 0.0;
+        if ( this->m_flLastStateChangeTime <= 0.0 )
+        {
+          v5 = 0.0;
+          goto LABEL_18;
+        }
+        v6 = 0.025;
+      }
+      Da = v6;
+      Ba = v2;
+      v5 = Approach(Ba, this->m_flPlaybackRate.m_Value, Da);
+      goto LABEL_18;
+    }
+    v5 = 1.0;
+  }
+LABEL_18:
+  v16 = v5;
+  CNetworkVarBase<float,CSprite::NetworkVar_m_flGlowProxySize>::Set(p_m_flPlaybackRate, &v16);
+  m_iBlurBodygroup = this->m_iBlurBodygroup;
+  if ( m_iBlurBodygroup >= 0 && p_m_flPlaybackRate->m_Value < 1.0 != v4 )
+  {
+    if ( p_m_flPlaybackRate->m_Value >= 1.0 )
+      CBaseAnimating::SetBodygroup(this, m_iBlurBodygroup, 1);
+    else
+      CBaseAnimating::SetBodygroup(this, m_iBlurBodygroup, 0);
+  }
+  this->StudioFrameAdvance(this);
+}

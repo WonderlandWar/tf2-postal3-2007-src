@@ -1,0 +1,96 @@
+void __thiscall C_TFMinigun::WeaponSoundUpdate(C_TFMinigun *this)
+{
+  int v2; // ebx
+  int m_iMinigunSoundCur; // eax
+  CSoundEnvelopeController *Controller; // eax
+  CSoundEnvelopeController *v5; // eax
+  CSoundEnvelopeController *v6; // edi
+  const char *v7; // ebx
+  const Vector *v8; // ebp
+  int (__thiscall *entindex)(IClientNetworkable *); // edx
+  CSoundEnvelopeController_vtbl *v10; // ebp
+  int v11; // eax
+  CSoundPatch *v12; // eax
+  CPASAttenuationFilter filter; // [esp+38h] [ebp-24h] BYREF
+
+  if ( this->IsCarriedByLocalPlayer(this) )
+  {
+    v2 = -1;
+    switch ( this->m_iWeaponState.m_Value )
+    {
+      case AC_STATE_IDLE:
+        if ( this->m_flBarrelCurrentVelocity <= 0.0 )
+          v2 = -1;
+        else
+          v2 = 12;
+        break;
+      case AC_STATE_STARTFIRING:
+        v2 = 11;
+        break;
+      case AC_STATE_FIRING:
+        v2 = 2 * this->m_bCritShot.m_Value + 3;
+        break;
+      case AC_STATE_SPINNING:
+        v2 = 13;
+        break;
+      case AC_STATE_DRYFIRE:
+        v2 = 0;
+        break;
+      default:
+        break;
+    }
+    m_iMinigunSoundCur = this->m_iMinigunSoundCur;
+    if ( m_iMinigunSoundCur != v2 )
+    {
+      if ( this->m_pSoundCur )
+      {
+        if ( m_iMinigunSoundCur == 12 && v2 == -1 )
+        {
+          Controller = CSoundEnvelopeController::GetController();
+          ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, int))Controller->SoundFadeOut)(
+            Controller,
+            this->m_pSoundCur,
+            0.2,
+            1);
+        }
+        else
+        {
+          v5 = CSoundEnvelopeController::GetController();
+          v5->SoundDestroy(v5, this->m_pSoundCur);
+        }
+        this->m_pSoundCur = 0;
+      }
+      this->m_iMinigunSoundCur = v2;
+      if ( v2 != -1 )
+      {
+        v6 = CSoundEnvelopeController::GetController();
+        v7 = this->GetShootSound(this, v2);
+        v8 = this->GetAbsOrigin(this);
+        C_RecipientFilter::C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+        *(_DWORD *)&filter.m_bReliable = &CPASFilter::`vftable';
+        C_RecipientFilter::AddRecipientsByPVS((C_RecipientFilter *)&filter.m_bReliable, v8);
+        entindex = this->entindex;
+        *(_DWORD *)&filter.m_bReliable = &CPASAttenuationFilter::`vftable';
+        v10 = v6->__vftable;
+        v11 = ((int (__thiscall *)(IClientNetworkable *, const char *))entindex)(&this->IClientNetworkable, v7);
+        v12 = (CSoundPatch *)((int (__thiscall *)(CSoundEnvelopeController *, CUtlVector<int,CUtlMemory<int,int> > *, int))v10->SoundCreate)(
+                               v6,
+                               &filter.m_Recipients,
+                               v11);
+        this->m_pSoundCur = v12;
+        ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))v6->Play)(
+          v6,
+          v12,
+          1.0,
+          100.0,
+          0.0);
+        ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD))v6->SoundChangeVolume)(
+          v6,
+          this->m_pSoundCur,
+          1.0,
+          0.1);
+        C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+      }
+    }
+  }
+}

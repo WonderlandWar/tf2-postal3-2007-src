@@ -1,0 +1,10 @@
+bool __thiscall CTFWeaponInvis::Deploy(CTFWeaponInvis *this)
+{
+  bool v2; // bl
+  float v4; // [esp+0h] [ebp-Ch]
+
+  v2 = CTFWeaponBase::Deploy(this);
+  v4 = gpGlobals->curtime + 1.5;
+  ((void (__thiscall *)(CTFWeaponInvis *, _DWORD))this->SetWeaponIdleTime)(this, LODWORD(v4));
+  return v2;
+}

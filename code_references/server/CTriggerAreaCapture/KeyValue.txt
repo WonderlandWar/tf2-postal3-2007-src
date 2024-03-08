@@ -1,0 +1,35 @@
+bool __thiscall CTriggerAreaCapture::KeyValue(CTriggerAreaCapture *this, const char *szKeyName, const char *szValue)
+{
+  CTriggerAreaCapture::perteamdata_t *v4; // esi
+  CTriggerAreaCapture::perteamdata_t *v6; // esi
+  CTriggerAreaCapture::perteamdata_t *v7; // esi
+
+  if ( V_strncmp(szKeyName, "team_numcap_", 12) )
+  {
+    if ( V_strncmp(szKeyName, "team_cancap_", 12) )
+    {
+      if ( V_strncmp(szKeyName, "team_spawn_", 11) )
+      {
+        return CBaseToggle::KeyValue(this, szKeyName, szValue);
+      }
+      else
+      {
+        v7 = &this->m_TeamData.m_Memory.m_pMemory[atoi(szKeyName + 11)];
+        v7->iSpawnAdjust = atoi(szValue);
+        return 1;
+      }
+    }
+    else
+    {
+      v6 = &this->m_TeamData.m_Memory.m_pMemory[atoi(szKeyName + 12)];
+      v6->bCanCap = atoi(szValue) != 0;
+      return 1;
+    }
+  }
+  else
+  {
+    v4 = &this->m_TeamData.m_Memory.m_pMemory[atoi(szKeyName + 12)];
+    v4->iNumRequiredToCap = atoi(szValue);
+    return 1;
+  }
+}

@@ -1,0 +1,33 @@
+void __thiscall CTriggerAreaCapture::Spawn(CTriggerAreaCapture *this)
+{
+  int v2; // ecx
+  int v3; // edx
+  CTriggerAreaCapture::perteamdata_t *v4; // eax
+  float thinkTime; // [esp+0h] [ebp-10h]
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  CBaseTrigger::Spawn(this);
+  val = this->m_spawnflags.m_Value | 1;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_spawnflags>::Set(&this->m_spawnflags, &val);
+  CBaseTrigger::InitTrigger(this);
+  this->Precache(this);
+  this->m_iAreaIndex = -1;
+  this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CTriggerAreaCapture::AreaTouch;
+  CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CTriggerAreaCapture::CaptureThink, 0.0, 0);
+  thinkTime = gpGlobals->curtime + 0.1;
+  CBaseEntity::SetNextThink(this, thinkTime, 0);
+  v2 = 0;
+  if ( this->m_TeamData.m_Size > 0 )
+  {
+    v3 = 0;
+    do
+    {
+      v4 = &this->m_TeamData.m_Memory.m_pMemory[v3];
+      if ( v4->iNumRequiredToCap < 1 )
+        v4->iNumRequiredToCap = 1;
+      ++v2;
+      ++v3;
+    }
+    while ( v2 < this->m_TeamData.m_Size );
+  }
+}

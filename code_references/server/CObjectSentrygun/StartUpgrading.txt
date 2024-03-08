@@ -1,0 +1,54 @@
+void __thiscall CObjectSentrygun::StartUpgrading(CObjectSentrygun *this)
+{
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel> *p_m_iUpgradeLevel; // edi
+  int v3; // edi
+  float flHealth; // [esp+4h] [ebp-2Ch]
+  int val; // [esp+14h] [ebp-1Ch] BYREF
+  Vector v6; // [esp+18h] [ebp-18h] BYREF
+  Vector vecOffset; // [esp+24h] [ebp-Ch] BYREF
+
+  p_m_iUpgradeLevel = &this->m_iUpgradeLevel;
+  val = this->m_iUpgradeLevel.m_Value + 1;
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel>::Set(&this->m_iUpgradeLevel, &val);
+  val = this->m_iMaxHealth.m_Value;
+  *(double *)&v6.x = (double)val * 1.2;
+  val = (int)*(double *)&v6.x;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iMaxHealth>::Set(&this->m_iMaxHealth, &val);
+  flHealth = *(double *)&v6.x;
+  CBaseObject::SetHealth(this, flHealth);
+  val = (int)((double)this->m_iMaxAmmoShells.m_Value * 1.2);
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iMaxAmmoShells>::Set(&this->m_iMaxAmmoShells, &val);
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells>::Set(
+    &this->m_iAmmoShells,
+    &this->m_iMaxAmmoShells.m_Value);
+  CBaseEntity::EmitSound(this, "Building_Sentrygun.Built", 0.0, 0);
+  v3 = p_m_iUpgradeLevel->m_Value - 2;
+  if ( v3 )
+  {
+    if ( v3 == 1 )
+    {
+      this->SetModel(this, "models/buildables/sentry3_heavy.mdl");
+      val = 20;
+      CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets>::Set(&this->m_iAmmoRockets, &val);
+      this->m_flHeavyBulletResist = 0.33000001;
+      v6.x = 0.0;
+      v6.y = 0.0;
+      v6.z = 46.0;
+      CBaseEntity::SetViewOffset(this, &v6);
+    }
+  }
+  else
+  {
+    this->SetModel(this, "models/buildables/sentry2_heavy.mdl");
+    this->m_flHeavyBulletResist = 0.2;
+    vecOffset.x = 0.0;
+    vecOffset.y = 0.0;
+    vecOffset.z = 40.0;
+    CBaseEntity::SetViewOffset(this, &vecOffset);
+  }
+  val = 3;
+  CNetworkVarBase<int,CObjectTeleporter::NetworkVar_m_iState>::Set(&this->m_iState, &val);
+  CBaseObject::SetActivity(this, ACT_OBJ_UPGRADING);
+  this->m_flUpgradeCompleteTime = gpGlobals->curtime + 1.5;
+  CBaseAnimatingOverlay::RemoveAllGestures(this);
+}

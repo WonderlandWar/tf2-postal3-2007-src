@@ -1,0 +1,4 @@
+double __thiscall CTFGrenadeLauncher::GetChargeMaxTime(CTFGrenadeLauncher *this)
+{
+  return tf_grenadelauncher_max_chargetime.m_pParent->m_fValue;
+}

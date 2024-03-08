@@ -1,0 +1,23 @@
+void __thiscall CCaptureFlag::CCaptureFlag(CCaptureFlag *this)
+{
+  CDynamicProp::CDynamicProp(this);
+  this->CTFItem::CDynamicProp::CBreakableProp::CBaseProp::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CCaptureFlag_vtbl *)&CCaptureFlag::`vftable'{for `CBaseProp'};
+  this->CTFItem::CDynamicProp::CBreakableProp::IBreakableWithPropData::__vftable = (IBreakableWithPropData_vtbl *)&CCaptureFlag::`vftable'{for `IBreakableWithPropData'};
+  this->CTFItem::CDynamicProp::CBreakableProp::CDefaultPlayerPickupVPhysics::IPlayerPickupVPhysics::__vftable = (CDefaultPlayerPickupVPhysics_vtbl *)&CCaptureFlag::`vftable'{for `CDefaultPlayerPickupVPhysics'};
+  this->CTFItem::CDynamicProp::IPositionWatcher::IWatcherCallback::__vftable = (IPositionWatcher_vtbl *)&CCaptureFlag::`vftable';
+  this->m_hPrevOwner.m_Value.m_Index = -1;
+  this->m_outputOnReturn.m_Value.iVal = 0;
+  this->m_outputOnReturn.m_Value.eVal.m_Index = -1;
+  this->m_outputOnReturn.m_Value.fieldType = FIELD_VOID;
+  this->m_outputOnPickUp.m_Value.iVal = 0;
+  this->m_outputOnPickUp.m_Value.eVal.m_Index = -1;
+  this->m_outputOnPickUp.m_Value.fieldType = FIELD_VOID;
+  this->m_outputOnDrop.m_Value.iVal = 0;
+  this->m_outputOnDrop.m_Value.eVal.m_Index = -1;
+  this->m_outputOnDrop.m_Value.fieldType = FIELD_VOID;
+  this->m_outputOnCapture.m_Value.iVal = 0;
+  this->m_outputOnCapture.m_Value.eVal.m_Index = -1;
+  this->m_outputOnCapture.m_Value.fieldType = FIELD_VOID;
+  this->m_hReturnIcon.m_Index = -1;
+  CBaseAnimating::UseClientSideAnimation(this);
+}

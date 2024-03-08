@@ -1,0 +1,193 @@
+void __thiscall CCaptureFlag::Capture(CCaptureFlag *this, CTFPlayer *pPlayer, int nCapturePoint)
+{
+  int m_Value; // eax
+  int k; // edi
+  int v6; // eax
+  int v7; // eax
+  CTFPlayer *v8; // ecx
+  CTFTeamManager *v9; // eax
+  CTFTeamManager *v10; // eax
+  CTFTeamManager *v11; // eax
+  int i; // edi
+  CTFTeamManager *v13; // eax
+  int v14; // eax
+  int v15; // eax
+  CTFTeamManager *v16; // eax
+  CTFTeamManager *v17; // eax
+  int j; // edi
+  CTFTeamManager *v19; // eax
+  int v20; // eax
+  CTFTeamManager *v21; // eax
+  IGameEvent *v22; // edi
+  int v23; // eax
+  int v24; // eax
+  int v25; // eax
+  int v26; // eax
+  const char *v27; // [esp+30h] [ebp-A4h]
+  const char *v28; // [esp+30h] [ebp-A4h]
+  float soundtime; // [esp+38h] [ebp-9Ch]
+  float soundtimea; // [esp+38h] [ebp-9Ch]
+  int soundtimeb; // [esp+38h] [ebp-9Ch]
+  int thinkTime; // [esp+3Ch] [ebp-98h]
+  float thinkTimea; // [esp+3Ch] [ebp-98h]
+  CBroadcastRecipientFilter filter; // [esp+4Ch] [ebp-88h] BYREF
+  CTeamRecipientFilter v35; // [esp+70h] [ebp-64h] BYREF
+  char v36[64]; // [esp+90h] [ebp-44h] BYREF
+
+  if ( !this->m_bDisabled.m_Value )
+  {
+    m_Value = this->m_nGameType.m_Value;
+    if ( m_Value )
+    {
+      if ( m_Value == 1 )
+      {
+        itoa(nCapturePoint, v36, 10);
+        v10 = TFTeamMgr();
+        CTFTeamManager::PlayerCenterPrint(v10, pPlayer, "#TF_AD_YouSecuredPoint", v36, 0, 0, 0);
+        v11 = TFTeamMgr();
+        CTFTeamManager::PlayerTeamCenterPrint(v11, pPlayer, "TF_AD_AttackersSecuredPoint", v36, 0, 0, 0);
+        for ( i = 2; i < 4; ++i )
+        {
+          if ( i == CBaseEntity::GetTeamNumber(pPlayer) )
+          {
+            CTeamRecipientFilter::CTeamRecipientFilter(&v35, i, 1);
+            soundtime = 0.0;
+            v27 = "AttackDefend.TeamCaptured";
+          }
+          else
+          {
+            v13 = TFTeamMgr();
+            CTFTeamManager::TeamCenterPrint(v13, i, "#TF_AD_AttackersSecuredPoint", 0, 0, 0, 0);
+            CTeamRecipientFilter::CTeamRecipientFilter(&v35, i, 1);
+            soundtime = 0.0;
+            v27 = "AttackDefend.EnemyCaptured";
+          }
+          v14 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound(&v35, v14, v27, 0, soundtime, 0);
+          CRecipientFilter::~CRecipientFilter(&v35);
+        }
+        CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+        *(_DWORD *)&filter.m_bReliable = &CBroadcastRecipientFilter::`vftable';
+        CRecipientFilter::AddAllPlayers((CRecipientFilter *)&filter.m_bReliable);
+        v15 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v15, "AttackDefend.Captured", 0, 0.0, 0);
+        CBasePlayer::IncrementFragCount(pPlayer, 30);
+        CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+LABEL_25:
+        v22 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_flag_event", 0);
+        if ( v22 )
+        {
+          v23 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+          v22->SetInt(v22, "player", v23);
+          v22->SetInt(v22, "eventtype", 2);
+          gameeventmanager->FireEvent(gameeventmanager, v22, 0);
+        }
+        filter.__vftable = 0;
+        CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nFlagStatus>::Set(&this->m_nFlagStatus, (const int *)&filter);
+        v24 = this->m_nFlagStatus.m_Value;
+        if ( v24 )
+        {
+          v25 = v24 - 1;
+          if ( !v25 )
+          {
+            v26 = CBaseAnimating::LookupSequence(this, "idle");
+            goto LABEL_31;
+          }
+          if ( v25 != 1 )
+          {
+LABEL_32:
+            *(float *)&filter.__vftable = 0.0;
+            CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(
+              &this->m_flResetTime,
+              (const float *)&filter);
+            *(float *)&filter.__vftable = 0.0;
+            CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(
+              &this->m_flNeutralTime,
+              (const float *)&filter);
+            CTFItem::Drop(this, pPlayer, 1, 0, 1);
+            CCaptureFlag::Reset(this);
+            CTFPlayer::TeamFortress_SetSpeed(pPlayer);
+            pPlayer->SpeakConceptIfAllowed(pPlayer, 40, 0, 0, 0, 0);
+            COutputEvent::FireOutput(&this->m_outputOnCapture, this, this, 0.0);
+            this->m_bCaptured = 1;
+            thinkTimea = gpGlobals->curtime + 1.0;
+            CBaseEntity::SetNextThink(this, thinkTimea, 0);
+            return;
+          }
+        }
+        v26 = CBaseAnimating::LookupSequence(this, "spin");
+LABEL_31:
+        CBaseAnimating::ResetSequence(this, v26);
+        goto LABEL_32;
+      }
+      if ( m_Value != 3 )
+        goto LABEL_25;
+      v16 = TFTeamMgr();
+      CTFTeamManager::PlayerCenterPrint(v16, pPlayer, "#TF_Invade_PlayerCapture", 0, 0, 0, 0);
+      v17 = TFTeamMgr();
+      CTFTeamManager::PlayerTeamCenterPrint(v17, pPlayer, "#TF_Invade_PlayerTeamCapture", 0, 0, 0, 0);
+      for ( j = 2; j < 4; ++j )
+      {
+        if ( j == CBaseEntity::GetTeamNumber(pPlayer) )
+        {
+          CTeamRecipientFilter::CTeamRecipientFilter(&v35, j, 1);
+          soundtimea = 0.0;
+          v28 = "Invade.TeamCaptured";
+        }
+        else
+        {
+          v19 = TFTeamMgr();
+          CTFTeamManager::TeamCenterPrint(v19, j, "#TF_Invade_OtherTeamCapture", 0, 0, 0, 0);
+          CTeamRecipientFilter::CTeamRecipientFilter(&v35, j, 1);
+          soundtimea = 0.0;
+          v28 = "Invade.EnemyCaptured";
+        }
+        v20 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+        CBaseEntity::EmitSound(&v35, v20, v28, 0, soundtimea, 0);
+        CRecipientFilter::~CRecipientFilter(&v35);
+      }
+      CBasePlayer::IncrementFragCount(pPlayer, 10);
+      v8 = pPlayer;
+    }
+    else
+    {
+      for ( k = 2; k < 4; ++k )
+      {
+        if ( k == CBaseEntity::GetTeamNumber(pPlayer) )
+        {
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+          v7 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v7, "CaptureFlag.TeamCaptured", 0, 0.0, 0);
+          CTFGameRules::SendHudNotification(
+            (CTFGameRules *)g_pGameRules,
+            (IRecipientFilter *)&filter.m_bReliable,
+            HUD_NOTIFY_ENEMY_FLAG_CAPTURED);
+        }
+        else
+        {
+          CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+          v6 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v6, "CaptureFlag.EnemyCaptured", 0, 0.0, 0);
+          CTFGameRules::SendHudNotification(
+            (CTFGameRules *)g_pGameRules,
+            (IRecipientFilter *)&filter.m_bReliable,
+            HUD_NOTIFY_YOUR_FLAG_CAPTURED);
+        }
+        CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+      }
+      CTFGameStats::Event_PlayerCapturedPoint(&CTF_GameStats, pPlayer);
+      v8 = pPlayer;
+      if ( tf_flag_caps_per_round.m_pParent->m_nValue > 0 )
+      {
+        thinkTime = CBaseEntity::GetTeamNumber(pPlayer);
+        v9 = TFTeamMgr();
+        CTFTeamManager::IncrementFlagCaptures(v9, thinkTime);
+        goto LABEL_25;
+      }
+    }
+    soundtimeb = CBaseEntity::GetTeamNumber(v8);
+    v21 = TFTeamMgr();
+    CTFTeamManager::AddTeamScore(v21, soundtimeb, 1);
+    goto LABEL_25;
+  }
+}

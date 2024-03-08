@@ -1,0 +1,40 @@
+void __thiscall CTeamControlPoint::CTeamControlPoint(CTeamControlPoint *this)
+{
+  int NumberOfTeams; // eax
+
+  CBaseAnimating::CBaseAnimating(this);
+  this->__vftable = (CTeamControlPoint_vtbl *)&CTeamControlPoint::`vftable';
+  this->m_TeamData.m_Memory.m_pMemory = 0;
+  this->m_TeamData.m_Memory.m_nAllocationCount = 0;
+  this->m_TeamData.m_Memory.m_nGrowSize = 0;
+  this->m_TeamData.m_Size = 0;
+  this->m_TeamData.m_pElements = 0;
+  this->m_OnCapReset.m_Value.iVal = 0;
+  this->m_OnCapReset.m_Value.eVal.m_Index = -1;
+  this->m_OnCapReset.m_Value.fieldType = FIELD_VOID;
+  this->m_OnCapTeam1.m_Value.iVal = 0;
+  this->m_OnCapTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnCapTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnCapTeam2.m_Value.iVal = 0;
+  this->m_OnCapTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnCapTeam2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnOwnerChangedToTeam1.m_Value.iVal = 0;
+  this->m_OnOwnerChangedToTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnOwnerChangedToTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnOwnerChangedToTeam2.m_Value.iVal = 0;
+  this->m_OnOwnerChangedToTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnOwnerChangedToTeam2.m_Value.fieldType = FIELD_VOID;
+  this->m_OnRoundStartOwnedByTeam1.m_Value.iVal = 0;
+  this->m_OnRoundStartOwnedByTeam1.m_Value.eVal.m_Index = -1;
+  this->m_OnRoundStartOwnedByTeam1.m_Value.fieldType = FIELD_VOID;
+  this->m_OnRoundStartOwnedByTeam2.m_Value.iVal = 0;
+  this->m_OnRoundStartOwnedByTeam2.m_Value.eVal.m_Index = -1;
+  this->m_OnRoundStartOwnedByTeam2.m_Value.fieldType = FIELD_VOID;
+  NumberOfTeams = GetNumberOfTeams();
+  this->m_TeamData.m_Size = 0;
+  CUtlVector<CTeamControlPoint::perteamdata_t,CUtlMemory<CTeamControlPoint::perteamdata_t,int>>::InsertMultipleBefore(
+    &this->m_TeamData,
+    0,
+    NumberOfTeams,
+    0);
+}

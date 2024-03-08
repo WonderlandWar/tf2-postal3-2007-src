@@ -1,0 +1,5 @@
+void __thiscall CTeamControlPoint::ForceOwner(CTeamControlPoint *this, int iTeam)
+{
+  CTeamControlPoint::InternalSetOwner(this, iTeam, 0, 0, 0);
+  CBaseTeamObjectiveResource::SetOwningTeam(g_pObjectiveResource, this->m_iPointIndex, this->m_iTeam);
+}

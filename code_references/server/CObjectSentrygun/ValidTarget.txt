@@ -1,0 +1,56 @@
+bool __thiscall CObjectSentrygun::ValidTarget(CObjectSentrygun *this, CBaseEntity *pTarget)
+{
+  bool v4; // zf
+  CBaseEntity_vtbl *v5; // eax
+  CBaseEntity *v6; // ebx
+  int v7; // ebx
+  CBaseObject *v8; // eax
+  int TeamNumber; // ebx
+  unsigned __int8 m_Value; // al
+
+  if ( !pTarget || !pTarget->IsPlayer(pTarget) && !pTarget->IsBaseObject(pTarget) || !pTarget->IsAlive(pTarget) )
+    return 0;
+  v4 = !pTarget->IsPlayer(pTarget);
+  v5 = pTarget->__vftable;
+  if ( v4 )
+  {
+    if ( v5->IsBaseObject(pTarget) )
+    {
+      v8 = (CBaseObject *)__RTDynamicCast(
+                            pTarget,
+                            0,
+                            &CBaseEntity `RTTI Type Descriptor',
+                            &CBaseObject `RTTI Type Descriptor',
+                            0);
+      if ( v8->m_bPlacing.m_Value || CBaseObject::MustBeBuiltOnAttachmentPoint(v8) )
+        return 0;
+    }
+  }
+  else
+  {
+    v6 = v5->IsPlayer(pTarget) ? pTarget : 0;
+    if ( CTFPlayerShared::GetPercentInvisible((CTFPlayerShared *)&v6[4].m_Network.m_PVSInfo.m_pClusters[4]) > 0.5
+      && pTarget != CHandle<CBaseAnimating>::operator CBaseAnimating *(&this->m_hEnemy) )
+    {
+      return 0;
+    }
+    if ( CTFPlayerShared::InCond((CTFPlayerShared *)&v6[4].m_Network.m_PVSInfo.m_pClusters[4], 7) )
+    {
+      v7 = v6[4].m_Network.m_PVSInfo.m_pClusters[21];
+      if ( v7 == CBaseEntity::GetTeamNumber(this)
+        && pTarget != CHandle<CBaseAnimating>::operator CBaseAnimating *(&this->m_hEnemy) )
+      {
+        return 0;
+      }
+    }
+  }
+  TeamNumber = CBaseEntity::GetTeamNumber(pTarget);
+  if ( TeamNumber == CBaseEntity::GetTeamNumber(this) )
+    return 0;
+  if ( !this->FVisible(this, pTarget, 1174421515, 0) )
+    return 0;
+  m_Value = this->m_nWaterLevel.m_Value;
+  if ( !m_Value && pTarget->m_nWaterLevel.m_Value >= 3u )
+    return 0;
+  return m_Value != 3 || pTarget->m_nWaterLevel.m_Value;
+}

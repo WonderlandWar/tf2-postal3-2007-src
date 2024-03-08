@@ -1,0 +1,26 @@
+void __thiscall CTriggerAreaCapture::HandleRespawnTimeAdjustments(CTriggerAreaCapture *this, int oldTeam, int newTeam)
+{
+  int iSpawnAdjust; // eax
+  float flValue; // [esp+0h] [ebp-8h]
+  float flValuea; // [esp+0h] [ebp-8h]
+  int oldTeama; // [esp+Ch] [ebp+4h]
+
+  if ( oldTeam > 1 )
+  {
+    iSpawnAdjust = this->m_TeamData.m_Memory.m_pMemory[oldTeam].iSpawnAdjust;
+    if ( iSpawnAdjust )
+    {
+      flValue = (float)-iSpawnAdjust;
+      CTeamplayRoundBasedRules::AddTeamRespawnWaveTime((CTeamplayRoundBasedRules *)g_pGameRules, oldTeam, flValue);
+    }
+  }
+  if ( newTeam > 1 )
+  {
+    oldTeama = this->m_TeamData.m_Memory.m_pMemory[newTeam].iSpawnAdjust;
+    if ( oldTeama )
+    {
+      flValuea = (float)oldTeama;
+      CTeamplayRoundBasedRules::AddTeamRespawnWaveTime((CTeamplayRoundBasedRules *)g_pGameRules, newTeam, flValuea);
+    }
+  }
+}

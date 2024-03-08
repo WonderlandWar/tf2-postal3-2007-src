@@ -1,0 +1,89 @@
+class CCaptureFlag : public CTFItem
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CCaptureFlag(class CCaptureFlag & );
+    public void CCaptureFlag();
+    public unsigned int GetItemID();
+    public void Precache();
+    public void Spawn();
+    public void FlagTouch(class CBaseEntity * );
+    public bool IsDisabled();
+    public void SetDisabled(bool );
+    public class CBaseEntity * GetPrevOwner();
+    public void Activate();
+    public void InputEnable(struct inputdata_t & );
+    public void InputDisable(struct inputdata_t & );
+    public void InputRoundActivate(struct inputdata_t & );
+    public void Think();
+    public void SetFlagStatus(int );
+    public void ResetFlagReturnTime();
+    public void SetFlagReturnIn(float );
+    public void ResetFlagNeutralTime();
+    public void SetFlagNeutralIn(float );
+    public bool IsCaptured();
+    public int UpdateTransmitState();
+    public void Capture(class CTFPlayer * ,int );
+    public void PickUp(class CTFPlayer * ,bool );
+    public void Drop(class CTFPlayer * ,bool ,bool ,bool );
+    public int GetGameType();
+    public bool IsDropped();
+    public bool IsHome();
+    public bool IsStolen();
+    private void Reset();
+    private void ResetMessage();
+    class NetworkVar_m_bDisabled
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CCaptureFlag::NetworkVar_m_bDisabled> m_bDisabled;
+    class NetworkVar_m_nGameType
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nGameType> m_nGameType;
+    class NetworkVar_m_nFlagStatus
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CCaptureFlag::NetworkVar_m_nFlagStatus> m_nFlagStatus;
+    class NetworkVar_m_flResetTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime> m_flResetTime;
+    class NetworkVar_m_flMaxResetTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flMaxResetTime> m_flMaxResetTime;
+    class NetworkVar_m_flNeutralTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime> m_flNeutralTime;
+    class NetworkVar_m_hPrevOwner
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CBaseEntity,CCaptureFlag::NetworkVar_m_hPrevOwner> m_hPrevOwner;
+    private int m_iOriginalTeam;
+    private float m_flOwnerPickupTime;
+    private class CHandle<CBaseEntity> m_hReturnIcon;
+    private class Vector m_vecResetPos;
+    private class QAngle m_vecResetAng;
+    private class COutputEvent m_outputOnReturn;
+    private class COutputEvent m_outputOnPickUp;
+    private class COutputEvent m_outputOnDrop;
+    private class COutputEvent m_outputOnCapture;
+    private bool m_bAllowOwnerPickup;
+    private bool m_bCaptured;
+    private struct datamap_t m_DataMap;
+    private struct datamap_t * GetBaseMap();
+    private struct datamap_t * GetDataDescMap();
+    public void ~CCaptureFlag();
+    public class CCaptureFlag & operator=(class CCaptureFlag & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

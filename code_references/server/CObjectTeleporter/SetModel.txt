@@ -1,0 +1,22 @@
+void __thiscall CObjectTeleporter::SetModel(CObjectTeleporter *this, const char *pModel)
+{
+  int BodygroupByName; // eax
+  Vector vecMax; // [esp+4h] [ebp-18h] BYREF
+  Vector vecMin; // [esp+10h] [ebp-Ch] BYREF
+
+  CBaseObject::SetModel(this, pModel);
+  vecMax.x = 24.0;
+  vecMax.y = 24.0;
+  vecMax.z = 12.0;
+  vecMin.x = -24.0;
+  vecMin.y = -24.0;
+  vecMin.z = 0.0;
+  UTIL_SetSize(this, &vecMin, &vecMax);
+  CBaseObject::CreateBuildPoints(this);
+  CBaseObject::ReattachChildren(this);
+  this->m_iDirectionBodygroup = CBaseAnimating::FindBodygroupByName(this, "teleporter_direction");
+  BodygroupByName = CBaseAnimating::FindBodygroupByName(this, "teleporter_blur");
+  this->m_iBlurBodygroup = BodygroupByName;
+  if ( BodygroupByName >= 0 )
+    CBaseAnimating::SetBodygroup(this, BodygroupByName, 0);
+}

@@ -1,0 +1,232 @@
+// local variable allocation has failed, the output may be wrong!
+void __usercall CTargetID::UpdateID(CTargetID *this@<ecx>, int a2@<edi>)
+{
+  C_TFPlayer *LocalTFPlayer; // ebp
+  int m_iTargetEntIndex; // eax
+  C_TFPlayer *BaseEntity; // edi
+  int v6; // edx
+  vgui::ILocalize_vtbl *v7; // ebx
+  const char *PlayerName; // eax
+  C_BaseCombatWeapon *v9; // eax
+  C_BasePlayer *v10; // ebx
+  bool (__thiscall *InSameTeam)(C_BaseEntity *, C_BaseEntity *); // eax
+  vgui::ILocalize_vtbl *v12; // ebx
+  const char *v13; // eax
+  int v14; // eax
+  int m_Value; // ebx
+  bool v16; // zf
+  const char *v17; // eax
+  wchar_t *v18; // ebx
+  wchar_t *v19; // eax
+  vgui::ILocalize_vtbl *v20; // ebp
+  int v21; // eax
+  double ChargeLevel; // st7
+  vgui::ILocalize_vtbl *v23; // ebx
+  wchar_t *v24; // eax
+  const char *v25; // ebx
+  C_TF_PlayerResource *v26; // eax
+  vgui::ILocalize_vtbl *v27; // edi
+  wchar_t *v28; // eax
+  vgui::Label *m_pTargetNameLabel; // ecx
+  int v30; // eax
+  int (__thiscall *GetMaxHealth)(C_BaseEntity *); // edx
+  vgui::Label *m_pTargetDataLabel; // ecx
+  char bShowHealth_3; // [esp+47h] [ebp-481h]
+  C_TFPlayer *flHealth; // [esp+48h] [ebp-480h]
+  int iIgnored; // [esp+4Ch] [ebp-47Ch]
+  C_TFPlayer *pDisguiseTarget; // [esp+50h] [ebp-478h] BYREF
+  float flMaxHealth; // [esp+54h] [ebp-474h] BYREF
+  int iMaxBuffedHealth; // [esp+58h] [ebp-470h] BYREF
+  int iPostDataW; // [esp+5Ch] [ebp-46Ch]
+  int iPostNameW; // [esp+60h] [ebp-468h] BYREF
+  int iDataW; // [esp+64h] [ebp-464h]
+  int iNameW; // [esp+68h] [ebp-460h] BYREF
+  wchar_t wszChargeLevel[10]; // [esp+6Ch] [ebp-45Ch] BYREF
+  wchar_t wszPlayerName[32]; // [esp+80h] [ebp-448h] BYREF
+  _BYTE sDataString_4[1024]; // [esp+C4h] [ebp-404h] OVERLAPPED BYREF
+  int v47; // [esp+4C4h] [ebp-4h]
+
+  memset(sDataString_4, 0, sizeof(sDataString_4));
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  bShowHealth_3 = HIBYTE(LocalTFPlayer);
+  if ( !LocalTFPlayer )
+    return;
+  m_iTargetEntIndex = this->m_iTargetEntIndex;
+  if ( !m_iTargetEntIndex )
+    return;
+  BaseEntity = (C_TFPlayer *)CClientEntityList::GetBaseEntity(
+                               (CClientEntityList *)cl_entitylist.m_Index,
+                               m_iTargetEntIndex);
+  if ( !BaseEntity )
+    return;
+  v6 = this->m_iTargetEntIndex;
+  *(float *)&iIgnored = 0.0;
+  LOBYTE(flHealth) = 0;
+  *(float *)&iMaxBuffedHealth = 1.0;
+  *(float *)&iPostDataW = 0.0;
+  if ( !IsPlayerIndex(v6) )
+  {
+    if ( ((unsigned __int8 (__thiscall *)(C_TFPlayer *, int))BaseEntity->IsBaseObject)(BaseEntity, a2) )
+    {
+      ((void (__thiscall *)(C_TFPlayer *, _BYTE *, int))BaseEntity->GetAutoaimVector)(
+        BaseEntity,
+        &sDataString_4[516],
+        512);
+      ((void (__thiscall *)(C_TFPlayer *, _BYTE *, int))BaseEntity->CreateMove)(BaseEntity, &sDataString_4[4], 512);
+      LOBYTE(iIgnored) = 1;
+      v30 = BaseEntity->GetHealth(BaseEntity);
+      GetMaxHealth = BaseEntity->GetMaxHealth;
+      *(float *)&pDisguiseTarget = (float)v30;
+      *(float *)&iPostDataW = (float)GetMaxHealth(BaseEntity);
+    }
+    goto LABEL_29;
+  }
+  v7 = g_pVGuiLocalize->__vftable;
+  PlayerName = C_BasePlayer::GetPlayerName(BaseEntity);
+  ((void (__thiscall *)(vgui::ILocalize *, const char *, wchar_t *, int, int))v7->ConvertANSIToUnicode)(
+    g_pVGuiLocalize,
+    PlayerName,
+    &wszPlayerName[2],
+    64,
+    a2);
+  if ( CTFPlayerShared::InCond(&BaseEntity->m_Shared, 7)
+    && !CTFPlayerShared::InCond(&BaseEntity->m_Shared, 6)
+    && !CTFPlayerShared::InCond(&BaseEntity->m_Shared, 8) )
+  {
+    iMaxBuffedHealth = BaseEntity->m_Shared.m_hDisguiseTarget.m_Value.m_Index;
+    v9 = CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *((CHandle<C_BaseCombatWeapon> *)&iMaxBuffedHealth);
+    v10 = ToBasePlayer(v9);
+    InSameTeam = BaseEntity->InSameTeam;
+    iMaxBuffedHealth = (int)v10;
+    if ( InSameTeam(BaseEntity, LocalTFPlayer) )
+    {
+      v14 = (int)LocalTFPlayer->GetTeam(LocalTFPlayer);
+      m_Value = BaseEntity->m_Shared.m_nDisguiseTeam.m_Value;
+      v16 = m_Value == (*(int (__thiscall **)(int))(*(_DWORD *)v14 + 280))(v14);
+      v17 = "#TF_friendly";
+      if ( !v16 )
+        v17 = "#TF_enemy";
+      v18 = g_pVGuiLocalize->Find(g_pVGuiLocalize, v17);
+      v19 = g_pVGuiLocalize->Find(g_pVGuiLocalize, g_aPlayerClassNames[BaseEntity->m_Shared.m_nDisguiseClass.m_Value]);
+      v20 = g_pVGuiLocalize->__vftable;
+      v21 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int, wchar_t *, wchar_t *))g_pVGuiLocalize->Find)(
+              g_pVGuiLocalize,
+              "#TF_playerid_friendlyspy_disguise",
+              2,
+              v18,
+              v19);
+      ((void (__cdecl *)(vgui::ILocalize *, _BYTE *, int, int))v20->ConstructString)(
+        g_pVGuiLocalize,
+        &sDataString_4[4],
+        512,
+        v21);
+      LocalTFPlayer = flHealth;
+    }
+    else if ( v10 )
+    {
+      v12 = g_pVGuiLocalize->__vftable;
+      bShowHealth_3 = 1;
+      v13 = C_BasePlayer::GetPlayerName((C_BasePlayer *)iMaxBuffedHealth);
+      v12->ConvertANSIToUnicode(g_pVGuiLocalize, v13, &wszPlayerName[4], 64);
+    }
+  }
+  if ( C_TFPlayer::IsPlayerClass(BaseEntity, 5) )
+  {
+    ChargeLevel = C_TFPlayer::MedicGetChargeLevel(BaseEntity);
+    _snwprintf(&wszChargeLevel[4], 9u, L"%.0f", ChargeLevel * 100.0);
+    wszPlayerName[3] = 0;
+    v23 = g_pVGuiLocalize->__vftable;
+    v24 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_playerid_mediccharge");
+    ((void (__cdecl *)(vgui::ILocalize *, _BYTE *, int, wchar_t *))v23->ConstructString)(
+      g_pVGuiLocalize,
+      &sDataString_4[4],
+      512,
+      v24);
+  }
+  if ( LocalTFPlayer->GetTeamNumber(LocalTFPlayer) == 1
+    || BaseEntity->InSameTeam(BaseEntity, LocalTFPlayer)
+    || bShowHealth_3 )
+  {
+    v25 = "#TF_playerid_sameteam";
+LABEL_22:
+    LOBYTE(iIgnored) = 1;
+    v26 = (C_TF_PlayerResource *)__RTDynamicCast(
+                                   g_PR,
+                                   0,
+                                   &C_PlayerResource `RTTI Type Descriptor',
+                                   &C_TF_PlayerResource `RTTI Type Descriptor',
+                                   0);
+    if ( v26 )
+    {
+      *(float *)&iPostDataW = (float)C_TF_PlayerResource::GetMaxHealth(v26, this->m_iTargetEntIndex);
+      iPostNameW = CTFPlayerShared::GetMaxBuffedHealth(&BaseEntity->m_Shared);
+      if ( bShowHealth_3 )
+        *(float *)&pDisguiseTarget = (float)BaseEntity->m_Shared.m_iDisguiseHealth.m_Value;
+      else
+        *(float *)&pDisguiseTarget = (float)BaseEntity->GetHealth(BaseEntity);
+    }
+    else
+    {
+      LOBYTE(iIgnored) = 0;
+    }
+    if ( v25 )
+    {
+      this->GetPrepend(this);
+      v27 = g_pVGuiLocalize->__vftable;
+      v28 = g_pVGuiLocalize->Find(g_pVGuiLocalize, v25);
+      ((void (__cdecl *)(vgui::ILocalize *, _BYTE *, int, wchar_t *))v27->ConstructString)(
+        g_pVGuiLocalize,
+        &sDataString_4[516],
+        512,
+        v28);
+    }
+    goto LABEL_29;
+  }
+  if ( LocalTFPlayer->m_Shared.m_nPlayerState.m_Value == 3 )
+  {
+    v25 = "#TF_playerid_diffteam";
+    goto LABEL_22;
+  }
+LABEL_29:
+  CTFHudPlayerHealth::SetHealth(
+    this->m_pTargetHealth,
+    (int)*(float *)&pDisguiseTarget,
+    (int)*(float *)&iPostDataW,
+    iPostNameW);
+  this->m_pTargetHealth->SetVisible(this->m_pTargetHealth, iIgnored);
+  this->m_pTargetNameLabel->GetContentSize(this->m_pTargetNameLabel, (int *)&wszChargeLevel[2], (int *)&flMaxHealth);
+  this->m_pTargetDataLabel->GetContentSize(this->m_pTargetDataLabel, (int *)wszChargeLevel, (int *)&flMaxHealth);
+  m_pTargetNameLabel = this->m_pTargetNameLabel;
+  if ( *(_WORD *)&sDataString_4[516] )
+  {
+    HIWORD(v47) = 0;
+    m_pTargetNameLabel->SetVisible(m_pTargetNameLabel, 1);
+    this->SetDialogVariable(&this->vgui::EditablePanel, "targetname", (const wchar_t *)&sDataString_4[516]);
+  }
+  else
+  {
+    m_pTargetNameLabel->SetVisible(m_pTargetNameLabel, 0);
+    this->m_pTargetNameLabel->SetText(this->m_pTargetNameLabel, locale);
+  }
+  m_pTargetDataLabel = this->m_pTargetDataLabel;
+  if ( *(_WORD *)&sDataString_4[4] )
+  {
+    *(_WORD *)&sDataString_4[514] = 0;
+    m_pTargetDataLabel->SetVisible(m_pTargetDataLabel, 1);
+    this->SetDialogVariable(&this->vgui::EditablePanel, "targetdata", (const wchar_t *)&sDataString_4[4]);
+  }
+  else
+  {
+    m_pTargetDataLabel->SetVisible(m_pTargetDataLabel, 0);
+    this->m_pTargetDataLabel->SetText(this->m_pTargetDataLabel, locale);
+  }
+  ((void (__thiscall *)(vgui::Label *, int *))this->m_pTargetNameLabel->GetContentSize)(
+    this->m_pTargetNameLabel,
+    &iNameW);
+  this->m_pTargetDataLabel->GetContentSize(this->m_pTargetDataLabel, &iPostNameW, (int *)&pDisguiseTarget);
+  if ( this->m_bLayoutOnUpdate || iPostNameW != iNameW || iDataW != *(_DWORD *)wszChargeLevel )
+  {
+    this->InvalidateLayout(&this->vgui::EditablePanel, 1, 0);
+    this->m_bLayoutOnUpdate = 0;
+  }
+}

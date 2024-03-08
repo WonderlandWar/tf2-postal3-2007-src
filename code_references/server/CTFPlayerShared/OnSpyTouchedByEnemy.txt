@@ -1,0 +1,6 @@
+void __thiscall CTFPlayerShared::OnSpyTouchedByEnemy(CTFPlayerShared *this)
+{
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flLastStealthExposeTime>::Set(
+    &this->m_flLastStealthExposeTime,
+    &gpGlobals->curtime);
+}

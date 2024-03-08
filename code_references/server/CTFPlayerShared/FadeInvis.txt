@@ -1,0 +1,25 @@
+void __thiscall CTFPlayerShared::FadeInvis(CTFPlayerShared *this, float flInvisFadeTime)
+{
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  val = this->m_nPlayerCond.m_Value & 0xFFFFFEFF;
+  CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed>::Set(
+    (CNetworkVarBase<int,CEnvWindShared::NetworkVar_m_iWindSeed> *)&this->m_nPlayerCond,
+    &val);
+  this->m_flCondExpireTimeLeft[8] = 0.0;
+  CTFPlayerShared::OnRemoveStealthed(this);
+  if ( flInvisFadeTime >= 0.15 )
+  {
+    *(float *)&val = tf_spy_cloak_no_attack_time.m_pParent->m_fValue + gpGlobals->curtime;
+    CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flStealthNoAttackExpire>::Set(
+      &this->m_flStealthNoAttackExpire,
+      (const float *)&val);
+  }
+  *(float *)&val = gpGlobals->curtime + flInvisFadeTime;
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeCompleteTime>::Set(
+    &this->m_flInvisChangeCompleteTime,
+    (const float *)&val);
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flInvisChangeTotalTime>::Set(
+    &this->m_flInvisChangeTotalTime,
+    &flInvisFadeTime);
+}

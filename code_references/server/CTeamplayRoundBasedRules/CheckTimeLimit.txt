@@ -1,0 +1,18 @@
+char __thiscall CTeamplayRoundBasedRules::CheckTimeLimit(CTeamplayRoundBasedRules *this)
+{
+  int m_nValue; // eax
+  IGameEvent *v3; // esi
+
+  m_nValue = mp_timelimit.m_pParent->m_nValue;
+  if ( m_nValue <= 0 || (int)((double)(60 * m_nValue) + this->m_flMapResetTime.m_Value - gpGlobals->curtime) > 0 )
+    return 0;
+  v3 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_game_over", 0);
+  if ( v3 )
+  {
+    v3->SetString(v3, "reason", "Reached Time Limit");
+    gameeventmanager->FireEvent(gameeventmanager, v3, 0);
+  }
+  this->SendTeamScoresEvent(this);
+  this->GoToIntermission(this);
+  return 1;
+}

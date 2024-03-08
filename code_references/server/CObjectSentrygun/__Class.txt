@@ -1,0 +1,139 @@
+class CObjectSentrygun : public CBaseObject
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void CObjectSentrygun(class CObjectSentrygun & );
+    public void CObjectSentrygun();
+	
+    public class CObjectSentrygun * Create(class Vector & ,class QAngle & );
+    public void Spawn();
+    public void Precache();
+    public void OnGoActive();
+    public int DrawDebugTextOverlays();
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    public void Killed(class CTakeDamageInfo & );
+    public void SetModel(char * );
+	
+    public bool StartBuilding(class CBaseEntity * );
+    public void StartPlacement(class CTFPlayer * );
+	
+    public bool OnWrenchHit(class CTFPlayer * );
+	
+    public void OnStartDisabled();
+    public void OnEndDisabled();
+	
+    public int GetTracerAttachment();
+	
+    public void UpgradeThink();
+    public bool IsUpgrading();
+	
+    public int GetUpgradeLevel();
+	
+    private void SentryThink();
+	
+    private bool CanBeUpgraded(class CTFPlayer * );
+    private void StartUpgrading();
+    private void FinishUpgrading();
+	
+    private bool FindTarget();
+    private bool ValidTarget(class CBaseEntity * );
+    private bool FInViewCone(class CBaseEntity * );
+    private bool IsBetterTarget(class CBaseEntity * );
+    private int Range(class CBaseEntity * );
+    private void FoundTarget(class CBaseEntity * );
+	
+    private void SentryRotate();
+    private bool MoveTurret();
+	
+    private void Attack();
+    private bool Fire();
+    private void MakeTracer(class Vector & ,class CGameTrace & ,int );
+	
+    private int GetBaseTurnRate();
+	
+    class NetworkVar_m_iState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iState> m_iState;
+	
+    private float m_flNextAttack;
+	
+    class NetworkVar_m_iUpgradeLevel
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeLevel> m_iUpgradeLevel;
+	
+    private int m_iRightBound;
+    private int m_iLeftBound;
+    private int m_iBaseTurnRate;
+    private bool m_bTurningRight;
+	
+    private class QAngle m_vecCurAngles;
+    private class QAngle m_vecGoalAngles;
+	
+    private float m_flTurnRate;
+	
+    private float m_flUpgradeCompleteTime;
+	
+    class NetworkVar_m_iUpgradeMetal
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetal> m_iUpgradeMetal;
+    class NetworkVar_m_iUpgradeMetalRequired
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetalRequired> m_iUpgradeMetalRequired;
+	
+    class NetworkVar_m_iAmmoShells
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells> m_iAmmoShells;
+    class NetworkVar_m_iMaxAmmoShells
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iMaxAmmoShells> m_iMaxAmmoShells;
+    class NetworkVar_m_iAmmoRockets
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets> m_iAmmoRockets;
+    class NetworkVar_m_iMaxAmmoRockets
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iMaxAmmoRockets> m_iMaxAmmoRockets;
+	
+    private int m_iAmmoType;
+	
+    private float m_flNextRocketAttack;
+	
+    private class CHandle<CBaseEntity> m_hEnemy;
+	
+    private int m_iAttachments[4];
+	
+    private int m_iPitchPoseParameter;
+    private int m_iYawPoseParameter;
+	
+    private float m_flLastAttackedTime;
+	
+    private float m_flHeavyBulletResist;
+	
+    private int m_iPlacementBodygroup;
+	
+    private struct datamap_t m_DataMap;
+    private struct datamap_t * GetBaseMap();
+    private struct datamap_t * GetDataDescMap();
+	
+    public void ~CObjectSentrygun();
+    public class CObjectSentrygun & operator=(class CObjectSentrygun & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

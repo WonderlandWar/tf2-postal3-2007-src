@@ -1,0 +1,22 @@
+void __thiscall CTeamControlPoint::SetActive(CTeamControlPoint *this, unsigned int active)
+{
+  bool v2; // zf
+  edict_t *m_pPev; // eax
+
+  v2 = (_BYTE)active == 0;
+  this->m_bActive = active;
+  if ( v2 )
+  {
+    CBaseEntity::AddEffects(this, 32);
+  }
+  else
+  {
+    active = this->m_fEffects.m_Value & 0xFFFFFFDF;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(&this->m_fEffects, (const int *)&active);
+    m_pPev = this->m_Network.m_pPev;
+    this->m_iEFlags |= 0x10000u;
+    if ( m_pPev )
+      m_pPev->m_fStateFlags |= 0x80u;
+    CBaseEntity::DispatchUpdateTransmitState(this);
+  }
+}

@@ -1,0 +1,35 @@
+void __thiscall CObjectTeleporter::Precache(CObjectTeleporter *this)
+{
+  int v1; // eax
+  int v2; // eax
+
+  CBaseObject::Precache(this);
+  CBaseEntity::PrecacheModel("models/buildables/teleporter_blueprint_enter.mdl");
+  CBaseEntity::PrecacheModel("models/buildables/teleporter_blueprint_exit.mdl");
+  v1 = CBaseEntity::PrecacheModel("models/buildables/teleporter.mdl");
+  PrecacheGibsForModel(v1);
+  v2 = CBaseEntity::PrecacheModel("models/buildables/teleporter_light.mdl");
+  PrecacheGibsForModel(v2);
+  CBaseEntity::PrecacheScriptSound("Building_Teleporter.Ready");
+  CBaseEntity::PrecacheScriptSound("Building_Teleporter.Send");
+  CBaseEntity::PrecacheScriptSound("Building_Teleporter.Receive");
+  CBaseEntity::PrecacheScriptSound("Building_Teleporter.Spin");
+  PrecacheParticleSystem("teleporter_red_charged");
+  PrecacheParticleSystem("teleporter_blue_charged");
+  PrecacheParticleSystem("teleporter_red_entrance");
+  PrecacheParticleSystem("teleporter_blue_entrance");
+  PrecacheParticleSystem("teleporter_red_exit");
+  PrecacheParticleSystem("teleporter_blue_exit");
+  PrecacheParticleSystem("teleporter_arms_circle_red");
+  PrecacheParticleSystem("teleporter_arms_circle_blue");
+  PrecacheParticleSystem("tpdamage_1");
+  PrecacheParticleSystem("tpdamage_2");
+  PrecacheParticleSystem("tpdamage_3");
+  PrecacheParticleSystem("tpdamage_4");
+  PrecacheParticleSystem("teleported_red");
+  PrecacheParticleSystem("player_sparkles_red");
+  PrecacheParticleSystem("teleported_blue");
+  PrecacheParticleSystem("player_sparkles_blue");
+  PrecacheParticleSystem("teleportedin_red");
+  PrecacheParticleSystem("teleportedin_blue");
+}

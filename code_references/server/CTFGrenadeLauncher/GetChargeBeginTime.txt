@@ -1,0 +1,4 @@
+double __thiscall CTFGrenadeLauncher::GetChargeBeginTime(CTFGrenadeLauncher *this)
+{
+  return *(float *)&this->m_pfnMoveDone;
+}

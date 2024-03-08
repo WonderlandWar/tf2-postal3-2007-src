@@ -1,0 +1,17 @@
+bool __thiscall CObjectSentrygun::StartBuilding(CObjectSentrygun *this, CBaseEntity *pBuilder)
+{
+  int m_iPitchPoseParameter; // edi
+  int m_iYawPoseParameter; // edi
+
+  this->SetModel(this, "models/buildables/sentry1_heavy.mdl");
+  CBaseObject::CreateBuildPoints(this);
+  m_iPitchPoseParameter = this->m_iPitchPoseParameter;
+  if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, m_iPitchPoseParameter, 0.0);
+  m_iYawPoseParameter = this->m_iYawPoseParameter;
+  if ( !this->m_pStudioHdr && CBaseEntity::GetModel(this) )
+    CBaseAnimating::LockStudioHdr(this);
+  CBaseAnimating::SetPoseParameter(this, this->m_pStudioHdr, m_iYawPoseParameter, 0.0);
+  return CBaseObject::StartBuilding(this, pBuilder);
+}

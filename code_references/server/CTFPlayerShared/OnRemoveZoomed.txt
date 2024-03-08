@@ -1,0 +1,4 @@
+void __thiscall CTFPlayerShared::OnRemoveZoomed(CTFPlayerShared *this)
+{
+  CBasePlayer::SetFOV(this->m_pOuter, this->m_pOuter, 0, 0.1, 0);
+}

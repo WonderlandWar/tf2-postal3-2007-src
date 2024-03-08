@@ -1,0 +1,23 @@
+void __thiscall CTFPistol::PrimaryAttack(CTFPistol *this)
+{
+  CBaseCombatCharacter *Owner; // eax
+  CNetworkVarBase<float,CTFPistol::NetworkVar_m_flAccuracyPenaltyTime> *p_m_flAccuracyPenaltyTime; // ecx
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  CNetworkVarBase<float,CTFPistol::NetworkVar_m_flLastAttackTime>::Set(&this->m_flLastAttackTime, &gpGlobals->curtime);
+  val = gpGlobals->curtime + 0.1;
+  CNetworkVarBase<float,CTFSniperRifle::NetworkVar_m_flChargedDamage>::Set(&this->m_flSoonestPrimaryAttack, &val);
+  Owner = CBaseCombatWeapon::GetOwner(this);
+  if ( Owner )
+    Owner->IsPlayer(Owner);
+  if ( CTFWeaponBase::CanAttack(this) )
+  {
+    CTFWeaponBaseGun::PrimaryAttack(this);
+    p_m_flAccuracyPenaltyTime = &this->m_flAccuracyPenaltyTime;
+    if ( gpGlobals->curtime <= (double)this->m_flAccuracyPenaltyTime.m_Value )
+      val = p_m_flAccuracyPenaltyTime->m_Value + 0.2;
+    else
+      val = gpGlobals->curtime + 0.2;
+    CNetworkVarBase<float,CWeaponIFMBaseCamera::NetworkVar_m_flRenderArmLength>::Set(p_m_flAccuracyPenaltyTime, &val);
+  }
+}

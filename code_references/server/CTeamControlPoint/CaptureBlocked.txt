@@ -1,0 +1,35 @@
+void __userpurge CTeamControlPoint::CaptureBlocked(
+        CTeamControlPoint *this@<ecx>,
+        int a2@<edi>,
+        int a3@<esi>,
+        CBaseMultiplayerPlayer *pPlayer,
+        int a5)
+{
+  const char *pszValue; // eax
+  int v7; // eax
+  IGameEvent *v8; // esi
+  int v9; // eax
+
+  pszValue = this->m_iszPrintName.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  if ( strlen(pszValue) )
+  {
+    v7 = ((int (__thiscall *)(IGameEventManager2 *, const char *, _DWORD, int))gameeventmanager->CreateEvent)(
+           gameeventmanager,
+           "teamplay_capture_blocked",
+           0,
+           a2);
+    v8 = (IGameEvent *)v7;
+    if ( v7 )
+    {
+      (*(void (__thiscall **)(int, const char *, int, int))(*(_DWORD *)v7 + 40))(v7, "cp", this->m_iPointIndex, a3);
+      ((void (__thiscall *)(IGameEvent *, const char *))v8->SetString)(v8, "cpname");
+      v9 = engine->IndexOfEdict(engine, *(const edict_t **)(a5 + 344));
+      v8->SetInt(v8, "blocker", v9);
+      v8->SetInt(v8, "priority", 9);
+      gameeventmanager->FireEvent(gameeventmanager, v8, 0);
+    }
+    ((void (__thiscall *)(CTeamControlPoint *))this->PlayerBlocked)(this);
+  }
+}

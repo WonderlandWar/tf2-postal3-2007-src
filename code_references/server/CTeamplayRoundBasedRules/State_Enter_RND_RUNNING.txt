@@ -1,0 +1,12 @@
+void __thiscall CTeamplayRoundBasedRules::State_Enter_RND_RUNNING(CTeamplayRoundBasedRules *this)
+{
+  IGameEvent *v2; // eax
+
+  this->SetupOnRoundRunning(this);
+  v2 = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_round_active", 0);
+  if ( v2 )
+    gameeventmanager->FireEvent(gameeventmanager, v2, 0);
+  if ( !this->m_bInWaitingForPlayers.m_Value )
+    CTeamplayRoundBasedRules::PlayStartRoundVoice(this);
+  this->m_bChangeLevelOnRoundEnd = 0;
+}

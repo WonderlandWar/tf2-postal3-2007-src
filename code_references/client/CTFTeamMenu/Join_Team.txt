@@ -1,0 +1,10 @@
+void __thiscall CTFTeamMenu::Join_Team(CTFTeamMenu *this, const CCommand *args)
+{
+  char cmd[256]; // [esp+0h] [ebp-108h] BYREF
+
+  if ( args->m_nArgc > 1 )
+  {
+    V_snprintf(&cmd[4], 256, "jointeam %s", args->m_ppArgv[1]);
+    this->OnCommand(this, &cmd[4]);
+  }
+}

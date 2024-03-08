@@ -1,0 +1,44 @@
+void __thiscall C_TFFlameThrower::StopFlame(C_TFFlameThrower *this, bool bAbrupt)
+{
+  int v3; // eax
+  CSoundEnvelopeController *Controller; // eax
+  CSoundEnvelopeController *v5; // eax
+  C_BasePlayer *LocalPlayer; // edi
+  C_BaseEntity::NetworkVar_m_Particles *p_m_Particles; // ecx
+  const char *v8; // [esp-4h] [ebp-38h]
+  CLocalPlayerFilter filter; // [esp+10h] [ebp-24h] BYREF
+
+  if ( (this->m_pFiringLoop || this->m_pFiringStartSound) && !bAbrupt )
+  {
+    CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+    v8 = this->GetShootSound(this, 13);
+    v3 = this->entindex(&this->IClientNetworkable);
+    C_BaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v3, v8, 0, 0.0, 0);
+    C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+  }
+  if ( this->m_pFiringLoop )
+  {
+    Controller = CSoundEnvelopeController::GetController();
+    Controller->SoundDestroy(Controller, this->m_pFiringLoop);
+    this->m_pFiringLoop = 0;
+  }
+  if ( this->m_pFiringStartSound )
+  {
+    v5 = CSoundEnvelopeController::GetController();
+    v5->SoundDestroy(v5, this->m_pFiringStartSound);
+    this->m_pFiringStartSound = 0;
+  }
+  LocalPlayer = C_BasePlayer::GetLocalPlayer();
+  if ( !LocalPlayer || LocalPlayer != C_BaseCombatWeapon::GetOwner(this) )
+  {
+    p_m_Particles = &this->m_Particles;
+    goto LABEL_14;
+  }
+  if ( C_BasePlayer::GetViewModel(LocalPlayer, 0) )
+  {
+    p_m_Particles = &C_BasePlayer::GetViewModel(LocalPlayer, 0)->m_Particles;
+LABEL_14:
+    CParticleProperty::StopEmission(p_m_Particles, 0);
+  }
+  this->m_iParticleWaterLevel = -1;
+}

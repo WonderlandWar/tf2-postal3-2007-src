@@ -1,0 +1,26 @@
+void __thiscall CCaptureFlag::InputRoundActivate(CCaptureFlag *this, inputdata_t *inputdata)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  CTFPlayer *m_pEntity; // esi
+
+  m_Index = this->m_hPrevOwner.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = &g_pEntityList->m_EntPtrArray[this->m_hPrevOwner.m_Value.m_Index & 0xFFF];
+    if ( v4->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (CTFPlayer *)v4->m_pEntity;
+      if ( v4->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((CBaseEntity *)v4->m_pEntity)
+          && CTFPlayer::HasItem(m_pEntity)
+          && CTFPlayer::GetItem(m_pEntity) == this )
+        {
+          this->Drop(this, m_pEntity, 1, 0, 0);
+        }
+      }
+    }
+  }
+  CCaptureFlag::Reset(this);
+}

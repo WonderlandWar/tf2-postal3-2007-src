@@ -1,0 +1,37 @@
+void __thiscall CObjectSapper::SapperThink(CObjectSapper *this)
+{
+  CBaseObject *ParentObject; // edi
+  double v3; // st7
+  double v4; // st6
+  float thinkTime; // [esp+0h] [ebp-5Ch]
+  CTakeDamageInfo info; // [esp+10h] [ebp-4Ch] BYREF
+
+  if ( CBaseEntity::GetTeam(this) )
+  {
+    ParentObject = CBaseObject::GetParentObject(this);
+    if ( ParentObject )
+    {
+      thinkTime = gpGlobals->curtime + 0.1;
+      CBaseEntity::SetNextThink(this, thinkTime, "SapperThink");
+      if ( ParentObject->IsAlive(ParentObject) && !ParentObject->IsDying(ParentObject) )
+      {
+        v3 = (gpGlobals->curtime - this->m_flLastThinkTime) * obj_sapper_amount.m_pParent->m_fValue
+           + this->m_flSapperDamageAccumulator;
+        v4 = (double)(int)v3;
+        info.m_vecDamageForce.x = v4;
+        this->m_flSapperDamageAccumulator = v3 - v4;
+        CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&info.m_vecDamageForce.y);
+        info.m_flMaxDamage = info.m_vecDamageForce.x;
+        CTakeDamageInfo::SetAttacker((CTakeDamageInfo *)&info.m_vecDamageForce.y, this);
+        CTakeDamageInfo::SetInflictor((CTakeDamageInfo *)&info.m_vecDamageForce.y, this);
+        info.m_iDamageCustom = 1;
+        CBaseEntity::TakeDamage(ParentObject, (CTakeDamageInfo *)&info.m_vecDamageForce.y);
+        this->m_flLastThinkTime = gpGlobals->curtime;
+      }
+    }
+    else
+    {
+      this->DestroyObject(this);
+    }
+  }
+}

@@ -1,0 +1,14 @@
+void __thiscall CObjectSentrygun::Killed(CObjectSentrygun *this, const CTakeDamageInfo *info)
+{
+  CTFPlayer *v3; // eax
+  int m_Value; // ecx
+
+  v3 = this->GetOwner(this);
+  if ( v3 )
+  {
+    m_Value = this->m_iKills.m_Value;
+    if ( v3->m_iMaxSentryKills < m_Value )
+      v3->m_iMaxSentryKills = m_Value;
+  }
+  CBaseObject::Killed(this, info);
+}

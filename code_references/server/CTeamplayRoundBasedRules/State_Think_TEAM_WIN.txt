@@ -1,0 +1,8 @@
+void __thiscall CTeamplayRoundBasedRules::State_Think_TEAM_WIN(CTeamplayRoundBasedRules *this)
+{
+  if ( this->m_flStateTransitionTime < (double)gpGlobals->curtime && !CTeamplayRoundBasedRules::CheckWinLimit(this) )
+  {
+    this->PreviousRoundEnd(this);
+    CTeamplayRoundBasedRules::State_Transition(this, GR_STATE_PREROUND);
+  }
+}

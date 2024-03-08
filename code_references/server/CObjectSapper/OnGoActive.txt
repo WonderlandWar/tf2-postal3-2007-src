@@ -1,0 +1,72 @@
+void __thiscall CObjectSapper::OnGoActive(CObjectSapper *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // eax
+  void *v5; // esi
+  int v6; // eax
+  int v7; // eax
+
+  m_Index = this->m_hBuiltOnEntity.m_Value.m_Index;
+  if ( m_Index == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hBuiltOnEntity.m_Value.m_Index & 0xFFF],
+        v3->m_SerialNumber != m_Index >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v3->m_pEntity;
+  }
+  v5 = __RTDynamicCast(m_pEntity, 0, &CBaseEntity `RTTI Type Descriptor', &CBaseObject `RTTI Type Descriptor', 0);
+  switch ( (*(int (__thiscall **)(void *))(*(_DWORD *)v5 + 1184))(v5) )
+  {
+    case 0:
+      this->SetModel(this, "models/buildables/sapper_dispenser.mdl");
+      goto LABEL_14;
+    case 1:
+    case 2:
+      this->SetModel(this, "models/buildables/sapper_teleporter.mdl");
+      CBaseObject::OnGoActive(this);
+      return;
+    case 3:
+      v6 = *((_DWORD *)__RTDynamicCast(
+                         v5,
+                         0,
+                         &CBaseObject `RTTI Type Descriptor',
+                         &CObjectSentrygun `RTTI Type Descriptor',
+                         0)
+           + 603)
+         - 1;
+      if ( v6 )
+      {
+        v7 = v6 - 1;
+        if ( v7 )
+        {
+          if ( v7 == 1 )
+          {
+            this->SetModel(this, "models/buildables/sapper_sentry3.mdl");
+            CBaseObject::OnGoActive(this);
+          }
+          else
+          {
+LABEL_14:
+            CBaseObject::OnGoActive(this);
+          }
+        }
+        else
+        {
+          this->SetModel(this, "models/buildables/sapper_sentry2.mdl");
+          CBaseObject::OnGoActive(this);
+        }
+      }
+      else
+      {
+        this->SetModel(this, "models/buildables/sapper_sentry1.mdl");
+        CBaseObject::OnGoActive(this);
+      }
+      return;
+    default:
+      goto LABEL_14;
+  }
+}

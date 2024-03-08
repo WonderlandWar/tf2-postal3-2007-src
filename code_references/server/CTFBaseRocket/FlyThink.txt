@@ -1,0 +1,143 @@
+void __thiscall CTFBaseRocket::FlyThink(CTFBaseRocket *this)
+{
+  CTFBaseRocket *v1; // esi
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  int v4; // eax
+  float v5; // ecx
+  float v6; // edx
+  float v7; // eax
+  double m_fValue; // st7
+  int m_iEFlags; // eax
+  float x; // edx
+  float y; // eax
+  double v12; // st7
+  const QAngle *AbsAngles; // eax
+  double v14; // st7
+  float *p_y; // eax
+  double v16; // st6
+  double v17; // st4
+  double z; // st5
+  double curtime; // st7
+  float value; // [esp+4h] [ebp-70h]
+  float valuea; // [esp+4h] [ebp-70h]
+  float flHomingSpeedVertical; // [esp+10h] [ebp-64h]
+  float flHomingSpeedLateral; // [esp+14h] [ebp-60h]
+  float flDist; // [esp+18h] [ebp-5Ch]
+  Vector vNewVelocity; // [esp+1Ch] [ebp-58h] BYREF
+  Vector vTargetDir; // [esp+28h] [ebp-4Ch] BYREF
+  Vector vDir; // [esp+34h] [ebp-40h] BYREF
+  QAngle oldAngles; // [esp+40h] [ebp-34h] BYREF
+  QAngle newAngles; // [esp+4Ch] [ebp-28h] BYREF
+  QAngle targetAngles; // [esp+58h] [ebp-1Ch] BYREF
+  QAngle angles; // [esp+64h] [ebp-10h] BYREF
+
+  v1 = this;
+  if ( this->m_bIsHoming )
+  {
+    m_Index = this->m_hHomingTarget.m_Index;
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hHomingTarget.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hHomingTarget.m_Index & 0xFFF].m_pEntity;
+      if ( m_pEntity )
+      {
+        v4 = (int)m_pEntity->__vftable[45].GetRefEHandle(m_pEntity);
+        v5 = *(float *)v4;
+        v6 = *(float *)(v4 + 4);
+        v7 = *(float *)(v4 + 8);
+        oldAngles.y = v5;
+        m_fValue = tf_rocket_homing_speed_lateral.m_pParent->m_fValue;
+        newAngles.x = v7;
+        m_iEFlags = v1->m_iEFlags;
+        flDist = m_fValue;
+        oldAngles.z = v6;
+        flHomingSpeedLateral = tf_rocket_homing_speed_vertical.m_pParent->m_fValue;
+        if ( (m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(v1);
+        vTargetDir.y = oldAngles.y - v1->m_vecAbsOrigin.x;
+        vTargetDir.z = oldAngles.z - v1->m_vecAbsOrigin.y;
+        vDir.x = newAngles.x - v1->m_vecAbsOrigin.z;
+        vNewVelocity.x = pfVectorNormalize((Vector *)&vTargetDir.y);
+        if ( (v1->m_iEFlags & 0x1000) != 0 )
+          CBaseEntity::CalcAbsoluteVelocity(v1);
+        x = v1->m_vecAbsVelocity.x;
+        y = v1->m_vecAbsVelocity.y;
+        oldAngles.x = v1->m_vecAbsVelocity.z;
+        vDir.y = x;
+        vDir.z = y;
+        v12 = pfVectorNormalize((Vector *)&vDir.y);
+        flHomingSpeedVertical = v12;
+        vNewVelocity.y = vDir.y;
+        vNewVelocity.z = vDir.z;
+        vTargetDir.x = oldAngles.x;
+        if ( gpGlobals->frametime <= 0.0 )
+        {
+          z = vNewVelocity.z;
+          v17 = vTargetDir.x;
+          v16 = vNewVelocity.y;
+        }
+        else if ( 0.0 == v12 )
+        {
+          v16 = vTargetDir.y;
+          z = vTargetDir.z;
+          v17 = vDir.x;
+        }
+        else
+        {
+          oldAngles.y = 0.0;
+          oldAngles.z = 0.0;
+          newAngles.x = 1.0;
+          VectorAngles((Vector *)&vTargetDir.y, (const Vector *)&oldAngles.y, (QAngle *)&targetAngles.y);
+          AbsAngles = CBaseEntity::GetAbsAngles(v1);
+          v14 = AbsAngles->x;
+          oldAngles.z = AbsAngles->y;
+          newAngles.x = AbsAngles->z;
+          value = v14;
+          newAngles.y = ApproachAngle(targetAngles.y, value, flHomingSpeedLateral);
+          newAngles.z = ApproachAngle(targetAngles.z, oldAngles.z, flDist);
+          targetAngles.x = newAngles.x;
+          AngleVectors((QAngle *)&newAngles.y, (Vector *)&vNewVelocity.y);
+          vNewVelocity.y = vNewVelocity.y * flHomingSpeedVertical;
+          vNewVelocity.z = vNewVelocity.z * flHomingSpeedVertical;
+          vTargetDir.x = flHomingSpeedVertical * vTargetDir.x;
+          if ( pfVectorNormalize((Vector *)&vNewVelocity.y) >= 0.001 )
+          {
+            v12 = flHomingSpeedVertical;
+            z = vNewVelocity.z;
+            v17 = vTargetDir.x;
+            v16 = vNewVelocity.y;
+          }
+          else
+          {
+            p_y = &vTargetDir.y;
+            if ( 0.0 == vNewVelocity.x )
+              p_y = &vDir.y;
+            v12 = flHomingSpeedVertical;
+            v16 = *p_y;
+            v17 = p_y[2];
+            z = p_y[1];
+          }
+        }
+        vNewVelocity.y = v16 * v12;
+        vNewVelocity.z = z * v12;
+        vTargetDir.x = v12 * v17;
+        CBaseEntity::SetAbsVelocity(v1, (Vector *)&vNewVelocity.y);
+      }
+    }
+    if ( (v1->m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(v1);
+    VectorAngles(&v1->m_vecAbsVelocity, (QAngle *)&angles.y);
+    CBaseEntity::SetAbsAngles(v1, (QAngle *)&angles.y);
+    curtime = gpGlobals->curtime;
+    this = v1;
+  }
+  else
+  {
+    curtime = gpGlobals->curtime + 0.1;
+  }
+  valuea = curtime;
+  CBaseEntity::SetNextThink(this, valuea, 0);
+  if ( v1->m_flCollideWithTeammatesTime < (double)gpGlobals->curtime && !v1->m_bCollideWithTeammates )
+    v1->m_bCollideWithTeammates = 1;
+}

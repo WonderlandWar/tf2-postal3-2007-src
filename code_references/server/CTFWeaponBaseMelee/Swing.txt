@@ -1,0 +1,19 @@
+void __userpurge CTFWeaponBaseMelee::Swing(CTFWeaponBaseMelee *this@<ecx>, CTFPlayer *pPlayer, float val)
+{
+  void (__thiscall *WeaponSound)(CBaseCombatWeapon *, WeaponSound_t, float); // edx
+  float v5; // [esp+Ch] [ebp-8h]
+
+  CTFWeaponBase::CalcIsAttackCritical(this);
+  this->SendPlayerAnimEvent(this, pPlayer);
+  this->DoViewModelAnimation(this);
+  val = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flTimeFireDelay + gpGlobals->curtime;
+  CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &val);
+  v5 = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flTimeIdleEmpty + this->m_flNextPrimaryAttack.m_Value;
+  ((void (__thiscall *)(CTFWeaponBaseMelee *, _DWORD))this->SetWeaponIdleTime)(this, LODWORD(v5));
+  WeaponSound = this->WeaponSound;
+  if ( this->m_bCurrentAttackIsCrit )
+    ((void (__thiscall *)(CTFWeaponBaseMelee *, int))WeaponSound)(this, 5);
+  else
+    ((void (__thiscall *)(CTFWeaponBaseMelee *, int))WeaponSound)(this, 8);
+  this->m_flSmackTime = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flSmackDelay + gpGlobals->curtime;
+}

@@ -1,0 +1,21 @@
+void __thiscall CTFPistol::ItemPostFrame(CTFPistol *this)
+{
+  CBaseCombatCharacter *Owner; // edi
+  float val; // [esp+8h] [ebp-4h] BYREF
+
+  Owner = CBaseCombatWeapon::GetOwner(this);
+  if ( Owner )
+  {
+    if ( Owner->IsPlayer(Owner) )
+    {
+      CTFWeaponBase::ItemPostFrame(this);
+      if ( !this->m_bInReload
+        && (Owner[1].m_nWaterTouch & 1) == 0
+        && gpGlobals->curtime > (double)this->m_flSoonestPrimaryAttack.m_Value )
+      {
+        val = gpGlobals->curtime - 0.1;
+        CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &val);
+      }
+    }
+  }
+}

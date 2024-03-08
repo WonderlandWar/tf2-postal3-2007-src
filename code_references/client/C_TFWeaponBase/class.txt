@@ -1,0 +1,156 @@
+class C_TFWeaponBase : C_BaseCombatWeapon
+{
+    private int YouForgotToImplementOrDeclareClientClass();
+    private class ClientClass * GetClientClass();
+    private class RecvTable * m_pClassRecvTable;
+	
+public:	
+    struct typedescription_t m_PredDesc[0];
+    struct datamap_t m_PredMap;
+    struct datamap_t * GetPredDescMap();
+	
+    private void C_TFWeaponBase(class C_TFWeaponBase & );
+    void C_TFWeaponBase();
+	
+    void Spawn();
+    void Precache();
+    bool IsPredicted();
+    void FallInit();
+	
+    class CTFWeaponInfo & GetTFWpnData();
+    int GetWeaponID();
+    bool IsWeapon(int );
+    int GetDamageType();
+    int GetCustomDamageType();
+	
+    char * GetViewModel(int );
+	
+    void Drop(class Vector & );
+    bool Holster(class C_BaseCombatWeapon * );
+    bool Deploy();
+	
+    void PrimaryAttack();
+    void SecondaryAttack();
+    void CalcIsAttackCritical();
+    bool CalcIsAttackCriticalHelper();
+    bool IsCurrentAttackACrit();
+	
+    bool Reload();
+    void AbortReload();
+    bool DefaultReload(int ,int ,int );
+    void SendReloadEvents();
+	
+    bool CanDrop();
+	
+    bool PlayEmptySound();
+	
+    void ItemBusyFrame();
+    void ItemPostFrame();
+	
+    void SetWeaponVisible(bool );
+	
+    struct acttable_t * ActivityList();
+    int ActivityListCount();
+    struct acttable_t m_acttablePrimary[0];
+    struct acttable_t m_acttableSecondary[0];
+    struct acttable_t m_acttableMelee[0];
+    struct acttable_t m_acttableBuilding[0];
+    struct acttable_t m_acttablePDA[0];
+	
+    class C_BasePlayer * GetPlayerOwner();
+    class C_TFPlayer * GetTFPlayerOwner();
+	
+    bool CanAttack();
+	
+    bool WeaponShouldBeLowered();
+    bool Ready();
+    bool Lower();
+	
+    void WeaponIdle();
+	
+    void WeaponReset();
+	
+    char * GetMuzzleFlashEffectName_3rd();
+    char * GetMuzzleFlashEffectName_1st();
+    char * GetMuzzleFlashModel();
+    float GetMuzzleFlashModelLifetime();
+    char * GetMuzzleFlashParticleEffect();
+	
+    char * GetTracerType();
+	
+    void Operator_HandleAnimEvent(struct animevent_t * ,class C_BaseCombatCharacter * );
+	
+    void ProcessMuzzleFlashEvent();	
+    int InternalDrawModel(int );
+	
+    bool ShouldPredict();
+    void OnDataChanged(enum DataUpdateType_t );
+    void OnPreDataChanged(enum DataUpdateType_t );
+    int GetWorldModelIndex();
+    bool ShouldDrawCrosshair();
+    void Redraw();
+	
+    void AddViewmodelBob(class C_BaseViewModel * ,class Vector & ,class QAngle & );
+    float CalcViewmodelBob();
+    int GetSkin();
+    struct BobState_t * GetBobState();
+	
+    bool OnFireEvent(class C_BaseViewModel * ,class Vector & ,class QAngle & ,int ,char * );
+	
+    class CHandle<C_MuzzleFlashModel> m_hMuzzleFlashModel[2];
+	
+    protected void CreateMuzzleFlashEffects(class C_BaseEntity * ,int );
+	
+    protected void UpdateReloadTimers(bool );
+    protected void SetReloadTimer(float );
+    protected bool ReloadSingly();
+    protected void ReloadSinglyPostFrame();
+	
+    protected int m_iWeaponMode;
+    class NetworkVar_m_iReloadMode
+    {
+        void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,C_TFWeaponBase::NetworkVar_m_iReloadMode> m_iReloadMode;
+    protected class CTFWeaponInfo * m_pWeaponInfo;
+    protected bool m_bInAttack;
+    protected bool m_bInAttack2;
+    protected bool m_bCurrentAttackIsCrit;
+	
+    class NetworkVar_m_bLowered
+    {
+        void NetworkStateChanged(void * );
+    };
+	
+    protected class CNetworkVarBase<bool,C_TFWeaponBase::NetworkVar_m_bLowered> m_bLowered;
+	
+    protected int m_iAltFireHint;
+	
+    protected int m_iReloadStartClipAmount;
+	
+    protected float m_flCritTime;
+    protected float m_flLastCritCheckTime;
+    protected int m_iLastCritCheckFrame;
+    protected int m_iCurrentSeed;
+	
+    protected char m_szTracerName[128];
+	
+    class NetworkVar_m_bResetParity
+    {
+        void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_TFWeaponBase::NetworkVar_m_bResetParity> m_bResetParity;
+	
+    protected bool m_bOldResetParity;
+	
+    class NetworkVar_m_bReloadedThroughAnimEvent
+    {
+        void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<bool,C_TFWeaponBase::NetworkVar_m_bReloadedThroughAnimEvent> m_bReloadedThroughAnimEvent;
+	
+    void ~C_TFWeaponBase();
+    class C_TFWeaponBase & operator=(class C_TFWeaponBase & );
+    void __local_vftable_ctor_closure();
+    void * __vecDelDtor(unsigned int );
+};

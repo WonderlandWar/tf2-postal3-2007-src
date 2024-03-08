@@ -1,0 +1,33 @@
+void __thiscall C_TFPlayer::ImpactWaterTrace(C_TFPlayer *this, CGameTrace *trace, const Vector *vecStart)
+{
+  const char *v4; // edi
+  C_BaseCombatWeapon *v5; // eax
+  CEffectData data; // [esp+8h] [ebp-BCh] BYREF
+  CGameTrace traceWater; // [esp+68h] [ebp-5Ch] BYREF
+
+  UTIL_TraceLine(vecStart, &trace->endpos, 0x46004033u, this, 0, (CGameTrace *)&traceWater.startpos.y);
+  if ( *(float *)&traceWater.contents < 1.0 )
+  {
+    CEffectData::CEffectData((CEffectData *)&data.m_vOrigin.y);
+    data.m_vOrigin.y = traceWater.endpos.y;
+    data.m_vOrigin.z = traceWater.endpos.z;
+    data.m_vStart.x = traceWater.plane.normal.x;
+    data.m_vNormal.y = traceWater.plane.normal.y;
+    data.m_vNormal.z = traceWater.plane.normal.z;
+    data.m_vAngles.x = traceWater.plane.dist;
+    data.m_flMagnitude = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(
+                           random,
+                           8.0,
+                           12.0);
+    if ( (traceWater.dispFlags & 0x10) != 0 )
+      data.m_hEntity.m_Index |= 1u;
+    v4 = "tf_gunshotsplash";
+    v5 = this->GetActiveWeapon(this);
+    if ( v5 )
+    {
+      if ( ((int (__thiscall *)(C_BaseCombatWeapon *))v5->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].SetRefEHandle)(v5) == 15 )
+        v4 = "tf_gunshotsplash_minigun";
+    }
+    DispatchEffect(v4, (CEffectData *)&data.m_vOrigin.y);
+  }
+}

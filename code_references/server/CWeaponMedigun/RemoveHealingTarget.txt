@@ -1,0 +1,115 @@
+void __userpurge CWeaponMedigun::RemoveHealingTarget(
+        CWeaponMedigun *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<ebp>,
+        int a4@<esi>,
+        int iSlot,
+        bool bStopHealingSelf)
+{
+  CWeaponMedigun *v6; // edi
+  unsigned int m_Index; // eax
+  CTFPlayer **v8; // ecx
+  CTFPlayer *v9; // ebx
+  CWeaponMedigun::NetworkVar_m_hHealingTargets *p_m_hHealingTargets; // ebp
+  IHandleEntity *v11; // ecx
+  CBaseEntity *OwnerEntity; // eax
+  CTFPlayer *v13; // esi
+  CTFPlayer *v14; // ebx
+  CEntInfo *v15; // ecx
+  IHandleEntity *m_pEntity; // esi
+  bool v17; // zf
+  const char *v18; // eax
+  unsigned int v19; // eax
+  int v20; // edx
+  CTFPlayer *v24; // [esp+28h] [ebp-8h]
+
+  v6 = this;
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v8 = (CTFPlayer **)&g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+    if ( g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+    {
+      v9 = *v8;
+      v24 = *v8;
+      if ( *v8 )
+      {
+        if ( v9->IsPlayer(v9) )
+        {
+          if ( iSlot == -1 || !iSlot )
+          {
+            p_m_hHealingTargets = &v6->m_hHealingTargets;
+            if ( v6->m_hHealingTargets.m_Value[0].m_Index != -1
+              && g_pEntityList->m_EntPtrArray[v6->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber == v6->m_hHealingTargets.m_Value[0].m_Index >> 12
+              && g_pEntityList->m_EntPtrArray[v6->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity )
+            {
+              v11 = p_m_hHealingTargets->m_Value[0].m_Index == -1
+                 || g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF].m_SerialNumber != p_m_hHealingTargets->m_Value[0].m_Index >> 12
+                  ? 0
+                  : g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF].m_pEntity;
+              if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v11->__vftable[25].SetRefEHandle)(v11) )
+              {
+                OwnerEntity = CBaseEntity::GetOwnerEntity(v6);
+                v13 = (CTFPlayer *)OwnerEntity;
+                if ( OwnerEntity && OwnerEntity->IsPlayer(OwnerEntity) )
+                  v14 = v13;
+                else
+                  v14 = 0;
+                if ( p_m_hHealingTargets->m_Value[0].m_Index == -1
+                  || (v15 = &g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF],
+                      g_pEntityList->m_EntPtrArray[p_m_hHealingTargets->m_Value[0].m_Index & 0xFFF].m_SerialNumber != p_m_hHealingTargets->m_Value[0].m_Index >> 12)
+                  || (m_pEntity = v15->m_pEntity) == 0
+                  || !((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(v15->m_pEntity) )
+                {
+                  m_pEntity = 0;
+                }
+                CTFPlayerShared::StopHealing((CTFPlayerShared *)&m_pEntity[948], v14);
+                CTFPlayerShared::RecalculateInvuln((CTFPlayerShared *)&m_pEntity[948], 0);
+                v17 = ((unsigned __int8 (__thiscall *)(IHandleEntity *, int, int, int))m_pEntity->__vftable[20].GetRefEHandle)(
+                        m_pEntity,
+                        a3,
+                        a4,
+                        a2) == 0;
+                v18 = "healtarget:alive";
+                if ( v17 )
+                  v18 = "healtarget:dead";
+                ((void (__thiscall *)(CTFPlayer *, int, const char *))v14->SpeakConceptIfAllowed)(v14, 37, v18);
+                ((void (__thiscall *)(IHandleEntity *, int, _DWORD, _DWORD, _DWORD, _DWORD))m_pEntity->__vftable[131].SetRefEHandle)(
+                  m_pEntity,
+                  54,
+                  0,
+                  0,
+                  0,
+                  0);
+                v9 = v24;
+                v6 = this;
+              }
+            }
+            iSlot = -1;
+            CWeaponMedigun::NetworkVar_m_hHealingTargets::Set(
+              p_m_hHealingTargets,
+              0,
+              (const CHandle<CBaseEntity> *)&iSlot);
+          }
+          v19 = v6->m_hHealingTargets.m_Value[0].m_Index;
+          if ( v19 == -1
+            || (v20 = v6->m_hHealingTargets.m_Value[0].m_Index & 0xFFF,
+                g_pEntityList->m_EntPtrArray[v20].m_SerialNumber != v19 >> 12)
+            || !g_pEntityList->m_EntPtrArray[v20].m_pEntity )
+          {
+            if ( v6->m_bHealing.m_Value )
+            {
+              v6->SendWeaponAnim(v6, 1092);
+              CTFPlayer::DoAnimationEvent(v9, PLAYERANIMEVENT_ATTACK_POST, 0);
+            }
+            CDamageModifier::RemoveModifier(&v6->m_DamageModifier);
+            LOBYTE(iSlot) = 0;
+            CNetworkVarBase<bool,CTFMinigun::NetworkVar_m_bCritShot>::Set(
+              (CNetworkVarBase<bool,CTFFlameThrower::NetworkVar_m_bCritFire> *)&v6->m_bHealing,
+              (const bool *)&iSlot);
+          }
+        }
+      }
+    }
+  }
+}

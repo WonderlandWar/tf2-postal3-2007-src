@@ -1,0 +1,11 @@
+void __thiscall CFuncRespawnRoom::Spawn(CFuncRespawnRoom *this)
+{
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  val = this->m_spawnflags.m_Value | 1;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_spawnflags>::Set(&this->m_spawnflags, &val);
+  CBaseTrigger::Spawn(this);
+  CBaseTrigger::InitTrigger(this);
+  this->m_bActive = 1;
+  this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CFuncRespawnRoom::RespawnRoomTouch;
+}

@@ -1,0 +1,44 @@
+void __usercall CWeaponMedigun::ItemPostFrame(CWeaponMedigun *this@<ecx>, int a2@<ebx>)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  IHandleEntity *m_pEntity; // ebp
+  bool val; // [esp+Fh] [ebp-1h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF];
+    if ( v4->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = v4->m_pEntity;
+      if ( v4->m_pEntity )
+      {
+        if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(v4->m_pEntity) )
+        {
+          CWeaponMedigun::DrainCharge(this);
+          if ( !this->m_bLowered.m_Value )
+          {
+            if ( this->AppliesModifier(this) )
+              CDamageModifier::SetModifier(&this->m_DamageModifier, weapon_medigun_damage_modifier.m_pParent->m_fValue);
+            val = 0;
+            CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking>::Set(&this->m_bAttacking, &val);
+            if ( ((int)m_pEntity[646].__vftable & 1) != 0 )
+            {
+              this->PrimaryAttack(this);
+              val = 1;
+              CNetworkVarBase<bool,CWeaponMedigun::NetworkVar_m_bAttacking>::Set(&this->m_bAttacking, &val);
+            }
+            else if ( this->m_bHealing.m_Value )
+            {
+              CWeaponMedigun::RemoveHealingTarget(this, a2, (int)m_pEntity, (int)this, -1, 0);
+            }
+            if ( ((int)m_pEntity[646].__vftable & 0x800) != 0 )
+              this->SecondaryAttack(this);
+            this->WeaponIdle(this);
+          }
+        }
+      }
+    }
+  }
+}

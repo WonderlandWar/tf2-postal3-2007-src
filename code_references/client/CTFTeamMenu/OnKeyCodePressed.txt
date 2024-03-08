@@ -1,0 +1,46 @@
+void __thiscall CTFTeamMenu::OnKeyCodePressed(CTFTeamMenu *this, ButtonCode_t code)
+{
+  ButtonCode_t m_iTeamMenuKey; // eax
+  C_TFPlayer *LocalTFPlayer; // eax
+  ButtonCode_t m_iScoreBoardKey; // eax
+  KeyValues *v6; // eax
+  KeyValues *v7; // eax
+
+  m_iTeamMenuKey = this->m_iTeamMenuKey;
+  if ( m_iTeamMenuKey == BUTTON_CODE_INVALID || m_iTeamMenuKey != code )
+  {
+    if ( code == KEY_SPACE )
+    {
+      engine->ClientCmd(engine, "jointeam auto");
+      this->ShowPanel(&this->IViewPortPanel, 0);
+      this->OnClose(this);
+    }
+    else
+    {
+      m_iScoreBoardKey = this->m_iScoreBoardKey;
+      if ( m_iScoreBoardKey == BUTTON_CODE_INVALID || m_iScoreBoardKey != code )
+      {
+        CTeamMenu::OnKeyCodePressed(this, code);
+      }
+      else
+      {
+        gViewPortInterface->ShowPanel(gViewPortInterface, "scores", 1);
+        v6 = (KeyValues *)KeyValues::operator new(0x20u);
+        if ( v6 )
+          KeyValues::KeyValues(v6, "PollHideCode", "code", code);
+        else
+          v7 = 0;
+        gViewPortInterface->PostMessageToPanel(gViewPortInterface, "scores", v7);
+      }
+    }
+  }
+  else
+  {
+    LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+    if ( LocalTFPlayer )
+    {
+      if ( LocalTFPlayer->GetTeamNumber(LocalTFPlayer) )
+        this->ShowPanel(&this->IViewPortPanel, 0);
+    }
+  }
+}

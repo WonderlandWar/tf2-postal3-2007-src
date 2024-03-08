@@ -1,0 +1,108 @@
+char __thiscall CObjectSentrygun::OnWrenchHit(CObjectSentrygun *this, CTFPlayer *pPlayer)
+{
+  CTFPlayer *v3; // ebx
+  int m_Value; // edi
+  int v5; // eax
+  int AmmoCount; // eax
+  int v7; // edi
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetal> *p_m_iUpgradeMetal; // ebp
+  int v9; // eax
+  int v10; // ebx
+  int v11; // ecx
+  double v12; // st7
+  int v13; // edi
+  int v14; // eax
+  int v15; // ebp
+  int v16; // ebx
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets> *p_m_iAmmoRockets; // edi
+  double v18; // st7
+  int v19; // esi
+  char result; // al
+  char bDidWork; // [esp+13h] [ebp-9h]
+  int val; // [esp+14h] [ebp-8h] BYREF
+  int v23; // [esp+18h] [ebp-4h] BYREF
+
+  bDidWork = 0;
+  if ( this->m_iHealth.m_Value < this->m_iMaxHealth.m_Value && this->Command_Repair(this, pPlayer) )
+  {
+    bDidWork = 1;
+  }
+  else if ( this->m_iState.m_Value != 3 )
+  {
+    v3 = pPlayer;
+    m_Value = pPlayer->m_PlayerClass.m_iClass.m_Value;
+    v5 = this->GetType(this);
+    if ( ClassCanBuild(m_Value, v5) && this->m_iUpgradeLevel.m_Value < 3 )
+    {
+      AmmoCount = CBaseCombatCharacter::GetAmmoCount(v3, 3);
+      if ( tf_sentrygun_upgrade_per_hit.m_pParent->m_nValue < AmmoCount )
+        AmmoCount = tf_sentrygun_upgrade_per_hit.m_pParent->m_nValue;
+      v7 = AmmoCount;
+      p_m_iUpgradeMetal = &this->m_iUpgradeMetal;
+      if ( AmmoCount > this->m_iUpgradeMetalRequired.m_Value - this->m_iUpgradeMetal.m_Value )
+        v7 = this->m_iUpgradeMetalRequired.m_Value - this->m_iUpgradeMetal.m_Value;
+      if ( !tf_cheapobjects.m_pParent->m_nValue )
+        CBaseCombatCharacter::RemoveAmmo(v3, v7, 3);
+      val = v7 + p_m_iUpgradeMetal->m_Value;
+      CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetal>::Set(&this->m_iUpgradeMetal, &val);
+      if ( v7 > 0 )
+        bDidWork = 1;
+      if ( p_m_iUpgradeMetal->m_Value >= this->m_iUpgradeMetalRequired.m_Value )
+      {
+        CObjectSentrygun::StartUpgrading(this);
+        val = 0;
+        CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iUpgradeMetal>::Set(&this->m_iUpgradeMetal, &val);
+      }
+    }
+  }
+  if ( this->IsUpgrading(this) )
+    return bDidWork;
+  v9 = CBaseCombatCharacter::GetAmmoCount(pPlayer, 3);
+  v10 = this->m_iAmmoShells.m_Value;
+  v11 = this->m_iMaxAmmoShells.m_Value;
+  val = v9;
+  if ( v10 < v11 && v9 > 0 )
+  {
+    v12 = (double)val / tf_sentrygun_metal_per_shell.m_pParent->m_fValue;
+    v13 = 40;
+    if ( (int)v12 <= 40 )
+      v13 = (int)v12;
+    if ( this->m_iMaxAmmoShells.m_Value - v10 < v13 )
+      v13 = this->m_iMaxAmmoShells.m_Value - v10;
+    CBaseCombatCharacter::RemoveAmmo(pPlayer, v13 * tf_sentrygun_metal_per_shell.m_pParent->m_nValue, 3);
+    v23 = v13 + this->m_iAmmoShells.m_Value;
+    CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoShells>::Set(&this->m_iAmmoShells, &v23);
+    if ( v13 > 0 )
+      bDidWork = 1;
+  }
+  v14 = CBaseCombatCharacter::GetAmmoCount(pPlayer, 3);
+  v15 = this->m_iAmmoRockets.m_Value;
+  v16 = this->m_iMaxAmmoRockets.m_Value;
+  p_m_iAmmoRockets = &this->m_iAmmoRockets;
+  val = v14;
+  if ( v15 >= v16 || this->m_iUpgradeLevel.m_Value != 3 || v14 <= 0 )
+    return bDidWork;
+  v18 = (double)val / tf_sentrygun_metal_per_rocket.m_pParent->m_fValue;
+  if ( (int)v18 <= 8 )
+  {
+    v19 = (int)v18;
+    val = (int)v18;
+  }
+  else
+  {
+    v19 = 8;
+    val = 8;
+  }
+  if ( v16 - v15 < v19 )
+  {
+    v19 = v16 - v15;
+    val = v16 - v15;
+  }
+  CBaseCombatCharacter::RemoveAmmo(pPlayer, (int)((double)val * tf_sentrygun_metal_per_rocket.m_pParent->m_fValue), 3);
+  pPlayer = (CTFPlayer *)(v19 + p_m_iAmmoRockets->m_Value);
+  CNetworkVarBase<int,CObjectSentrygun::NetworkVar_m_iAmmoRockets>::Set(p_m_iAmmoRockets, (const int *)&pPlayer);
+  result = 1;
+  if ( v19 <= 0 )
+    return bDidWork;
+  return result;
+}

@@ -1,0 +1,178 @@
+void __usercall CTFFreezePanel::UpdateCallout(
+        CTFFreezePanel *this@<ecx>,
+        Vector *p_vMins@<ebp>,
+        Vector *p_vecMassCenter@<esi>)
+{
+  float x; // edi
+  C_TFPlayer *LocalTFPlayer; // eax
+  int v5; // ebx
+  CUtlVector<CHandle<C_BaseEntity>,CUtlMemory<CHandle<C_BaseEntity>,int> > *p_m_hSpawnedGibs; // ebp
+  int v7; // eax
+  int v8; // esi
+  int Wide; // eax
+  int Tall; // eax
+  CHudElement *Element; // eax
+  vgui::Panel *p_m_bActive; // edi
+  int v13; // eax
+  int m_Size; // eax
+  unsigned int m_Index; // eax
+  CEntInfo *v16; // ecx
+  IHandleEntity *m_pEntity; // edi
+  float *v18; // eax
+  IHandleEntity_vtbl *v19; // ecx
+  CTFFreezePanelCallout *v20; // eax
+  int v21; // eax
+  float v22; // ecx
+  float v23; // edx
+  CTFFreezePanelCallout *v24; // eax
+  int iXa; // [esp+Ch] [ebp-98h]
+  int iX; // [esp+Ch] [ebp-98h]
+  int iY; // [esp+10h] [ebp-94h] BYREF
+  int y; // [esp+14h] [ebp-90h] BYREF
+  Vector origin; // [esp+18h] [ebp-8Ch] BYREF
+  Vector vecStatTL; // [esp+24h] [ebp-80h] BYREF
+  Vector vecStatBR; // [esp+30h] [ebp-74h] BYREF
+  Vector vecFreezeBR; // [esp+3Ch] [ebp-68h] BYREF
+  Vector vecFreezeTL; // [esp+48h] [ebp-5Ch] BYREF
+  CUtlVector<Vector,CUtlMemory<Vector,int> > vecCalloutsTL; // [esp+54h] [ebp-50h] BYREF
+  CUtlVector<Vector,CUtlMemory<Vector,int> > vecCalloutsBR; // [esp+68h] [ebp-3Ch] BYREF
+  Vector vMaxs; // [esp+7Ch] [ebp-28h] BYREF
+  Vector vMins; // [esp+88h] [ebp-1Ch] BYREF
+  Vector vecMassCenter; // [esp+94h] [ebp-10h] BYREF
+  char v41; // [esp+A0h] [ebp-4h] BYREF
+
+  x = *(float *)&this;
+  LODWORD(origin.x) = this;
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  v5 = 0;
+  if ( LocalTFPlayer )
+  {
+    if ( (p_m_hSpawnedGibs = &LocalTFPlayer->m_hSpawnedGibs,
+          v7 = (int)LocalTFPlayer->GetRepresentativeRagdoll(LocalTFPlayer),
+          v8 = v7,
+          p_m_hSpawnedGibs)
+      && p_m_hSpawnedGibs->m_Size
+      || v7 )
+    {
+      vgui::Panel::GetPos((vgui::Panel *)LODWORD(x), &iY, &y);
+      vecFreezeTL.y = (float)iY;
+      vecFreezeTL.z = (float)y;
+      *(float *)&vecCalloutsTL.m_Memory.m_pMemory = 0.0;
+      Wide = vgui::Panel::GetWide((vgui::Panel *)LODWORD(x));
+      vecFreezeBR.y = (float)(iY + Wide);
+      Tall = vgui::Panel::GetTall((vgui::Panel *)LODWORD(x));
+      memset(&vecCalloutsTL.m_Memory.m_nAllocationCount, 0, 16);
+      vecFreezeBR.z = (float)(y + Tall);
+      vecFreezeTL.x = 1.0;
+      memset(&vecCalloutsBR, 0, sizeof(vecCalloutsBR));
+      vecStatTL.y = 0.0;
+      vecStatTL.z = 0.0;
+      vecStatBR.x = 0.0;
+      vecStatBR.y = 0.0;
+      vMaxs.x = 0.0;
+      vecStatBR.z = 0.0;
+      vecFreezeBR.x = 1.0;
+      Element = CHud::FindElement(&gHUD, "CTFStatPanel");
+      if ( Element )
+      {
+        p_m_bActive = (vgui::Panel *)&Element[-10].m_bActive;
+        if ( Element != (CHudElement *)232 && p_m_bActive->IsVisible(p_m_bActive) )
+        {
+          vgui::Panel::GetPos(p_m_bActive, &iY, &y);
+          vecStatTL.y = (float)iY;
+          vecStatTL.z = (float)y;
+          v13 = vgui::Panel::GetWide(p_m_bActive);
+          vecStatBR.y = (double)v13 + vecStatTL.y;
+          iXa = vgui::Panel::GetTall(p_m_bActive);
+          vecStatBR.z = (double)iXa + vecStatTL.z;
+        }
+        x = origin.x;
+      }
+      if ( p_m_hSpawnedGibs && (m_Size = p_m_hSpawnedGibs->m_Size) != 0 )
+      {
+        iX = 0;
+        if ( m_Size > 0 )
+        {
+          do
+          {
+            m_Index = p_m_hSpawnedGibs->m_Memory.m_pMemory[v5].m_Index;
+            if ( m_Index != -1 )
+            {
+              v16 = &g_pEntityList->m_EntPtrArray[p_m_hSpawnedGibs->m_Memory.m_pMemory[v5].m_Index & 0xFFF];
+              if ( g_pEntityList->m_EntPtrArray[p_m_hSpawnedGibs->m_Memory.m_pMemory[v5].m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+              {
+                m_pEntity = v16->m_pEntity;
+                if ( v16->m_pEntity )
+                {
+                  v18 = (float *)((int (__thiscall *)(IHandleEntity *, Vector *, Vector *))m_pEntity[1].SetRefEHandle)(
+                                   &m_pEntity[1],
+                                   p_vecMassCenter,
+                                   p_vMins);
+                  vecStatTL.x = *v18;
+                  v19 = m_pEntity[46].__vftable;
+                  vecStatTL.y = v18[1];
+                  vecStatTL.z = v18[2];
+                  if ( v19 )
+                  {
+                    (*((void (__thiscall **)(IHandleEntity_vtbl *, char *))v19->~IHandleEntity + 44))(v19, &v41);
+                    CCollisionProperty::CollisionToWorldSpace(
+                      (CCollisionProperty *)&m_pEntity[88],
+                      (const Vector *)&v41,
+                      &vecStatTL);
+                  }
+                  p_vMins = &vMins;
+                  p_vecMassCenter = &vecMassCenter;
+                  m_pEntity[1].__vftable[6].GetRefEHandle(m_pEntity + 1);
+                  v20 = CTFFreezePanel::TestAndAddCallout(
+                          (CTFFreezePanel *)LODWORD(origin.x),
+                          (Vector *)&origin.y,
+                          (Vector *)&vMins.y,
+                          (Vector *)&vMaxs.y,
+                          (CUtlVector<Vector,CUtlMemory<Vector,int> > *)&vecCalloutsTL.m_Memory.m_nAllocationCount,
+                          (CUtlVector<Vector,CUtlMemory<Vector,int> > *)&vecCalloutsBR.m_Memory.m_nAllocationCount,
+                          (Vector *)&vecFreezeTL.y,
+                          (Vector *)&vecFreezeBR.y,
+                          (Vector *)&vecStatTL.y,
+                          (Vector *)&vecStatBR.y,
+                          &iY,
+                          &y);
+                  if ( v20 )
+                    CTFFreezePanelCallout::UpdateForGib(v20, v5, iX++);
+                }
+              }
+            }
+            ++v5;
+          }
+          while ( v5 < p_m_hSpawnedGibs->m_Size );
+        }
+      }
+      else if ( v8 )
+      {
+        v21 = (*(int (__thiscall **)(int))(*(_DWORD *)v8 + 8))(v8);
+        v22 = *(float *)v21;
+        v23 = *(float *)(v21 + 4);
+        vecStatTL.x = *(float *)(v21 + 8);
+        origin.y = v22;
+        origin.z = v23;
+        (*(void (__thiscall **)(int, float *, float *))(*(_DWORD *)v8 + 12))(v8, &vMins.y, &vMaxs.y);
+        v24 = CTFFreezePanel::TestAndAddCallout(
+                (CTFFreezePanel *)LODWORD(x),
+                (Vector *)&origin.y,
+                (Vector *)&vMins.y,
+                (Vector *)&vMaxs.y,
+                (CUtlVector<Vector,CUtlMemory<Vector,int> > *)&vecCalloutsTL.m_Memory.m_nAllocationCount,
+                (CUtlVector<Vector,CUtlMemory<Vector,int> > *)&vecCalloutsBR.m_Memory.m_nAllocationCount,
+                (Vector *)&vecFreezeTL.y,
+                (Vector *)&vecFreezeBR.y,
+                (Vector *)&vecStatTL.y,
+                (Vector *)&vecStatBR.y,
+                &iY,
+                &y);
+        if ( v24 )
+          CTFFreezePanelCallout::UpdateForRagdoll(v24);
+      }
+      CUtlVector<CClientThinkList::ThinkListChanges_t,CUtlMemory<CClientThinkList::ThinkListChanges_t,int>>::~CUtlVector<CClientThinkList::ThinkListChanges_t,CUtlMemory<CClientThinkList::ThinkListChanges_t,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&vecCalloutsBR.m_Memory.m_nAllocationCount);
+      CUtlVector<CClientThinkList::ThinkListChanges_t,CUtlMemory<CClientThinkList::ThinkListChanges_t,int>>::~CUtlVector<CClientThinkList::ThinkListChanges_t,CUtlMemory<CClientThinkList::ThinkListChanges_t,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&vecCalloutsTL.m_Memory.m_nAllocationCount);
+    }
+  }
+}

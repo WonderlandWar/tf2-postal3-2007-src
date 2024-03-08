@@ -1,0 +1,60 @@
+void __thiscall CTFFreezePanel::ShowSnapshotPanel(CTFFreezePanel *this, vgui::Panel *bShow)
+{
+  vgui::Panel *ChildByName; // eax
+  void *v4; // ebp
+  vgui::Panel *v5; // eax
+  void *v6; // ebx
+  vgui::Panel *v7; // eax
+  void *v8; // eax
+  void *v9; // esi
+  vgui::ImagePanel *v10; // eax
+  vgui::ILocalize_vtbl *v11; // ebx
+  int v12; // eax
+  vgui::AnimationController *v13; // eax
+  int v14; // [esp-Ch] [ebp-258h]
+  const char *v15; // [esp+8h] [ebp-244h]
+  vgui::ImagePanel *pIcon; // [esp+10h] [ebp-23Ch] BYREF
+  char szKey[16]; // [esp+14h] [ebp-238h] BYREF
+  wchar_t wKey[16]; // [esp+24h] [ebp-228h] BYREF
+
+  ChildByName = vgui::Panel::FindChildByName(this, "ScreenshotPanelBG", 0);
+  v4 = __RTDynamicCast(ChildByName, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::ImagePanel `RTTI Type Descriptor', 0);
+  v5 = vgui::Panel::FindChildByName(this, "ScreenshotIcon", 0);
+  v6 = __RTDynamicCast(v5, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::ImagePanel `RTTI Type Descriptor', 0);
+  *(_DWORD *)szKey = v6;
+  v7 = vgui::Panel::FindChildByName(this, "ScreenshotLabel", 0);
+  v8 = __RTDynamicCast(v7, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::Label `RTTI Type Descriptor', 0);
+  v9 = v8;
+  if ( v4 && v6 && v8 )
+  {
+    v10 = (vgui::ImagePanel *)engine->Key_LookupBinding(engine, "screenshot");
+    pIcon = v10;
+    if ( !v10 || !_stricmp((const char *)v10, "(null)") )
+    {
+      LOBYTE(bShow) = 0;
+      pIcon = (vgui::ImagePanel *)" ";
+    }
+    (*(void (__thiscall **)(void *))(*(_DWORD *)v4 + 124))(v4);
+    ((void (__thiscall *)(vgui::ImagePanel *))pIcon->SetVisible)(pIcon);
+    (*(void (__thiscall **)(void *, vgui::Panel *))(*(_DWORD *)v9 + 124))(v9, bShow);
+    V_snprintf((char *)&pIcon, 16, "%s", v15);
+    g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, (const char *)&pIcon, (wchar_t *)&szKey[12], 32);
+    v11 = g_pVGuiLocalize->__vftable;
+    v12 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int, char *))g_pVGuiLocalize->Find)(
+            g_pVGuiLocalize,
+            "#TF_freezecam_snapshot",
+            1,
+            &szKey[12]);
+    ((void (__cdecl *)(vgui::ILocalize *, wchar_t *, int, int))v11->ConstructString)(
+      g_pVGuiLocalize,
+      &wKey[12],
+      512,
+      v12);
+    (*(void (__thiscall **)(void *, wchar_t *, _DWORD, int))(*(_DWORD *)v9 + 764))(v9, &wKey[12], 0, v14);
+    v13 = (vgui::AnimationController *)((int (__thiscall *)(IClientMode *, CTFFreezePanel *, const char *))g_pClientMode->GetViewportAnimationController)(
+                                         g_pClientMode,
+                                         this,
+                                         "HudSnapShotReminderIn");
+    vgui::AnimationController::StartAnimationSequence(v13, bShow, (const char *)bShow);
+  }
+}

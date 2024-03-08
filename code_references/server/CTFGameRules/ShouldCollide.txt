@@ -1,0 +1,38 @@
+char __thiscall CTFGameRules::ShouldCollide(CTFGameRules *this, int collisionGroup0, int collisionGroup1)
+{
+  int v3; // edx
+  int v4; // eax
+  bool v5; // zf
+
+  v3 = collisionGroup0;
+  v4 = collisionGroup1;
+  if ( collisionGroup0 > collisionGroup1 )
+  {
+    v3 = collisionGroup1;
+    v4 = collisionGroup0;
+  }
+  switch ( v3 )
+  {
+    case 8:
+      if ( v4 == 11 || v4 == 24 || v4 == 20 )
+        return 0;
+      v5 = v4 == 23;
+LABEL_8:
+      if ( v5 )
+        return 0;
+      return CGameRules::ShouldCollide(this, v3, v4);
+    case 5:
+      if ( v4 == 24 )
+        return 1;
+      if ( v4 == 20 || v4 == 23 )
+        return 0;
+      break;
+    case 11:
+      v5 = v4 == 24;
+      goto LABEL_8;
+    case 20:
+      v5 = v4 == 20;
+      goto LABEL_8;
+  }
+  return CGameRules::ShouldCollide(this, v3, v4);
+}

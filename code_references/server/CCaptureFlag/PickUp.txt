@@ -1,0 +1,197 @@
+void __userpurge CCaptureFlag::PickUp(
+        CCaptureFlag *this@<ecx>,
+        int a2@<ebx>,
+        int a3@<edi>,
+        int pPlayer,
+        bool bInvisible)
+{
+  CTFPlayer *v6; // ebx
+  int v7; // eax
+  int m_Value; // eax
+  int k; // edi
+  int v10; // eax
+  int v11; // eax
+  CTFTeamManager *v12; // eax
+  int i; // edi
+  int v14; // eax
+  CTFTeamManager *v15; // eax
+  CTFTeamManager *v16; // eax
+  int j; // edi
+  CTFTeamManager *v18; // eax
+  int v19; // eax
+  void (__thiscall **p_ChangeTeam)(CBaseEntity *, int); // edi
+  int TeamNumber; // eax
+  IGameEvent *v22; // edi
+  int v23; // eax
+  unsigned int m_Index; // eax
+  unsigned int v25; // eax
+  CBaseEntity *m_pEntity; // ecx
+  const char *v27; // [esp+3Ch] [ebp-3Ch]
+  const char *v28; // [esp+3Ch] [ebp-3Ch]
+  float soundtime; // [esp+44h] [ebp-34h]
+  float soundtimea; // [esp+44h] [ebp-34h]
+  CTeamRecipientFilter filter; // [esp+54h] [ebp-24h] BYREF
+
+  if ( !this->m_bDisabled.m_Value )
+  {
+    if ( ((unsigned __int8 (__thiscall *)(CGameRules *))g_pGameRules->__vftable[1].Think)(g_pGameRules) )
+    {
+      v6 = (CTFPlayer *)pPlayer;
+      if ( this->m_bAllowOwnerPickup
+        || !CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPrevOwner)
+        || CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hPrevOwner) != v6 )
+      {
+        CTFItem::PickUp(this, v6, 0);
+        CTFPlayer::TeamFortress_SetSpeed(v6);
+        v7 = CBaseAnimating::LookupAttachment(v6, "flag");
+        if ( v7 != -1 )
+        {
+          this->SetParent(this, v6, v7);
+          CBaseEntity::SetLocalOrigin(this, &vec3_origin);
+          CBaseEntity::SetLocalAngles(this, &vec3_angle);
+        }
+        if ( v6->m_PlayerClass.m_iClass.m_Value == 8
+          && (CTFPlayerShared::InCond(&v6->m_Shared, 7) || CTFPlayerShared::InCond(&v6->m_Shared, 6)) )
+        {
+          CTFPlayerShared::RemoveDisguise(&v6->m_Shared);
+        }
+        this->m_pfnTouch = 0;
+        CNetworkHandleBase<CBaseEntity,CCaptureFlag::NetworkVar_m_hPrevOwner>::Set(&this->m_hPrevOwner, v6);
+        m_Value = this->m_nGameType.m_Value;
+        this->m_bAllowOwnerPickup = 1;
+        if ( m_Value )
+        {
+          if ( m_Value == 1 )
+          {
+            v12 = TFTeamMgr();
+            CTFTeamManager::PlayerCenterPrint(v12, v6, "#TF_AD_TakeFlagToPoint", 0, 0, 0, 0);
+            for ( i = 2; i < 4; ++i )
+            {
+              if ( i == CBaseEntity::GetTeamNumber(v6) )
+              {
+                CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, i, 1);
+                soundtime = 0.0;
+                v27 = "AttackDefend.TeamStolen";
+              }
+              else
+              {
+                CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, i, 1);
+                soundtime = 0.0;
+                v27 = "AttackDefend.EnemyStolen";
+              }
+              v14 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+              CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v14, v27, 0, soundtime, 0);
+              CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+            }
+          }
+          else if ( m_Value == 3 )
+          {
+            v15 = TFTeamMgr();
+            CTFTeamManager::PlayerCenterPrint(v15, v6, "#TF_Invade_PlayerPickup", 0, 0, 0, 0);
+            v16 = TFTeamMgr();
+            CTFTeamManager::PlayerTeamCenterPrint(v16, v6, "#TF_Invade_PlayerTeamPickup", 0, 0, 0, 0);
+            for ( j = 2; j < 4; ++j )
+            {
+              if ( j == CBaseEntity::GetTeamNumber(v6) )
+              {
+                CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, j, 1);
+                soundtimea = 0.0;
+                v28 = "Invade.TeamStolen";
+              }
+              else
+              {
+                v18 = TFTeamMgr();
+                CTFTeamManager::TeamCenterPrint(v18, j, "#TF_Invade_OtherTeamPickup", 0, 0, 0, 0);
+                CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, j, 1);
+                soundtimea = 0.0;
+                v28 = "Invade.EnemyStolen";
+              }
+              v19 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+              CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v19, v28, 0, soundtimea, 0);
+              CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+            }
+            p_ChangeTeam = &this->ChangeTeam;
+            TeamNumber = CBaseEntity::GetTeamNumber(v6);
+            (*p_ChangeTeam)(this, TeamNumber);
+            if ( CBaseEntity::GetTeamNumber(this) )
+              pPlayer = CBaseEntity::GetTeamNumber(this) - 2;
+            else
+              pPlayer = 2;
+            CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+              (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+              &pPlayer);
+          }
+        }
+        else
+        {
+          for ( k = 2; k < 4; ++k )
+          {
+            if ( k == CBaseEntity::GetTeamNumber(v6) )
+            {
+              CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+              v11 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+              CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v11, "CaptureFlag.TeamStolen", 0, 0.0, 0);
+              CTFGameRules::SendHudNotification(
+                (CTFGameRules *)g_pGameRules,
+                (IRecipientFilter *)&filter.m_bReliable,
+                HUD_NOTIFY_ENEMY_FLAG_TAKEN);
+            }
+            else
+            {
+              CTeamRecipientFilter::CTeamRecipientFilter((CTeamRecipientFilter *)&filter.m_bReliable, k, 1);
+              v10 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+              CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v10, "CaptureFlag.EnemyStolen", 0, 0.0, 0);
+              CTFGameRules::SendHudNotification(
+                (CTFGameRules *)g_pGameRules,
+                (IRecipientFilter *)&filter.m_bReliable,
+                HUD_NOTIFY_YOUR_FLAG_TAKEN);
+            }
+            CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+          }
+        }
+        CCaptureFlag::SetFlagStatus(this, 1);
+        *(float *)&pPlayer = 0.0;
+        CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flResetTime>::Set(
+          &this->m_flResetTime,
+          (const float *)&pPlayer);
+        *(float *)&pPlayer = 0.0;
+        CNetworkVarBase<float,CCaptureFlag::NetworkVar_m_flNeutralTime>::Set(
+          &this->m_flNeutralTime,
+          (const float *)&pPlayer);
+        v22 = (IGameEvent *)((int (__thiscall *)(IGameEventManager2 *, const char *, _DWORD, int, int))gameeventmanager->CreateEvent)(
+                              gameeventmanager,
+                              "teamplay_flag_event",
+                              0,
+                              a3,
+                              a2);
+        if ( v22 )
+        {
+          v23 = engine->IndexOfEdict(engine, v6->m_Network.m_pPev);
+          v22->SetInt(v22, "player", v23);
+          v22->SetInt(v22, "eventtype", 1);
+          gameeventmanager->FireEvent(gameeventmanager, v22, 0);
+        }
+        ((void (__thiscall *)(CTFPlayer *, int, _DWORD, _DWORD))v6->SpeakConceptIfAllowed)(v6, 39, 0, 0);
+        COutputEvent::FireOutput(&this->m_outputOnPickUp, this, this, 0.0);
+        m_Index = this->m_hReturnIcon.m_Index;
+        if ( m_Index != -1
+          && g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+          && g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_pEntity )
+        {
+          v25 = this->m_hReturnIcon.m_Index;
+          if ( v25 == -1
+            || g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_SerialNumber != v25 >> 12 )
+          {
+            m_pEntity = 0;
+          }
+          else
+          {
+            m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hReturnIcon.m_Index & 0xFFF].m_pEntity;
+          }
+          UTIL_Remove(m_pEntity);
+          this->m_hReturnIcon.m_Index = -1;
+        }
+      }
+    }
+  }
+}

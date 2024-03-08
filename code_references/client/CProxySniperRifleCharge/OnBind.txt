@@ -1,0 +1,29 @@
+void __thiscall CProxySniperRifleCharge::OnBind(CProxySniperRifleCharge *this, void *pC_BaseEntity)
+{
+  C_TFPlayer *LocalTFPlayer; // esi
+  int SpectatorTarget; // eax
+  C_BaseCombatWeapon *ActiveTFWeapon; // eax
+  IMaterial *v6; // eax
+  float v7; // [esp+0h] [ebp-Ch]
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( GetSpectatorTarget() && GetSpectatorMode() == 4 )
+  {
+    SpectatorTarget = GetSpectatorTarget();
+    LocalTFPlayer = (C_TFPlayer *)UTIL_PlayerByIndex(SpectatorTarget);
+  }
+  if ( LocalTFPlayer )
+  {
+    ActiveTFWeapon = C_TFPlayer::GetActiveTFWeapon(LocalTFPlayer);
+    if ( ActiveTFWeapon )
+    {
+      v7 = *(float *)&ActiveTFWeapon[1].m_pPhysicsObject * 0.0066666668;
+      ((void (__stdcall *)(_DWORD))this->m_pResult->SetFloatValue)(LODWORD(v7));
+    }
+  }
+  if ( ToolsEnabled() )
+  {
+    v6 = this->GetMaterial(this);
+    ToolFramework_RecordMaterialParams(v6);
+  }
+}

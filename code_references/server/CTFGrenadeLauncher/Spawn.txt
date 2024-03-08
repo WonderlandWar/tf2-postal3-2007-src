@@ -1,0 +1,5 @@
+void __thiscall CTFGrenadeLauncher::Spawn(CTFGrenadeLauncher *this)
+{
+  this->m_iAltFireHint = 21;
+  CTFWeaponBase::Spawn(this);
+}
