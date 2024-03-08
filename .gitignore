@@ -17,17 +17,8 @@ ipch
 *.sdf
 *.opensdf
 *.idb
-*.vcxproj
-*.sln
-*.vcxproj.vpc_crc
-*.vcxproj.filters
-*.vpc.sentinel
-*.vcxproj.FileListAbsolute.txt
 
 # OSX/Linux build products
-*.mak
-*.mak.vpc_crc
-*.xcodeproj/
 obj*/
 !devtools/*.mak
 !utils/smdlexp/smdlexp.mak
@@ -72,29 +63,4 @@ server_blacklist.txt
 *.hl3
 *.tga
 *.jpg
-
-# shader files
-*.tmp
-
-# compiled map and nodegraph files
-*.bsp
-*.ain
-
-# misc
-capt_compile.bat
-/.vs/VSWorkspaceState.json
-.vs
-
-# game folder files
-GameInfo.txt
-*.cfg
-*.vmt
-*.vtf
-*.mdl
-*.phy
-*.vtx
-*.vvd
-portalcollab_english.txt
-hudanimations.txt
-*.res
-
+config.cfg
