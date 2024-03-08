@@ -17,6 +17,7 @@ ipch
 *.sdf
 *.opensdf
 *.idb
+*.ncb
 
 # OSX/Linux build products
 obj*/
