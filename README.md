@@ -10,4 +10,4 @@ Mod download: https://drive.google.com/file/d/143OQVoplGDkho3QLmYJoQQkwB8aSjCQZ/
 Credits
 ==
 * Wonderland_War - Reverse Engineering the Postal 3 DLLs.
-* WolfCl0ck - Patching up some missing assets in the leaked TF2 Postal 3 build.
+* WolfCl0ck - Patching up some missing assets that weren't present in the leaked TF2 Postal 3 build.
