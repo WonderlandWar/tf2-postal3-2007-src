@@ -1031,7 +1031,7 @@ C_TFPlayer::C_TFPlayer() :
 	
 	m_aGibs.Purge();
 
-	m_Hints.Init( this, 40, g_pszHintMessages );
+	m_Hints.Init( this, NUM_HINTS, g_pszHintMessages );
 
 	m_pCigaretteSmoke = NULL;
 

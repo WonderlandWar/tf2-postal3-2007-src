@@ -357,7 +357,7 @@ CTFPlayer::CTFPlayer()
 
 	SetDesiredPlayerClassIndex( TF_CLASS_UNDEFINED );
 
-	m_Hints.Init( this, 40, g_pszHintMessages );
+	m_Hints.Init( this, NUM_HINTS, g_pszHintMessages );
 
 	SetContextThink( &CTFPlayer::TFPlayerThink, gpGlobals->curtime, "TFPlayerThink" );
 
