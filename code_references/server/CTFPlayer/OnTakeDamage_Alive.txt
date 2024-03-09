@@ -1,0 +1,245 @@
+int __userpurge CTFPlayer::OnTakeDamage_Alive@<eax>(CTFPlayer *this@<ecx>, int a2@<ebp>, CTakeDamageInfo *info)
+{
+  unsigned int m_Index; // eax
+  unsigned int v5; // eax
+  IHandleEntity *m_pEntity; // ecx
+  float *v7; // eax
+  CTFPlayer_vtbl *v8; // edx
+  double v9; // st7
+  const Vector *(__thiscall *WorldSpaceCenter)(CBaseEntity *); // eax
+  float *v11; // eax
+  double v12; // st6
+  double v13; // st7
+  unsigned int v15; // eax
+  CTFPlayer **v16; // ecx
+  CTFPlayer *v17; // ebp
+  unsigned int v18; // eax
+  bool IsPlayerClass; // al
+  double m_flDamage; // st7
+  const Vector *v21; // eax
+  double v22; // st7
+  const Vector *v23; // eax
+  CBaseEntity *Inflictor; // eax
+  double v25; // st7
+  const Vector *v26; // eax
+  double v27; // st7
+  double v28; // st7
+  const Vector *v29; // eax
+  double v30; // st7
+  double v31; // rt2
+  double v32; // st5
+  double v33; // st6
+  double v34; // st5
+  double v35; // st7
+  bool v36; // al
+  IGameEvent *v37; // esi
+  int v38; // eax
+  bool v39; // al
+  bool v40; // al
+  float x; // edx
+  float y; // eax
+  const Vector *v43; // eax
+  edict_t *m_pPev; // edi
+  float v45; // eax
+  float damage; // [esp+14h] [ebp-98h]
+  float damagea; // [esp+14h] [ebp-98h]
+  float damageb; // [esp+14h] [ebp-98h]
+  float damagec; // [esp+14h] [ebp-98h]
+  float scale; // [esp+18h] [ebp-94h]
+  float scalea; // [esp+18h] [ebp-94h]
+  char v53; // [esp+2Fh] [ebp-7Dh]
+  Vector vecDir; // [esp+30h] [ebp-7Ch] BYREF
+  Vector vDamagePos; // [esp+3Ch] [ebp-70h] BYREF
+  CEffectData data; // [esp+48h] [ebp-64h] BYREF
+
+  vecDir.y = vec3_origin.x;
+  m_Index = info->m_hInflictor.m_Index;
+  vecDir.z = vec3_origin.y;
+  vDamagePos.x = vec3_origin.z;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_pEntity )
+  {
+    v5 = info->m_hInflictor.m_Index;
+    if ( v5 == -1 || g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v5 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+    v7 = (float *)m_pEntity->__vftable[45].GetRefEHandle(m_pEntity);
+    v8 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    vDamagePos.y = *v7;
+    vDamagePos.z = v7[1];
+    v9 = v7[2];
+    WorldSpaceCenter = v8->WorldSpaceCenter;
+    data.m_vOrigin.x = v9 - 10.0;
+    v11 = (float *)WorldSpaceCenter(this);
+    v12 = vDamagePos.z - v11[1];
+    v13 = data.m_vOrigin.x - v11[2];
+    vecDir.y = vDamagePos.y - *v11;
+    vecDir.z = v12;
+    vDamagePos.x = v13;
+    pfVectorNormalize((Vector *)&vecDir.y);
+  }
+  v53 = 0;
+  g_vecAttackDir.x = vecDir.y;
+  g_vecAttackDir.y = vecDir.z;
+  g_vecAttackDir.z = vDamagePos.x;
+  this->m_bitsDamageType |= info->m_bitsDamageType;
+  if ( this->m_takedamage.m_Value != 1 )
+  {
+    if ( (info->m_bitsDamageType & 0x1000000) == 0
+      || this->m_PlayerClass.m_iClass.m_Value == 7
+      || (v53 = 1, this->m_nWaterLevel.m_Value >= 2u) )
+    {
+      v53 = 0;
+    }
+    if ( 0.0 == info->m_flDamage )
+      return 0;
+    LODWORD(vecDir.x) = this->m_iHealth.m_Value - (int)(info->m_flDamage + 0.5);
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(&this->m_iHealth, (const int *)&vecDir);
+  }
+  this->m_flLastDamageTime = gpGlobals->curtime;
+  v15 = info->m_hAttacker.m_Index;
+  if ( v15 == -1 )
+    return 0;
+  v16 = (CTFPlayer **)&g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF];
+  if ( g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v15 >> 12 )
+    return 0;
+  v17 = *v16;
+  if ( !*v16 )
+    return 0;
+  if ( (info->m_bitsDamageType & 0x800) == 0 )
+  {
+    v18 = info->m_hInflictor.m_Index;
+    if ( v18 != -1
+      && g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber == v18 >> 12
+      && g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity
+      && this->m_MoveType.m_Value == 2
+      && (v17->m_Collision.m_usSolidFlags.m_Value & 8) == 0
+      && !CTFPlayerShared::InCond(&this->m_Shared, 7) )
+    {
+      vDamagePos.y = 0.0;
+      vDamagePos.z = 0.0;
+      data.m_vOrigin.x = 0.0;
+      if ( CTakeDamageInfo::GetAttacker(info) == this )
+      {
+        IsPlayerClass = CTFPlayer::IsPlayerClass(this, 3);
+        m_flDamage = info->m_flDamage;
+        if ( IsPlayerClass )
+        {
+          scale = tf_damageforcescale_self_soldier.m_pParent->m_fValue;
+          damage = info->m_flDamage;
+          v21 = CBaseEntity::WorldAlignSize(this);
+          DamageForce(v21, damage, scale);
+        }
+        else
+        {
+          damagea = info->m_flDamage;
+          v23 = CBaseEntity::WorldAlignSize(this);
+          DamageForce(v23, damagea, 9.0);
+        }
+        v22 = -m_flDamage;
+        vDamagePos.y = vecDir.y * v22;
+        vDamagePos.z = vecDir.z * v22;
+        data.m_vOrigin.x = v22 * vDamagePos.x;
+      }
+      else if ( (info->m_bitsDamageType & 2) != 0
+             && (Inflictor = CTakeDamageInfo::GetInflictor(info), Inflictor->IsBaseObject(Inflictor)) )
+      {
+        v25 = info->m_flDamage;
+        damageb = info->m_flDamage;
+        v26 = CBaseEntity::WorldAlignSize(this);
+        DamageForce(v26, damageb, 16.0);
+        v27 = -v25;
+        vDamagePos.y = vecDir.y * v27;
+        vDamagePos.z = vecDir.z * v27;
+        data.m_vOrigin.x = v27 * vDamagePos.x;
+      }
+      else
+      {
+        v28 = info->m_flDamage;
+        scalea = tf_damageforcescale_other.m_pParent->m_fValue;
+        damagec = info->m_flDamage;
+        v29 = CBaseEntity::WorldAlignSize(this);
+        DamageForce(v29, damagec, scalea);
+        v30 = -v28;
+        v31 = vecDir.z * v30;
+        v32 = vecDir.y * v30;
+        vDamagePos.y = v32;
+        v33 = v32;
+        vDamagePos.z = v31;
+        v34 = v30 * vDamagePos.x;
+        v35 = v31;
+        data.m_vOrigin.x = v34;
+        if ( CTFPlayer::IsPlayerClass(this, 6) )
+        {
+          vDamagePos.y = v33 * 0.5;
+          vDamagePos.z = v35 * 0.5;
+          data.m_vOrigin.x = v34 * 0.5;
+        }
+      }
+      CBaseEntity::ApplyAbsVelocityImpulse(this, (Vector *)&vDamagePos.y);
+    }
+  }
+  if ( v53 )
+  {
+    v36 = v17->IsPlayer(v17);
+    CTFPlayerShared::Burn(&this->m_Shared, v36 ? v17 : 0);
+  }
+  v37 = gameeventmanager->CreateEvent(gameeventmanager, "player_hurt", 0);
+  if ( v37 )
+  {
+    v38 = ((int (__thiscall *)(IVEngineServer *, edict_t *, int))engine->GetPlayerUserId)(
+            engine,
+            this->m_Network.m_pPev,
+            a2);
+    v37->SetInt(v37, "userid", v38);
+    v37->SetInt(v37, "health", this->m_iHealth.m_Value < 0 ? 0 : this->m_iHealth.m_Value);
+    v37->SetInt(v37, "priority", 5);
+    if ( v17->IsPlayer(v17) )
+    {
+      v39 = v17->IsPlayer(v17);
+      engine->GetPlayerUserId(engine, *(v39 ? &v17->m_Network.m_pPev : (edict_t **)344));
+    }
+    ((void (__thiscall *)(IGameEvent *, const char *))v37->SetInt)(v37, "attacker");
+    gameeventmanager->FireEvent(gameeventmanager, v37, 0);
+  }
+  if ( v17 != this && v17->IsPlayer(v17) )
+  {
+    v40 = v17->IsPlayer(v17);
+    CTFPlayerShared::RecordDamageEvent(
+      v40 ? &v17->m_Shared : (CTFPlayerShared *)3792,
+      info,
+      this->m_iHealth.m_Value <= 0);
+  }
+  if ( !CTFPlayerShared::InCond(&this->m_Shared, 7) && !CTFPlayerShared::InCond(&this->m_Shared, 9) )
+  {
+    x = info->m_vecDamagePosition.x;
+    y = info->m_vecDamagePosition.y;
+    data.m_vOrigin.x = info->m_vecDamagePosition.z;
+    vDamagePos.y = x;
+    vDamagePos.z = y;
+    if ( Vector::operator==((Vector *)&vDamagePos.y, &vec3_origin) )
+    {
+      v43 = this->WorldSpaceCenter(this);
+      vDamagePos.y = v43->x;
+      vDamagePos.z = v43->y;
+      data.m_vOrigin.x = v43->z;
+    }
+    CEffectData::CEffectData((CEffectData *)&data.m_vOrigin.y);
+    data.m_vOrigin.y = vDamagePos.y;
+    m_pPev = this->m_Network.m_pPev;
+    data.m_vOrigin.z = vDamagePos.z;
+    data.m_nEntIndex = 255;
+    data.m_vStart.x = data.m_vOrigin.x;
+    data.m_vNormal.y = -vecDir.y;
+    data.m_vNormal.z = -vecDir.z;
+    data.m_vAngles.x = -vDamagePos.x;
+    data.m_flMagnitude = 4.0;
+    v45 = COERCE_FLOAT(engine->IndexOfEdict(engine, m_pPev));
+    data.m_flRadius = info->m_flDamage;
+    data.m_flScale = v45;
+    DispatchEffect("tf_bloodimpact", (CEffectData *)&data.m_vOrigin.y);
+  }
+  return 1;
+}

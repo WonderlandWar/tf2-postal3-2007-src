@@ -2649,7 +2649,7 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	if ( m_takedamage != DAMAGE_EVENTS_ONLY )
 	{
 		// Start burning if we took ignition damage
-		bIgniting = ( ( info.GetDamageType() & DMG_IGNITE ) && ( GetWaterLevel() < WL_Waist ) );
+		bIgniting = ( ( info.GetDamageType() & DMG_IGNITE ) && ( TF_CLASS_PYRO != GetPlayerClass()->GetClassIndex() ) && ( GetWaterLevel() < WL_Waist ) );
 
 		if ( info.GetDamage() == 0.0f )
 			return 0;
