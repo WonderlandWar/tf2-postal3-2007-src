@@ -1,0 +1,11 @@
+void __thiscall CTFWeaponBaseGun::DoFireEffects(CTFWeaponBaseGun *this)
+{
+  CBasePlayer *PlayerOwner; // esi
+
+  PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner )
+  {
+    if ( PlayerOwner->IsPlayer(PlayerOwner) )
+      PlayerOwner->DoMuzzleFlash(PlayerOwner);
+  }
+}

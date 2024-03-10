@@ -242,16 +242,7 @@ void CTFWeaponBase::Precache()
 	}
 
 	const CTFWeaponInfo *pTFInfo = &GetTFWpnData();
-
-	if ( pTFInfo->m_szExplosionSound && pTFInfo->m_szExplosionSound[0] )
-	{
-		CBaseEntity::PrecacheScriptSound( pTFInfo->m_szExplosionSound );
-	}
-
-	if ( pTFInfo->m_szBrassModel[0] )
-	{
-		PrecacheModel( pTFInfo->m_szBrassModel );
-	}
+	
 
 	if ( pTFInfo->m_pClassViewModelKV )
 	{
@@ -266,6 +257,16 @@ void CTFWeaponBase::Precache()
 			if ( result )
 				PrecacheModel( result );
 		}
+	}
+
+	if ( pTFInfo->m_szExplosionSound && pTFInfo->m_szExplosionSound[0] )
+	{
+		CBaseEntity::PrecacheScriptSound( pTFInfo->m_szExplosionSound );
+	}
+
+	if ( pTFInfo->m_szBrassModel[0] )
+	{
+		PrecacheModel( pTFInfo->m_szBrassModel );
 	}
 
 	if ( pTFInfo->m_szMuzzleFlashParticleEffect && pTFInfo->m_szMuzzleFlashParticleEffect[0] )

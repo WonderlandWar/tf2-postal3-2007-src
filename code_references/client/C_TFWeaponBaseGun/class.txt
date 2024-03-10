@@ -1,0 +1,45 @@
+class C_TFWeaponBaseGun : public C_TFWeaponBase
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFWeaponBaseGun(class C_TFWeaponBaseGun & );
+    public void C_TFWeaponBaseGun();
+	
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public bool Holster(class C_BaseCombatWeapon * );
+	
+    public void DoFireEffects();
+	
+    public void ToggleZoom();
+	
+    public class C_BaseEntity * FireProjectile(class C_TFPlayer * );
+    public void GetProjectileFireSetup(class C_TFPlayer * ,class Vector ,class Vector * ,class QAngle * ,bool );
+	
+    public void FireBullet(class C_TFPlayer * );
+    public class C_BaseEntity * FireRocket(class C_TFPlayer * );
+    public class C_BaseEntity * FireNail(class C_TFPlayer * ,int );
+    public class C_BaseEntity * FirePipeBomb(class C_TFPlayer * ,bool );
+	
+    public float GetWeaponSpread();
+    public float GetProjectileSpeed();
+	
+    public void UpdatePunchAngles(class C_TFPlayer * );
+    public float GetProjectileDamage();
+	
+    public void ZoomIn();
+    public void ZoomOut();
+    public void ZoomOutIn();
+	
+    public void PlayWeaponShootSound();
+	
+    public void ~C_TFWeaponBaseGun();
+    public class C_TFWeaponBaseGun & operator=(class C_TFWeaponBaseGun & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

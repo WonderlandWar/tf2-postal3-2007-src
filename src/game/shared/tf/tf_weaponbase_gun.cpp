@@ -516,21 +516,7 @@ void CTFWeaponBaseGun::DoFireEffects()
 	if ( !pPlayer )
 		return;
 
-	// Muzzle flash on weapon.
-	bool bMuzzleFlash = true;
-	if ( pPlayer->IsPlayerClass( TF_CLASS_HEAVYWEAPONS ) )
-	{
-		CTFWeaponBase *pWeapon = pPlayer->GetActiveTFWeapon();
-		if ( pWeapon && pWeapon->GetWeaponID() == TF_WEAPON_MINIGUN )
-		{
-			bMuzzleFlash = false;
-		}
-	}
-
-	if ( bMuzzleFlash )
-	{
-		pPlayer->DoMuzzleFlash();
-	}
+	pPlayer->DoMuzzleFlash();
 }
 
 //-----------------------------------------------------------------------------
@@ -551,6 +537,8 @@ void CTFWeaponBaseGun::ToggleZoom( void )
 			ZoomOut();
 		}
 	}
+
+	m_flNextPrimaryAttack = gpGlobals->curtime + 0.5;
 
 	// Get the zoom animation time.
 	m_flNextSecondaryAttack = gpGlobals->curtime + 1.2;

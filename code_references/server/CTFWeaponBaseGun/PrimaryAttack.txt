@@ -1,0 +1,53 @@
+void __usercall CTFWeaponBaseGun::PrimaryAttack(CTFWeaponBaseGun *this@<ecx>, int a2@<ebp>, int a3@<edi>)
+{
+  int m_Value; // eax
+  CBasePlayer *PlayerOwner; // eax
+  CTFPlayer *v6; // edi
+  bool (__thiscall *SendWeaponAnim)(CBaseCombatWeapon *, int); // eax
+  CTFWeaponBaseGun_vtbl *v8; // edi
+  float v10; // [esp+10h] [ebp-10h]
+  int val; // [esp+1Ch] [ebp-4h] BYREF
+  float retaddr; // [esp+20h] [ebp+0h] BYREF
+
+  m_Value = this->m_iClip1.m_Value;
+  if ( (m_Value > 0 || m_Value == -1) && gpGlobals->curtime >= (double)this->m_flNextPrimaryAttack.m_Value )
+  {
+    PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+    v6 = (CTFPlayer *)PlayerOwner;
+    if ( PlayerOwner )
+    {
+      if ( PlayerOwner->IsPlayer(PlayerOwner) && CTFWeaponBase::CanAttack(this) )
+      {
+        CTFWeaponBase::CalcIsAttackCritical(this);
+		
+        CTFPlayer::RemoveInvisibility(v6);
+        CTFPlayer::RemoveDisguise(v6);
+		
+        if ( ((int (__thiscall *)(CTFWeaponBaseGun *, int, int))this->GetWeaponID)(this, a3, a2) != 15 )
+          CTFPlayer::SpeakWeaponFire(v6, -1);
+        CTFGameStats::Event_PlayerFiredWeapon(&CTF_GameStats, v6, this->m_bCurrentAttackIsCrit);
+		
+        SendWeaponAnim = this->SendWeaponAnim;
+        this->m_iWeaponMode = 0;
+		
+        SendWeaponAnim(this, 180);
+		
+        v6->SetAnimation(v6, PLAYER_ATTACK1);
+		
+        this->FireProjectile(this, v6);
+		
+        retaddr = this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flTimeFireDelay + gpGlobals->curtime;
+		
+        CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &retaddr);
+        v8 = this->__vftable;
+        v10 = CBaseAnimating::SequenceDuration(this) + gpGlobals->curtime;
+        ((void (__thiscall *)(CTFWeaponBaseGun *, _DWORD))v8->SetWeaponIdleTime)(this, LODWORD(v10));
+        if ( this->m_bReloadsSingly )
+        {
+          val = 0;
+          CNetworkVarBase<int,CTFWeaponBase::NetworkVar_m_iReloadMode>::Set(&this->m_iReloadMode, &val);
+        }
+      }
+    }
+  }
+}

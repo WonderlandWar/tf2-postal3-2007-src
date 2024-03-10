@@ -1,0 +1,24 @@
+void __thiscall CTFWeaponBaseGun::ToggleZoom(CTFWeaponBaseGun *this)
+{
+  CBasePlayer *PlayerOwner; // eax
+  bool v3; // cc
+  CTFWeaponBaseGun_vtbl *v4; // eax
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  PlayerOwner = CTFWeaponBase::GetPlayerOwner(this);
+  if ( PlayerOwner )
+  {
+    v3 = CBasePlayer::GetFOV(PlayerOwner) < 75;
+    v4 = this->__vftable;
+    if ( v3 )
+      v4->ZoomOut(this);
+    else
+      v4->ZoomIn(this);
+  }
+  val = gpGlobals->curtime + 0.5;
+  CNetworkVarBase<float,CFish::NetworkVar_m_x>::Set(&this->m_flNextPrimaryAttack, &val);
+  val = gpGlobals->curtime + 1.2;
+  CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flNextSecondaryAttack>::Set(
+    &this->m_flNextSecondaryAttack,
+    &val);
+}

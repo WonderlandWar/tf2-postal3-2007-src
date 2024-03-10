@@ -1,0 +1,24 @@
+void __thiscall CTFWeaponBaseGun::SecondaryAttack(CTFWeaponPDA *this)
+{
+  CTFPlayer *PlayerOwner; // edi
+  float val; // [esp+4h] [ebp-4h] BYREF
+
+  if ( !this->m_bInAttack2 )
+  {
+    PlayerOwner = (CTFPlayer *)CTFWeaponBase::GetPlayerOwner(this);
+    if ( PlayerOwner )
+    {
+      if ( PlayerOwner->IsPlayer(PlayerOwner) && CTFWeaponBase::CanAttack(this) )
+      {
+        CTFPlayer::DoClassSpecialSkill(PlayerOwner);
+		
+        this->m_bInAttack2 = 1;
+		
+        val = gpGlobals->curtime + 0.5;
+        CNetworkVarBase<float,CBaseCombatWeapon::NetworkVar_m_flNextSecondaryAttack>::Set(
+          &this->m_flNextSecondaryAttack,
+          &val);
+      }
+    }
+  }
+}
