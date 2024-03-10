@@ -1,0 +1,15 @@
+void __thiscall C_TFMinigun::UpdateOnRemove(C_TFMinigun *this)
+{
+  CSoundEnvelopeController *Controller; // eax
+
+  if ( this->IsCarriedByLocalPlayer(this) )
+  {
+    if ( this->m_pSoundCur )
+    {
+      Controller = CSoundEnvelopeController::GetController();
+      Controller->SoundDestroy(Controller, this->m_pSoundCur);
+      this->m_pSoundCur = 0;
+    }
+    C_BaseEntity::UpdateOnRemove(this);
+  }
+}

@@ -1,0 +1,17 @@
+void __thiscall CTFMinigun::HandleFireOnEmpty(CTFMinigun *this)
+{
+  CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *p_m_iWeaponState; // edi
+  int val; // [esp+8h] [ebp-4h] BYREF
+
+  p_m_iWeaponState = (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState;
+  val = 4;
+  CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(
+    (CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> *)&this->m_iWeaponState,
+    &val);
+  this->SendWeaponAnim(this, 181);
+  if ( this->m_iWeaponMode == 1 )
+  {
+    val = 3;
+    CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState>::Set(p_m_iWeaponState, &val);
+  }
+}

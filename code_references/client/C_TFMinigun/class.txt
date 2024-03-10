@@ -1,0 +1,67 @@
+class C_TFMinigun : public C_TFWeaponBaseGun
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFMinigun(class C_TFMinigun & );
+    public void C_TFMinigun();
+    public void ~C_TFMinigun();
+	
+    public void Precache();
+    public int GetWeaponID();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public void SharedAttack();
+    public void WeaponIdle();
+    public bool SendWeaponAnim(int );
+    public bool CanHolster();
+    public bool Holster(class C_BaseCombatWeapon * );
+    public bool Lower();
+    public void HandleFireOnEmpty();
+    public void WeaponReset();
+	
+    public void ItemPostFrame();
+    public void ItemPreFrame();
+	
+    public int GetCustomDamageType();
+	
+    public float GetFiringTime();
+	
+    public void WeaponSoundUpdate();
+	
+    public void UpdateBarrelMovement();
+	
+    public float GetBarrelRotation();
+	
+    private void WindUp();
+    private void WindDown();
+	
+    private class CStudioHdr * OnNewModel();
+    private void StandardBlendingRules(class CStudioHdr * ,class Vector * ,class Quaternion * ,float ,int );
+    private void UpdateOnRemove();
+    private void CreateMove(float ,class CUserCmd * ,class QAngle & );
+	
+    private void PlayWeaponShootSound();
+    class NetworkVar_m_iWeaponState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<enum MinigunState_t,C_TFMinigun::NetworkVar_m_iWeaponState> m_iWeaponState;
+    class NetworkVar_m_bCritShot
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,C_TFMinigun::NetworkVar_m_bCritShot> m_bCritShot;
+	
+    private float m_flStartedFiringAt;
+    private float m_flBarrelCurrentVelocity;
+    private float m_flBarrelTargetVelocity;
+    private int m_iBarrelBone;
+    private float m_flBarrelAngle;
+    private class CSoundPatch * m_pSoundCur;
+    private int m_iMinigunSoundCur;
+};

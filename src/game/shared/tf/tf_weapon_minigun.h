@@ -61,16 +61,18 @@ public:
 	virtual bool	Lower( void );
 	virtual void	HandleFireOnEmpty( void );
 	virtual void	WeaponReset( void );
-
-#ifdef GAME_DLL
-	virtual int		UpdateTransmitState( void );
-#endif
-
+		
+	virtual void	ItemPreFrame( void );
+	virtual void	ItemPostFrame( void );
 
 	virtual int GetCustomDamageType() const { return TF_DMG_CUSTOM_MINIGUN; }
 
 	float			GetFiringTime( void ) { return (m_flStartedFiringAt >= 0) ? (gpGlobals->curtime - m_flStartedFiringAt) : 0; }
-
+		
+	// Firing sound
+	void				WeaponSoundUpdate( void );
+	
+	void				UpdateBarrelMovement( void );
 
 #ifdef CLIENT_DLL
 	float GetBarrelRotation();
@@ -82,23 +84,13 @@ private:
 
 	void WindUp( void );
 	void WindDown( void );
-	
-		
-	virtual void	ItemPreFrame( void );
-	virtual void	ItemPostFrame( void );
-	
-	// Firing sound
-	void				WeaponSoundUpdate( void );
-	
-	void				UpdateBarrelMovement( void );
 
 #ifdef CLIENT_DLL
 	// Barrel spinning
 	virtual CStudioHdr *OnNewModel( void );
 	virtual void		StandardBlendingRules( CStudioHdr *hdr, Vector pos[], Quaternion q[], float currentTime, int boneMask );
-
+	virtual void		UpdateOnRemove( void );
 	void				CreateMove( float flInputSampleTime, CUserCmd *pCmd, const QAngle &vecOldViewAngles );
-
 #endif
 
 private:
@@ -107,7 +99,6 @@ private:
 	CNetworkVar( MinigunState_t, m_iWeaponState );
 	CNetworkVar( bool, m_bCritShot );
 
-	float			m_flNextFiringSpeech;
 	float			m_flStartedFiringAt;
 	float	m_flBarrelCurrentVelocity;
 	float	m_flBarrelTargetVelocity;

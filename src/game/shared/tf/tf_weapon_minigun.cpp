@@ -80,6 +80,23 @@ CTFMinigun::~CTFMinigun()
 	WeaponReset();
 }
 
+#ifdef CLIENT_DLL
+void CTFMinigun::UpdateOnRemove( void )
+{
+	if ( IsCarriedByLocalPlayer() )
+	{
+		if ( m_pSoundCur )
+		{
+			CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+			controller.SoundDestroy( m_pSoundCur );
+			m_pSoundCur = NULL;
+		}
+	}
+	BaseClass::UpdateOnRemove();
+}
+
+#endif
+
 void CTFMinigun::WeaponReset( void )
 {
 	BaseClass::WeaponReset();
@@ -87,13 +104,7 @@ void CTFMinigun::WeaponReset( void )
 	m_iWeaponState = AC_STATE_IDLE;
 	m_iWeaponMode = TF_WEAPON_PRIMARY_MODE;
 	m_bCritShot = false;
-	m_flStartedFiringAt = -1;
-	m_flNextFiringSpeech = 0;
-
-	m_flBarrelAngle = 0;
-
-	m_flBarrelCurrentVelocity = 0;
-	m_flBarrelTargetVelocity = 0;
+	m_flStartedFiringAt = 0.0;
 
 	if ( m_pSoundCur )
 	{
@@ -103,14 +114,6 @@ void CTFMinigun::WeaponReset( void )
 
 	m_iMinigunSoundCur = -1;
 }
-
-#ifdef GAME_DLL
-int CTFMinigun::UpdateTransmitState( void )
-{
-	// ALWAYS transmit to all clients.
-	return SetTransmitState( FL_EDICT_ALWAYS );
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -212,14 +215,6 @@ void CTFMinigun::SharedAttack()
 				{
 					m_flStartedFiringAt = gpGlobals->curtime;
 				}
-
-#ifdef GAME_DLL
-				if ( m_flNextFiringSpeech < gpGlobals->curtime )
-				{
-					m_flNextFiringSpeech = gpGlobals->curtime + 5.0;
-					pPlayer->SpeakConceptIfAllowed( MP_CONCEPT_MINIGUN_FIREWEAPON );
-				}
-#endif
 
 				// Only fire if we're actually shooting
 				BaseClass::PrimaryAttack();		// fire and do timers
@@ -378,9 +373,7 @@ void CTFMinigun::WindDown( void )
 	// Update player's speed
 	pPlayer->TeamFortress_SetSpeed();
 
-#ifdef CLIENT_DLL
 	m_flBarrelTargetVelocity = 0;
-#endif
 }
 
 
@@ -446,16 +439,13 @@ bool CTFMinigun::SendWeaponAnim( int iActivity )
 //-----------------------------------------------------------------------------
 void CTFMinigun::HandleFireOnEmpty( void )
 {
-	if ( m_iWeaponState == AC_STATE_FIRING || m_iWeaponState == AC_STATE_SPINNING )
+	m_iWeaponState = AC_STATE_DRYFIRE;
+
+	SendWeaponAnim( ACT_VM_SECONDARYATTACK );
+
+	if ( m_iWeaponMode == TF_WEAPON_SECONDARY_MODE )
 	{
-		 m_iWeaponState = AC_STATE_DRYFIRE;
-
-		 SendWeaponAnim( ACT_VM_SECONDARYATTACK );
-
-		 if ( m_iWeaponMode == TF_WEAPON_SECONDARY_MODE )
-		 {
-			m_iWeaponState = AC_STATE_SPINNING;
-		 }
+		m_iWeaponState = AC_STATE_SPINNING;
 	}
 }
 
