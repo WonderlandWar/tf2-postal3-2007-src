@@ -1,0 +1,4 @@
+const char *__thiscall CSpectatorMenu::GetName(CSpectatorMenu *this)
+{
+  return "specmenu";
+}

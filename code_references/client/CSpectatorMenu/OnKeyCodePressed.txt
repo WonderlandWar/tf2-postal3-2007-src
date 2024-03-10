@@ -1,0 +1,5 @@
+void __thiscall CSpectatorMenu::OnKeyCodePressed(CSpectatorMenu *this, ButtonCode_t code)
+{
+  if ( code == this->m_iDuckKey )
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, &this->IViewPortPanel, 0);
+}

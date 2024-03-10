@@ -1,0 +1,4 @@
+BOOL __thiscall CSpectatorGUI::ShouldShowPlayerLabel(CSpectatorGUI *this, int specmode)
+{
+  return specmode == 4 || specmode == 5;
+}

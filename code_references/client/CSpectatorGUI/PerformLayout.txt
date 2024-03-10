@@ -1,0 +1,12 @@
+void __thiscall CSpectatorGUI::PerformLayout(CSpectatorGUI *this)
+{
+  int w; // [esp+4h] [ebp-10h] BYREF
+  int y; // [esp+8h] [ebp-Ch] BYREF
+  int x; // [esp+Ch] [ebp-8h] BYREF
+  int v5; // [esp+10h] [ebp-4h] BYREF
+
+  GetHudSize(&y, &w);
+  vgui::Panel::SetBounds(this, 0, 0, y, w);
+  vgui::Panel::GetPos(this->m_pBottomBarBlank, &v5, &x);
+  vgui::Panel::SetSize(this->m_pBottomBarBlank, y, w - x);
+}

@@ -1,0 +1,10 @@
+void __thiscall CSpectatorMenu::PerformLayout(CSpectatorMenu *this)
+{
+  int Tall; // eax
+  int h; // [esp+4h] [ebp-8h] BYREF
+  int v4; // [esp+8h] [ebp-4h] BYREF
+
+  GetHudSize(&h, &v4);
+  Tall = vgui::Panel::GetTall(this);
+  vgui::Panel::SetSize(this, h, Tall);
+}

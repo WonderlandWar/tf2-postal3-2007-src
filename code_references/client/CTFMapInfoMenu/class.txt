@@ -1,0 +1,62 @@
+class CTFMapInfoMenu : public vgui::Frame, public IViewPortPanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFMapInfoMenu_RegisterMap
+    {
+        public void CTFMapInfoMenu_RegisterMap();
+    };
+    public class CTFMapInfoMenu::CTFMapInfoMenu_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFMapInfoMenu_Register
+    {
+        public void CTFMapInfoMenu_Register();
+    };
+    public class CTFMapInfoMenu::CTFMapInfoMenu_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFMapInfoMenu_RegisterKBMap
+    {
+        public void CTFMapInfoMenu_RegisterKBMap();
+    };
+    public class CTFMapInfoMenu::CTFMapInfoMenu_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFMapInfoMenu(class CTFMapInfoMenu & );
+    public void CTFMapInfoMenu(class IViewPort * );
+    public void ~CTFMapInfoMenu();
+    public char * GetName();
+    public void SetData(class KeyValues * );
+    public void Reset();
+    public void Update();
+    public bool NeedsUpdate();
+    public bool HasInputElements();
+    public void ShowPanel(bool );
+    public unsigned int GetVPanel();
+    public bool IsVisible();
+    public void SetParent(unsigned int );
+    protected void OnKeyCodePressed(enum ButtonCode_t );
+    protected void PerformLayout();
+    protected void ApplySchemeSettings(class vgui::IScheme * );
+    protected void OnCommand(char * );
+    private void LoadMapPage(char * );
+    private void SetMapTitle();
+    private bool CheckForIntroMovie();
+    private void CheckIntroButton();
+    protected class IViewPort * m_pViewPort;
+    protected class CTFLabel * m_pTitle;
+    protected class CTFRichText * m_pMapInfo;
+    protected class vgui::HTML * m_pMapInfoHTML;
+    protected class CTFButton * m_pContinue;
+    protected class CTFButton * m_pBack;
+    protected class CTFButton * m_pIntro;
+    protected class vgui::ImagePanel * m_pMapImage;
+    protected char m_szMapName[260];
+    public class CTFMapInfoMenu & operator=(class CTFMapInfoMenu & );
+    public void * __vecDelDtor(unsigned int );
+};

@@ -53,8 +53,6 @@ public:
 
 	int MapIndexToObjectID( int index );
 
-	virtual int GetRenderGroupPriority() { return 50; }
-
 private:
 	CEngyDestroyMenuItem *m_pActiveItems[4];
 	CEngyDestroyMenuItem *m_pInactiveItems[4];

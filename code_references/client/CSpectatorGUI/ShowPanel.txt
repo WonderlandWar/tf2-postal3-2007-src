@@ -1,0 +1,17 @@
+void __thiscall CSpectatorGUI::ShowPanel(CSpectatorGUI *this, int bShow)
+{
+  if ( (_BYTE)bShow
+    && !(*(unsigned __int8 (__thiscall **)(vgui::Panel::PanelMessageFunc_InternalInvalidateLayout *))(*(_DWORD *)&this[-1].m_InternalInvalidateLayout_register + 128))(&this[-1].m_InternalInvalidateLayout_register) )
+  {
+    this->m_InternalKeyTyped_register = 0;
+  }
+  (*(void (__thiscall **)(vgui::Panel::PanelMessageFunc_InternalInvalidateLayout *, int))(*(_DWORD *)&this[-1].m_InternalInvalidateLayout_register
+                                                                                        + 124))(
+    &this[-1].m_InternalInvalidateLayout_register,
+    bShow);
+  if ( !(_BYTE)bShow )
+  {
+    if ( this->m_InternalKeyTyped_register )
+      gViewPortInterface->ShowPanel(gViewPortInterface, "scores", 0);
+  }
+}

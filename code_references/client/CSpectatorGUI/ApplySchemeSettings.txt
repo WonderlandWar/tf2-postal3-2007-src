@@ -1,0 +1,24 @@
+void __thiscall CSpectatorGUI::ApplySchemeSettings(CSpectatorGUI *this, vgui::IScheme *pScheme)
+{
+  void (__thiscall *SetBgColor)(vgui::Panel *, Color); // edx
+  vgui::Panel_vtbl *v4; // edi
+  Color *v5; // eax
+  vgui::Panel_vtbl *v6; // edi
+  Color *v7; // eax
+
+  this->LoadControlSettings(this, "Resource/UI/Spectator.res", 0, 0);
+  this->m_pBottomBarBlank->SetVisible(this->m_pBottomBarBlank, 1);
+  this->m_pTopBar->SetVisible(this->m_pTopBar, 1);
+  vgui::Panel::ApplySchemeSettings(this, pScheme);
+  SetBgColor = this->SetBgColor;
+  pScheme = 0;
+  ((void (__thiscall *)(CSpectatorGUI *, _DWORD))SetBgColor)(this, 0);
+  v4 = this->m_pTopBar->__vftable;
+  v5 = this->GetBlackBarColor(this, &pScheme);
+  ((void (__thiscall *)(vgui::Panel *, _DWORD))v4->SetBgColor)(this->m_pTopBar, *v5);
+  v6 = this->m_pBottomBarBlank->__vftable;
+  v7 = this->GetBlackBarColor(this, &pScheme);
+  ((void (__thiscall *)(vgui::Panel *, _DWORD))v6->SetBgColor)(this->m_pBottomBarBlank, *v7);
+  this->SetPaintBorderEnabled(this, 0);
+  this->SetBorder(this, 0);
+}

@@ -1,0 +1,11 @@
+void __thiscall CSpectatorMenu::OnCommand(CSpectatorMenu *this, const char *command)
+{
+  if ( !_stricmp(command, "specnext") )
+  {
+    engine->ClientCmd(engine, "spec_next");
+  }
+  else if ( !_stricmp(command, "specprev") )
+  {
+    engine->ClientCmd(engine, "spec_prev");
+  }
+}

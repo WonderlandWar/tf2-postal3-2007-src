@@ -1,0 +1,4 @@
+void __thiscall CSpectatorMenu::Reset(CSpectatorMenu *this)
+{
+  vgui::ComboBox::RemoveAll(*(vgui::ComboBox **)&this->m_OnCommand_register);
+}

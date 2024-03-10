@@ -1,0 +1,45 @@
+void __thiscall CTFMapInfoMenu::OnCommand(CTFMapInfoMenu *this, const char *command)
+{
+  IViewPortPanel *v3; // eax
+  IViewPortPanel *v4; // eax
+  IViewPortPanel *v5; // eax
+  bool v6; // zf
+  void (__thiscall *ShowPanel)(IViewPort *, const char *, bool); // eax
+
+  if ( !strcmp(command, "back") )
+  {
+    if ( this )
+      v3 = &this->IViewPortPanel;
+    else
+      v3 = 0;
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, v3, 0);
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, "info", 1);
+  }
+  else if ( !strcmp(command, "continue") )
+  {
+    if ( this )
+      v4 = &this->IViewPortPanel;
+    else
+      v4 = 0;
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, v4, 0);
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, "team", 1);
+  }
+  else if ( !strcmp(command, "intro") )
+  {
+    if ( this )
+      v5 = &this->IViewPortPanel;
+    else
+      v5 = 0;
+    this->m_pViewPort->ShowPanel(this->m_pViewPort, v5, 0);
+    v6 = !CTFMapInfoMenu::CheckForIntroMovie(this);
+    ShowPanel = this->m_pViewPort->ShowPanel;
+    if ( v6 )
+      ((void (__stdcall *)(const char *))ShowPanel)("team");
+    else
+      ((void (__stdcall *)(const char *))ShowPanel)("intro");
+  }
+  else
+  {
+    vgui::Frame::OnCommand(this, command);
+  }
+}

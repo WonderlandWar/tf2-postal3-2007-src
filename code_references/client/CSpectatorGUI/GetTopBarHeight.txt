@@ -1,0 +1,4 @@
+int __thiscall CSpectatorGUI::GetTopBarHeight(CSpectatorGUI *this)
+{
+  return vgui::Panel::GetTall(this->m_pTopBar);
+}

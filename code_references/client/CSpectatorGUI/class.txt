@@ -1,0 +1,73 @@
+class CSpectatorGUI : public vgui::EditablePanel, public IViewPortPanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CSpectatorGUI_RegisterMap
+    {
+        public void CSpectatorGUI_RegisterMap();
+    };
+    public class CSpectatorGUI::CSpectatorGUI_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CSpectatorGUI_Register
+    {
+        public void CSpectatorGUI_Register();
+    };
+    public class CSpectatorGUI::CSpectatorGUI_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CSpectatorGUI_RegisterKBMap
+    {
+        public void CSpectatorGUI_RegisterKBMap();
+    };
+    public class CSpectatorGUI::CSpectatorGUI_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CSpectatorGUI(class CSpectatorGUI & );
+    public void CSpectatorGUI(class IViewPort * );
+    public void ~CSpectatorGUI();
+    public char * GetName();
+    public void SetData(class KeyValues * );
+    public void Reset();
+    public void Update();
+    public bool NeedsUpdate();
+    public bool HasInputElements();
+    public void ShowPanel(bool );
+	
+    public unsigned int GetVPanel();
+    public bool IsVisible();
+    public void SetParent(unsigned int );
+    public void OnThink();
+	
+    public int GetTopBarHeight();
+    public int GetBottomBarHeight();
+	
+    public bool ShouldShowPlayerLabel(int );
+	
+    public class Color GetBlackBarColor();
+	
+	
+    protected void SetLabelText(char * ,wchar_t * );
+    protected void SetLabelText(char * ,char * );
+    protected void MoveLabelToFront(char * );
+    protected void UpdateTimer();
+    protected void SetLogoImage(char * );
+	
+	
+    enum _unnamed_12024
+    {
+        INSET_OFFSET=2
+    };
+    protected void PerformLayout();
+    protected void ApplySchemeSettings(class vgui::IScheme * );
+    protected class vgui::Panel * m_pTopBar;
+    protected class vgui::Panel * m_pBottomBarBlank;
+    protected class vgui::ImagePanel * m_pBannerImage;
+    protected class vgui::Label * m_pPlayerLabel;
+    protected class IViewPort * m_pViewPort;
+    protected bool m_bSpecScoreboard;
+};

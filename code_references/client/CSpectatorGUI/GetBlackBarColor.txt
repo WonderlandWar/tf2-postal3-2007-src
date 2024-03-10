@@ -1,0 +1,11 @@
+Color *__thiscall CSpectatorGUI::GetBlackBarColor(CSpectatorGUI *this, Color *result)
+{
+  Color *v2; // eax
+
+  v2 = result;
+  result->_color[0] = 0;
+  result->_color[1] = 0;
+  result->_color[2] = 0;
+  result->_color[3] = -60;
+  return v2;
+}

@@ -1,0 +1,42 @@
+void __thiscall CSpectatorMenu::ShowPanel(CSpectatorMenu *this, int bShow)
+{
+  char *p_m_pDragDrop; // edi
+  int v4; // eax
+  C_HLTVCamera *v5; // eax
+
+  p_m_pDragDrop = (char *)&this[-1].m_pDragDrop;
+  if ( vgui::Panel::IsVisible((CSpectatorMenu *)((char *)this - 232)) != (_BYTE)bShow )
+  {
+    v4 = *(_DWORD *)p_m_pDragDrop;
+    if ( (_BYTE)bShow )
+    {
+      (*(void (__thiscall **)(char *, int))(v4 + 520))(p_m_pDragDrop, 1);
+      (*(void (__thiscall **)(char *, int))(*(_DWORD *)p_m_pDragDrop + 524))(p_m_pDragDrop, 1);
+    }
+    else
+    {
+      (*(void (__thiscall **)(char *, _DWORD))(v4 + 124))(p_m_pDragDrop, 0);
+      (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_pDragDrop + 520))(p_m_pDragDrop, 0);
+      (*(void (__thiscall **)(char *, _DWORD))(*(_DWORD *)p_m_pDragDrop + 524))(p_m_pDragDrop, 0);
+    }
+    LOBYTE(bShow) = 1;
+    if ( engine->IsHLTV(engine) )
+    {
+      v5 = HLTVCamera();
+      if ( C_HLTVCamera::IsPVSLocked(v5) )
+        LOBYTE(bShow) = 0;
+    }
+    (*(void (__thiscall **)(_DWORD, int))(**(_DWORD **)&this->m_InternalCursorExited_register + 124))(
+      *(_DWORD *)&this->m_InternalCursorExited_register,
+      bShow);
+    (*(void (__thiscall **)(_DWORD, int))(**(_DWORD **)&this->m_InternalMouseReleased_register + 124))(
+      *(_DWORD *)&this->m_InternalMouseReleased_register,
+      bShow);
+    (*(void (__thiscall **)(_DWORD, int))(**(_DWORD **)&this->m_OnCommand_register + 124))(
+      *(_DWORD *)&this->m_OnCommand_register,
+      bShow);
+    (*(void (__thiscall **)(_DWORD, int))(**(_DWORD **)&this->m_OnDelete_register + 124))(
+      *(_DWORD *)&this->m_OnDelete_register,
+      bShow);
+  }
+}

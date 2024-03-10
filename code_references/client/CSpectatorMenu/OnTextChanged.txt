@@ -1,0 +1,42 @@
+void __thiscall CSpectatorMenu::OnTextChanged(CSpectatorMenu *this, KeyValues *data)
+{
+  void *Ptr; // eax
+  vgui::ComboBox *v4; // eax
+  KeyValues *ActiveItemUserData; // esi
+  const char *String; // esi
+  int SpectatorTarget; // edi
+  IGameResources *v8; // eax
+  const char *v9; // eax
+  char command[128]; // [esp+0h] [ebp-88h] BYREF
+
+  Ptr = KeyValues::GetPtr(data, "panel", 0);
+  v4 = (vgui::ComboBox *)__RTDynamicCast(
+                           Ptr,
+                           0,
+                           &vgui::Panel `RTTI Type Descriptor',
+                           &vgui::ComboBox `RTTI Type Descriptor',
+                           0);
+  if ( v4 == this->m_pConfigSettings )
+  {
+    ((void (__stdcall *)(const char *))this->m_pConfigSettings->SetText)("#Spec_Options");
+  }
+  else if ( v4 == this->m_pPlayerList )
+  {
+    ActiveItemUserData = vgui::ComboBox::GetActiveItemUserData(v4);
+    if ( ActiveItemUserData )
+    {
+      if ( GameResources() )
+      {
+        String = KeyValues::GetString(ActiveItemUserData, "player", locale);
+        SpectatorTarget = GetSpectatorTarget();
+        v8 = GameResources();
+        v9 = v8->GetPlayerName(v8, SpectatorTarget);
+        if ( _stricmp(v9, String) )
+        {
+          V_snprintf(&command[4], 128, "spec_player \"%s\"", String);
+          ((void (__stdcall *)(char *))engine->ClientCmd)(&command[4]);
+        }
+      }
+    }
+  }
+}

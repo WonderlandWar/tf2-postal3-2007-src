@@ -1,0 +1,17 @@
+void __thiscall CSpectatorGUI::OnThink(CSpectatorGUI *this)
+{
+  IViewPortPanel *m_nValue; // eax
+
+  vgui::Panel::OnThink(this);
+  if ( this->IsVisible(this) )
+  {
+    m_nValue = (IViewPortPanel *)spec_scoreboard.m_pParent->m_nValue;
+    if ( this->m_bSpecScoreboard != (m_nValue != 0)
+      && (!m_nValue || (m_nValue = gViewPortInterface->GetActivePanel(gViewPortInterface)) == 0) )
+    {
+      LOBYTE(m_nValue) = spec_scoreboard.m_pParent->m_nValue != 0;
+      this->m_bSpecScoreboard = (char)m_nValue;
+      gViewPortInterface->ShowPanel(gViewPortInterface, "scores", (bool)m_nValue);
+    }
+  }
+}

@@ -244,28 +244,8 @@ void CTFMapInfoMenu::OnCommand( const char *command )
 	else if ( !Q_strcmp( command, "continue" ) )
 	{
 		m_pViewPort->ShowPanel( this, false );
+		m_pViewPort->ShowPanel( PANEL_TEAM, true );
 
-		if ( CheckForIntroMovie() && !HasViewedMovieForMap() )
-		{
-			m_pViewPort->ShowPanel( PANEL_INTRO, true );
-
-			UTIL_IncrementMapKey( "viewed" );
-		}
-		else
-		{
-			// On console, we may already have a team due to the lobby assigning us one.
-			// We tell the server we're done with the map info menu, and it decides what to do with us.
-			if ( IsX360() )
-			{
-				engine->ClientCmd( "closedwelcomemenu" );
-			}
-			else if ( GetLocalPlayerTeam() == TEAM_UNASSIGNED )
-			{
-				m_pViewPort->ShowPanel( PANEL_TEAM, true );
-			}
-
-			UTIL_IncrementMapKey( "viewed" );
-		}
 	}
 	else if ( !Q_strcmp( command, "intro" ) )
 	{

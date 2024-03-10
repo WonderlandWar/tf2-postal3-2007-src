@@ -1,0 +1,12 @@
+int __thiscall CSpectatorMenu::PlayerAddItem(CSpectatorMenu *this, int itemID, wchar_t *name, KeyValues *data)
+{
+  bool v5; // al
+  vgui::ComboBox *m_pPlayerList; // ecx
+
+  v5 = this->m_pPlayerList->IsItemIDValid(this->m_pPlayerList, itemID);
+  m_pPlayerList = this->m_pPlayerList;
+  if ( !v5 )
+    return m_pPlayerList->AddItem(m_pPlayerList, name, data) + 1;
+  m_pPlayerList->UpdateItem(m_pPlayerList, itemID, name, data);
+  return itemID + 1;
+}

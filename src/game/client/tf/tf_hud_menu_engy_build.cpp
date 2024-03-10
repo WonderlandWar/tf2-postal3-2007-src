@@ -56,18 +56,6 @@ CHudMenuEngyBuild::CHudMenuEngyBuild( const char *pElementName ) : CHudElement( 
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
 
-	m_pActiveSelection = NULL;
-
-	m_iSelectedItem = -1;
-
-	m_pBuildLabelBright = NULL;
-	m_pBuildLabelDim = NULL;
-
-	m_pDestroyLabelBright = NULL;
-	m_pDestroyLabelDim = NULL;
-
-	m_bInConsoleMode = false;
-
 	RegisterForRenderGroup( "mid" );
 }
 
@@ -76,75 +64,29 @@ CHudMenuEngyBuild::CHudMenuEngyBuild( const char *pElementName ) : CHudElement( 
 //-----------------------------------------------------------------------------
 void CHudMenuEngyBuild::ApplySchemeSettings( IScheme *pScheme )
 {
-	bool b360Style = ( IsConsole() || tf_build_menu_controller_mode.GetBool() );
-
 	// load control settings...
+	LoadControlSettings( "resource/UI/build_menu/HudMenuEngyBuild.res" );
 
-	if ( b360Style )
-	{
-		LoadControlSettings( "resource/UI/build_menu_360/HudMenuEngyBuild.res" );
+	// Load the already built images, not destroyable
+	m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_already_built.res" );
+	m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_already_built.res" );
+	m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_already_built.res" );
+	m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_already_built.res" );
 
-		// Load the already built images, destroyable
-		m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu_360/sentry_already_built.res" );
-		m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu_360/dispenser_already_built.res" );
-		m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu_360/tele_entrance_already_built.res" );
-		m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu_360/tele_exit_already_built.res" );
+	m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_active.res" );
+	m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_active.res" );
+	m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_active.res" );
+	m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_active.res" );
 
-		m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu_360/sentry_active.res" );
-		m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu_360/dispenser_active.res" );
-		m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu_360/tele_entrance_active.res" );
-		m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu_360/tele_exit_active.res" );
-
-		m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu_360/sentry_cant_afford.res" );
-		m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu_360/dispenser_cant_afford.res" );
-		m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu_360/tele_entrance_cant_afford.res" );
-		m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu_360/tele_exit_cant_afford.res" );
-
-		m_pActiveSelection = dynamic_cast< CIconPanel * >( FindChildByName( "active_selection_bg" ) );
-
-		m_pBuildLabelBright = dynamic_cast< CTFLabel * >( FindChildByName( "BuildHintLabel_Bright" ) );
-		m_pBuildLabelDim = dynamic_cast< CTFLabel * >( FindChildByName( "BuildHintLabel_Dim" ) );
-	
-		m_pDestroyLabelBright = dynamic_cast< CTFLabel * >( FindChildByName( "DestroyHintLabel_Bright" ) );
-		m_pDestroyLabelDim = dynamic_cast< CTFLabel * >( FindChildByName( "DestroyHintLabel_Dim" ) );
-
-		// Reposition the activeselection to the default position
-		m_iSelectedItem = -1;	// force reposition
-		SetSelectedItem( 1 );
-	}
-	else
-	{
-		LoadControlSettings( "resource/UI/build_menu/HudMenuEngyBuild.res" );
-
-		// Load the already built images, not destroyable
-		m_pAlreadyBuiltObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_already_built.res" );
-		m_pAlreadyBuiltObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_already_built.res" );
-		m_pAlreadyBuiltObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_already_built.res" );
-		m_pAlreadyBuiltObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_already_built.res" );
-
-		m_pAvailableObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_active.res" );
-		m_pAvailableObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_active.res" );
-		m_pAvailableObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_active.res" );
-		m_pAvailableObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_active.res" );
-
-		m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_cant_afford.res" );
-		m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_cant_afford.res" );
-		m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_cant_afford.res" );
-		m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_cant_afford.res" );
-
-		m_pActiveSelection = NULL;
-
-		m_pBuildLabelBright = NULL;
-		m_pBuildLabelDim = NULL;
-
-		m_pDestroyLabelBright = NULL;
-		m_pDestroyLabelDim = NULL;
-	}
+	m_pCantAffordObjects[0]->LoadControlSettings( "resource/UI/build_menu/sentry_cant_afford.res" );
+	m_pCantAffordObjects[1]->LoadControlSettings( "resource/UI/build_menu/dispenser_cant_afford.res" );
+	m_pCantAffordObjects[2]->LoadControlSettings( "resource/UI/build_menu/tele_entrance_cant_afford.res" );
+	m_pCantAffordObjects[3]->LoadControlSettings( "resource/UI/build_menu/tele_exit_cant_afford.res" );
 
 	// Set the cost label
 	for ( int i=0; i<4; i++ )
 	{
-		int iCost = GetObjectInfo( GetBuildingIDFromSlot( i+1 ) )->m_Cost;
+		int iCost = GetObjectInfo( MapIndexToObjectID( i ) )->m_Cost;
 
 		m_pAvailableObjects[i]->SetDialogVariable( "metal", iCost );
 		m_pAlreadyBuiltObjects[i]->SetDialogVariable( "metal", iCost );
@@ -181,30 +123,27 @@ bool CHudMenuEngyBuild::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int CHudMenuEngyBuild::GetBuildingIDFromSlot( int iSlot )
+int CHudMenuEngyBuild::MapIndexToObjectID( int index )
 {
-	int iBuilding = OBJ_LAST;
-	switch( iSlot )
+	static int iRemapIndexToObjectID[4] = 
 	{
-	case 1:
-		iBuilding = OBJ_SENTRYGUN;
-		break;
-	case 2:
-		iBuilding = OBJ_DISPENSER;
-		break;
-	case 3:
-		iBuilding = OBJ_TELEPORTER_ENTRANCE;
-		break;
-	case 4:
-		iBuilding = OBJ_TELEPORTER_EXIT;
-		break;
+		OBJ_SENTRYGUN,
+		OBJ_DISPENSER,
+		OBJ_TELEPORTER_ENTRANCE,
+		OBJ_TELEPORTER_EXIT
+	};
 
-	default:
-		Assert( !"What slot are we asking for and why?" );
-		break;
+	Assert( index >= 0 && index <= 3 );
+
+	if ( index >= 0 && index <= 3 )
+	{
+		return iRemapIndexToObjectID[index];
 	}
-
-	return iBuilding;
+	else
+	{
+		Assert( !"Bad param to CHudMenuEngyBuild::MMapIndexToObjectID" );
+		return OBJ_LAST;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -222,167 +161,67 @@ int	CHudMenuEngyBuild::HudElementKeyInput( int down, ButtonCode_t keynum, const 
 		return 1;
 	}
 
-	bool bController = ( IsConsole() || ( keynum >= JOYSTICK_FIRST ) );
+	int iSlot = 0;
 
-	if ( bController )
+	switch( keynum )
 	{
-		int iNewSelection = m_iSelectedItem;
+	case KEY_1:
+	case KEY_XBUTTON_UP:
+		iSlot = OBJ_SENTRYGUN;
+		break;
+	case KEY_2:
+    case KEY_XBUTTON_RIGHT:
+		iSlot = OBJ_DISPENSER;
+		break;
+	case KEY_3:
+	case KEY_XBUTTON_DOWN:
+		iSlot = OBJ_TELEPORTER_ENTRANCE;
+		break;
+	case KEY_4:
+	case KEY_XBUTTON_LEFT:
+		iSlot = OBJ_TELEPORTER_EXIT;
+		break;
 
-		switch( keynum )
-		{
-		case KEY_XBUTTON_UP:
-			// jump to last
-			iNewSelection = 4;
-			break;
-
-		case KEY_XBUTTON_DOWN:
-			// jump to first
-			iNewSelection = 1;
-			break;
-
-		case KEY_XBUTTON_RIGHT:
-			// move selection to the right
-			iNewSelection++;
-			if ( iNewSelection > 4 )
-				iNewSelection = 1;
-			break;
-
-		case KEY_XBUTTON_LEFT:
-			// move selection to the left
-			iNewSelection--;
-			if ( iNewSelection < 1 )
-				iNewSelection = 4;
-			break;
-
-		case KEY_XBUTTON_A:
-		case KEY_XBUTTON_RTRIGGER:
-			// build selected item
-			SendBuildMessage( m_iSelectedItem );
-			return 0;
-
-		case KEY_XBUTTON_Y:
-		case KEY_XBUTTON_LTRIGGER:
-			{
-				// destroy selected item
-				bool bSuccess = SendDestroyMessage( m_iSelectedItem );
-
-				if ( bSuccess )
-				{
-					engine->ExecuteClientCmd( "lastinv" );
-				}
-			}
-			return 0;
-
-		case KEY_XBUTTON_B:
-			// cancel, close the menu
-			engine->ExecuteClientCmd( "lastinv" );
-			return 0;
-
-		default:
-			return 1;	// key not handled
-		}
-
-		SetSelectedItem( iNewSelection );
-
+	case KEY_5:
+	case KEY_6:
+	case KEY_7:
+	case KEY_8:
+	case KEY_9:
+		// Eat these keys
 		return 0;
+
+	case KEY_0:
+	case KEY_XBUTTON_B:
+		// cancel, close the menu
+		engine->ExecuteClientCmd( "lastinv" );
+		return 0;
+
+	default:
+		return 1;	// key not handled
 	}
-	else
-	{
-		int iSlot = 0;
-
-		switch( keynum )
-		{
-		case KEY_1:
-			iSlot = 1;
-			break;
-		case KEY_2:
-			iSlot = 2;
-			break;
-		case KEY_3:
-			iSlot = 3;
-			break;
-		case KEY_4:
-			iSlot = 4;
-			break;
-
-		case KEY_5:
-		case KEY_6:
-		case KEY_7:
-		case KEY_8:
-		case KEY_9:
-			// Eat these keys
-			return 0;
-
-		case KEY_0:
-		case KEY_XBUTTON_B:
-			// cancel, close the menu
-			engine->ExecuteClientCmd( "lastinv" );
-			return 0;
-
-		default:
-			return 1;	// key not handled
-		}
-
-		if ( iSlot > 0 )
-		{
-			SendBuildMessage( iSlot );
-			return 0;
-		}
-	}
-
-	return 1;	// key not handled
-}
-
-void CHudMenuEngyBuild::SendBuildMessage( int iSlot )
-{
+	
 	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
 
 	if ( !pLocalPlayer )
-		return;
+		return 1;
 
-	int iBuilding = GetBuildingIDFromSlot( iSlot );
-
-	C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iBuilding );
-	int iCost = GetObjectInfo( iBuilding )->m_Cost;
+	C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iSlot );
+	int iCost = GetObjectInfo( iSlot )->m_Cost;
 
 	if ( pObj == NULL && pLocalPlayer->GetAmmoCount( TF_AMMO_METAL ) >= iCost )
 	{
 		char szCmd[128];
-		Q_snprintf( szCmd, sizeof(szCmd), "build %d", iBuilding );
+		Q_snprintf( szCmd, sizeof(szCmd), "build %d", iSlot );
 		engine->ClientCmd( szCmd );
+		return 0;
 	}
 	else
 	{
 		pLocalPlayer->EmitSound( "Player.DenyWeaponSelection" );
-	}
-}
-
-bool CHudMenuEngyBuild::SendDestroyMessage( int iSlot )
-{
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-
-	if ( !pLocalPlayer )
-		return false;
-
-	bool bSuccess = false;
-
-	int iBuilding = GetBuildingIDFromSlot( iSlot );
-
-	C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iBuilding );
-
-	if ( pObj != NULL )
-	{
-		char szCmd[128];
-		Q_snprintf( szCmd, sizeof(szCmd), "destroy %d", iBuilding );
-		engine->ClientCmd( szCmd );
-		bSuccess = true; 
-	}
-	else
-	{
-		pLocalPlayer->EmitSound( "Player.DenyWeaponSelection" );
+		return 0;
 	}
 
-	return bSuccess;
+	return 1;	// key not handled
 }
 
 void CHudMenuEngyBuild::OnTick( void )
@@ -396,7 +235,7 @@ void CHudMenuEngyBuild::OnTick( void )
 
 	for ( int i=0;i<4; i++ )
 	{
-		int iRemappedObjectID = GetBuildingIDFromSlot( i + 1 );
+		int iRemappedObjectID = MapIndexToObjectID( i );
 
 		// update this slot
 		C_BaseObject *pObj = NULL;
@@ -435,14 +274,6 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 		// close the weapon selection menu
 		engine->ClientCmd( "cancelselect" );
 
-		bool bConsoleMode = ( IsConsole() || tf_build_menu_controller_mode.GetBool() );
-
-		if ( bConsoleMode != m_bInConsoleMode )
-		{
-			InvalidateLayout( true, true );
-			m_bInConsoleMode = bConsoleMode;
-		}
-
 		// set the %lastinv% dialog var to our binding
 		const char *key = engine->Key_LookupBinding( "lastinv" );
 		if ( !key )
@@ -465,7 +296,7 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 		int iSlot;
 		for ( iSlot = 1; iSlot <= 4; iSlot++ )
 		{
-			int iBuilding = GetBuildingIDFromSlot( iSlot );
+			int iBuilding = MapIndexToObjectID( iSlot );
 			C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iBuilding );
 
 			if ( pObj == NULL )
@@ -475,9 +306,6 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 			}
 		}
 
-		m_iSelectedItem = -1;	//force redo
-		SetSelectedItem( iDefaultSlot );
-
 		HideLowerPriorityHudElementsInGroup( "mid" );
 	}
 	else
@@ -486,66 +314,4 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 	}
 
 	BaseClass::SetVisible( state );
-}
-
-void CHudMenuEngyBuild::SetSelectedItem( int iSlot )
-{
-	if ( m_iSelectedItem != iSlot )
-	{
-		m_iSelectedItem = iSlot;
-
-		// move the selection item to the new position
-		if ( m_pActiveSelection )
-		{
-			// move the selection background
-			int x, y;
-			m_pAlreadyBuiltObjects[m_iSelectedItem-1]->GetPos( x, y );
-
-			x -= XRES(4);
-			y -= XRES(4);
-
-			m_pActiveSelection->SetPos( x, y );
-
-			UpdateHintLabels();			
-		}
-	}
-}
-
-void CHudMenuEngyBuild::UpdateHintLabels( void )
-{
-	// hilight the action we can perform ( build or destroy or neither )
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-
-	if ( pLocalPlayer )
-	{
-		int iBuilding = GetBuildingIDFromSlot( m_iSelectedItem );
-		C_BaseObject *pObj = pLocalPlayer->GetObjectOfType( iBuilding );
-
-		bool bDestroyLabelBright = false;
-		bool bBuildLabelBright = false;
-
-		if ( pObj )
-		{
-			// hilight destroy, we have a building
-			bDestroyLabelBright = true;
-		}
-		else if ( pLocalPlayer->GetAmmoCount( TF_AMMO_METAL ) >= GetObjectInfo( iBuilding )->m_Cost )	// I can afford it
-		{
-			// hilight build, we can build this
-			bBuildLabelBright = true;
-		}
-		else
-		{
-			// dim both, do nothing
-		}
-
-		if ( m_pDestroyLabelBright && m_pDestroyLabelDim && m_pBuildLabelBright && m_pBuildLabelDim )
-		{
-			m_pDestroyLabelBright->SetVisible( bDestroyLabelBright );
-			m_pDestroyLabelDim->SetVisible( !bDestroyLabelBright );
-
-			m_pBuildLabelBright->SetVisible( bBuildLabelBright );
-			m_pBuildLabelDim->SetVisible( !bBuildLabelBright );
-		}
-	}
 }

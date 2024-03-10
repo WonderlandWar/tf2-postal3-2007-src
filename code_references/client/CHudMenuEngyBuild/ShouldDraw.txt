@@ -1,0 +1,17 @@
+bool __thiscall CHudMenuEngyBuild::ShouldDraw(CHudMenuEngyBuild *this)
+{
+  C_TFPlayer *LocalTFPlayer; // eax
+  C_BaseCombatCharacter *v2; // edi
+  C_BaseCombatWeapon *ActiveTFWeapon; // eax
+  C_BaseCombatWeapon *v5; // esi
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  v2 = LocalTFPlayer;
+  if ( !LocalTFPlayer )
+    return 0;
+  ActiveTFWeapon = C_TFPlayer::GetActiveTFWeapon(LocalTFPlayer);
+  v5 = ActiveTFWeapon;
+  return ActiveTFWeapon
+      && v2 == C_BaseCombatWeapon::GetOwner(ActiveTFWeapon)
+      && ((int (__thiscall *)(C_BaseCombatWeapon *))v5->C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].SetRefEHandle)(v5) == 40;
+}

@@ -1,0 +1,44 @@
+void __thiscall CSpectatorMenu::OnThink(CSpectatorMenu *this)
+{
+  IGameResources *v2; // edi
+  int SpectatorTarget; // eax
+  const char *v4; // ebx
+  const char *String; // edi
+  KeyValues *ActiveItemUserData; // eax
+  int v7; // edi
+  KeyValues *ItemUserData; // eax
+  const char *v9; // eax
+
+  vgui::Panel::OnThink(this);
+  v2 = GameResources();
+  if ( v2 )
+  {
+    SpectatorTarget = GetSpectatorTarget();
+    v4 = v2->GetPlayerName(v2, SpectatorTarget);
+    String = locale;
+    ActiveItemUserData = vgui::ComboBox::GetActiveItemUserData(this->m_pPlayerList);
+    if ( ActiveItemUserData )
+      String = KeyValues::GetString(ActiveItemUserData, "player", locale);
+    if ( _stricmp(String, v4) )
+    {
+      v7 = 0;
+      if ( this->m_pPlayerList->GetItemCount(this->m_pPlayerList) > 0 )
+      {
+        while ( 1 )
+        {
+          ItemUserData = vgui::ComboBox::GetItemUserData(this->m_pPlayerList, v7);
+          if ( ItemUserData )
+          {
+            v9 = KeyValues::GetString(ItemUserData, "player", locale);
+            if ( !_stricmp(v9, v4) )
+              break;
+          }
+          if ( ++v7 >= this->m_pPlayerList->GetItemCount(this->m_pPlayerList) )
+            return;
+        }
+        vgui::ComboBox::ActivateItemByRow(this->m_pPlayerList, v7);
+        this->m_pPlayerList->SetText(this->m_pPlayerList, v4);
+      }
+    }
+  }
+}

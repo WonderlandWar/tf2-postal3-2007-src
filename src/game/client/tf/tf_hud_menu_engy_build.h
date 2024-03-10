@@ -36,35 +36,12 @@ public:
 
 	int	HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
 
-	virtual int GetRenderGroupPriority() { return 50; }
-
-private:
-	int GetBuildingIDFromSlot( int iSlot );
-
-	void SendBuildMessage( int iSlot );
-	bool SendDestroyMessage( int iSlot );
-
-	void SetSelectedItem( int iSlot );
-
-	void UpdateHintLabels( void );	// show/hide the bright and dim build, destroy hint labels
+	int MapIndexToObjectID( int index );
 
 private:
 	EditablePanel *m_pAvailableObjects[4];
 	EditablePanel *m_pAlreadyBuiltObjects[4];
 	EditablePanel *m_pCantAffordObjects[4];
-
-	// 360 layout only
-	CIconPanel *m_pActiveSelection;
-
-	int m_iSelectedItem;
-
-	CTFLabel *m_pBuildLabelBright;
-	CTFLabel *m_pBuildLabelDim;
-
-	CTFLabel *m_pDestroyLabelBright;
-	CTFLabel *m_pDestroyLabelDim;
-
-	bool m_bInConsoleMode;
 };
 
 #endif	// TF_HUD_MENU_ENGY_BUILD_H

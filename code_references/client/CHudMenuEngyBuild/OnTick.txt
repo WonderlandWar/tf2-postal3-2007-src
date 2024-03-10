@@ -1,0 +1,48 @@
+void __usercall CHudMenuEngyBuild::OnTick(CHudMenuEngyBuild *this@<ecx>, int a2@<ebp>)
+{
+  C_TFPlayer *LocalTFPlayer; // eax
+  C_TFPlayer *v4; // edi
+  int v5; // ebp
+  vgui::EditablePanel **v6; // esi
+  int v7; // ebx
+  C_BaseObject *ObjectOfType; // edi
+  const CObjectInfo *ObjectInfo; // eax
+  vgui::EditablePanel *v10; // ecx
+  int iAccount; // [esp+8h] [ebp-8h]
+  int retaddr; // [esp+10h] [ebp+0h]
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  v4 = LocalTFPlayer;
+  iAccount = (int)LocalTFPlayer;
+  if ( LocalTFPlayer )
+  {
+    v5 = 0;
+    C_BaseCombatCharacter::GetAmmoCount(LocalTFPlayer, 3);
+    v6 = &this->m_pAvailableObjects[2];
+    while ( 1 )
+    {
+      v7 = (unsigned int)v5 > 3 ? 5 : iObject[v5];
+      ObjectOfType = C_TFPlayer::GetObjectOfType(v4, v7);
+      ((void (__thiscall *)(_DWORD, _DWORD, int))(*(v6 - 8))->SetVisible)(*(v6 - 8), 0, a2);
+      (*(v6 - 4))->SetVisible(*(v6 - 4), 0);
+      (*v6)->SetVisible(*v6, 0);
+      if ( !ObjectOfType || ObjectOfType->m_bPlacing )
+      {
+        ObjectInfo = GetObjectInfo(v7);
+        a2 = 1;
+        v10 = retaddr >= ObjectInfo->m_Cost ? *(v6 - 8) : *v6;
+        ((void (__thiscall *)(vgui::EditablePanel *))v10->SetVisible)(v10);
+      }
+      else
+      {
+        a2 = 1;
+        ((void (__thiscall *)(_DWORD))(*(v6 - 4))->SetVisible)(*(v6 - 4));
+      }
+      ++v5;
+      ++v6;
+      if ( v5 >= 4 )
+        break;
+      v4 = (C_TFPlayer *)iAccount;
+    }
+  }
+}

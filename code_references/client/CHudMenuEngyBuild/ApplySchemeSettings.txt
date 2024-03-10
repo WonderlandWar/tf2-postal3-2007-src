@@ -1,0 +1,93 @@
+void __thiscall CHudMenuEngyBuild::ApplySchemeSettings(CHudMenuEngyBuild *this, vgui::IScheme *pScheme)
+{
+  int *p_m_iConfigID; // edi
+  int i; // ebp
+  int v5; // eax
+  int m_Cost; // ebx
+
+  ((void (__thiscall *)(CHudMenuEngyBuild *, const char *, _DWORD, _DWORD))this->CHudElement::CGameEventListener::IGameEventListener2::__vftable[14].ShouldDraw)(
+    this,
+    "resource/UI/build_menu/HudMenuEngyBuild.res",
+    0,
+    0);
+  ((void (__thiscall *)(vgui::Panel *, const char *, _DWORD, _DWORD))this->m_NavGroup._mainPanel->__vftable[1].GetVPanel)(
+    this->m_NavGroup._mainPanel,
+    "resource/UI/build_menu/sentry_active.res",
+    0,
+    0);
+  (*(void (__thiscall **)(_DWORD, const char *, _DWORD, _DWORD))(**(_DWORD **)&this->m_NavGroup._topLevelFocus + 764))(
+    *(_DWORD *)&this->m_NavGroup._topLevelFocus,
+    "resource/UI/build_menu/dispenser_active.res",
+    0,
+    0);
+  (*(void (__thiscall **)(KeyValues *, const char *, _DWORD, _DWORD))(this->m_pDialogVariables->m_iKeyName + 764))(
+    this->m_pDialogVariables,
+    "resource/UI/build_menu/tele_entrance_active.res",
+    0,
+    0);
+  (*(void (__thiscall **)(char *, const char *, _DWORD, _DWORD))(*(_DWORD *)this->m_pszConfigName + 764))(
+    this->m_pszConfigName,
+    "resource/UI/build_menu/tele_exit_active.res",
+    0,
+    0);
+  p_m_iConfigID = &this->m_iConfigID;
+  (*(void (__thiscall **)(int, const char *, _DWORD, _DWORD))(*(_DWORD *)this->m_iConfigID + 764))(
+    this->m_iConfigID,
+    "resource/UI/build_menu/sentry_already_built.res",
+    0,
+    0);
+  (*(void (__thiscall **)(_DWORD, const char *, _DWORD, _DWORD))(**(_DWORD **)&this->m_RegisterClass + 764))(
+    *(_DWORD *)&this->m_RegisterClass,
+    "resource/UI/build_menu/dispenser_already_built.res",
+    0,
+    0);
+  this->m_pAvailableObjects[0]->LoadControlSettings(
+    this->m_pAvailableObjects[0],
+    "resource/UI/build_menu/tele_entrance_already_built.res",
+    0,
+    0);
+  this->m_pAvailableObjects[1]->LoadControlSettings(
+    this->m_pAvailableObjects[1],
+    "resource/UI/build_menu/tele_exit_already_built.res",
+    0,
+    0);
+  this->m_pAvailableObjects[2]->LoadControlSettings(
+    this->m_pAvailableObjects[2],
+    "resource/UI/build_menu/sentry_cant_afford.res",
+    0,
+    0);
+  this->m_pAvailableObjects[3]->LoadControlSettings(
+    this->m_pAvailableObjects[3],
+    "resource/UI/build_menu/dispenser_cant_afford.res",
+    0,
+    0);
+  this->m_pAlreadyBuiltObjects[0]->LoadControlSettings(
+    this->m_pAlreadyBuiltObjects[0],
+    "resource/UI/build_menu/tele_entrance_cant_afford.res",
+    0,
+    0);
+  this->m_pAlreadyBuiltObjects[1]->LoadControlSettings(
+    this->m_pAlreadyBuiltObjects[1],
+    "resource/UI/build_menu/tele_exit_cant_afford.res",
+    0,
+    0);
+  for ( i = 0; i < 4; ++i )
+  {
+    if ( (unsigned int)i > 3 )
+      v5 = 5;
+    else
+      v5 = iObject[i];
+    m_Cost = GetObjectInfo(v5)->m_Cost;
+    (*(void (__thiscall **)(_DWORD, const char *, int))(*(_DWORD *)*(p_m_iConfigID - 4) + 824))(
+      *(p_m_iConfigID - 4),
+      "metal",
+      m_Cost);
+    (*(void (__thiscall **)(int, const char *, int))(*(_DWORD *)*p_m_iConfigID + 824))(*p_m_iConfigID, "metal", m_Cost);
+    (*(void (__thiscall **)(int, const char *, int))(*(_DWORD *)p_m_iConfigID[4] + 824))(
+      p_m_iConfigID[4],
+      "metal",
+      m_Cost);
+    ++p_m_iConfigID;
+  }
+  vgui::Panel::ApplySchemeSettings((vgui::Panel *)this, pScheme);
+}

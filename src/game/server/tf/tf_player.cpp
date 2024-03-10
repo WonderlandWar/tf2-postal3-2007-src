@@ -1640,43 +1640,12 @@ bool CTFPlayer::ClientCommand( const CCommand &args )
 		}
 		return true;
 	}
-	else if ( FStrEq( pcmd, "burn" ) ) 
-	{
-		m_Shared.Burn( this );
-		return true;
-	}
-	else
 #endif
-
 	if ( FStrEq( pcmd, "jointeam" ) )
 	{
 		if ( args.ArgC() >= 2 )
 		{
 			HandleCommand_JoinTeam( args[1] );
-		}
-		return true;
-	}
-	else if ( FStrEq( pcmd, "closedwelcomemenu" ) )
-	{
-		if ( GetTeamNumber() == TEAM_UNASSIGNED )
-		{
-			ShowViewPortPanel( PANEL_TEAM, true );
-		}
-		else if ( IsPlayerClass( TF_CLASS_UNDEFINED ) )
-		{
-			switch( GetTeamNumber() )
-			{
-			case TF_TEAM_RED:
-				ShowViewPortPanel( PANEL_CLASS_RED, true );
-				break;
-
-			case TF_TEAM_BLUE:
-				ShowViewPortPanel( PANEL_CLASS_BLUE, true );
-				break;
-
-			default:
-				break;
-			}
 		}
 		return true;
 	}
@@ -1731,6 +1700,43 @@ bool CTFPlayer::ClientCommand( const CCommand &args )
 			m_Shared.Disguise( ( GetTeamNumber() == TF_TEAM_BLUE ) ? TF_TEAM_RED : TF_TEAM_BLUE, nClass );
 		}
 
+		return true;
+	}
+	else if ( FStrEq( pcmd, "burn" ) )
+	{
+		m_Shared.Burn( this );
+		return true;
+	}
+	else if ( FStrEq( pcmd, "detsentry" ) )
+	{
+		if ( CanAttack() )
+		{		
+			DetonateOwnedObjectsOfType( OBJ_SENTRYGUN );
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "detdispenser" ) )
+	{
+		if ( CanAttack() )
+		{		
+			DetonateOwnedObjectsOfType( OBJ_DISPENSER );
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "dettele_enter" ) )
+	{
+		if ( CanAttack() )
+		{		
+			DetonateOwnedObjectsOfType( OBJ_TELEPORTER_ENTRANCE );
+		}
+		return true;
+	}
+	else if ( FStrEq( pcmd, "dettele_exit" ) )
+	{
+		if ( CanAttack() )
+		{		
+			DetonateOwnedObjectsOfType( OBJ_TELEPORTER_EXIT );
+		}
 		return true;
 	}
 	else if ( FStrEq( pcmd, "mp_playgesture" ) )
@@ -1807,17 +1813,6 @@ bool CTFPlayer::ClientCommand( const CCommand &args )
 			int iBuilding = atoi( args[ 1 ] );
 
 			StartBuildingObjectOfType( iBuilding );
-		}
-		return true;
-	}
-	else if ( FStrEq( pcmd, "destroy" ) )
-	{
-		if ( args.ArgC() == 2 )
-		{
-			// player wants to destroy something
-			int iBuilding = atoi( args[ 1 ] );
-
-			DetonateOwnedObjectsOfType( iBuilding );
 		}
 		return true;
 	}

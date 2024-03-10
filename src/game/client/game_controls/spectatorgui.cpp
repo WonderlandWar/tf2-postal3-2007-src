@@ -129,7 +129,6 @@ CSpectatorMenu::CSpectatorMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_SPEC
 	m_pViewOptions->SetMenu( menu );	// attach menu to combo box
 
 	LoadControlSettings("Resource/UI/BottomSpectator.res");
-	ListenForGameEvent( "spec_target_updated" );
 }
 
 void CSpectatorMenu::ApplySchemeSettings(IScheme *pScheme)
@@ -206,38 +205,41 @@ void CSpectatorMenu::OnCommand( const char *command )
 	}
 }
 
-void CSpectatorMenu::FireGameEvent( IGameEvent * event )
+void CSpectatorMenu::OnThink( void )
 {
-	const char *pEventName = event->GetName();
-
- 	if ( Q_strcmp( "spec_target_updated", pEventName ) == 0 )
+	BaseClass::OnThink();
+  
+	if ( GameResources() )
 	{
-		IGameResources *gr = GameResources();
-		if ( !gr )
-			return;
+		int SpectatorTarget = GetSpectatorTarget();
+	
+		const char *currentPlayerName = GameResources()->GetPlayerName(SpectatorTarget);
+	
+		const char *newPlayerName = "";
+	
+		KeyValues *ActiveItemUserData = m_pPlayerList->GetActiveItemUserData();
+		if ( ActiveItemUserData )
+			newPlayerName = ActiveItemUserData->GetString("player");
 
-		// make sure the player combo box is up to date
-		int playernum = GetSpectatorTarget();
-		if ( playernum < 1 || playernum > MAX_PLAYERS )
-			return;
-
-		const char *selectedPlayerName = gr->GetPlayerName( playernum );
-		const char *currentPlayerName = "";
-		KeyValues *kv = m_pPlayerList->GetActiveItemUserData();
-		if ( kv )
+		if ( _stricmp(newPlayerName, currentPlayerName) )
 		{
-			currentPlayerName = kv->GetString( "player" );
-		}
-		if ( !FStrEq( currentPlayerName, selectedPlayerName ) )
-		{
-			for ( int i=0; i<m_pPlayerList->GetItemCount(); ++i )
+			int i = 0;
+			if ( m_pPlayerList->GetItemCount() > 0 )
 			{
-				KeyValues *kv = m_pPlayerList->GetItemUserData( i );
-				if ( kv && FStrEq( kv->GetString( "player" ), selectedPlayerName ) )
+				while ( 1 )
 				{
-					m_pPlayerList->ActivateItemByRow( i );
-					break;
+					KeyValues *ItemUserData = m_pPlayerList->GetItemUserData(i);
+					if ( ItemUserData )
+					{
+						const char *playerName = ItemUserData->GetString("player");
+						if ( !_stricmp(playerName, currentPlayerName) )
+							break;
+					}
+					if ( ++i >= m_pPlayerList->GetItemCount() )
+						return;
 				}
+				m_pPlayerList->ActivateItemByRow( i );
+				m_pPlayerList->SetText( currentPlayerName );
 			}
 		}
 	}

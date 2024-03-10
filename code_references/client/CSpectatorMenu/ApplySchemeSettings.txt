@@ -1,0 +1,38 @@
+void __thiscall CSpectatorMenu::ApplySchemeSettings(CSpectatorMenu *this, vgui::IScheme *pScheme)
+{
+  vgui::Menu *v3; // eax
+  vgui::Menu *v4; // eax
+  vgui::Menu *v5; // eax
+  vgui::Menu *v6; // ebx
+  void (__thiscall **p_SetBgColor)(vgui::Panel *, Color); // edi
+  Color *v8; // eax
+  vgui::Menu *v9; // ebx
+  void (__thiscall **v10)(vgui::Panel *, Color); // edi
+  Color *v11; // eax
+  vgui::Menu *v12; // edi
+  void (__thiscall **v13)(vgui::Panel *, Color); // esi
+  Color *v14; // eax
+
+  vgui::Panel::ApplySchemeSettings(this, pScheme);
+  v3 = this->m_pConfigSettings->GetMenu(this->m_pConfigSettings);
+  vgui::Panel::MakeReadyForUse(v3);
+  v4 = this->m_pViewOptions->GetMenu(this->m_pViewOptions);
+  vgui::Panel::MakeReadyForUse(v4);
+  v5 = this->m_pPlayerList->GetMenu(this->m_pPlayerList);
+  vgui::Panel::MakeReadyForUse(v5);
+  if ( g_pSpectatorGUI )
+  {
+    v6 = this->m_pConfigSettings->GetMenu(this->m_pConfigSettings);
+    p_SetBgColor = &v6->SetBgColor;
+    v8 = g_pSpectatorGUI->GetBlackBarColor(g_pSpectatorGUI, &pScheme);
+    (*p_SetBgColor)(v6, *v8);
+    v9 = this->m_pViewOptions->GetMenu(this->m_pViewOptions);
+    v10 = &v9->SetBgColor;
+    v11 = g_pSpectatorGUI->GetBlackBarColor(g_pSpectatorGUI, &pScheme);
+    (*v10)(v9, *v11);
+    v12 = this->m_pPlayerList->GetMenu(this->m_pPlayerList);
+    v13 = &v12->SetBgColor;
+    v14 = g_pSpectatorGUI->GetBlackBarColor(g_pSpectatorGUI, &pScheme);
+    (*v13)(v12, *v14);
+  }
+}

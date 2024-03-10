@@ -1,0 +1,133 @@
+void __usercall CSpectatorMenu::Update(CSpectatorMenu *this@<ecx>, wchar_t *a2@<edi>)
+{
+  IGameResources *v3; // esi
+  int i; // ebx
+  int (__thiscall **p_ConvertANSIToUnicode)(vgui::ILocalize *, const char *, wchar_t *, int); // edi
+  const char *v6; // eax
+  const char *v7; // eax
+  IGameResources_vtbl *v8; // edi
+  int v9; // eax
+  const char *v10; // eax
+  const char *v11; // edi
+  wchar_t *v12; // eax
+  vgui::ILocalize_vtbl *v13; // edi
+  int v14; // eax
+  vgui::ILocalize_vtbl *v15; // edi
+  int v16; // eax
+  KeyValues *v17; // edi
+  const char *v18; // eax
+  KeyValues *v19; // eax
+  KeyValues *v20; // edi
+  int SpectatorTarget; // eax
+  const char *v22; // edi
+  int v23; // esi
+  KeyValues *ItemUserData; // eax
+  const char *String; // eax
+  char localizeTeamName[64]; // [esp+2Ch] [ebp-1E8h] BYREF
+  wchar_t playerName[64]; // [esp+6Ch] [ebp-1A8h] BYREF
+  wchar_t playerText[80]; // [esp+ECh] [ebp-128h] BYREF
+  wchar_t teamText[64]; // [esp+18Ch] [ebp-88h] BYREF
+
+  *(_DWORD *)localizeTeamName = 0;
+  v3 = GameResources();
+  ((void (__thiscall *)(CSpectatorMenu *))this->PaintTraverse)(this);
+  if ( *(_DWORD *)&this->m_InternalInvalidateLayout_register == -1 )
+    *(_DWORD *)&this->m_InternalInvalidateLayout_register = gameuifuncs->GetButtonCodeForBind(gameuifuncs, "duck");
+  if ( v3 )
+  {
+    for ( i = 1; i <= *(_DWORD *)(gpGlobals.m_Index + 20); ++i )
+    {
+      if ( v3->IsConnected(v3, i) && !v3->IsLocalPlayer(v3, i) && v3->IsAlive(v3, i) )
+      {
+        p_ConvertANSIToUnicode = &g_pVGuiLocalize->ConvertANSIToUnicode;
+        v6 = (const char *)((int (__thiscall *)(IGameResources *, int, wchar_t *, int, wchar_t *))v3->GetPlayerName)(
+                             v3,
+                             i,
+                             &playerName[2],
+                             128,
+                             a2);
+        v7 = UTIL_SafeName(v6);
+        ((void (__thiscall *)(vgui::ILocalize *, const char *))*p_ConvertANSIToUnicode)(g_pVGuiLocalize, v7);
+        v8 = v3->__vftable;
+        v9 = v3->GetTeam(v3, i);
+        v10 = v8->GetTeamName(v3, v9);
+        v11 = v10;
+        if ( v10 )
+        {
+          V_snprintf(&localizeTeamName[8], 64, "#%s", v10);
+          v12 = g_pVGuiLocalize->Find(g_pVGuiLocalize, &localizeTeamName[8]);
+          if ( !v12 )
+          {
+            g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, v11, &teamText[4], 128);
+            v12 = &teamText[4];
+          }
+          v13 = g_pVGuiLocalize->__vftable;
+          a2 = v12;
+          v14 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int, wchar_t *))g_pVGuiLocalize->Find)(
+                  g_pVGuiLocalize,
+                  "#Spec_PlayerItem_Team",
+                  2,
+                  &playerName[4]);
+          ((void (__cdecl *)(vgui::ILocalize *, wchar_t *, int, int))v13->ConstructString)(
+            g_pVGuiLocalize,
+            &playerText[2],
+            160,
+            v14);
+        }
+        else
+        {
+          v15 = g_pVGuiLocalize->__vftable;
+          a2 = &playerName[4];
+          v16 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int))g_pVGuiLocalize->Find)(
+                  g_pVGuiLocalize,
+                  "#Spec_PlayerItem",
+                  1);
+          ((void (__cdecl *)(vgui::ILocalize *, wchar_t *, int, int))v15->ConstructString)(
+            g_pVGuiLocalize,
+            &playerText[2],
+            160,
+            v16);
+        }
+        v17 = (KeyValues *)KeyValues::operator new(0x20u);
+        if ( v17 )
+        {
+          v18 = v3->GetPlayerName(v3, i);
+          KeyValues::KeyValues(v17, "UserData", "player", v18);
+          v20 = v19;
+        }
+        else
+        {
+          v20 = 0;
+        }
+        *(_DWORD *)localizeTeamName = CSpectatorMenu::PlayerAddItem(
+                                        (CSpectatorMenu *)((char *)this - 232),
+                                        *(int *)localizeTeamName,
+                                        &playerText[2],
+                                        v20);
+        KeyValues::deleteThis(v20);
+      }
+    }
+    SpectatorTarget = GetSpectatorTarget();
+    v22 = v3->GetPlayerName(v3, SpectatorTarget);
+    v23 = 0;
+    if ( (*(int (__thiscall **)(_DWORD))(**(_DWORD **)&this->m_OnCommand_register + 1064))(*(_DWORD *)&this->m_OnCommand_register) > 0 )
+    {
+      while ( 1 )
+      {
+        ItemUserData = vgui::ComboBox::GetItemUserData(*(vgui::ComboBox **)&this->m_OnCommand_register, v23);
+        if ( ItemUserData )
+        {
+          String = KeyValues::GetString(ItemUserData, "player", locale);
+          if ( !_stricmp(String, v22) )
+            break;
+        }
+        if ( ++v23 >= (*(int (__thiscall **)(_DWORD))(**(_DWORD **)&this->m_OnCommand_register + 1064))(*(_DWORD *)&this->m_OnCommand_register) )
+          return;
+      }
+      vgui::ComboBox::ActivateItemByRow(*(vgui::ComboBox **)&this->m_OnCommand_register, v23);
+      (*(void (__thiscall **)(_DWORD, const char *))(**(_DWORD **)&this->m_OnCommand_register + 764))(
+        *(_DWORD *)&this->m_OnCommand_register,
+        v22);
+    }
+  }
+}

@@ -171,7 +171,7 @@ int	CHudMenuEngyDestroy::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 
 	case KEY_0:
 	case KEY_XBUTTON_B:
-		engine->ExecuteClientCmd( "lastinv" );
+		engine->ClientCmd( "lastinv" );
 		bHandled = true;
 		break;
 
@@ -185,9 +185,24 @@ int	CHudMenuEngyDestroy::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 
 		if ( pLocalPlayer->GetObjectOfType( iBuildingID ) != NULL )
 		{
-			char szCmd[128];
-			Q_snprintf( szCmd, sizeof(szCmd), "destroy %d; lastinv", iBuildingID );
-			engine->ExecuteClientCmd( szCmd );
+			switch ( iBuildingID )
+			{
+			case OBJ_SENTRYGUN:
+				engine->ClientCmd( "detsentry;lastinv" );
+				break;
+				
+			case OBJ_DISPENSER:
+				engine->ClientCmd( "detdispenser;lastinv" );
+				break;
+				
+			case OBJ_TELEPORTER_ENTRANCE:
+				engine->ClientCmd( "dettele_enter;lastinv" );
+				break;
+				
+			case OBJ_TELEPORTER_EXIT:
+				engine->ClientCmd( "dettele_exit;lastinv" );
+				break;
+			}
 		}
 		else
 		{

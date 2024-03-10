@@ -1,0 +1,72 @@
+class CSpectatorMenu : public vgui::EditablePanel, public IViewPortPanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CSpectatorMenu_RegisterMap
+    {
+        public void CSpectatorMenu_RegisterMap();
+    };
+    public class CSpectatorMenu::CSpectatorMenu_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CSpectatorMenu_Register
+    {
+        public void CSpectatorMenu_Register();
+    };
+    public class CSpectatorMenu::CSpectatorMenu_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CSpectatorMenu_RegisterKBMap
+    {
+        public void CSpectatorMenu_RegisterKBMap();
+    };
+    public class CSpectatorMenu::CSpectatorMenu_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+	
+    public void CSpectatorMenu(class CSpectatorMenu & );
+    public void CSpectatorMenu(class IViewPort * );
+    public void ~CSpectatorMenu();
+	
+    public char * GetName();
+    public void SetData(class KeyValues * );
+    public void Reset();
+    public void Update();
+    public bool NeedsUpdate();
+    public bool HasInputElements();
+    public void ShowPanel(bool );
+	
+    public void OnThink();
+    public bool IsVisible();
+    public unsigned int GetVPanel();
+    public void SetParent(unsigned int );
+    class PanelMessageFunc_OnTextChanged
+    {
+        public void InitVar();
+        public void PanelMessageFunc_OnTextChanged();
+    };
+	
+    private class CSpectatorMenu::PanelMessageFunc_OnTextChanged m_OnTextChanged_register;
+    private void OnTextChanged(class KeyValues * );
+    private void OnCommand(char * );
+    private void OnKeyCodePressed(enum ButtonCode_t );
+    private void ApplySchemeSettings(class vgui::IScheme * );
+    private void PerformLayout();
+	
+    private void SetViewModeText(char * );
+    private void SetPlayerNameText(wchar_t * );
+    private void SetPlayerFgColor(class Color );
+	
+    private int PlayerAddItem(int ,wchar_t * ,class KeyValues * );
+    private class vgui::ComboBox * m_pPlayerList;
+    private class vgui::ComboBox * m_pViewOptions;
+    private class vgui::ComboBox * m_pConfigSettings;
+    private class vgui::Button * m_pLeftButton;
+    private class vgui::Button * m_pRightButton;
+    private class IViewPort * m_pViewPort;
+    private enum ButtonCode_t m_iDuckKey;
+};

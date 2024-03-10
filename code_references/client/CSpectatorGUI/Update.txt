@@ -1,0 +1,184 @@
+void __thiscall CSpectatorGUI::Update(CSpectatorGUI *this)
+{
+  IGameResources *v2; // edi
+  int SpectatorTarget; // ebp
+  IViewPortPanel *v4; // ebx
+  unsigned int v5; // ebx
+  vgui::Panel *v6; // ecx
+  int (__stdcall *v7)(int); // edx
+  void (__thiscall **v8)(_DWORD, int); // ebx
+  int v9; // eax
+  IGameResources_vtbl *v10; // ebx
+  int v11; // eax
+  const Color *v12; // eax
+  int v13; // eax
+  __int16 v14; // cx
+  int (__thiscall **p_ConvertANSIToUnicode)(vgui::ILocalize *, const char *, wchar_t *, int); // ebx
+  const char *v16; // eax
+  const char *v17; // eax
+  int v18; // ebx
+  vgui::ILocalize_vtbl *v19; // edi
+  wchar_t *v20; // eax
+  vgui::ILocalize_vtbl *v21; // edi
+  wchar_t *v22; // eax
+  C_HLTVCamera *v23; // eax
+  C_HLTVCamera *v24; // eax
+  const char *v25; // eax
+  vgui::ILocalize_vtbl *v26; // esi
+  int v27; // eax
+  vgui::Panel *v28; // esi
+  vgui::Panel *ChildByName; // eax
+  void *v30; // eax
+  vgui::Panel *v31; // eax
+  void *v32; // eax
+  int v33; // [esp+1Ch] [ebp-11F8h]
+  vgui::Panel *v34; // [esp+30h] [ebp-11E4h] BYREF
+  int w; // [esp+34h] [ebp-11E0h] BYREF
+  int v36; // [esp+38h] [ebp-11DCh] BYREF
+  int v37; // [esp+3Ch] [ebp-11D8h] BYREF
+  int tall; // [esp+40h] [ebp-11D4h] BYREF
+  int SpectatorMode; // [esp+44h] [ebp-11D0h]
+  int y; // [esp+48h] [ebp-11CCh] BYREF
+  int h; // [esp+4Ch] [ebp-11C8h] BYREF
+  int x; // [esp+50h] [ebp-11C4h] BYREF
+  int wide; // [esp+54h] [ebp-11C0h] BYREF
+  char v44[4]; // [esp+58h] [ebp-11BCh] BYREF
+  unsigned __int16 string[10]; // [esp+5Ch] [ebp-11B8h] BYREF
+  char pDest[128]; // [esp+70h] [ebp-11A4h] BYREF
+  unsigned __int8 dst[128]; // [esp+F0h] [ebp-1124h] BYREF
+  __int16 v48[78]; // [esp+170h] [ebp-10A4h] BYREF
+  char v49[4]; // [esp+20Ch] [ebp-1008h] BYREF
+  char v50[2044]; // [esp+210h] [ebp-1004h] BYREF
+  char v51[4]; // [esp+A0Ch] [ebp-808h] BYREF
+  char v52[2048]; // [esp+A10h] [ebp-804h] BYREF
+
+  GetHudSize(&w, &h);
+  vgui::Panel::GetBounds(*(vgui::Panel **)&this->m_OnCommand_register, &x, &y, &wide, &tall);
+  v2 = GameResources();
+  SpectatorMode = GetSpectatorMode();
+  SpectatorTarget = GetSpectatorTarget();
+  v4 = gViewPortInterface->FindPanelByName(gViewPortInterface, "overview");
+  if ( !v4 || !v4->IsVisible(v4) )
+  {
+    vgui::Panel::SetSize(*(vgui::Panel **)&this->m_OnCommand_register, w, tall);
+    goto LABEL_7;
+  }
+  v5 = v4->GetVPanel(v4);
+  g_pVGuiPanel->GetPos(g_pVGuiPanel, v5, &v36, (int *)&v34);
+  g_pVGuiPanel->GetSize(g_pVGuiPanel, v5, &v37, (int *)v44);
+  v6 = *(vgui::Panel **)&this->m_OnCommand_register;
+  if ( (int)v34 >= tall )
+  {
+    vgui::Panel::SetSize(v6, w, tall);
+LABEL_7:
+    vgui::Panel::SetPos(*(vgui::Panel **)&this->m_OnCommand_register, 0, 0);
+    goto LABEL_8;
+  }
+  vgui::Panel::SetSize(v6, w - v37 - v36, tall);
+  vgui::Panel::SetPos(*(vgui::Panel **)&this->m_OnCommand_register, v36 + v37, 0);
+LABEL_8:
+  v7 = *(int (__stdcall **)(int))(*(_DWORD *)&this[-1].m_InternalInvalidateLayout_register + 868);
+  v8 = (void (__thiscall **)(_DWORD, int))(**(_DWORD **)&this->m_InternalCursorExited_register + 124);
+  v34 = (CSpectatorGUI *)((char *)this - 232);
+  v9 = v7(SpectatorMode);
+  (*v8)(*(_DWORD *)&this->m_InternalCursorExited_register, v9);
+  if ( SpectatorTarget > 0 && SpectatorTarget <= *(_DWORD *)(gpGlobals.m_Index + 20) && v2 )
+  {
+    v10 = v2->__vftable;
+    v11 = v2->GetTeam(v2, SpectatorTarget);
+    v12 = v10->GetTeamColor(v2, v11);
+    (*(void (__thiscall **)(_DWORD, const Color))(**(_DWORD **)&this->m_InternalCursorExited_register + 220))(
+      *(_DWORD *)&this->m_InternalCursorExited_register,
+      *v12);
+    v13 = 0;
+    do
+    {
+      v14 = aUnableToFindSp[v13];
+      v48[v13++] = v14;
+    }
+    while ( v14 );
+    memset(dst, 0, sizeof(dst));
+    p_ConvertANSIToUnicode = &g_pVGuiLocalize->ConvertANSIToUnicode;
+    v16 = (const char *)((int (__thiscall *)(IGameResources *, int, unsigned __int8 *, int))v2->GetPlayerName)(
+                          v2,
+                          SpectatorTarget,
+                          dst,
+                          128);
+    v17 = UTIL_SafeName(v16);
+    ((void (__thiscall *)(vgui::ILocalize *, const char *))*p_ConvertANSIToUnicode)(g_pVGuiLocalize, v17);
+    v18 = v2->GetHealth(v2, SpectatorTarget);
+    if ( v18 > 0 && v2->IsAlive(v2, SpectatorTarget) )
+    {
+      _snwprintf(string, 0x14u, L"%i", v18);
+      v19 = g_pVGuiLocalize->__vftable;
+      v20 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#Spec_PlayerItem_Team");
+      ((void (__cdecl *)(vgui::ILocalize *, __int16 *, int, wchar_t *))v19->ConstructString)(
+        g_pVGuiLocalize,
+        v48,
+        160,
+        v20);
+      (*(void (__thiscall **)(_DWORD, __int16 *, _DWORD))(**(_DWORD **)&this->m_InternalCursorExited_register + 764))(
+        *(_DWORD *)&this->m_InternalCursorExited_register,
+        v48,
+        0);
+    }
+    else
+    {
+      v21 = g_pVGuiLocalize->__vftable;
+      v22 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#Spec_PlayerItem");
+      ((void (__cdecl *)(vgui::ILocalize *, __int16 *, int, wchar_t *))v21->ConstructString)(
+        g_pVGuiLocalize,
+        v48,
+        160,
+        v22);
+      (*(void (__thiscall **)(_DWORD, __int16 *, _DWORD))(**(_DWORD **)&this->m_InternalCursorExited_register + 764))(
+        *(_DWORD *)&this->m_InternalCursorExited_register,
+        v48,
+        0);
+    }
+  }
+  else
+  {
+    (*(void (__thiscall **)(_DWORD, const wchar_t *, _DWORD))(**(_DWORD **)&this->m_InternalCursorExited_register + 764))(
+      *(_DWORD *)&this->m_InternalCursorExited_register,
+      &word_102E8098,
+      0);
+  }
+  if ( engine->IsHLTV(engine) )
+  {
+    v23 = HLTVCamera();
+    V_snprintf(pDest, 128, "Spectators : %d", v23->m_nNumSpectators);
+    g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, pDest, (wchar_t *)v50, 2048);
+    v24 = HLTVCamera();
+    V_strncpy(pDest, v24->m_szTitleText, 128);
+    g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, pDest, (wchar_t *)v52, 2048);
+  }
+  else
+  {
+    v25 = engine->GetLevelName(engine);
+    V_FileBase(v25, pDest, 128);
+    g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, pDest, (wchar_t *)dst, 128);
+    v26 = g_pVGuiLocalize->__vftable;
+    v27 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int, unsigned __int8 *))g_pVGuiLocalize->Find)(
+            g_pVGuiLocalize,
+            "#Spec_Map",
+            1,
+            dst);
+    ((void (__cdecl *)(vgui::ILocalize *, char *, int, int))v26->ConstructString)(g_pVGuiLocalize, v49, 2048, v27);
+    ((void (__thiscall *)(vgui::ILocalize *, const char *, char *, int, int))g_pVGuiLocalize->ConvertANSIToUnicode)(
+      g_pVGuiLocalize,
+      locale,
+      v51,
+      2048,
+      v33);
+  }
+  v28 = v34;
+  ChildByName = vgui::Panel::FindChildByName(v34, "extrainfo", 0);
+  v30 = __RTDynamicCast(ChildByName, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::Label `RTTI Type Descriptor', 0);
+  if ( v30 )
+    (*(void (__thiscall **)(void *, char *, _DWORD))(*(_DWORD *)v30 + 764))(v30, v50, 0);
+  v31 = vgui::Panel::FindChildByName(v28, "titlelabel", 0);
+  v32 = __RTDynamicCast(v31, 0, &vgui::Panel `RTTI Type Descriptor', &vgui::Label `RTTI Type Descriptor', 0);
+  if ( v32 )
+    (*(void (__thiscall **)(void *, char *, _DWORD))(*(_DWORD *)v32 + 764))(v32, v52, 0);
+}

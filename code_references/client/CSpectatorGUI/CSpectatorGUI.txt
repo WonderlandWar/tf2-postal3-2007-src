@@ -1,0 +1,68 @@
+void __thiscall CSpectatorGUI::CSpectatorGUI(CSpectatorGUI *this, IViewPort *pViewPort)
+{
+  vgui::PanelMessageMap *v3; // edi
+  PanelAnimationMap *v4; // edi
+  vgui::PanelKeyBindingMap *v5; // edi
+  vgui::Panel *v6; // eax
+  vgui::Panel *v7; // eax
+  vgui::Panel *v8; // eax
+  vgui::Panel *v9; // eax
+  vgui::Label *v10; // eax
+  vgui::Label *v11; // eax
+
+  vgui::EditablePanel::EditablePanel(this, 0, "specgui");
+  this->IViewPortPanel::__vftable = (IViewPortPanel_vtbl *)&IViewPortPanel::`vftable';
+  this->vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable = (CSpectatorGUI_vtbl *)&CSpectatorGUI::`vftable'{for `vgui::EditablePanel'};
+  this->IViewPortPanel::__vftable = (IViewPortPanel_vtbl *)&CSpectatorGUI::`vftable'{for `IViewPortPanel'};
+  if ( !`CSpectatorGUI::ChainToMap'::`2'::chained )
+  {
+    `CSpectatorGUI::ChainToMap'::`2'::chained = 1;
+    v3 = vgui::FindOrAddPanelMessageMap("CSpectatorGUI");
+    v3->pfnClassName = CSpectatorGUI::GetPanelClassName;
+    v3->baseMap = vgui::FindOrAddPanelMessageMap("vgui::EditablePanel");
+  }
+  if ( !`CSpectatorGUI::ChainToAnimationMap'::`2'::chained )
+  {
+    `CSpectatorGUI::ChainToAnimationMap'::`2'::chained = 1;
+    v4 = FindOrAddPanelAnimationMap("CSpectatorGUI");
+    v4->pfnClassName = CSpectatorGUI::GetPanelClassName;
+    v4->baseMap = FindOrAddPanelAnimationMap("vgui::EditablePanel");
+  }
+  if ( !`CSpectatorGUI::KB_ChainToMap'::`2'::chained )
+  {
+    `CSpectatorGUI::KB_ChainToMap'::`2'::chained = 1;
+    v5 = vgui::FindOrAddPanelKeyBindingMap("CSpectatorGUI");
+    v5->pfnClassName = CSpectatorGUI::GetPanelClassName;
+    v5->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::EditablePanel");
+  }
+  this->m_bSpecScoreboard = 0;
+  this->m_pViewPort = pViewPort;
+  g_pSpectatorGUI = this;
+  vgui::Panel::SetVisible(this, 0);
+  vgui::Panel::SetProportional(this, 1);
+  vgui::Panel::SetScheme(this, "ClientScheme");
+  vgui::Panel::SetMouseInputEnabled(this, 0);
+  vgui::Panel::SetKeyBoardInputEnabled(this, 0);
+  v6 = (vgui::Panel *)operator new(0xB8u);
+  if ( v6 )
+    vgui::Panel::Panel(v6, this, "topbar");
+  else
+    v7 = 0;
+  this->m_pTopBar = v7;
+  v8 = (vgui::Panel *)operator new(0xB8u);
+  if ( v8 )
+    vgui::Panel::Panel(v8, this, "bottombarblank");
+  else
+    v9 = 0;
+  this->m_pBottomBarBlank = v9;
+  v10 = (vgui::Label *)operator new(0x108u);
+  if ( v10 )
+    vgui::Label::Label(v10, this, "playerlabel", locale);
+  else
+    v11 = 0;
+  this->m_pPlayerLabel = v11;
+  v11->SetVisible(v11, 0);
+  vgui::Panel::SetPaintBorderEnabled(this, 0);
+  vgui::Panel::SetPaintBackgroundEnabled(this, 0);
+  vgui::Panel::InvalidateLayout(this, 0, 0);
+}
