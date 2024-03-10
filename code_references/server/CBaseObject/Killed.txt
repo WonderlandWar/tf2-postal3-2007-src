@@ -1,0 +1,91 @@
+void __thiscall CBaseObject::Killed(CBaseObject *this, const CTakeDamageInfo *info)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity *pInflictor; // ebx
+  unsigned int v5; // eax
+  IHandleEntity *pKiller; // eax
+  CBasePlayer *pScorer; // ebp
+  unsigned int v8; // eax
+  IHandleEntity *v9; // ecx
+  CObjectSapper *pSapper; // eax
+  IGameEvent *v11; // esi
+  const char *KillingWeaponName; // ebx
+  CTFPlayer *pTFPlayer; // eax
+  int v14; // eax
+  int v15; // eax
+  int v16; // eax
+  IGameEvent_vtbl *v17; // ebx
+  int v18; // eax
+  CTFPlayer *pAssister; // [esp+50h] [ebp-4h]
+
+  this->m_bDying = 1;
+  m_Index = info->m_hInflictor.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    pInflictor = 0;
+  else
+    pInflictor = (CBaseEntity *)g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+  v5 = info->m_hAttacker.m_Index;
+  if ( v5 == -1 || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v5 >> 12 )
+    pKiller = 0;
+  else
+    pKiller = g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+  pScorer = (CBasePlayer *)((int (__thiscall *)(CGameRules *, IHandleEntity *, CBaseEntity *, CBaseObject *))g_pGameRules->__vftable[1].Name)(
+                             g_pGameRules,
+                             pKiller,
+                             pInflictor,
+                             this);
+  pAssister = 0;
+  if ( this->m_bHasSapper.m_Value && (info->m_bitsDamageType & 1) == 0 )
+  {
+    v8 = this->m_hMoveChild.m_Index;
+    if ( v8 == -1 || g_pEntityList->m_EntPtrArray[this->m_hMoveChild.m_Index & 0xFFF].m_SerialNumber != v8 >> 12 )
+      v9 = 0;
+    else
+      v9 = g_pEntityList->m_EntPtrArray[this->m_hMoveChild.m_Index & 0xFFF].m_pEntity;
+    pSapper = (CObjectSapper *)__RTDynamicCast(
+                                 v9,
+                                 0,
+                                 &CBaseEntity `RTTI Type Descriptor',
+                                 &CObjectSapper `RTTI Type Descriptor',
+                                 0);
+    if ( pSapper )
+    {
+      pAssister = pSapper->GetOwner(pSapper);
+      CTFGameStats::Event_AssistDestroyBuilding(&CTF_GameStats, pAssister, this);
+    }
+  }
+  if ( pScorer && pInflictor != this )
+  {
+    v11 = gameeventmanager->CreateEvent(gameeventmanager, "object_destroyed", 0);
+    KillingWeaponName = CTFGameRules::GetKillingWeaponName((CTFGameRules *)g_pGameRules, pInflictor, pScorer);
+    pTFPlayer = this->GetOwner(this);
+    if ( v11 )
+    {
+      if ( pTFPlayer )
+      {
+        v14 = engine->GetPlayerUserId(engine, pTFPlayer->m_Network.m_pPev);
+        v11->SetInt(v11, "userid", v14);
+      }
+      if ( pAssister )
+      {
+        v15 = engine->GetPlayerUserId(engine, pAssister->m_Network.m_pPev);
+        v11->SetInt(v11, "assister", v15);
+      }
+      v16 = engine->GetPlayerUserId(engine, pScorer->m_Network.m_pPev);
+      v11->SetInt(v11, "attacker", v16);
+      v11->SetString(v11, "weapon", KillingWeaponName);
+      v11->SetInt(v11, "priority", 7);
+      v17 = v11->__vftable;
+      v18 = this->GetType(this);
+      v17->SetInt(v11, "objecttype", v18);
+      gameeventmanager->FireEvent(gameeventmanager, v11, 0);
+    }
+    if ( pScorer->IsPlayer(pScorer) )
+    {
+      CTFGameStats::Event_PlayerDestroyedBuilding(&CTF_GameStats, (CTFPlayer *)pScorer, this);
+      pScorer->Event_KilledOther(pScorer, this, info);
+    }
+  }
+  this->Explode(this);
+  UTIL_Remove(this);
+}

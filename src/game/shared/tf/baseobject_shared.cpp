@@ -616,7 +616,7 @@ bool CBaseObject::CalculatePlacementPos( void )
 bool CBaseObject::VerifyCorner( const Vector &vBottomCenter, float xOffset, float yOffset )
 {
 	// Start slightly above the surface
-	Vector vStart( vBottomCenter.x + xOffset, vBottomCenter.y + yOffset, vBottomCenter.z + 0.1 );
+	Vector vStart( vBottomCenter.x + xOffset, vBottomCenter.y + yOffset, vBottomCenter.z );
 
 	trace_t tr;
 	UTIL_TraceLine( 
@@ -661,7 +661,11 @@ bool CBaseObject::IsPlacementPosValid( void )
 	}
 
 #ifndef CLIENT_DLL
-	if ( !EstimateValidBuildPos() )
+	// Cannot build inside a nobuild brush
+	if ( PointInNoBuild( m_vecBuildOrigin ) )
+		return false;
+
+	if ( PointInRespawnRoom( NULL, m_vecBuildOrigin ) )
 		return false;
 #endif
 

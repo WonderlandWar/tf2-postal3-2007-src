@@ -1,0 +1,87 @@
+char __thiscall CBaseObject::StartBuilding(CBaseObject *this, CTFPlayer *pBuilder)
+{
+  int TeamNumber; // eax
+  CTeam *GlobalTeam; // eax
+  CTFPlayer *v5; // edi
+  CTFTeam *pTFTeam; // ebx
+  CTFPlayer_vtbl *v8; // ebp
+  const char *ResponseRulesModifier; // eax
+  unsigned int m_Index; // eax
+  unsigned int v11; // eax
+  IHandleEntity *m_pEntity; // eax
+  IHasBuildPoints *v13; // eax
+  double v14; // st7
+
+  TeamNumber = CBaseEntity::GetTeamNumber(this);
+  GlobalTeam = GetGlobalTeam(TeamNumber);
+  v5 = pBuilder;
+  pTFTeam = (CTFTeam *)GlobalTeam;
+  if ( *(float *)&pBuilder != 0.0 && pBuilder->IsPlayer(pBuilder) )
+  {
+    if ( CTFPlayer::IsPlayerClass(v5, 9) )
+      CBasePlayer::HintMessage(v5, 25, 0);
+    if ( !CTFPlayer::StartedBuildingObject(v5, this->m_iObjectType.m_Value) )
+    {
+      ClientPrint(v5, 4, "Not enough resources.\n", 0, 0, 0, 0);
+      UTIL_Remove(this);
+      return 0;
+    }
+    v8 = v5->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    ResponseRulesModifier = CBaseObject::GetResponseRulesModifier(this);
+    v8->SpeakConceptIfAllowed(v5, 45, ResponseRulesModifier, 0, 0, 0);
+  }
+  if ( pTFTeam && !CTFTeam::IsObjectOnTeam(pTFTeam, this) )
+    CTFTeam::AddObject(pTFTeam, this);
+  LOBYTE(pBuilder) = 0;
+  CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bPlacing>::Set(&this->m_bPlacing, (const bool *)&pBuilder);
+  LOBYTE(pBuilder) = 1;
+  CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bBuilding>::Set(&this->m_bBuilding, (const bool *)&pBuilder);
+  CBaseObject::SetHealth(this, 0.1);
+  *(float *)&pBuilder = 0.0;
+  CNetworkVarBase<float,CBaseObject::NetworkVar_m_flPercentageConstructed>::Set(
+    &this->m_flPercentageConstructed,
+    (const float *)&pBuilder);
+  LOBYTE(pBuilder) = 0;
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_nRenderMode>::Set(
+    &this->m_nRenderMode,
+    (const unsigned __int8 *)&pBuilder);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value & 0xFFFB);
+  CBaseObject::SpawnControlPanels(this);
+  m_Index = this->m_hBuiltOnEntity.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hBuiltOnEntity.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hBuiltOnEntity.m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    v11 = this->m_hBuiltOnEntity.m_Value.m_Index;
+    if ( v11 == -1
+      || g_pEntityList->m_EntPtrArray[this->m_hBuiltOnEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != v11 >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hBuiltOnEntity.m_Value.m_Index & 0xFFF].m_pEntity;
+    }
+    v13 = (IHasBuildPoints *)__RTDynamicCast(
+                               m_pEntity,
+                               0,
+                               &CBaseEntity `RTTI Type Descriptor',
+                               &IHasBuildPoints `RTTI Type Descriptor',
+                               0);
+    v13->SetObjectOnBuildPoint(v13, this->m_iBuiltOnPoint, this);
+  }
+  v14 = ((double (__thiscall *)(CBaseObject *))this->GetTotalTime)(this);
+  this->m_flConstructionTimeLeft = v14;
+  this->m_flTotalConstructionTime = v14;
+  if ( v5 && v5->IsPlayer(v5) )
+    CTFPlayer::FinishedObject(v5, this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  this->m_vecBuildOrigin.x = this->m_vecAbsOrigin.x;
+  this->m_vecBuildOrigin.y = this->m_vecAbsOrigin.y;
+  this->m_vecBuildOrigin.z = this->m_vecAbsOrigin.z;
+  if ( (enginetrace->GetPointContents(enginetrace, &this->m_vecBuildOrigin, 0) & 0x4030) != 0 )
+    CBaseEntity::SetWaterLevel(this, 3);
+  this->DetermineAnimation(this);
+  return 1;
+}

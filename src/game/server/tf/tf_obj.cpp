@@ -1110,13 +1110,6 @@ bool CBaseObject::StartBuilding( CBaseEntity *pBuilder )
 	{
 		CTFPlayer *pTFBuilder = ToTFPlayer( pBuilder );
 		pTFBuilder->FinishedObject( this );
-		IGameEvent * event = gameeventmanager->CreateEvent( "player_builtobject" );
-		if ( event )
-		{
-			event->SetInt( "userid", pTFBuilder->GetUserID() );
-			event->SetInt( "object", ObjectType() );
-			gameeventmanager->FireEvent( event, true );	// don't send to clients
-		}
 	}
 
 	m_vecBuildOrigin = GetAbsOrigin();
@@ -1771,9 +1764,8 @@ void CBaseObject::Killed( const CTakeDamageInfo &info )
 			
 			event->SetInt( "attacker", pScorer->GetUserID() );	// attacker
 			event->SetString( "weapon", killer_weapon_name );
-			event->SetInt( "priority", 6 );		// HLTV event priority, not transmitted
+			event->SetInt( "priority", 7 );		// HLTV event priority, not transmitted
 			event->SetInt( "objecttype", GetType() );
-			event->SetInt( "index", entindex() );	// object entity index
 
 			gameeventmanager->FireEvent( event );
 		}
@@ -1879,7 +1871,7 @@ void CBaseObject::OnAddSapper( void )
 
 	if ( pPlayer )
 	{
-		//pPlayer->HintMessage( HINT_OBJECT_YOUR_OBJECT_SAPPED, true );
+		pPlayer->HintMessage( HINT_OBJECT_YOUR_OBJECT_SAPPED, true );
 		pPlayer->SpeakConceptIfAllowed( MP_CONCEPT_SPY_SAPPER, GetResponseRulesModifier() );
 	}
 
@@ -1968,37 +1960,7 @@ bool CBaseObject::InputWrenchHit( CTFPlayer *pPlayer )
 
 	bool bDidWork = false;
 
-
-	if ( HasSapper() )
-	{
-		// do damage to any attached buildings
-
-		#define WRENCH_DMG_VS_SAPPER	65
-
-		CTakeDamageInfo info( pPlayer, pPlayer, WRENCH_DMG_VS_SAPPER, DMG_CLUB, TF_DMG_WRENCH_FIX );
-
-		IHasBuildPoints *pBPInterface = dynamic_cast< IHasBuildPoints * >( this );
-		int iNumObjects = pBPInterface->GetNumObjectsOnMe();
-		for ( int iPoint=0;iPoint<iNumObjects;iPoint++ )
-		{
-			CBaseObject *pObject = GetBuildPointObject( iPoint );
-
-			if ( pObject && pObject->IsHostileUpgrade() )
-			{
-				int iBeforeHealth = pObject->GetHealth();
-
-				pObject->TakeDamage( info );
-
-				// This should always be true
-				if ( iBeforeHealth != pObject->GetHealth() )
-				{
-					bDidWork = true;
-					Assert( bDidWork );
-				}
-			}
-		}
-	}
-	else if ( IsUpgrading() )
+	if ( IsUpgrading() )
 	{
 		bDidWork = false;
 	}

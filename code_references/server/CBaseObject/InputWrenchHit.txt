@@ -1,0 +1,10 @@
+bool __thiscall CBaseObject::InputWrenchHit(CBaseObject *this, CTFPlayer *pPlayer)
+{
+  if ( !pPlayer )
+    return 0;
+  this->IsUpgrading(this);
+  if ( !this->m_bBuilding.m_Value )
+    return this->OnWrenchHit(this, pPlayer);
+  CBaseObject::OnRepairHit(this, pPlayer);
+  return 1;
+}

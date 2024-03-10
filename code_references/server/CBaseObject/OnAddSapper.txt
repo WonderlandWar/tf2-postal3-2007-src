@@ -1,0 +1,26 @@
+void __thiscall CBaseObject::OnAddSapper(CBaseObject *this)
+{
+  CTFPlayer *v2; // eax
+  CTFPlayer *v3; // esi
+  CHintSystem *v4; // eax
+  CTFPlayer_vtbl *v5; // ebx
+  const char *ResponseRulesModifier; // eax
+  bool val; // [esp+Bh] [ebp-1h] BYREF
+
+  val = 1;
+  CNetworkVarBase<bool,CBaseObject::NetworkVar_m_bHasSapper>::Set(&this->m_bHasSapper, &val);
+  v2 = this->GetBuilder(this);
+  v3 = v2;
+  if ( v2 )
+  {
+    if ( v2->Hints(v2) )
+    {
+      v4 = v3->Hints(v3);
+      CHintSystem::HintMessage(v4, 36, 1, 0);
+    }
+    v5 = v3->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    ResponseRulesModifier = CBaseObject::GetResponseRulesModifier(this);
+    v5->SpeakConceptIfAllowed(v3, 47, ResponseRulesModifier, 0, 0, 0);
+  }
+  CBaseObject::UpdateDisabledState(this);
+}
