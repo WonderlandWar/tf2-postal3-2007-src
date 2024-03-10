@@ -855,6 +855,11 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 {
 	if ( pOther->m_takedamage == DAMAGE_NO )
 		return;
+	else if ( !engine->IndexOfEdict( pOther->edict() ) )
+	{
+		UTIL_Remove( this );
+		return;
+	}
 
 	if ( GetTeamNumber() == pOther->GetTeamNumber() )
 		return;
