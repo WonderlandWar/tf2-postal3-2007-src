@@ -1,0 +1,20 @@
+// local variable allocation has failed, the output may be wrong!
+void __thiscall CTFBaseRocket::RocketTouch(CTFBaseRocket *this, CBaseEntity *pOther)
+{
+  const CGameTrace *TouchTrace; // eax
+  CGameTrace trace_4; // [esp+8h] [ebp-58h] OVERLAPPED BYREF
+
+  if ( (pOther->m_Collision.m_usSolidFlags.m_Value & 0x28) == 0 )
+  {
+    TouchTrace = CBaseEntity::GetTouchTrace();
+    if ( (TouchTrace->surface.flags & 4) != 0 )
+    {
+      UTIL_Remove(this);
+    }
+    else
+    {
+      qmemcpy(&trace_4, TouchTrace, sizeof(trace_4));
+      CTFBaseRocket::Explode(this, &trace_4, pOther);
+    }
+  }
+}

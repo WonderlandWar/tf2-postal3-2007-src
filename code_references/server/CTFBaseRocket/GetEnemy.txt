@@ -1,0 +1,14 @@
+CBaseEntity *__thiscall CTFBaseRocket::GetEnemy(CTFBaseRocket *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v2; // ecx
+
+  m_Index = this->m_hEnemy.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v2 = &g_pEntityList->m_EntPtrArray[this->m_hEnemy.m_Index & 0xFFF];
+  if ( v2->m_SerialNumber != m_Index >> 12 )
+    return 0;
+  else
+    return (CBaseEntity *)v2->m_pEntity;
+}

@@ -1,0 +1,44 @@
+void __thiscall CTFBaseRocket::Spawn(CTFBaseRocket *this)
+{
+  int v2; // ecx
+  double curtime; // st7
+  Vector vecMax; // [esp+14h] [ebp-18h] BYREF
+  Vector vecMin; // [esp+20h] [ebp-Ch] BYREF
+
+  this->Precache(this);
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BBOX);
+  CBaseEntity::SetMoveType(this, MOVETYPE_FLY, MOVECOLLIDE_FLY_CUSTOM);
+  this->m_iEFlags |= 0x20000000u;
+  CBaseEntity::SetCollisionGroup(this, 24);
+  vecMax.x = 0.0;
+  vecMax.y = 0.0;
+  vecMax.z = 0.0;
+  vecMin.x = 0.0;
+  vecMin.y = 0.0;
+  vecMin.z = 0.0;
+  UTIL_SetSize(this, &vecMin, &vecMax);
+  if ( this->m_takedamage.m_Value )
+  {
+    v2 = 1;
+    if ( !this->m_takedamage.m_Value )
+      v2 = -1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  if ( v2 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    this->m_takedamage.m_Value = 0;
+  }
+  this->m_flGravity = 0.0;
+  this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *)) __thiscall CTFBaseRocket::`vcall'{792,{flat}};
+  CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CTFBaseRocket::FlyThink, 0.0, 0);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+  curtime = gpGlobals->curtime;
+  this->m_bCollideWithTeammates = 0;
+  this->m_bIsHoming = 0;
+  this->m_flCollideWithTeammatesTime = curtime + 0.25;
+  this->m_hHomingTarget.m_Index = -1;
+}

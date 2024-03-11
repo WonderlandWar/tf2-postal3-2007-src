@@ -1,0 +1,4 @@
+void __thiscall CTFBaseRocket::SetDamage(CTFBaseRocket *this, float flDamage)
+{
+  this->m_flDamage = flDamage;
+}

@@ -1,0 +1,96 @@
+void __thiscall CFuncRotating::Spawn(CFuncRotating *this)
+{
+  int m_Value; // ecx
+  double v3; // st5
+  double z; // st4
+  double v5; // st7
+  CBaseEntity::NetworkVar_m_Collision *p_m_Collision; // ecx
+  const char *v7; // eax
+  long double v8; // st7
+  bool v9; // c3
+  double v10; // st7
+  CFuncRotating_vtbl *v11; // eax
+  float thinkTime; // [esp+8h] [ebp-14h]
+  char v13[4]; // [esp+18h] [ebp-4h] BYREF
+
+  if ( 0.0 == this->m_flVolume )
+    this->m_flVolume = 1.0;
+  m_Value = this->m_spawnflags.m_Value;
+  if ( (this->m_spawnflags.m_Value & 0x80) != 0 )
+  {
+    v3 = 2.0;
+  }
+  else if ( (m_Value & 0x100) != 0 )
+  {
+    v3 = 1.25;
+  }
+  else
+  {
+    v3 = 0.80000001;
+  }
+  this->m_flAttenuation = v3;
+  if ( 0.0 == this->m_flFanFriction )
+    this->m_flFanFriction = 1.0;
+  if ( (m_Value & 4) != 0 )
+  {
+    this->m_vecMoveAng.x = 0.0;
+    this->m_vecMoveAng.y = 0.0;
+    this->m_vecMoveAng.z = 1.0;
+  }
+  else if ( (m_Value & 8) != 0 )
+  {
+    this->m_vecMoveAng.x = 1.0;
+    this->m_vecMoveAng.y = 0.0;
+    this->m_vecMoveAng.z = 0.0;
+  }
+  else
+  {
+    this->m_vecMoveAng.x = 0.0;
+    this->m_vecMoveAng.z = 0.0;
+    this->m_vecMoveAng.y = 1.0;
+  }
+  if ( (this->m_spawnflags.m_Value & 2) != 0 )
+  {
+    z = this->m_vecMoveAng.z;
+    v5 = this->m_vecMoveAng.y * -1.0;
+    this->m_vecMoveAng.x = this->m_vecMoveAng.x * -1.0;
+    this->m_vecMoveAng.y = v5;
+    this->m_vecMoveAng.z = -1.0 * z;
+  }
+  CCollisionProperty::SetSolid(&this->m_Collision, SOLID_VPHYSICS);
+  p_m_Collision = &this->m_Collision;
+  if ( (this->m_spawnflags.m_Value & 0x40) != 0 )
+    CCollisionProperty::SetSolidFlags(p_m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  else
+    CCollisionProperty::SetSolidFlags(p_m_Collision, this->m_Collision.m_usSolidFlags.m_Value & 0xFFFB);
+  CBaseEntity::SetMoveType(this, MOVETYPE_PUSH, MOVECOLLIDE_DEFAULT);
+  v7 = *(const char **)((int (__thiscall *)(CFuncRotating *, char *))this->GetModelName)(this, v13);
+  if ( !v7 )
+    v7 = locale;
+  this->SetModel(this, v7);
+  v8 = fabs(this->m_flMaxSpeed);
+  this->m_pfnUse = (void (__thiscall *)(CBaseEntity *, CBaseEntity *, CBaseEntity *, USE_TYPE, float))CFuncRotating::RotatingUse;
+  this->m_flMaxSpeed = v8;
+  v9 = 0.0 == v8;
+  v10 = 0.0;
+  if ( v9 )
+    this->m_flMaxSpeed = 100.0;
+  if ( (this->m_spawnflags.m_Value & 1) != 0 )
+  {
+    CBaseEntity::ThinkSet(this, CBaseEntity::SUB_CallUseToggle, 0.0, 0);
+    thinkTime = gpGlobals->curtime + 0.2;
+    CBaseEntity::SetNextThink(this, thinkTime, 0);
+    v10 = 0.0;
+  }
+  if ( (this->m_spawnflags.m_Value & 0x20) != 0 )
+    this->m_pfnTouch = (void (__thiscall *)(CBaseEntity *, CBaseEntity *))CFuncRotating::HurtTouch;
+  v11 = this->__vftable;
+  this->m_flSpeed = v10;
+  v11->Precache(this);
+  this->CreateVPhysics(this);
+  this->m_angStart.x = this->m_angRotation.m_Value.x;
+  this->m_angStart.y = this->m_angRotation.m_Value.y;
+  this->m_angStart.z = this->m_angRotation.m_Value.z;
+  if ( this->m_bSolidBsp )
+    CCollisionProperty::SetSolid(&this->m_Collision, SOLID_BSP);
+}

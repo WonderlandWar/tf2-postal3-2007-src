@@ -1,0 +1,4 @@
+int __thiscall CTFBaseRocket::GetDamageType(CTFBaseRocket *this)
+{
+  return g_aWeaponDamageTypes[this->GetWeaponID(this)];
+}

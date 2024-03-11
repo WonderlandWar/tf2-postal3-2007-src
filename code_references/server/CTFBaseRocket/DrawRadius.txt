@@ -1,0 +1,97 @@
+void __thiscall CTFBaseRocket::DrawRadius(CTFBaseRocket *this, float flRadius)
+{
+  float y; // edx
+  float z; // eax
+  double v5; // st7
+  long double v6; // st6
+  double v7; // st7
+  double v8; // st7
+  long double v9; // st6
+  double v10; // st7
+  double v11; // st7
+  long double v12; // st6
+  double v13; // st7
+  Vector pos; // [esp+8h] [ebp-34h] BYREF
+  Vector edge; // [esp+14h] [ebp-28h] BYREF
+  Vector lastEdge; // [esp+20h] [ebp-1Ch] BYREF
+  float x; // [esp+2Ch] [ebp-10h]
+  Vector target; // [esp+30h] [ebp-Ch] BYREF
+
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  y = this->m_vecAbsOrigin.y;
+  z = this->m_vecAbsOrigin.z;
+  pos.y = this->m_vecAbsOrigin.x;
+  target.x = pos.y;
+  pos.z = y;
+  edge.x = z;
+  target.y = y;
+  target.z = z + 50.0;
+  NDebugOverlay::Line((Vector *)&pos.y, &target, 255, 0, 0, 0, 10.0);
+  v5 = flRadius;
+  lastEdge.y = pos.y + flRadius;
+  lastEdge.z = pos.z;
+  x = edge.x;
+  v6 = 0.0;
+  pos.x = 0.0;
+  while ( 1 )
+  {
+    edge.y = cos(v6) * v5 + pos.y;
+    edge.z = pos.z;
+    lastEdge.x = v5 * sin(v6) + edge.x;
+    NDebugOverlay::Line((Vector *)&edge.y, (Vector *)&lastEdge.y, 255, 0, 0, 0, 10.0);
+    lastEdge.y = edge.y;
+    lastEdge.z = edge.z;
+    x = lastEdge.x;
+    v7 = pos.x + 22.5;
+    pos.x = v7;
+    if ( v7 > 360.0 )
+      break;
+    v6 = v7;
+    v5 = flRadius;
+  }
+  lastEdge.y = pos.y;
+  v8 = flRadius;
+  lastEdge.z = pos.z + flRadius;
+  x = edge.x;
+  v9 = 0.0;
+  pos.x = 0.0;
+  while ( 1 )
+  {
+    edge.y = pos.y;
+    edge.z = cos(v9) * v8 + pos.z;
+    lastEdge.x = v8 * sin(v9) + edge.x;
+    NDebugOverlay::Line((Vector *)&edge.y, (Vector *)&lastEdge.y, 255, 0, 0, 0, 10.0);
+    lastEdge.y = edge.y;
+    lastEdge.z = edge.z;
+    x = lastEdge.x;
+    v10 = pos.x + 22.5;
+    pos.x = v10;
+    if ( v10 > 360.0 )
+      break;
+    v9 = v10;
+    v8 = flRadius;
+  }
+  lastEdge.y = pos.y;
+  v11 = flRadius;
+  lastEdge.z = pos.z + flRadius;
+  x = edge.x;
+  v12 = 0.0;
+  pos.x = 0.0;
+  while ( 1 )
+  {
+    edge.y = cos(v12) * v11 + pos.y;
+    edge.z = v11 * sin(v12) + pos.z;
+    lastEdge.x = edge.x;
+    NDebugOverlay::Line((Vector *)&edge.y, (Vector *)&lastEdge.y, 255, 0, 0, 0, 10.0);
+    lastEdge.y = edge.y;
+    lastEdge.z = edge.z;
+    x = lastEdge.x;
+    v13 = pos.x + 22.5;
+    pos.x = v13;
+    if ( v13 > 360.0 )
+      break;
+    v12 = v13;
+    v11 = flRadius;
+  }
+}

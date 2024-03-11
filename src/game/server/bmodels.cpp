@@ -415,7 +415,6 @@ public:
 	int	 DrawDebugTextOverlays(void);
 
 	DECLARE_DATADESC();
-	DECLARE_SERVERCLASS();
 
 protected:
 
@@ -449,10 +448,6 @@ protected:
 	bool m_bStopAtStartPos;
 
 	bool m_bSolidBsp;				// Brush is SOLID_BSP
-
-public:
-	Vector m_vecClientOrigin;
-	QAngle m_vecClientAngles;
 };
 
 LINK_ENTITY_TO_CLASS( func_rotating, CFuncRotating );
@@ -493,66 +488,6 @@ BEGIN_DATADESC( CFuncRotating )
 
 END_DATADESC()
 
-extern void SendProxy_Origin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
-void SendProxy_FuncRotatingOrigin( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID )
-{
-	CFuncRotating *entity = (CFuncRotating*)pStruct;
-	Assert( entity );
-	if ( entity->HasSpawnFlags(SF_BRUSH_ROTATE_CLIENTSIDE) )
-	{
-		const Vector *v = &entity->m_vecClientOrigin;
-		pOut->m_Vector[ 0 ] = v->x;
-		pOut->m_Vector[ 1 ] = v->y;
-		pOut->m_Vector[ 2 ] = v->z;
-		return;
-	}
-
-	SendProxy_Origin( pProp, pStruct, pData, pOut, iElement, objectID );
-}
-
-extern void SendProxy_Angles( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID );
-void SendProxy_FuncRotatingAngles( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID )
-{
-	CFuncRotating *entity = (CFuncRotating*)pStruct;
-	Assert( entity );
-	if ( entity->HasSpawnFlags(SF_BRUSH_ROTATE_CLIENTSIDE) )
-	{
-		const QAngle *a = &entity->m_vecClientAngles;
-		pOut->m_Vector[ 0 ] = anglemod( a->x );
-		pOut->m_Vector[ 1 ] = anglemod( a->y );
-		pOut->m_Vector[ 2 ] = anglemod( a->z );
-		return;
-	}
-
-	SendProxy_Angles( pProp, pStruct, pData, pOut, iElement, objectID );
-}
-
-extern void SendProxy_SimulationTime( const SendProp *pProp, const void *pStruct, const void *pVarData, DVariant *pOut, int iElement, int objectID );
-void SendProxy_FuncRotatingSimulationTime( const SendProp *pProp, const void *pStruct, const void *pVarData, DVariant *pOut, int iElement, int objectID )
-{
-	CFuncRotating *entity = (CFuncRotating*)pStruct;
-	Assert( entity );
-	if ( entity->HasSpawnFlags(SF_BRUSH_ROTATE_CLIENTSIDE) )
-	{
-		pOut->m_Int = 0;
-		return;
-	}
-
-	SendProxy_SimulationTime( pProp, pStruct, pVarData, pOut, iElement, objectID );
-}
-
-IMPLEMENT_SERVERCLASS_ST(CFuncRotating, DT_FuncRotating)
-	SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
-	SendPropExclude( "DT_BaseEntity", "m_vecOrigin" ),
-	SendPropExclude( "DT_BaseEntity", "m_flSimulationTime" ),
-
-	SendPropVector(SENDINFO(m_vecOrigin), -1,  SPROP_COORD|SPROP_CHANGES_OFTEN, 0.0f, HIGH_DEFAULT, SendProxy_FuncRotatingOrigin ),
-	SendPropQAngles(SENDINFO(m_angRotation), 13, SPROP_CHANGES_OFTEN, SendProxy_FuncRotatingAngles ),
-	SendPropInt(SENDINFO(m_flSimulationTime), SIMULATION_TIME_WINDOW_BITS, SPROP_UNSIGNED|SPROP_CHANGES_OFTEN|SPROP_ENCODED_AGAINST_TICKCOUNT, SendProxy_FuncRotatingSimulationTime),
-END_SEND_TABLE()
-
-
-
 //-----------------------------------------------------------------------------
 // Purpose: Handles keyvalues from the BSP. Called before spawning.
 //-----------------------------------------------------------------------------
@@ -581,10 +516,6 @@ bool CFuncRotating::KeyValue( const char *szKeyName, const char *szValue )
 //-----------------------------------------------------------------------------
 void CFuncRotating::Spawn( )
 {
-#ifdef TF_DLL
-	AddSpawnFlags( SF_BRUSH_ROTATE_CLIENTSIDE );
-#endif
-
 	//
 	// Maintain compatibility with previous maps.
 	//
@@ -706,12 +637,6 @@ void CFuncRotating::Spawn( )
 	if ( m_bSolidBsp )
 	{
 		SetSolid( SOLID_BSP );
-	}
-
-	if ( HasSpawnFlags(SF_BRUSH_ROTATE_CLIENTSIDE) )
-	{
-		m_vecClientOrigin = GetLocalOrigin();
-		m_vecClientAngles = GetLocalAngles();
 	}
 }
 

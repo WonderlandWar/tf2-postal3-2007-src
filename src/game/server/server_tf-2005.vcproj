@@ -3525,10 +3525,6 @@
 					RelativePath=".\hl2\Func_Monitor.cpp"
 					>
 				</File>
-				<File
-					RelativePath=".\hl2\npc_headcrab.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="IFM"

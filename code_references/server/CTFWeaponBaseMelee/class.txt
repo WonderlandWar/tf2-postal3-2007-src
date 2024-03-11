@@ -1,0 +1,47 @@
+class CTFWeaponBaseMelee : public CTFWeaponBase
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    private void CTFWeaponBaseMelee(class CTFWeaponBaseMelee & );
+	
+    public void CTFWeaponBaseMelee();
+	
+    public bool HasPrimaryAmmo();
+    public bool CanBeSelected();
+    public void Precache();
+    public void ItemPostFrame();
+    public void Spawn();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public bool Holster(class CBaseCombatWeapon * );
+    public int GetWeaponID();
+    public bool ShouldDrawCrosshair();
+    public void WeaponReset();
+	
+    public bool CalcIsAttackCriticalHelper();
+	
+    public void DoViewModelAnimation();
+	
+    public bool DoSwingTrace(class CGameTrace & );
+    public void Smack();
+	
+    public float GetMeleeDamage(class CBaseEntity * ,int & );
+	
+    public void OnEntityHit(class CBaseEntity * );
+	
+    public void SendPlayerAnimEvent(class CTFPlayer * );
+	
+    public bool IsCurrentAttackACritical();
+    public bool ConnectedHit();
+	
+    public class CTFWeaponInfo * m_pWeaponInfo;
+	
+    protected void Swing(class CTFPlayer * );
+	
+    protected float m_flSmackTime;
+    protected bool m_bConnected;
+};

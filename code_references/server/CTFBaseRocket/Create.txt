@@ -1,0 +1,45 @@
+CTFBaseRocket *__cdecl CTFBaseRocket::Create(
+        const char *pszClassname,
+        const Vector *vecOrigin,
+        const QAngle *vecAngles,
+        CBaseEntity *pOwner,
+        CBaseEntity *pHomingTarget)
+{
+  CTFBaseRocket *result; // eax
+  CTFBaseRocket *v6; // esi
+  CTFBaseRocket_vtbl *v7; // ebx
+  int TeamNumber; // eax
+  Vector vecVelocity; // [esp+8h] [ebp-40h] BYREF
+  Vector vecForward; // [esp+14h] [ebp-34h] BYREF
+  QAngle angles; // [esp+20h] [ebp-28h] BYREF
+  Vector vecUp; // [esp+2Ch] [ebp-1Ch] BYREF
+  Vector vecRight; // [esp+38h] [ebp-10h] BYREF
+
+  result = (CTFBaseRocket *)CBaseEntity::Create(pszClassname, vecOrigin, vecAngles, pOwner);
+  v6 = result;
+  if ( result )
+  {
+    result->SetOwnerEntity(result, pOwner);
+    v6->Spawn(v6);
+    AngleVectors(vecAngles, (Vector *)&vecForward.y, (Vector *)&vecRight.y, (Vector *)&vecUp.y);
+    vecVelocity.y = vecForward.y * 1100.0;
+    vecVelocity.z = vecForward.z * 1100.0;
+    vecForward.x = 1100.0 * angles.x;
+    CBaseEntity::SetAbsVelocity(v6, (Vector *)&vecVelocity.y);
+    CNetworkVarBase<Vector,CTFBaseRocket::NetworkVar_m_vInitialVelocity>::Set(
+      &v6->m_vInitialVelocity,
+      (Vector *)&vecVelocity.y);
+    VectorAngles((Vector *)&vecVelocity.y, (QAngle *)&angles.y);
+    CBaseEntity::SetAbsAngles(v6, (QAngle *)&angles.y);
+    v7 = v6->__vftable;
+    TeamNumber = CBaseEntity::GetTeamNumber(pOwner);
+    v7->ChangeTeam(v6, TeamNumber);
+    if ( pHomingTarget )
+    {
+      v6->m_bIsHoming = 1;
+      v6->m_hHomingTarget.m_Index = pHomingTarget->GetRefEHandle(pHomingTarget)->m_Index;
+    }
+    return v6;
+  }
+  return result;
+}

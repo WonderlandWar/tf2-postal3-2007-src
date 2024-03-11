@@ -83,6 +83,8 @@ public:
 	virtual void	RocketTouch( CBaseEntity *pOther );
 	void			Explode( trace_t *pTrace, CBaseEntity *pOther );
 
+    void SendDispatchEffect( void );
+
 	virtual float	GetDamage() { return m_flDamage; }
 	virtual int		GetDamageType() { return g_aWeaponDamageTypes[ GetWeaponID() ]; }
 	virtual void	SetDamage(float flDamage) { m_flDamage = flDamage; }
@@ -103,9 +105,6 @@ protected:
 
 	void			FlyThink( void );
 
-	EHANDLE m_hHomingTarget;
-	bool m_bIsHoming;
-
 protected:
 
 	// Not networked.
@@ -116,6 +115,9 @@ protected:
 
 
 	CHandle<CBaseEntity>	m_hEnemy;
+
+	EHANDLE m_hHomingTarget;
+	bool m_bIsHoming;
 
 #endif
 };

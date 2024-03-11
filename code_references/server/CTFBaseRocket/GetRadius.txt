@@ -1,0 +1,4 @@
+double __thiscall CTFBaseRocket::GetRadius(CTFBaseRocket *this)
+{
+  return 121.0;
+}

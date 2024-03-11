@@ -1,0 +1,53 @@
+class CTFBaseRocket : public CBaseAnimating
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void CTFBaseRocket(class CTFBaseRocket & );
+    public void CTFBaseRocket();
+    public void ~CTFBaseRocket();
+    public void Precache();
+    public void Spawn();
+	
+    class NetworkVar_m_vInitialVelocity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVectorBase<Vector,CTFBaseRocket::NetworkVar_m_vInitialVelocity> m_vInitialVelocity;
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    public class CTFBaseRocket * Create(char * ,class Vector & ,class QAngle & ,class CBaseEntity * ,class CBaseEntity * );
+	
+    public void RocketTouch(class CBaseEntity * );
+    public void Explode(class CGameTrace * ,class CBaseEntity * );
+	
+    public void SendDispatchEffect();
+	
+    public float GetDamage();
+    public int GetDamageType();
+    public void SetDamage(float );
+    public float GetRadius();
+    public void DrawRadius(float );
+	
+    public unsigned int PhysicsSolidMaskForEntity();
+	
+    public void SetupInitialTransmittedGrenadeVelocity(class Vector & );
+	
+    public int GetWeaponID();
+	
+    public class CBaseEntity * GetEnemy();
+	
+    public void SetHomingTarget(class CBaseEntity * );
+	
+    protected void FlyThink();
+	
+    protected float m_flDamage;
+    protected float m_flCollideWithTeammatesTime;
+    protected bool m_bCollideWithTeammates;
+    protected class CHandle<CBaseEntity> m_hEnemy;
+    protected bool m_bIsHoming;
+    protected class CHandle<CBaseEntity> m_hHomingTarget;
+};

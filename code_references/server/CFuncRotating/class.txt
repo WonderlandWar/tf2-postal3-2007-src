@@ -1,0 +1,56 @@
+class CFuncRotating : public CBaseEntity
+{
+    public void Spawn();
+    public void Precache();
+    public bool CreateVPhysics();
+    public void SpinUpMove();
+    public void SpinDownMove();
+    public bool KeyValue(char * ,char * );
+    public void HurtTouch(class CBaseEntity * );
+    public void RotatingUse(class CBaseEntity * ,class CBaseEntity * ,enum USE_TYPE ,float );
+    public void RotateMove();
+    public void ReverseMove();
+    public void RampPitchVol();
+    public void Blocked(class CBaseEntity * );
+    public void SetTargetSpeed(float );
+    public void UpdateSpeed(float );
+	
+    public int DrawDebugTextOverlays();
+	
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    protected bool SpinDown(float );
+    protected float GetMoveSpeed(float );
+	
+    protected float GetNextMoveInterval();
+	
+    protected void InputSetSpeed(struct inputdata_t & );
+    protected void InputStart(struct inputdata_t & );
+    protected void InputStop(struct inputdata_t & );
+    protected void InputStartForward(struct inputdata_t & );
+    protected void InputStartBackward(struct inputdata_t & );
+    protected void InputToggle(struct inputdata_t & );
+    protected void InputReverse(struct inputdata_t & );
+    protected void InputStopAtStartPos(struct inputdata_t & );
+	
+    protected class QAngle m_vecMoveAng;
+	
+    protected float m_flFanFriction;
+    protected float m_flAttenuation;
+    protected float m_flVolume;
+    protected float m_flTargetSpeed;
+    protected float m_flMaxSpeed;
+    protected float m_flBlockDamage;
+    protected struct string_t m_NoiseRunning;
+    protected bool m_bReversed;
+	
+    protected class QAngle m_angStart;
+    protected bool m_bStopAtStartPos;
+	
+    protected bool m_bSolidBsp;
+	
+    public void CFuncRotating(class CFuncRotating & );
+    public void CFuncRotating();
+};

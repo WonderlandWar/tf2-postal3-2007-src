@@ -1,0 +1,39 @@
+void __thiscall C_TFWeaponBaseMelee::Smack(C_TFWeaponBaseMelee *this)
+{
+  bool v2; // zf
+  void (__thiscall *WeaponSound)(C_BaseCombatWeapon *, WeaponSound_t, float); // eax
+  C_TFPlayer *TFPlayerOwner; // eax
+  C_TFPlayer *v5; // esi
+  const QAngle *v6; // eax
+  int v7; // esi
+  Vector vecSwingStart; // [esp+4h] [ebp-74h] BYREF
+  Vector vecForward; // [esp+10h] [ebp-68h] BYREF
+  CGameTrace trace; // [esp+1Ch] [ebp-5Ch] BYREF
+
+  if ( C_TFWeaponBase::GetPlayerOwner(this) && C_TFWeaponBaseMelee::DoSwingTrace(this, (CGameTrace *)&trace.startpos.y) )
+  {
+    v2 = (*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)trace.hitbox + 488))(trace.hitbox) == 0;
+    WeaponSound = this->WeaponSound;
+    if ( v2 )
+      ((void (__thiscall *)(C_TFWeaponBaseMelee *, int))WeaponSound)(this, 10);
+    else
+      ((void (__thiscall *)(C_TFWeaponBaseMelee *, int))WeaponSound)(this, 9);
+    TFPlayerOwner = C_TFWeaponBase::GetTFPlayerOwner(this);
+    v5 = TFPlayerOwner;
+    if ( TFPlayerOwner )
+    {
+      v6 = TFPlayerOwner->EyeAngles(TFPlayerOwner);
+      AngleVectors(v6, (Vector *)&vecForward.y);
+      v5->Weapon_ShootPosition(v5, (Vector *)&vecSwingStart.y);
+      if ( trace.hitbox )
+      {
+        v7 = v5->GetTeamNumber(v5);
+        if ( (*(int (__thiscall **)(int))(*(_DWORD *)trace.hitbox + 280))(trace.hitbox) != v7 )
+        {
+          UTIL_ImpactTrace((CGameTrace *)&trace.startpos.y, 128, 0);
+          this->m_bConnected = 1;
+        }
+      }
+    }
+  }
+}

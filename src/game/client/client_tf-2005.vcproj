@@ -539,10 +539,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\c_func_rotating.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\c_func_smokevolume.cpp"
 				>
 			</File>

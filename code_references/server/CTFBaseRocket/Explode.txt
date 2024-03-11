@@ -1,0 +1,73 @@
+void __thiscall CTFBaseRocket::Explode(CTFBaseRocket *this, CGameTrace *pTrace, CBaseEntity *pOther)
+{
+  int v4; // ecx
+  double v6; // st6
+  double v7; // st7
+  unsigned int m_Index; // eax
+  CBaseEntity *m_pEntity; // edi
+  float flDuration; // [esp+4h] [ebp-74h]
+  int v11; // [esp+8h] [ebp-70h]
+  Vector absOrigin; // [esp+24h] [ebp-54h] BYREF
+  CTakeDamageInfo info; // [esp+30h] [ebp-48h] BYREF
+  float flRadius; // [esp+7Ch] [ebp+4h]
+
+  if ( pOther )
+    this->m_hEnemy.m_Index = pOther->GetRefEHandle(pOther)->m_Index;
+  else
+    this->m_hEnemy.m_Index = -1;
+  this->m_ModelName.pszValue = 0;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  if ( this->m_takedamage.m_Value )
+  {
+    v4 = 1;
+    if ( !this->m_takedamage.m_Value )
+      v4 = -1;
+  }
+  else
+  {
+    v4 = 0;
+  }
+  if ( v4 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    this->m_takedamage.m_Value = 0;
+  }
+  if ( 1.0 != pTrace->fraction )
+  {
+    v6 = 0.60000002 * pTrace->plane.normal.z;
+    v7 = pTrace->plane.normal.y * 0.60000002;
+    absOrigin.x = pTrace->plane.normal.x * 0.60000002 + pTrace->endpos.x;
+    absOrigin.y = v7 + pTrace->endpos.y;
+    absOrigin.z = v6 + pTrace->endpos.z;
+    CBaseEntity::SetAbsOrigin(this, &absOrigin);
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  CSoundEnt::InsertSound(1, &this->m_vecAbsOrigin, 1024, 3.0, 0, 0, 0);
+  CTFBaseRocket::SendDispatchEffect(this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  m_Index = this->m_hOwnerEntity.m_Value.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = (CBaseEntity *)g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_pEntity;
+  }
+  v11 = this->GetDamageType(this);
+  flDuration = this->GetDamage(this);
+  CTakeDamageInfo::CTakeDamageInfo(&info, this, m_pEntity, &vec3_origin, &this->m_vecAbsOrigin, flDuration, v11, 0, 0);
+  flRadius = this->GetRadius(this);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  RadiusDamage(&info, &this->m_vecAbsOrigin, flRadius, 0, 0);
+  if ( tf_rocket_show_radius.m_pParent->m_nValue )
+    CTFBaseRocket::DrawRadius(this, flRadius);
+  if ( !pOther->IsPlayer(pOther) )
+    UTIL_DecalTrace(pTrace, "Scorch");
+  UTIL_Remove(this);
+}

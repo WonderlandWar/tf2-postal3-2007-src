@@ -1,0 +1,9 @@
+unsigned int __thiscall CTFBaseRocket::PhysicsSolidMaskForEntity(CTFBaseRocket *this)
+{
+  int v2; // esi
+
+  if ( this->m_bCollideWithTeammates )
+    return CBaseEntity::PhysicsSolidMaskForEntity(this) | 0x1800;
+  v2 = CBaseEntity::GetTeamNumber(this) != 2 ? 2048 : 4096;
+  return v2 | CBaseEntity::PhysicsSolidMaskForEntity(this);
+}

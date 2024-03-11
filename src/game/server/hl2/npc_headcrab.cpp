@@ -17,9 +17,7 @@
 #include "ai_moveprobe.h"
 #include "ai_memory.h"
 #include "bitstring.h"
-#ifndef TF_DLL
 #include "hl2_shareddefs.h"
-#endif
 #include "npcevent.h"
 #include "soundent.h"
 #include "npc_headcrab.h"
@@ -32,9 +30,7 @@
 #include "world.h"
 #include "npc_bullseye.h"
 #include "physics_npc_solver.h"
-#ifndef TF_DLL
 #include "hl2_gamerules.h"
-#endif
 #include "decals.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -249,9 +245,9 @@ void CBaseHeadcrab::Spawn( void )
 	SetSolid( SOLID_BBOX );
 	AddSolidFlags( FSOLID_NOT_STANDABLE );
 	SetMoveType( MOVETYPE_STEP );
-#ifndef TF_DLL
+
 	SetCollisionGroup( HL2COLLISION_GROUP_HEADCRAB );
-#endif
+
 	SetViewOffset( Vector(6, 0, 11) ) ;		// Position of the eyes relative to NPC's origin.
 
 	SetBloodColor( BLOOD_COLOR_GREEN );
@@ -363,9 +359,6 @@ void CBaseHeadcrab::OnChangeActivity( Activity NewActivity )
 //-----------------------------------------------------------------------------
 Class_T	CBaseHeadcrab::Classify( void )
 {
-#ifdef TF_DLL
-	return CLASS_NONE;
-#else
 	if( m_bHidden )
 	{
 		// Effectively invisible to other AI's while hidden.
@@ -375,7 +368,6 @@ Class_T	CBaseHeadcrab::Classify( void )
 	{
 		return( CLASS_HEADCRAB ); 
 	}
-#endif
 }
 
 
@@ -1312,7 +1304,6 @@ void CBaseHeadcrab::JumpFromCanister()
 
 void CBaseHeadcrab::DropFromCeiling( void )
 {
-#ifndef TF_DLL
 	if ( HL2GameRules()->IsAlyxInDarknessMode() )
 	{
 		if ( IsHangingFromCeiling() )
@@ -1340,7 +1331,6 @@ void CBaseHeadcrab::DropFromCeiling( void )
 			}
 		}
 	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1889,10 +1879,9 @@ int CBaseHeadcrab::SelectSchedule( void )
 
 	if ( IsHangingFromCeiling() )
 	{
-#ifndef TF_DLL
 		if ( HL2GameRules()->IsAlyxInDarknessMode() == false && ( HasCondition( COND_CAN_RANGE_ATTACK1 ) || HasCondition( COND_NEW_ENEMY ) ) )
 			return SCHED_HEADCRAB_CEILING_DROP;
-#endif
+
 		if ( HasCondition( COND_LIGHT_DAMAGE ) || HasCondition( COND_HEAVY_DAMAGE ) )
 			return SCHED_HEADCRAB_CEILING_DROP;
 
@@ -2091,7 +2080,6 @@ void CBaseHeadcrab::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, 
 //-----------------------------------------------------------------------------
 bool CBaseHeadcrab::HandleInteraction(int interactionType, void *data, CBaseCombatCharacter* sourceEnt)
 {
-#ifndef TF_DLL
 	if (interactionType == g_interactionBarnacleVictimDangle)
 	{
 		// Die instantly
@@ -2142,7 +2130,7 @@ bool CBaseHeadcrab::HandleInteraction(int interactionType, void *data, CBaseComb
 
 		return true;
 	}
-#endif
+
 	return BaseClass::HandleInteraction( interactionType, data, sourceEnt );
 }
 
@@ -2388,9 +2376,8 @@ void CBaseHeadcrab::CreateDust( bool placeDecal )
 
 		if ( ( (char) pdata->game.material == CHAR_TEX_CONCRETE ) || ( (char) pdata->game.material == CHAR_TEX_DIRT ) )
 		{
-#ifndef TF_DLL
 			UTIL_CreateAntlionDust( tr.endpos + Vector(0, 0, 24), GetLocalAngles() );
-#endif
+
 			//CEffectData data;
 			//data.m_vOrigin = GetAbsOrigin();
 			//data.m_vNormal = tr.plane.normal;
@@ -2432,7 +2419,7 @@ void CHeadcrab::Precache( void )
 void CHeadcrab::Spawn( void )
 {
 	Precache();
-	SetModel( "models/player/engineer.mdl" );
+	SetModel( "models/headcrabclassic.mdl" );
 
 	BaseClass::Spawn();
 

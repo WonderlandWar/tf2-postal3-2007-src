@@ -1,0 +1,4 @@
+int __thiscall CTFBaseRocket::GetWeaponID(CTFBaseRocket *this)
+{
+  return 19;
+}

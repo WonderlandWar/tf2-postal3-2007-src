@@ -1,0 +1,13 @@
+void __thiscall CTFBaseRocket::CTFBaseRocket(CTFBaseRocket *this)
+{
+  CBaseAnimating::CBaseAnimating(this);
+  this->__vftable = (CTFBaseRocket_vtbl *)&CTFBaseRocket::`vftable';
+  this->m_hEnemy.m_Index = -1;
+  this->m_hHomingTarget.m_Index = -1;
+  CNetworkVectorBase<Vector,CTFBaseRocket::NetworkVar_m_vInitialVelocity>::Init(
+    &this->m_vInitialVelocity,
+    0.0,
+    0.0,
+    0.0);
+  this->m_flDamage = 0.0;
+}

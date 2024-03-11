@@ -120,7 +120,6 @@ void CTFBaseRocket::Spawn( void )
 	SetSolid( SOLID_BBOX );
 	SetMoveType( MOVETYPE_FLY, MOVECOLLIDE_FLY_CUSTOM );
 	AddEFlags( EFL_NO_WATER_VELOCITY_CHANGE );
-	AddEffects( EF_NOSHADOW );
 
 	SetCollisionGroup( TFCOLLISION_GROUP_ROCKETS );
 
@@ -139,6 +138,8 @@ void CTFBaseRocket::Spawn( void )
 	m_flCollideWithTeammatesTime = gpGlobals->curtime + 0.25;
 	m_bCollideWithTeammates = false;
 
+	m_bIsHoming = false;
+	m_hHomingTarget = NULL;
 #endif
 }
 
@@ -302,7 +303,7 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 	// Pull out a bit.
 	if ( pTrace->fraction != 1.0 )
 	{
-		SetAbsOrigin( pTrace->endpos + ( pTrace->plane.normal * 1.0f ) );
+		SetAbsOrigin( pTrace->endpos + ( pTrace->plane.normal * 0.6f ) );
 	}
 
 	// Play explosion sound and effect.
@@ -313,11 +314,6 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 
 	// Damage.
 	CBaseEntity *pAttacker = GetOwnerEntity();
-	IScorer *pScorerInterface = dynamic_cast<IScorer*>( pAttacker );
-	if ( pScorerInterface )
-	{
-		pAttacker = pScorerInterface->GetScorer();
-	}
 
 	CTakeDamageInfo info( this, pAttacker, vec3_origin, vecOrigin, GetDamage(), GetDamageType() );
 	float flRadius = GetRadius();
@@ -337,6 +333,51 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 
 	// Remove the rocket.
 	UTIL_Remove( this );
+}
+
+void CTFBaseRocket::SendDispatchEffect( void )
+{
+	// TFP3: Horrifically bad code, revisit when tf_fx gets properly implemented
+#if 0
+	CEffectData explosionData; // [esp+4h] [ebp-64h] BYREF
+
+	CDisablePredictionFiltering disabler;
+
+	explosionData.m_vOrigin.y = 0.0;
+	explosionData.m_vOrigin.z = 0.0;
+	explosionData.m_vStart.x = 0.0;
+	explosionData.m_nEntIndex = 0;
+	explosionData.m_vStart.y = 0.0;
+	explosionData.m_flScale = 0.0;
+	explosionData.m_vStart.z = 0.0;
+	explosionData.m_nSurfaceProp = 0;
+	explosionData.m_vNormal.x = 0.0;
+	explosionData.m_nMaterial = 0;
+	explosionData.m_vNormal.y = 0.0;
+	memset(&explosionData.m_nDamageType, 0, 13);
+	explosionData.m_vNormal.z = 0.0;
+	explosionData.m_vAngles.x = 0.0;
+	explosionData.m_vAngles.y = 0.0;
+	explosionData.m_vAngles.z = 0.0;
+	*(float *)&explosionData.m_fFlags = 0.0;
+	explosionData.m_flMagnitude = 1.0;
+	explosionData.m_flRadius = 0.0;
+	*(float *)&explosionData.m_nAttachmentIndex = 0.0;
+
+	const Vector vecOrigin = GetAbsOrigin();
+	const QAngle absAngles = GetAbsAngles();
+
+	explosionData.m_vOrigin.y = vecOrigin.x;
+	explosionData.m_vOrigin.z = vecOrigin.y;
+	explosionData.m_vStart.x = vecOrigin.z;
+	
+	explosionData.m_vAngles.y = absAngles.x;
+	explosionData.m_vAngles.z = absAngles.y;
+	*(float *)&explosionData.m_fFlags = absAngles.z;
+
+	explosionData.m_nEntIndex = GetWeaponID();
+	DispatchEffect( "TF_Explosion", explosionData );
+#endif
 }
 
 //-----------------------------------------------------------------------------

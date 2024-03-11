@@ -1,0 +1,47 @@
+class C_TFWeaponBaseMelee : public C_TFWeaponBase
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFWeaponBaseMelee(class C_TFWeaponBaseMelee & );
+    public void C_TFWeaponBaseMelee();
+	
+    public bool HasPrimaryAmmo();
+    public bool CanBeSelected();
+    public void Precache();
+    public void ItemPostFrame();
+    public void Spawn();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public bool Holster(class C_BaseCombatWeapon * );
+    public int GetWeaponID();
+    public bool ShouldDrawCrosshair();
+    public void WeaponReset();
+	
+    public bool CalcIsAttackCriticalHelper();
+	
+    public void DoViewModelAnimation();
+	
+    public bool DoSwingTrace(class CGameTrace & );
+    public void Smack();
+	
+    public float GetMeleeDamage(class C_BaseEntity * ,int & );
+	
+    public void OnEntityHit(class C_BaseEntity * );
+	
+    public void SendPlayerAnimEvent(class C_TFPlayer * );
+	
+    public bool IsCurrentAttackACritical();
+    public bool ConnectedHit();
+	
+    public class CTFWeaponInfo * m_pWeaponInfo;
+	
+    protected void Swing(class C_TFPlayer * );
+	
+    protected float m_flSmackTime;
+    protected bool m_bConnected;
+};
