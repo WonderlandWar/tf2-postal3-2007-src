@@ -60,10 +60,6 @@ LINK_ENTITY_TO_CLASS( team_control_point, CTeamControlPoint );
 CTeamControlPoint::CTeamControlPoint()
 {
 	m_TeamData.SetSize( GetNumberOfTeams() );
-
-#ifdef  TF_DLL
-	UseClientSideAnimation();
-#endif
 }
 
 //-----------------------------------------------------------------------------

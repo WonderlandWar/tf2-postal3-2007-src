@@ -3578,8 +3578,6 @@ void CGameMovement::SetGroundEntity( trace_t *pm )
 		{
 			MoveHelper()->AddToTouched( *pm, mv->m_vecVelocity );
 		}
-
-		mv->m_vecVelocity.z = 0.0f;
 	}
 }
 
@@ -4373,7 +4371,6 @@ void CGameMovement::Duck( void )
 						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
 						player->m_Local.m_bDucked = true;
 						player->m_Local.m_bDucking = false;
-						player->AddFlag( FL_DUCKING );
 					}
 				}
 			}

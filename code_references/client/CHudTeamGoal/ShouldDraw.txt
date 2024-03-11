@@ -1,0 +1,53 @@
+char __usercall CHudTeamGoal::ShouldDraw@<al>(CHudTeamGoal *this@<ecx>, int a2@<esi>)
+{
+  CHudElement *Element; // eax
+  C_TFPlayer *LocalTFPlayer; // esi
+  C_TFGameRules *v6; // edi
+  int v7; // eax
+  const char *pszGoal_1; // eax
+  const char *pszGoal_2; // esi
+  wchar_t *v10; // eax
+  vgui::Label_vtbl *v11; // edx
+
+  Element = CHud::FindElement(&gHUD, "CTFStatPanel");
+  if ( Element
+    && Element != (CHudElement *)232
+    && (*(unsigned __int8 (__thiscall **)(bool *))(*(_DWORD *)&Element[-10].m_bActive + 128))(&Element[-10].m_bActive) )
+  {
+    return 0;
+  }
+  if ( !this->m_pGoalLabel )
+    return 0;
+  if ( !g_pGameRules )
+    return 0;
+  if ( !BYTE1(g_pGameRules[3].m_pszName) )
+    return 0;
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( !LocalTFPlayer )
+    return 0;
+  if ( !LocalTFPlayer->IsAlive(LocalTFPlayer) )
+    return 0;
+  if ( LocalTFPlayer->GetTeamNumber(LocalTFPlayer) < 2 )
+    return 0;
+  v6 = (C_TFGameRules *)g_pGameRules;
+  v7 = LocalTFPlayer->GetTeamNumber(LocalTFPlayer);
+  pszGoal_1 = C_TFGameRules::GetTeamGoalString(v6, v7);
+  pszGoal_2 = pszGoal_1;
+  if ( !pszGoal_1 || !*pszGoal_1 || !CHudElement::ShouldDraw(this) )
+    return 0;
+  if ( !this->IsVisible(&this->vgui::EditablePanel) )
+  {
+    v10 = (wchar_t *)((int (__thiscall *)(vgui::ILocalize *, const char *, int))g_pVGuiLocalize->Find)(
+                       g_pVGuiLocalize,
+                       pszGoal_2,
+                       a2);
+    v11 = this->m_pGoalLabel->__vftable;
+    if ( v10 )
+    {
+      ((void (__stdcall *)(wchar_t *))v11->SetText)(v10);
+      return 1;
+    }
+    ((void (*)(void))v11->SetText)();
+  }
+  return 1;
+}

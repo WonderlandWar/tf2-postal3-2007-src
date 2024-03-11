@@ -1,0 +1,75 @@
+class C_TFGameRules : public C_TeamplayRoundBasedRules, public CGameEventListener
+{
+    public void C_TFGameRules(class C_TFGameRules & );
+    public void C_TFGameRules();
+	
+    public bool Damage_IsTimeBased(int );
+    public bool Damage_ShowOnHUD(int );
+    public bool Damage_ShouldNotBleed(int );
+	
+    public int Damage_GetTimeBased();
+    public int Damage_GetShowOnHud();
+    public int Damage_GetShouldNotBleed();
+	
+    public int GetFarthestOwnedControlPoint(int ,bool );
+    public bool TeamMayCapturePoint(int ,int );
+    public bool PlayerMayCapturePoint(class C_BasePlayer * ,int ,char * ,int );
+    public bool PlayerMayBlockPoint(class C_BasePlayer * ,int ,char * ,int );
+	
+    public int CalcPlayerScore(struct RoundStats_t * );
+	
+    public bool IsBirthday();
+	
+    public int GetCaptureValueForPlayer(class C_BasePlayer * );
+	
+    public bool ShouldCollide(int ,int );
+	
+    public bool IsGameUnderTimeLimit();
+	
+    public int GetTimeLeft();
+	
+    public class CViewVectors * GetViewVectors();
+	
+    public void FireGameEvent(class IGameEvent * );
+	
+    public char * GetGameTypeName();
+    public int GetGameType();
+	
+    public bool FlagsMayBeCapped();
+	
+    public void RunPlayerConditionThink();
+	
+    public char * GetTeamGoalString(int );
+	
+    public void OnDataChanged(enum DataUpdateType_t );
+    public void HandleOvertimeBegin();
+	
+    class NetworkVar_m_nGameType
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,C_TFGameRules::NetworkVar_m_nGameType> m_nGameType;
+    class NetworkVar_m_pszTeamGoalStringRed
+    {
+        public char * operator const char *();
+        public char * Get();
+        public char * GetForModify();
+        protected void NetworkStateChanged();
+        private char m_Value[256];
+    };
+    private class C_TFGameRules::NetworkVar_m_pszTeamGoalStringRed m_pszTeamGoalStringRed;
+    class NetworkVar_m_pszTeamGoalStringBlue
+    {
+        public char * operator const char *();
+        public char * Get();
+        public char * GetForModify();
+        protected void NetworkStateChanged();
+        private char m_Value[256];
+    };
+    private class C_TFGameRules::NetworkVar_m_pszTeamGoalStringBlue m_pszTeamGoalStringBlue;
+	
+    public bool m_bControlSpawnsPerTeam[32][8];
+    public int m_iPreviousRoundWinners;
+	
+    public int m_iBirthdayMode;
+};

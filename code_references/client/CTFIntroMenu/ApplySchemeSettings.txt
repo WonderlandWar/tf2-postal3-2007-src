@@ -1,0 +1,21 @@
+void __thiscall CTFIntroMenu::ApplySchemeSettings(CTFIntroMenu *this, vgui::IScheme *pScheme)
+{
+  vgui::Panel *ChildByName; // eax
+  vgui::Panel *v4; // eax
+
+  CIntroMenu::ApplySchemeSettings(this, pScheme);
+  ChildByName = vgui::Panel::FindChildByName(this, "VideoPanel", 0);
+  this->m_pVideo = (CTFVideoPanel *)__RTDynamicCast(
+                                      ChildByName,
+                                      0,
+                                      &vgui::Panel `RTTI Type Descriptor',
+                                      &CTFVideoPanel `RTTI Type Descriptor',
+                                      0);
+  v4 = vgui::Panel::FindChildByName(this, "MenuBG", 0);
+  this->m_pModel = (CModelPanel *)__RTDynamicCast(
+                                    v4,
+                                    0,
+                                    &vgui::Panel `RTTI Type Descriptor',
+                                    &CModelPanel `RTTI Type Descriptor',
+                                    0);
+}

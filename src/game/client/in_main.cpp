@@ -120,7 +120,6 @@ static	kbutton_t	in_break;
 static	kbutton_t	in_zoom;
 static  kbutton_t   in_grenade1;
 static  kbutton_t   in_grenade2;
-kbutton_t	in_ducktoggle;
 
 /*
 ===========
@@ -465,18 +464,6 @@ void IN_Grenade1Down( const CCommand &args ) { KeyDown( &in_grenade1, args[1] );
 void IN_Grenade2Up( const CCommand &args ) { KeyUp( &in_grenade2, args[1] ); }
 void IN_Grenade2Down( const CCommand &args ) { KeyDown( &in_grenade2, args[1] ); }
 void IN_XboxStub( const CCommand &args ) { /*do nothing*/ }
-
-void IN_DuckToggle( const CCommand &args ) 
-{ 
-	if ( ::input->KeyState(&in_ducktoggle) )
-	{
-		KeyUp( &in_ducktoggle, args[1] ); 
-	}
-	else
-	{
-		KeyDown( &in_ducktoggle, args[1] ); 
-	}
-}
 
 void IN_AttackDown( const CCommand &args )
 {
@@ -1299,11 +1286,6 @@ int CInput::GetButtonBits( int bResetState )
 	CalcButtonBits( bits, IN_GRENADE1, s_ClearInputState, &in_grenade1, bResetState );
 	CalcButtonBits( bits, IN_GRENADE2, s_ClearInputState, &in_grenade2, bResetState );
 
-	if ( KeyState(&in_ducktoggle) )
-	{
-		bits |= IN_DUCK;
-	}
-
 	// Cancel is a special flag
 	if (in_cancel)
 	{
@@ -1453,10 +1435,6 @@ static ConCommand endgrenade1( "-grenade1", IN_Grenade1Up );
 static ConCommand startgrenade1( "+grenade1", IN_Grenade1Down );
 static ConCommand endgrenade2( "-grenade2", IN_Grenade2Up );
 static ConCommand startgrenade2( "+grenade2", IN_Grenade2Down );
-
-#ifdef TF_CLIENT_DLL
-static ConCommand toggle_duck( "toggle_duck", IN_DuckToggle );
-#endif
 
 // Xbox 360 stub commands
 static ConCommand xboxmove("xmove", IN_XboxStub);

@@ -1,0 +1,41 @@
+void __thiscall CTFIntroMenu::OnTick(CTFIntroMenu *this)
+{
+  int m_iAction; // eax
+  const char *v3; // eax
+  CTFVideoPanel *m_pVideo; // ecx
+  char mapname[32]; // [esp+0h] [ebp-12Ch] BYREF
+  char strFullpath[260]; // [esp+20h] [ebp-10Ch] BYREF
+
+  if ( this->m_flThink > 0.0 && *(float *)(gpGlobals.m_Index + 12) > (double)this->m_flThink )
+  {
+    m_iAction = this->m_iAction;
+    switch ( m_iAction )
+    {
+      case 1:
+        v3 = engine->GetLevelName(engine);
+        V_FileBase(v3, &mapname[4], 32);
+        strlwr(&mapname[4]);
+        V_strncpy(&strFullpath[4], "media/", 260);
+        V_strncat(&strFullpath[4], &mapname[4], 0x104u, -1);
+        V_strncat(&strFullpath[4], ".bik", 0x104u, -1);
+        m_pVideo = this->m_pVideo;
+        if ( m_pVideo )
+        {
+          m_pVideo->Activate(m_pVideo);
+          VideoPanel::BeginPlayback(this->m_pVideo, &strFullpath[4]);
+          this->m_pVideo->MoveToFront(this->m_pVideo);
+        }
+        break;
+      case 2:
+        this->m_pViewPort->ShowPanel(this->m_pViewPort, &this->IViewPortPanel, 0);
+        this->m_pViewPort->ShowPanel(this->m_pViewPort, "mapinfo", 1);
+        break;
+      case 3:
+        this->m_pViewPort->ShowPanel(this->m_pViewPort, &this->IViewPortPanel, 0);
+        this->m_pViewPort->ShowPanel(this->m_pViewPort, "team", 1);
+        break;
+    }
+    this->m_iAction = 0;
+    this->m_flThink = -1.0;
+  }
+}

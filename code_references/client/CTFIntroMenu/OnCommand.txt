@@ -1,0 +1,35 @@
+void __thiscall CTFIntroMenu::OnCommand(CTFIntroMenu *this, const char *command)
+{
+  CTFVideoPanel *m_pVideo; // ecx
+  CModelPanel *m_pModel; // ecx
+  CTFVideoPanel *v5; // ecx
+  float flTime; // [esp+10h] [ebp+4h]
+
+  if ( !strcmp(command, "back") )
+  {
+    m_pVideo = this->m_pVideo;
+    flTime = *(float *)(gpGlobals.m_Index + 12);
+    if ( m_pVideo )
+      m_pVideo->Shutdown(m_pVideo);
+    m_pModel = this->m_pModel;
+    if ( m_pModel )
+    {
+      if ( m_pModel->SetSequence(m_pModel, "Up") )
+        flTime = *(float *)(gpGlobals.m_Index + 12) + 0.34999999;
+    }
+    this->m_flThink = flTime;
+    this->m_iAction = 2;
+  }
+  else if ( !strcmp(command, "skip") )
+  {
+    v5 = this->m_pVideo;
+    if ( v5 )
+      v5->Shutdown(v5);
+    this->m_flThink = *(float *)(gpGlobals.m_Index + 12);
+    this->m_iAction = 3;
+  }
+  else
+  {
+    CIntroMenu::OnCommand(this, command);
+  }
+}

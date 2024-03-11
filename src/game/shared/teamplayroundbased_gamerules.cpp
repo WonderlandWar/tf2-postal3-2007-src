@@ -1140,7 +1140,7 @@ void CTeamplayRoundBasedRules::State_Think_TEAM_WIN( void )
 {
 	if( gpGlobals->curtime > m_flStateTransitionTime )
 	{
-		// check the win limit, max rounds, time limit and nextlevel cvar before starting the next round
+		// check the win limit before starting the next round
 		if ( !CheckWinLimit() )
 		{
 			PreviousRoundEnd();

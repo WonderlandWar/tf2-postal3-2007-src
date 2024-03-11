@@ -1,0 +1,15 @@
+void __thiscall CTFMapInfoMenu::PerformLayout(CTFMapInfoMenu *this)
+{
+  const char *v2; // eax
+  char mapname[32]; // [esp+4h] [ebp-28h] BYREF
+
+  vgui::Frame::PerformLayout(this);
+  v2 = engine->GetLevelName(engine);
+  V_FileBase(v2, &mapname[4], 32);
+  V_strncpy(this->m_szMapName, &mapname[4], 260);
+  strupr(this->m_szMapName);
+  CTFMapInfoMenu::LoadMapPage(this, &mapname[4]);
+  CTFMapInfoMenu::SetMapTitle(this);
+  if ( this->m_pContinue )
+    this->m_pContinue->RequestFocus(this->m_pContinue, 0);
+}

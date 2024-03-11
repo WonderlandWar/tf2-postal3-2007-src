@@ -1,0 +1,42 @@
+class CTFVideoPanel : public VideoPanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFVideoPanel_RegisterMap
+    {
+        public void CTFVideoPanel_RegisterMap();
+    };
+    public class CTFVideoPanel::CTFVideoPanel_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFVideoPanel_Register
+    {
+        public void CTFVideoPanel_Register();
+    };
+    public class CTFVideoPanel::CTFVideoPanel_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFVideoPanel_RegisterKBMap
+    {
+        public void CTFVideoPanel_RegisterKBMap();
+    };
+    public class CTFVideoPanel::CTFVideoPanel_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFVideoPanel(class CTFVideoPanel & );
+    public void CTFVideoPanel(class vgui::Panel * ,char * );
+    public void ~CTFVideoPanel();
+    public void OnClose();
+    public void OnKeyCodePressed(enum ButtonCode_t );
+    public void ApplySettings(class KeyValues * );
+    public void GetPanelPos(int & ,int & );
+    public void Shutdown();
+    public float GetDelay();
+    protected void ReleaseVideo();
+    protected void OnVideoOver();
+    private float m_flDelay;
+};

@@ -26,7 +26,6 @@ extern ConVar mp_waitingforplayers_restart;
 extern ConVar mp_waitingforplayers_cancel;
 extern ConVar mp_clan_readyrestart;
 extern ConVar mp_clan_ready_signal;
-extern ConVar nextlevel;
 
 #define VOICE_COMMAND_MAX_SUBTITLE_DIST	1900
 

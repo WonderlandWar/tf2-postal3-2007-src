@@ -1,0 +1,33 @@
+void __thiscall CTFIntroMenu::ShowPanel(CTFIntroMenu *this, bool bShow)
+{
+  CTFIntroMenu *this2; // esi
+  double v4; // st7
+
+  this2 = (CTFIntroMenu *)((char *)this - 384);
+  if ( vgui::Panel::IsVisible((CTFIntroMenu *)((char *)this - 384)) != bShow )
+  {
+    this2->m_flThink = -1.0;
+    this2->m_iAction = 0;
+    if ( bShow )
+    {
+      this2->Activate(this2);
+      this2->SetMouseInputEnabled(this2, 1);
+      if ( *(_DWORD *)&this->m_InternalCursorExited_register )
+      {
+        (*(void (__thiscall **)(_DWORD))(**(_DWORD **)&this->m_InternalCursorExited_register + 876))(*(_DWORD *)&this->m_InternalCursorExited_register);
+        v4 = *(float *)(*(_DWORD *)&this->m_InternalCursorExited_register + 524) + *(float *)(gpGlobals.m_Index + 12);
+        this2->m_iAction = 1;
+        this2->m_flThink = v4;
+      }
+      if ( *(_DWORD *)&this->m_InternalMouseReleased_register )
+        (*(void (__thiscall **)(_DWORD))(**(_DWORD **)&this->m_InternalMouseReleased_register + 872))(*(_DWORD *)&this->m_InternalMouseReleased_register);
+    }
+    else
+    {
+      if ( *(_DWORD *)&this->m_InternalCursorExited_register )
+        (*(void (__thiscall **)(_DWORD))(**(_DWORD **)&this->m_InternalCursorExited_register + 876))(*(_DWORD *)&this->m_InternalCursorExited_register);
+      this2->SetVisible(this2, 0);
+      this2->SetMouseInputEnabled(this2, 0);
+    }
+  }
+}

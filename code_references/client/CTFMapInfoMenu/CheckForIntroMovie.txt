@@ -1,0 +1,14 @@
+bool __thiscall CTFMapInfoMenu::CheckForIntroMovie(CTFMapInfoMenu *this)
+{
+  const char *v1; // eax
+  char mapname[32]; // [esp+0h] [ebp-12Ch] BYREF
+  char strFullpath[260]; // [esp+20h] [ebp-10Ch] BYREF
+
+  v1 = engine->GetLevelName(engine);
+  V_FileBase(v1, &mapname[4], 32);
+  strlwr(&mapname[4]);
+  V_strncpy(&strFullpath[4], "media/", 260);
+  V_strncat(&strFullpath[4], &mapname[4], 0x104u, -1);
+  V_strncat(&strFullpath[4], ".bik", 0x104u, -1);
+  return g_pFullFileSystem->FileExists(&g_pFullFileSystem->IBaseFileSystem, &strFullpath[4], 0);
+}

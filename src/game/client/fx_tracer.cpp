@@ -38,7 +38,7 @@ Vector GetTracerOrigin( const CEffectData &data )
 		C_BaseEntity *pEnt = data.GetEntity();
 
 // This check should probably be for all multiplayer games, investigate later
-#if defined( HL2MP ) || defined( TF_CLIENT_DLL )
+#if defined( HL2MP )
 		if ( pEnt && pEnt->IsDormant() )
 			return vecStart;
 #endif

@@ -1,0 +1,16 @@
+void __thiscall CTFIntroMenu::OnIntroFinished(CTFIntroMenu *this)
+{
+  CTFVideoPanel *m_pVideo; // ecx
+  CModelPanel *m_pModel; // ecx
+  float v4; // [esp+4h] [ebp-4h]
+
+  v4 = *(float *)(gpGlobals.m_Index + 12);
+  m_pVideo = this->m_pVideo;
+  if ( m_pVideo )
+    m_pVideo->Shutdown(m_pVideo);
+  m_pModel = this->m_pModel;
+  if ( m_pModel && m_pModel->SetSequence(m_pModel, "Up") )
+    v4 = *(float *)(gpGlobals.m_Index + 12) + 0.34999999;
+  this->m_iAction = 3;
+  this->m_flThink = v4;
+}

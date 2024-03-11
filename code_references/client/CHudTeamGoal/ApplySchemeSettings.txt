@@ -1,0 +1,18 @@
+void __thiscall CHudTeamGoal::ApplySchemeSettings(CHudTeamGoal *this, vgui::IScheme *pScheme)
+{
+  vgui::Panel *ChildByName; // eax
+
+  ((void (__thiscall *)(CHudTeamGoal *, const char *, _DWORD, _DWORD))this->CHudElement::CGameEventListener::IGameEventListener2::__vftable[14].ShouldDraw)(
+    this,
+    "resource/UI/HudTeamGoal.res",
+    0,
+    0);
+  vgui::Panel::ApplySchemeSettings((vgui::Panel *)this, pScheme);
+  ChildByName = vgui::Panel::FindChildByName((vgui::Panel *)this, "GoalLabel", 0);
+  this->m_NavGroup._mainPanel = (vgui::Panel *)__RTDynamicCast(
+                                                 ChildByName,
+                                                 0,
+                                                 &vgui::Panel `RTTI Type Descriptor',
+                                                 &vgui::Label `RTTI Type Descriptor',
+                                                 0);
+}

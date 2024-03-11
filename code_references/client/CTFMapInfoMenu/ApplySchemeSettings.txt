@@ -1,0 +1,6 @@
+void __thiscall CTFMapInfoMenu::ApplySchemeSettings(CTFMapInfoMenu *this, vgui::IScheme *pScheme)
+{
+  this->LoadControlSettings(this, "Resource/UI/MapInfoMenu.res", 0, 0);
+  CTFMapInfoMenu::SetMapTitle(this);
+  vgui::Frame::ApplySchemeSettings(this, pScheme);
+}

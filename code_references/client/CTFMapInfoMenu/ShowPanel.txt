@@ -1,0 +1,29 @@
+void __thiscall CTFMapInfoMenu::ShowPanel(CTFMapInfoMenu *this, bool bShow)
+{
+  CTFMapInfoMenu *v2; // esi
+  vgui::ILocalize_vtbl *v3; // ebx
+  CTFMapInfoMenu_vtbl *v4; // edi
+  const char *v5; // eax
+  int v6; // eax
+
+  v2 = (CTFMapInfoMenu *)((char *)this - 384);
+  if ( (*(unsigned __int8 (__thiscall **)(vgui::Panel **))&this[-1]._bottomRightGrip->_buildModeFlags)(&this[-1]._bottomRightGrip) != bShow )
+  {
+    if ( bShow )
+    {
+      v2->Activate(v2);
+      v2->SetMouseInputEnabled(v2, 1);
+      CTFMapInfoMenu::CheckIntroButton(v2);
+      v3 = g_pVGuiLocalize->__vftable;
+      v4 = v2->vgui::Frame::vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable;
+      v5 = g_pGameRules->GetGameTypeName(g_pGameRules);
+      v6 = (int)v3->Find(g_pVGuiLocalize, v5);
+      v4->SetDialogVariable(v2, "gamemode", (const wchar_t *)v6);
+    }
+    else
+    {
+      v2->SetVisible(v2, 0);
+      v2->SetMouseInputEnabled(v2, 0);
+    }
+  }
+}

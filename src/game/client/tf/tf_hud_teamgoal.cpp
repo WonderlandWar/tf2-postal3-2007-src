@@ -19,6 +19,7 @@
 #include "tf_imagepanel.h"
 #include "tf_gamerules.h"
 #include "c_tf_team.h"
+#include "tf_hud_statpanel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -35,14 +36,11 @@ class CHudTeamGoal : public CHudElement, public EditablePanel
 public:
 	CHudTeamGoal( const char *pElementName );
 
-	virtual void	LevelInit( void );
 	virtual void	ApplySchemeSettings( IScheme *scheme );
 	virtual bool	ShouldDraw( void );
 
 private:
 	Label			*m_pGoalLabel;
-	float			m_flHideAt;
-	int				m_iGoalLabelOrgY;
 };
 
 DECLARE_HUDELEMENT( CHudTeamGoal );
@@ -52,23 +50,6 @@ DECLARE_HUDELEMENT( CHudTeamGoal );
 //-----------------------------------------------------------------------------
 CHudTeamGoal::CHudTeamGoal( const char *pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudTeamGoal" )
 {
-	Panel *pParent = g_pClientMode->GetViewport();
-	SetParent( pParent );
-
-	SetHiddenBits( HIDEHUD_MISCSTATUS );
-
-	m_flHideAt = 0;
-	m_iGoalLabelOrgY = 0;
-
-	RegisterForRenderGroup( "commentary" );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CHudTeamGoal::LevelInit( void )
-{
-	m_flHideAt = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -82,12 +63,6 @@ void CHudTeamGoal::ApplySchemeSettings( IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	m_pGoalLabel = dynamic_cast<Label *>( FindChildByName("GoalLabel") );
-
-	if ( m_pGoalLabel )
-	{
-		int iIgnored;
-		m_pGoalLabel->GetPos( iIgnored, m_iGoalLabelOrgY );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -95,19 +70,16 @@ void CHudTeamGoal::ApplySchemeSettings( IScheme *pScheme )
 //-----------------------------------------------------------------------------
 bool CHudTeamGoal::ShouldDraw( void )
 {
-	bool bCouldSee = ( TFGameRules() && TFGameRules()->ShouldShowTeamGoal() );
-
-	if ( m_flHideAt && m_flHideAt < gpGlobals->curtime )
-	{
-		if ( !bCouldSee )
-		{
-			m_flHideAt = 0;
-		}
-
+	// TFP3:
+	// TODO: Is this correct?
+	CTFStatPanel *pStatPanel = GET_HUDELEMENT( CTFStatPanel);
+	if ( pStatPanel && pStatPanel->IsVisible() )
 		return false;
-	}
 
-	if ( bCouldSee )
+	if ( !m_pGoalLabel )
+		return false;
+
+	if ( TFGameRules() )
 	{
 		C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
 		if ( pPlayer && pPlayer->IsAlive() && pPlayer->GetTeamNumber() >= FIRST_GAME_TEAM )
@@ -117,34 +89,16 @@ bool CHudTeamGoal::ShouldDraw( void )
 			{
 				if ( !IsVisible() )
 				{
-					// Once we've played a map 15 times, don't show team goals anymore.
-					if ( UTIL_GetMapKeyCount( "viewed" ) > 15 )
+					wchar_t *pszLocalizedGoal = g_pVGuiLocalize->Find( pszGoal );
+					if ( pszLocalizedGoal )
 					{
-						m_flHideAt = -1;	// To prevent it rechecking until next level load
-						return false;
+						m_pGoalLabel->SetText( pszLocalizedGoal );
 					}
-					
-					if ( m_pGoalLabel )
+					else
 					{
-						wchar_t *pszLocalizedGoal = g_pVGuiLocalize->Find( pszGoal );
-						if ( pszLocalizedGoal )
-						{
-							m_pGoalLabel->SetText( pszLocalizedGoal );
-						}
-						else
-						{
-							m_pGoalLabel->SetText( pszGoal );
-						}
+						m_pGoalLabel->SetText( pszGoal );
 					}
-
-					// Show for 15 seconds
-					m_flHideAt = gpGlobals->curtime + 15.0;
 				}
-
-				// Don't appear if the team switch alert is there
-				CHudElement *pHudSwitch = gHUD.FindElement( "CHudTeamSwitch" );
-				if ( pHudSwitch && pHudSwitch->ShouldDraw() )
-					return false;
 
 				return true;
 			}

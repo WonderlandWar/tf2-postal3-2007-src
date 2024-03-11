@@ -2553,23 +2553,17 @@ void C_TFPlayer::AddDecal( const Vector& rayStart, const Vector& rayEnd,
 //-----------------------------------------------------------------------------
 void C_TFPlayer::ClientPlayerRespawn( void )
 {
-	if ( IsLocalPlayer() )
+	// Dod called these, not sure why
+	//MoveToLastReceivedPosition( true );
+	//ResetLatched();
+
+	// Reset the camera.
+	if ( m_bWasTaunting )
 	{
-		// Dod called these, not sure why
-		//MoveToLastReceivedPosition( true );
-		//ResetLatched();
-
-		// Reset the camera.
-		if ( m_bWasTaunting )
-		{
-			TurnOffTauntCam();
-		}
-
-		ResetToneMapping(1.0);
-
-		// Release the duck toggle key
-		KeyUp( &in_ducktoggle, NULL ); 
+		TurnOffTauntCam();
 	}
+
+	ResetToneMapping(1.0);
 
 	UpdateVisibility();
 

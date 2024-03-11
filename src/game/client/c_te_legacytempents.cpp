@@ -42,7 +42,6 @@ extern ConVar muzzleflash_light;
 #define TENT_WIND_ACCEL 50
 
 //Precache the effects
-#ifndef TF_CLIENT_DLL
 CLIENTEFFECT_REGISTER_BEGIN( PrecacheEffectMuzzleFlash )
 	CLIENTEFFECT_MATERIAL( "effects/combinemuzzle1" )
 	CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2" )
@@ -60,7 +59,6 @@ CLIENTEFFECT_REGISTER_BEGIN( PrecacheEffectMuzzleFlash )
 
 	CLIENTEFFECT_MATERIAL( "effects/strider_muzzle" )
 CLIENTEFFECT_REGISTER_END()
-#endif
 
 //Whether or not to eject brass from weapons
 ConVar cl_ejectbrass( "cl_ejectbrass", "1" );
@@ -2362,7 +2360,6 @@ void CTempEnts::Update(void)
 // Recache tempents which might have been flushed
 void CTempEnts::LevelInit()
 {
-#ifndef TF_CLIENT_DLL
 	m_pSpriteMuzzleFlash[0] = (model_t *)engine->LoadModel( "sprites/ar2_muzzle1.vmt" );
 	m_pSpriteMuzzleFlash[1] = (model_t *)engine->LoadModel( "sprites/muzzleflash4.vmt" );
 	m_pSpriteMuzzleFlash[2] = (model_t *)engine->LoadModel( "sprites/muzzleflash4.vmt" );
@@ -2378,7 +2375,6 @@ void CTempEnts::LevelInit()
 	m_pShells[0] = (model_t *) engine->LoadModel( "models/weapons/shell.mdl" );
 	m_pShells[1] = (model_t *) engine->LoadModel( "models/weapons/rifleshell.mdl" );
 	m_pShells[2] = (model_t *) engine->LoadModel( "models/weapons/shotgun_shell.mdl" );
-#endif
 
 #if defined( HL1_CLIENT_DLL )
 	m_pHL1Shell			= (model_t *)engine->LoadModel( "models/shell.mdl" );

@@ -1,0 +1,18 @@
+void __thiscall CTFMapInfoMenu::CheckIntroButton(CTFMapInfoMenu *this)
+{
+  if ( this->IsVisible(this) )
+  {
+    if ( CTFMapInfoMenu::CheckForIntroMovie(this) )
+    {
+      if ( this->m_pIntro )
+      {
+        if ( !this->m_pIntro->IsVisible(this->m_pIntro) )
+          this->m_pIntro->SetVisible(this->m_pIntro, 1);
+      }
+    }
+    else if ( this->m_pIntro && this->m_pIntro->IsVisible(this->m_pIntro) )
+    {
+      this->m_pIntro->SetVisible(this->m_pIntro, 0);
+    }
+  }
+}
