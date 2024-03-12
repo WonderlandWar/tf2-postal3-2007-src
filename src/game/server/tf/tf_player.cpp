@@ -83,13 +83,9 @@ ConVar tf_damagescale_self_soldier( "tf_damagescale_self_soldier", "0.60", FCVAR
 ConVar tf_damage_lineardist( "tf_damage_lineardist", "0", FCVAR_DEVELOPMENTONLY );
 ConVar tf_damage_range( "tf_damage_range", "0.5", FCVAR_DEVELOPMENTONLY );
 
-ConVar tf_max_voice_speak_delay( "tf_max_voice_speak_delay", "1.5", FCVAR_DEVELOPMENTONLY, "Max time after a voice command until player can do another one" );
-
 extern ConVar spec_freeze_time;
 extern ConVar spec_freeze_traveltime;
 extern ConVar sv_maxunlag;
-extern ConVar tf_gravetalk;
-extern ConVar tf_spectalk;
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
@@ -380,7 +376,7 @@ void CTFPlayer::TFPlayerThink()
 	}
 
 	// Time to finish the current random expression? Or time to pick a new one?
-	if ( IsAlive() && m_flNextRandomExpressionTime >= 0 && gpGlobals->curtime > m_flNextRandomExpressionTime )
+	if ( IsAlive() && gpGlobals->curtime > m_flNextRandomExpressionTime )
 	{
 		// Random expressions need to be cleared, because they don't loop. So if we
 		// pick the same one again, we want to restart it.
@@ -500,13 +496,7 @@ void CTFPlayer::CheckForIdle( void )
 		{
 			bool bKickPlayer = false;
 
-			ConVarRef mp_allowspectators( "mp_allowspectators" );
-			if ( mp_allowspectators.IsValid() && ( mp_allowspectators.GetBool() == false ) )
-			{
-				// just kick the player if this server doesn't allow spectators
-				bKickPlayer = true;
-			}
-			else if ( mp_idledealmethod.GetInt() == 1 )
+			if ( mp_idledealmethod.GetInt() == 1 )
 			{
 				//First send them into spectator mode then kick him.
 				if ( m_bIsIdle == false )
@@ -603,12 +593,6 @@ void CTFPlayer::Precache()
 	PrecacheScriptSound( "TFPlayer.SaveMe" );
 	PrecacheScriptSound( "Camera.SnapShot" );
 
-	PrecacheScriptSound( "Game.YourTeamLost" );
-	PrecacheScriptSound( "Game.YourTeamWon" );
-	PrecacheScriptSound( "Game.SuddenDeath" );
-	PrecacheScriptSound( "Game.Stalemate" );
-	PrecacheScriptSound( "TV.Tune" );
-
 	// Precache particle systems
 	PrecacheParticleSystem( "crit_text" );
 	PrecacheParticleSystem( "cig_smoke" );
@@ -645,17 +629,9 @@ void CTFPlayer::PrecachePlayerModels( void )
 			int iModel = PrecacheModel( pszModel );
 			PrecacheGibsForModel( iModel );
 		}
-
-		if ( !IsX360() )
-		{
-			// Precache the hardware facial morphed models as well.
-			const char *pszHWMModel = GetPlayerClassData( i )->m_szHWMModelName;
-			if ( pszHWMModel && pszHWMModel[0] )
-			{
-				PrecacheModel( pszHWMModel );
-			}
-		}
 	}
+
+	PrecacheModel( "models/effects/medicyell.mdl" );
 	
 	if ( TFGameRules() && TFGameRules()->IsBirthday() )
 	{
@@ -727,9 +703,6 @@ void CTFPlayer::InitialSpawn( void )
 	BaseClass::InitialSpawn();
 
 	SetWeaponBuilder( NULL );
-
-	m_iMaxSentryKills = 0;
-	CTF_GameStats.Event_MaxSentryKills( this, 0 );
 
 	StateEnter( TF_STATE_WELCOME );
 }
@@ -809,23 +782,6 @@ void CTFPlayer::Spawn()
 		{
 			m_Shared.AddCond( TF_COND_HEALTH_BUFF );
 		}
-
-		if ( !m_bSeenRoundInfo )
-		{
-			TFGameRules()->ShowRoundInfoPanel( this );
-			m_bSeenRoundInfo = true;
-		}
-
-		if ( IsInCommentaryMode() && !IsFakeClient() )
-		{
-			// Player is spawning in commentary mode. Tell the commentary system.
-			CBaseEntity *pEnt = NULL;
-			variant_t emptyVariant;
-			while ( (pEnt = gEntList.FindEntityByClassname( pEnt, "commentary_auto" )) != NULL )
-			{
-				pEnt->AcceptInput( "MultiplayerSpawned", this, this, emptyVariant, 0 );
-			}
-		}
 	}
 
 	CTF_GameStats.Event_PlayerSpawned( this );
@@ -842,6 +798,8 @@ void CTFPlayer::Spawn()
 
 	m_flNextVoiceCommandTime = gpGlobals->curtime;
 
+	m_iActivePipebombs = 0;
+
 	ClearZoomOwner();
 	SetFOV( this , 0 );
 
@@ -849,15 +807,6 @@ void CTFPlayer::Spawn()
 
 	ClearExpression();
 	m_flNextSpeakWeaponFire = gpGlobals->curtime;
-
-	m_bIsIdle = false;
-
-	// This makes the surrounding box always the same size as the standing collision box
-	// helps with parts of the hitboxes that extend out of the crouching hitbox, eg with the
-	// heavyweapons guy
-	Vector mins = VEC_HULL_MIN;
-	Vector maxs = VEC_HULL_MAX;
-	CollisionProp()->SetSurroundingBoundsType( USE_SPECIFIED_BOUNDS, &mins, &maxs );
 }
 
 //-----------------------------------------------------------------------------
@@ -1369,11 +1318,7 @@ void CTFPlayer::ForceChangeTeam( int iTeamNum )
 	}
 	else if ( iNewTeam == TEAM_SPECTATOR )
 	{
-		m_bIsIdle = false;
 		StateTransition( TF_STATE_OBSERVER );
-
-		RemoveAllWeapons();
-		DestroyViewModels();
 	}
 
 	// Don't modify living players in any way
@@ -1898,12 +1843,6 @@ bool CTFPlayer::PlaySpecificSequence( const char *pAnimationName )
 //-----------------------------------------------------------------------------
 bool CTFPlayer::CanDisguise( void )
 {
-	if ( !IsAlive() )
-		return false;
-
-	if ( GetPlayerClass()->GetClassIndex() != TF_CLASS_SPY )
-		return false;
-
 	if ( HasItem() && GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG )
 	{
 		HintMessage( HINT_CANNOT_DISGUISE_WITH_FLAG );
@@ -1979,11 +1918,6 @@ void CTFPlayer::StartBuildingObjectOfType( int iType )
 		if ( pBuilder )
 		{
 			pBuilder->SetSubType( iType );
-
-			if ( GetActiveTFWeapon() == pBuilder )
-			{
-				SetActiveWeapon( NULL );
-			}
 
 			// try to switch to this weapon
 			if ( Weapon_Switch( pBuilder ) )
@@ -2147,15 +2081,6 @@ void CTFPlayer::DropFlag( void )
 		if ( pFlag )
 		{
 			pFlag->Drop( this, true, true );
-			IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_flag_event" );
-			if ( event )
-			{
-				event->SetInt( "player", entindex() );
-				event->SetInt( "eventtype", TF_FLAGEVENT_DROPPED );
-				event->SetInt( "priority", 8 );
-
-				gameeventmanager->FireEvent( event );
-			}
 		}
 	}
 }
@@ -3317,15 +3242,6 @@ void CTFPlayer::RemoveAllItems( bool removeSuit )
 	if ( HasItem() )
 	{
 		GetItem()->Drop( this, true );
-
-		IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_flag_event" );
-		if ( event )
-		{
-			event->SetInt( "player", entindex() );
-			event->SetInt( "eventtype", TF_FLAGEVENT_DROPPED );
-			event->SetInt( "priority", 8 );
-			gameeventmanager->FireEvent( event );
-		}
 	}
 
 	if ( m_hOffHandWeapon.Get() )
@@ -3357,7 +3273,18 @@ void CTFPlayer::ClientHearVox( const char *pSentence )
 //-----------------------------------------------------------------------------
 void CTFPlayer::UpdateModel( void )
 {
-	SetModel( GetPlayerClass()->GetModelName() );
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) )
+	{
+		TFPlayerClassData_t *pDisguiseData = GetPlayerClassData( m_Shared.m_nDisguiseClass );
+		SetDisguiseModelIndex( modelinfo->GetModelIndex( pDisguiseData->m_szModelName ) );
+	}
+	else
+	{
+		SetDisguiseModelIndex( 0 );
+	}
+	
+	TFPlayerClassData_t *pClassData = GetPlayerClassData( m_PlayerClass.GetClassIndex() );
+	SetModel( pClassData->m_szModelName );
 }
 
 //-----------------------------------------------------------------------------
@@ -3570,23 +3497,13 @@ void CTFPlayer::StateEnterWELCOME( void )
 
 	PhysObjectSleep();
 
-	if ( gpGlobals->eLoadType == MapLoad_Background )
-	{
-		m_bSeenRoundInfo = true;
-
-		ChangeTeam( TEAM_SPECTATOR );
-	}
-	else if ( (TFGameRules() && TFGameRules()->IsLoadingBugBaitReport()) )
+	if ( (TFGameRules() && TFGameRules()->IsLoadingBugBaitReport()) )
 	{
 		m_bSeenRoundInfo = true;
 		
 		ChangeTeam( TF_TEAM_BLUE );
 		SetDesiredPlayerClassIndex( TF_CLASS_SCOUT );
 		ForceRespawn();
-	}
-	else if ( IsInCommentaryMode() )
-	{
-		m_bSeenRoundInfo = true;
 	}
 	else
 	{
@@ -3839,6 +3756,14 @@ void CTFPlayer::StateThinkDYING( void )
 	}
 }
 
+void CTFPlayer::StateEnterWATCHINGROUNDINFO( void )
+{
+	if ( m_Shared.m_iDesiredPlayerClass == TF_CLASS_UNDEFINED )
+		StateTransition( TF_STATE_OBSERVER );
+	else
+		ForceRespawn();
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -3948,11 +3873,6 @@ void CTFPlayer::ForceRespawn( void )
 		do{
 			iDesiredClass = random->RandomInt( TF_FIRST_NORMAL_CLASS, TF_LAST_NORMAL_CLASS );
 		} while( iDesiredClass == GetPlayerClass()->GetClassIndex() );
-	}
-
-	if ( HasTheFlag() )
-	{
-		DropFlag();
 	}
 
 	if ( GetPlayerClass()->GetClassIndex() != iDesiredClass )
@@ -4580,7 +4500,7 @@ void CTFPlayer::RemoveInvisibility( void )
 void CTFPlayer::RemoveDisguise( void )
 {
 	// remove quickly
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) || m_Shared.InCond( TF_COND_DISGUISING ) )
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) )
 	{
 		m_Shared.RemoveDisguise();
 	}
@@ -4886,10 +4806,10 @@ bool CTFPlayer::SetObserverTarget(CBaseEntity *target)
 // Purpose: Find the nearest team member within the distance of the origin.
 //			Favor players who are the same class.
 //-----------------------------------------------------------------------------
-CBaseEntity *CTFPlayer::FindNearestObservableTarget( Vector vecOrigin, float flMaxDist )
+CTFPlayer *CTFPlayer::FindNearestObservablePlayer( Vector vecOrigin, float flMaxDist )
 {
 	CTeam *pTeam = GetTeam();
-	CBaseEntity *pReturnTarget = NULL;
+	CTFPlayer *pReturnPlayer = NULL;
 	bool bFoundClass = false;
 	float flCurDistSqr = (flMaxDist * flMaxDist);
 	int iNumPlayers = pTeam->GetNumPlayers();
@@ -4927,7 +4847,7 @@ CBaseEntity *CTFPlayer::FindNearestObservableTarget( Vector vecOrigin, float flM
 			// to be a matching class and closer to boot.
 			if ( !bFoundClass || pPlayer->IsPlayerClass( GetPlayerClass()->GetClassIndex() ) )
 			{
-				pReturnTarget = pPlayer;
+				pReturnPlayer = pPlayer;
 				flCurDistSqr = flDistSqr;
 
 				if ( pPlayer->IsPlayerClass( GetPlayerClass()->GetClassIndex() ) )
@@ -4940,29 +4860,14 @@ CBaseEntity *CTFPlayer::FindNearestObservableTarget( Vector vecOrigin, float flM
 		{
 			if ( pPlayer->IsPlayerClass( GetPlayerClass()->GetClassIndex() ) )
 			{
-				pReturnTarget = pPlayer;
+				pReturnPlayer = pPlayer;
 				flCurDistSqr = flDistSqr;
 				bFoundClass = true;
 			}
 		}
-	}
+	}	
 
-	if ( !bFoundClass && IsPlayerClass( TF_CLASS_ENGINEER ) )
-	{
-		// let's spectate our sentry instead, we didn't find any other engineers to spec
-		int iNumObjects = GetObjectCount();
-		for ( int i = 0; i < iNumObjects; i++ )
-		{
-			CBaseObject *pObj = GetObject(i);
-
-			if ( pObj && pObj->GetType() == OBJ_SENTRYGUN )
-			{
-				pReturnTarget = pObj;
-			}
-		}
-	}		
-
-	return pReturnTarget;
+	return pReturnPlayer;
 }
 
 //-----------------------------------------------------------------------------
@@ -5014,7 +4919,7 @@ void CTFPlayer::FindInitialObserverTarget( void )
 					CBaseEntity *pCapPoint = pMaster->GetControlPoint(iFarthestPoint);
 					if ( pCapPoint )
 					{
-						CBaseEntity *pTarget = FindNearestObservableTarget( pCapPoint->GetAbsOrigin(), 1500 );
+						CTFPlayer *pTarget = FindNearestObservablePlayer( pCapPoint->GetAbsOrigin(), 1500 );
 						if ( pTarget )
 						{
 							m_hObserverTarget.Set( pTarget );
@@ -5027,7 +4932,7 @@ void CTFPlayer::FindInitialObserverTarget( void )
 	}
 
 	// Find the nearest guy near myself
-	CBaseEntity *pTarget = FindNearestObservableTarget( GetAbsOrigin(), FLT_MAX );
+	CTFPlayer *pTarget = FindNearestObservablePlayer( GetAbsOrigin(), FLT_MAX );
 	if ( pTarget )
 	{
 		m_hObserverTarget.Set( pTarget );
@@ -5054,14 +4959,6 @@ void CTFPlayer::ValidateCurrentObserverTarget( void )
 			}
 
 			return;
-		}
-	}
-
-	if ( m_hObserverTarget && m_hObserverTarget->IsBaseObject() )
-	{
-		if ( m_iObserverMode == OBS_MODE_IN_EYE )
-		{
-			ForceObserverMode( OBS_MODE_CHASE );
 		}
 	}
 
@@ -5123,10 +5020,9 @@ void CTFPlayer::Taunt( void )
 
 	if ( IsPlayerClass( TF_CLASS_SNIPER ) )
 	{
-		CTFWeaponBase *pActiveWeapon = GetActiveTFWeapon();
-		if ( pActiveWeapon && pActiveWeapon->GetWeaponID() == TF_WEAPON_SNIPERRIFLE )
+		if ( GetActiveTFWeapon()->GetWeaponID() == TF_WEAPON_SNIPERRIFLE )
 		{
-			CTFSniperRifle *pSniperRifle = static_cast<CTFSniperRifle*>( pActiveWeapon );
+			CTFSniperRifle *pSniperRifle = static_cast<CTFSniperRifle*>( GetActiveTFWeapon() );
 			if ( m_Shared.InCond( TF_COND_AIMING ) )
 			{
 				pSniperRifle->ToggleZoom();
@@ -5337,33 +5233,7 @@ void CTFPlayer::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
 //-----------------------------------------------------------------------------
 bool CTFPlayer::CanHearAndReadChatFrom( CBasePlayer *pPlayer )
 {
-	// can always hear the console unless we're ignoring all chat
-	if ( !pPlayer )
-		return m_iIgnoreGlobalChat != CHAT_IGNORE_ALL;
-
-	// check if we're ignoring all chat
-	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_ALL )
-		return false;
-
-	// check if we're ignoring all but teammates
-	if ( m_iIgnoreGlobalChat == CHAT_IGNORE_TEAM && g_pGameRules->PlayerRelationship( this, pPlayer ) != GR_TEAMMATE )
-		return false;
-
-	if ( !pPlayer->IsAlive() && IsAlive() )
-	{
-		// Everyone can chat like normal when the round/game ends
-		if ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN || TFGameRules()->State_Get() == GR_STATE_GAME_OVER )
-			return true;
-
-		// Separate rule for spectators.
-		if ( pPlayer->GetTeamNumber() < FIRST_GAME_TEAM )
-			return tf_spectalk.GetBool();
-
-		// Living players can't hear dead ones unless gravetalk is enabled.
-		return tf_gravetalk.GetBool();
-	}
-
-	return true;
+	return	pPlayer->m_lifeState && !m_lifeState || BaseClass::CanHearAndReadChatFrom( pPlayer );
 }
 
 //-----------------------------------------------------------------------------
@@ -5527,7 +5397,7 @@ bool CTFPlayer::CanSpeakVoiceCommand( void )
 void CTFPlayer::NoteSpokeVoiceCommand( const char *pszScenePlayed )
 {
 	Assert( pszScenePlayed );
-	m_flNextVoiceCommandTime = gpGlobals->curtime + min( GetSceneDuration( pszScenePlayed ), tf_max_voice_speak_delay.GetFloat() );
+	m_flNextVoiceCommandTime = GetSceneDuration( pszScenePlayed ) + gpGlobals->curtime;
 }
 
 //-----------------------------------------------------------------------------
@@ -5535,8 +5405,7 @@ void CTFPlayer::NoteSpokeVoiceCommand( const char *pszScenePlayed )
 //-----------------------------------------------------------------------------
 bool CTFPlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const CUserCmd *pCmd, const CBitVec<MAX_EDICTS> *pEntityTransmitBits ) const
 {
-	CTFPlayer *pTFPlayer = (CTFPlayer*)pPlayer;
-	if ( pPlayer->GetTeamNumber() == GetTeamNumber() && !friendlyfire.GetBool() || ( this == const_cast<CBaseEntity*>( pTFPlayer->m_Shared.GetFirstHealer().Get() ) && !IsPlayerClass( TF_CLASS_MEDIC ) ) )
+	if ( pPlayer->GetTeamNumber() == GetTeamNumber() && !friendlyfire.GetBool() || !IsPlayerClass( TF_CLASS_MEDIC ) )
 		return false;
 	
 	// If this entity hasn't been transmitted to us and acked, then don't bother lag compensating it.

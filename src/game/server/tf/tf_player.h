@@ -188,7 +188,7 @@ public:
 	virtual bool		SetObserverTarget(CBaseEntity * target);
 	virtual bool		ModeWantsSpectatorGUI( int iMode ) { return (iMode != OBS_MODE_FREEZECAM && iMode != OBS_MODE_DEATHCAM); }
 	void				FindInitialObserverTarget( void );
-	CBaseEntity		    *FindNearestObservableTarget( Vector vecOrigin, float flMaxDist );
+	CTFPlayer		    *FindNearestObservablePlayer( Vector vecOrigin, float flMaxDist );
 	virtual void		ValidateCurrentObserverTarget( void );
 
 	void CheckUncoveringSpies( CTFPlayer *pTouchedPlayer );
@@ -279,7 +279,7 @@ public:
 	bool IsClassMenuOpen( void );
 
 	virtual void SetModelIndex( int index );
-	void SetDisguiseModelIndex( int index );
+	void SetDisguiseModelIndex( int index ) { m_nDisguiseModelIndex = index; }
 
 	CNetworkVar( int, m_nPlayerModelIndex );
 	CNetworkVar( int, m_nDisguiseModelIndex );

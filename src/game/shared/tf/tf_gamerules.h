@@ -105,8 +105,6 @@ public:
 
 	bool			IsBirthday( void );
 
-	virtual const unsigned char *GetEncryptionKey( void ) { return (unsigned char *)"E2NcUkG2"; }
-
 #ifdef GAME_DLL
 public:
 	// Override this to prevent removal of game specific entities that need to persist
@@ -198,18 +196,12 @@ public:
 
 	const char *GetTeamGoalString( int iTeam );
 
-	virtual bool	IsConnectedUserInfoChangeAllowed( CBasePlayer *pPlayer ) { return true; }
-
 #ifdef CLIENT_DLL
 
 	DECLARE_CLIENTCLASS_NOBASE(); // This makes data tables able to access our private vars.
 
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
 	virtual void	HandleOvertimeBegin();
-
-	bool			ShouldShowTeamGoal( void );
-
-	const char *GetVideoFileForMap( bool bWithExtension = true );
 
 #else
 

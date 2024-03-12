@@ -1,0 +1,21 @@
+void __thiscall CTFPlayer::UpdateModel(CTFPlayer *this)
+{
+  TFPlayerClassData_t *PlayerClassData; // eax
+  TFPlayerClassData_t *v3; // eax
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  if ( CTFPlayerShared::InCond(&this->m_Shared, 7) )
+  {
+    PlayerClassData = GetPlayerClassData(this->m_Shared.m_nDisguiseClass.m_Value);
+    val = (unsigned __int16)modelinfo->GetModelIndex(modelinfo, PlayerClassData->m_szModelName);
+  }
+  else
+  {
+    val = 0;
+  }
+  CNetworkVarBase<short,CTFPlayer::NetworkVar_m_nDisguiseModelIndex>::Set(
+    &this->m_nDisguiseModelIndex,
+    (const __int16 *)&val);
+  v3 = GetPlayerClassData(this->m_PlayerClass.m_iClass.m_Value);
+  this->SetModel(this, v3->m_szModelName);
+}

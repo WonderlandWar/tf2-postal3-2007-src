@@ -1,0 +1,32 @@
+void __thiscall CTFPlayer::StartBuildingObjectOfType(CTFPlayer *this, int iType)
+{
+  int i; // ebx
+  CBaseCombatWeapon *Weapon; // esi
+  CTFWeaponBuilder *v5; // esi
+
+  if ( !CTFPlayer::CanBuild(this, iType) )
+  {
+    for ( i = 0; i < CBaseCombatCharacter::WeaponCount(this); ++i )
+    {
+      Weapon = CBaseCombatCharacter::GetWeapon(this, i);
+      if ( Weapon )
+      {
+        if ( ((int (__thiscall *)(CBaseCombatWeapon *))Weapon->__vftable[1].~IHandleEntity)(Weapon) == 43 )
+        {
+          v5 = (CTFWeaponBuilder *)__RTDynamicCast(
+                                     Weapon,
+                                     0,
+                                     &CTFWeaponBase `RTTI Type Descriptor',
+                                     &CTFWeaponBuilder `RTTI Type Descriptor',
+                                     0);
+          if ( v5 )
+          {
+            v5->SetSubType(v5, iType);
+            if ( this->Weapon_Switch(this, v5, 0) )
+              break;
+          }
+        }
+      }
+    }
+  }
+}

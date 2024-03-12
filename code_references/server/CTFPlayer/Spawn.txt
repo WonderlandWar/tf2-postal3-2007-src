@@ -1,0 +1,140 @@
+void __thiscall CTFPlayer::Spawn(CTFPlayer *this)
+{
+  IMDLCache *v1; // ebx
+  CBaseViewModel *ViewModel; // eax
+  CPlayerStateInfo *m_pStateInfo; // eax
+  void (__thiscall *pfnLeaveState)(CTFPlayer *); // edx
+  int v6; // eax
+  bool v7; // zf
+  Vector *(__thiscall *EyePosition)(CBaseEntity *, Vector *); // edx
+  const Vector *v9; // edi
+  unsigned int m_Index; // eax
+  int v11; // ecx
+  const Vector *ClassEyeHeight; // eax
+  bool v13; // [esp+33h] [ebp-35h] BYREF
+  int val; // [esp+34h] [ebp-34h] BYREF
+  float v15; // [esp+38h] [ebp-30h] BYREF
+  Vector v16; // [esp+3Ch] [ebp-2Ch] BYREF
+  CRecipientFilter v17; // [esp+48h] [ebp-20h] BYREF
+
+  v1 = mdlcache;
+  mdlcache->BeginLock(mdlcache);
+  this->m_flSpawnTime = gpGlobals->curtime;
+  CTFPlayer::UpdateModel(this);
+  CBaseEntity::SetMoveType(this, MOVETYPE_WALK, MOVECOLLIDE_DEFAULT);
+  CBasePlayer::Spawn(this);
+  this->CreateViewModel(this, 1);
+  ViewModel = CBasePlayer::GetViewModel(this, 1);
+  ViewModel->SetModel(ViewModel, locale);
+  if ( this->m_Shared.m_nPlayerState.m_Value == 1 )
+    CTFPlayer::StateEnterWELCOME(this);
+  if ( this->m_Shared.m_nPlayerState.m_Value == 3 )
+  {
+    m_pStateInfo = this->m_pStateInfo;
+    if ( m_pStateInfo )
+    {
+      pfnLeaveState = m_pStateInfo->pfnLeaveState;
+      if ( pfnLeaveState )
+        pfnLeaveState((CTFPlayer *)((char *)this + *(_DWORD *)m_pStateInfo->gap1C));
+    }
+    CTFPlayer::StateEnter(this, 0);
+  }
+  if ( !this->m_Shared.m_nPlayerState.m_Value )
+  {
+    if ( CTFPlayerShared::InCond(&this->m_Shared, 7) )
+      CTFPlayerShared::RemoveDisguise(&this->m_Shared);
+    CBaseEntity::EmitSound(this, "Player.Spawn", 0.0, 0);
+    CTFPlayer::InitClass(this);
+    CTFPlayerShared::RemoveAllCond(&this->m_Shared, 0);
+    v6 = CBaseEntity::GetTeamNumber(this) - 2;
+    v7 = v6 == this->m_iLastSkin;
+    val = v6;
+    if ( !v7 )
+    {
+      CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+        (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&this->m_nSkin,
+        &val);
+      this->m_iLastSkin = val;
+    }
+    CTFPlayer::TeamFortress_SetSpeed(this);
+    *(float *)&val = gpGlobals->curtime + 1.0;
+    CNetworkVarBase<float,CBaseCombatCharacter::NetworkVar_m_flNextAttack>::Set(
+      &this->m_flNextAttack,
+      (const float *)&val);
+    this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, PLAYERANIMEVENT_SPAWN, 0);
+    EyePosition = this->EyePosition;
+    v15 = 0.0;
+    v9 = EyePosition(this, &v16);
+    CRecipientFilter::CRecipientFilter(&v17);
+    v17.__vftable = (CRecipientFilter_vtbl *)&CPVSFilter::`vftable';
+    CRecipientFilter::AddRecipientsByPVS(&v17, v9);
+    if ( !ToolsEnabled() )
+      CRecipientFilter::RemoveRecipient(&v17, this);
+    CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner>::Set(
+      (CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner> *)&g_TEPlayerAnimEvent.m_hPlayer,
+      this);
+    val = 17;
+    CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+      (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_iEvent,
+      &val);
+    CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+      (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_nData,
+      (const int *)&v15);
+    CBaseTempEntity::Create(&g_TEPlayerAnimEvent, &v17, 0.0);
+    CRecipientFilter::~CRecipientFilter(&v17);
+    m_Index = this->m_hTauntScene.m_Index;
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hTauntScene.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+      && g_pEntityList->m_EntPtrArray[this->m_hTauntScene.m_Index & 0xFFF].m_pEntity )
+    {
+      StopScriptedScene(this, this->m_hTauntScene);
+      this->m_Shared.m_flTauntRemoveTime = 0.0;
+      this->m_hTauntScene.m_Index = -1;
+    }
+    if ( this->m_Shared.m_bEnableSeparation.m_Value )
+    {
+      v11 = 0;
+    }
+    else
+    {
+      v11 = 1;
+      if ( this->m_Shared.m_bEnableSeparation.m_Value - 1 <= 0 )
+        v11 = -1;
+    }
+    if ( v11 )
+    {
+      this->m_Shared.NetworkStateChanged(&this->m_Shared, &this->m_Shared.m_bEnableSeparation);
+      this->m_Shared.m_bEnableSeparation.m_Value = 1;
+    }
+    v16 = vec3_origin;
+    CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity>::Set(
+      &this->m_Shared.m_vSeparationVelocity,
+      &v16);
+    CTFPlayerShared::RemoveCond(&this->m_Shared, 10);
+    if ( this->m_Shared.m_nNumHealers.m_Value > 0 )
+      CTFPlayerShared::AddCond(&this->m_Shared, 12, -1.0);
+  }
+  CTFGameStats::Event_PlayerSpawned(&CTF_GameStats, this);
+  v13 = !this->m_iSpawnCounter.m_Value;
+  CNetworkVarBase<bool,CTFPlayer::NetworkVar_m_iSpawnCounter>::Set(&this->m_iSpawnCounter, &v13);
+  v15 = 100.0;
+  this->m_bAllowInstantSpawn = 0;
+  CNetworkVarBase<float,CTFPlayerShared::NetworkVar_m_flCloakMeter>::Set(&this->m_Shared.m_flCloakMeter, &v15);
+  CTFPlayerShared::ClearDamageEvents(&this->m_Shared);
+  this->m_DamagerHistory[0].flTimeDamage = 0.0;
+  this->m_DamagerHistory[0].hDamager.m_Index = -1;
+  this->m_DamagerHistory[1].hDamager.m_Index = -1;
+  this->m_DamagerHistory[1].flTimeDamage = 0.0;
+  this->m_flLastDamageTime = 0.0;
+  this->m_iMaxSentryKills = 0;
+  this->m_flNextVoiceCommandTime = gpGlobals->curtime;
+  v15 = 0.0;
+  CNetworkVarBase<int,CTFPlayer::NetworkVar_m_iActivePipebombs>::Set(&this->m_iActivePipebombs, (const int *)&v15);
+  CBasePlayer::ClearZoomOwner(this);
+  CBasePlayer::SetFOV(this, this, 0, 0.0, 0);
+  ClassEyeHeight = CTFPlayer::GetClassEyeHeight(this);
+  CBaseEntity::SetViewOffset(this, ClassEyeHeight);
+  CTFPlayer::ClearExpression(this);
+  this->m_flNextSpeakWeaponFire = gpGlobals->curtime;
+  v1->EndLock(v1);
+}

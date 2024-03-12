@@ -1,0 +1,404 @@
+int __thiscall CTFPlayer::OnTakeDamage(CTFPlayer *this, const CTakeDamageInfo *inputInfo)
+{
+  double v3; // st7
+  bool v5; // al
+  bool v6; // zf
+  CBaseEntity *Attacker; // eax
+  const char *DebugName; // edi
+  CBaseEntity *Inflictor; // eax
+  const char *v10; // eax
+  const char *v11; // eax
+  CGameRules *v12; // edi
+  unsigned __int8 (__thiscall *v13)(CGameRules *); // eax
+  CBaseEntity *v14; // eax
+  float v15; // ecx
+  int v16; // eax
+  int v17; // edi
+  int bitsDamage; // ebx
+  CBaseEntity *v19; // eax
+  CBaseEntity *v20; // eax
+  int ParticleSystemIndex; // eax
+  CTFPlayer_vtbl *v22; // edx
+  float *v23; // eax
+  double v24; // st7
+  double v25; // st6
+  double v26; // st5
+  CBasePlayer *v27; // eax
+  void (*DispatchEffect)(void); // edx
+  CBaseEntity *v29; // eax
+  int v30; // eax
+  IUniformRandomStream *m_pParent; // ecx
+  double v32; // st6
+  double v33; // st7
+  double v34; // st7
+  double x; // st7
+  double flMin_1; // st6
+  double flMax; // st5
+  CBaseEntity *v38; // eax
+  float v39; // eax
+  CTFPlayer_vtbl *v40; // edx
+  Vector *v41; // eax
+  Vector *v42; // eax
+  double v43; // st7
+  CBaseEntity *v44; // eax
+  float v45; // eax
+  CTFPlayer_vtbl *v46; // edx
+  Vector *v47; // eax
+  Vector *v48; // eax
+  double flCenter; // st7
+  double v50; // st5
+  double v51; // rt0
+  double flOut; // st7
+  int v53; // ebp
+  CBaseEntity *v54; // eax
+  const Vector *AbsOrigin; // eax
+  int m_flDamage; // eax
+  int v57; // eax
+  CBaseEntity *v58; // eax
+  int v59; // edi
+  int v60; // eax
+  const char *v61; // [esp+10h] [ebp-178h]
+  float v62; // [esp+1Ch] [ebp-16Ch]
+  char v63; // [esp+1Fh] [ebp-169h]
+  float v64; // [esp+20h] [ebp-168h]
+  float v65; // [esp+20h] [ebp-168h]
+  float v66; // [esp+20h] [ebp-168h]
+  float v67; // [esp+20h] [ebp-168h]
+  float B; // [esp+28h] [ebp-160h] BYREF
+  float C; // [esp+2Ch] [ebp-15Ch] BYREF
+  Vector C_4; // [esp+30h] [ebp-158h] BYREF
+  CTakeDamageInfo info; // [esp+3Ch] [ebp-14Ch] BYREF
+  CSingleUserRecipientFilter v72; // [esp+88h] [ebp-100h] BYREF
+  float v73; // [esp+ACh] [ebp-DCh]
+  float flMin; // [esp+B0h] [ebp-D8h] BYREF
+  CSingleUserRecipientFilter user; // [esp+B4h] [ebp-D4h] BYREF
+  CEffectData data; // [esp+D4h] [ebp-B4h] BYREF
+  EmitSound_t params; // [esp+140h] [ebp-48h] BYREF
+
+  CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&info.m_flMaxDamage, inputInfo);
+  if ( (this->m_fFlags.m_Value & 0x4000) != 0 )
+    return 0;
+  v3 = *(float *)&v72.m_Recipients.m_Memory.m_nGrowSize;
+  if ( (this->m_debugOverlays & 0x2000000) != 0 && (double)this->m_iHealth.m_Value - v3 <= 0.0 )
+  {
+    LODWORD(info.m_vecReportedPosition.x) = 1;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(
+      &this->m_iHealth,
+      (const int *)&info.m_vecReportedPosition);
+    return 0;
+  }
+  if ( 0.0 == v3 || !this->IsAlive(this) )
+    return 0;
+  v5 = tf_debug_damage.m_pParent->m_nValue != 0;
+  v6 = tf_debug_damage.m_pParent->m_nValue == 0;
+  LODWORD(info.m_vecReportedPosition.x) = this->m_iHealth.m_Value;
+  HIBYTE(info.m_vecDamagePosition.y) = v5;
+  if ( !v6 )
+  {
+    if ( CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_flMaxDamage) )
+    {
+      Attacker = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_flMaxDamage);
+      DebugName = CBaseEntity::GetDebugName(Attacker);
+    }
+    else
+    {
+      DebugName = "Unknown Attacker";
+    }
+    if ( CTakeDamageInfo::GetInflictor((CTakeDamageInfo *)&info.m_flMaxDamage) )
+    {
+      Inflictor = CTakeDamageInfo::GetInflictor((CTakeDamageInfo *)&info.m_flMaxDamage);
+      *(float *)&v10 = COERCE_FLOAT(CBaseEntity::GetDebugName(Inflictor));
+    }
+    else
+    {
+      *(float *)&v10 = COERCE_FLOAT("Unknown Inflictor");
+    }
+    *(double *)&C_4.y = *(float *)&v72.m_Recipients.m_Memory.m_nGrowSize;
+    C = *(float *)&v10;
+    v11 = CBaseEntity::GetDebugName(this);
+    _Warning(
+      "%s taking damage from %s, via %s. Damage: %.2f\n",
+      v11,
+      (const char *)LODWORD(C),
+      DebugName,
+      *(double *)&C_4.y);
+  }
+  v12 = g_pGameRules;
+  *(_QWORD *)&C_4.y = __PAIR64__(
+                        (unsigned int)CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_flMaxDamage),
+                        (unsigned int)this);
+  if ( !v13(v12) )
+  {
+    if ( HIBYTE(info.m_vecDamageForce.z) )
+      _Warning("    ABORTED: Player can't take damage from that attacker.\n");
+    return 0;
+  }
+  v14 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+  C_4.x = v15;
+  CHandle<CAI_BaseNPC>::CHandle<CAI_BaseNPC>((CHandle<CBaseEntity> *)&C_4, v14);
+  CTFPlayer::AddDamagerToHistory(this, LODWORD(C_4.x));
+  v16 = (int)*(float *)&v72.m_Recipients.m_Memory.m_pMemory;
+  v17 = v16;
+  this->m_LastDamageType = v72.m_Recipients.m_Size;
+  LODWORD(C_4.x) = 8;
+  this->m_lastDamageAmount = v16;
+  if ( CTFPlayer::IsPlayerClass(this, SLODWORD(C_4.x)) && (v72.m_Recipients.m_Size & 0x20) == 0 )
+    CTFPlayerShared::NoteLastDamageTime(&this->m_Shared, v17);
+  if ( CTFPlayer::IsPlayerClass(this, 3) && CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker) == this )
+    *(float *)&v72.m_Recipients.m_Memory.m_pMemory = tf_damagescale_self_soldier.m_pParent->m_fValue
+                                                   * *(float *)&v72.m_Recipients.m_Memory.m_pMemory;
+  this->m_vecTotalBulletForce.x = *(float *)&info.m_hAttacker.m_Index;
+  LODWORD(C_4.x) = 9;
+  this->m_vecTotalBulletForce.y = info.m_flDamage;
+  this->m_vecTotalBulletForce.z = info.m_flMaxDamage;
+  bitsDamage = inputInfo->m_bitsDamageType;
+  if ( CTFPlayerShared::InCond(&this->m_Shared, SLOBYTE(C_4.x)) )
+  {
+    v19 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+    if ( !v19
+      || (v19->m_Collision.m_usSolidFlags.m_Value & 8) == 0
+      || !__RTDynamicCast(v19, 0, &CBaseEntity `RTTI Type Descriptor', &CTriggerHurt `RTTI Type Descriptor', 0) )
+    {
+      LODWORD(info.m_vecDamagePosition.x) = this->m_takedamage.m_Value;
+      LODWORD(info.m_vecDamagePosition.y) = 1;
+      CNetworkVarBase<char,CBaseEntity::NetworkVar_m_takedamage>::operator=<int>(
+        &this->m_takedamage,
+        (const int *)&info.m_vecDamagePosition.y);
+      CBaseCombatCharacter::OnTakeDamage(this, (const CTakeDamageInfo *)&info.m_hAttacker);
+      CNetworkVarBase<char,CBaseEntity::NetworkVar_m_takedamage>::operator=<int>(
+        &this->m_takedamage,
+        (const int *)&info.m_vecDamagePosition);
+      if ( (bitsDamage & 8) == 0 )
+        this->SpeakConceptIfAllowed(this, 1, 0, 0, 0, 0);
+      return 0;
+    }
+  }
+  if ( CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker) != this && (bitsDamage & 0x4020) == 0 )
+  {
+    if ( (bitsDamage & 0x100000) != 0 )
+    {
+      if ( HIBYTE(info.m_vecDamageForce.z) )
+        _Warning("    CRITICAL!\n");
+      info.m_vecDamagePosition.x = tf_damage_critical_mult.m_pParent->m_fValue
+                                 * *(float *)&v72.m_Recipients.m_Memory.m_pMemory;
+      if ( CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker) )
+      {
+        v20 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+        if ( v20->IsPlayer(v20) && !CTFPlayerShared::InCond(&this->m_Shared, 7) )
+        {
+          CEffectData::CEffectData((CEffectData *)&user.m_bUsingPredictionRules);
+          ParticleSystemIndex = GetParticleSystemIndex("crit_text");
+          v22 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+          data.m_nDamageType = ParticleSystemIndex;
+          v23 = (float *)v22->WorldSpaceCenter(this);
+          v24 = *v23;
+          v25 = v23[1];
+          v26 = v23[2];
+          data.m_fFlags = 0;
+          *(float *)&user.m_bUsingPredictionRules = v24;
+          data.m_vOrigin.x = v25;
+          data.m_vOrigin.y = v26 + 32.0;
+          data.m_vNormal.z = vec3_angle.x;
+          data.m_vAngles.x = vec3_angle.y;
+          data.m_vAngles.y = vec3_angle.z;
+          v27 = (CBasePlayer *)CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+          CSingleUserRecipientFilter::CSingleUserRecipientFilter((CSingleUserRecipientFilter *)&flMin, v27);
+          DispatchEffect = (void (*)(void))te->DispatchEffect;
+          LODWORD(C_4.x) = &user.m_bUsingPredictionRules;
+          C = COERCE_FLOAT("ParticleEffect");
+          B = COERCE_FLOAT((CSingleUserRecipientFilter *)&user.m_bUsingPredictionRules);
+          v64 = COERCE_FLOAT(&flMin);
+          DispatchEffect();
+          EmitSound_t::EmitSound_t((EmitSound_t *)&data.m_nHitBox);
+          *(float *)&params.m_pSoundName = 0.0;
+          *(_DWORD *)&data.m_nColor = "TFPlayer.CritHit";
+          v29 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_vecDamagePosition.z);
+          v30 = CBaseEntity::entindex(v29);
+          CBaseEntity::EmitSound(
+            (IRecipientFilter *)&v72.m_Recipients.m_Size,
+            v30,
+            (const EmitSound_t *)&data.m_nHitBox);
+          CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&params.m_nPitch);
+          CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&v72.m_Recipients.m_Size);
+        }
+      }
+      if ( (bitsDamage & 8) != 0 )
+        goto LABEL_64;
+      v63 = 0;
+      v61 = "damagecritical:1";
+    }
+    else
+    {
+      m_pParent = (IUniformRandomStream *)tf_damage_range.m_pParent;
+      v6 = tf_damage_lineardist.m_pParent->m_nValue == 0;
+      v32 = tf_damage_range.m_pParent->m_fValue * *(float *)&v72.m_Recipients.m_Memory.m_pMemory;
+      info.m_vecDamagePosition.x = v32;
+      if ( v6 )
+      {
+        x = v32;
+        flMin_1 = 0.25;
+        flMax = 0.75;
+        if ( (bitsDamage & 0x200000) != 0 )
+        {
+          v38 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+          v39 = COERCE_FLOAT((int)v38->WorldSpaceCenter(v38));
+          v40 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+          C_4.x = v39;
+          v41 = (Vector *)v40->WorldSpaceCenter(this);
+          v42 = Vector::operator-(v41, (Vector *)&info.m_vecReportedPosition.y, (const Vector *)LODWORD(C_4.x));
+          if ( Vector::Length(v42) >= 1.0 )
+          {
+            v44 = CTakeDamageInfo::GetAttacker((CTakeDamageInfo *)&info.m_hAttacker);
+            v45 = COERCE_FLOAT((int)v44->WorldSpaceCenter(v44));
+            v46 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+            C_4.x = v45;
+            v47 = (Vector *)v46->WorldSpaceCenter(this);
+            v48 = Vector::operator-(v47, (Vector *)&data.m_iEffectName, (const Vector *)LODWORD(C_4.x));
+            v43 = Vector::Length(v48);
+          }
+          else
+          {
+            v43 = 1.0;
+          }
+          info.m_vecReportedPosition.x = v43;
+          v65 = v43 * 0.001953125;
+          flCenter = RemapValClamped(v65, 0.0, 2.0, 1.0, 0.0);
+          if ( (bitsDamage & 0x20000) != 0 && flCenter > 0.5 )
+          {
+            v66 = flCenter;
+            flCenter = RemapVal(v66, 0.5, 1.0, 0.5, 0.64999998);
+          }
+          v50 = flCenter - 0.25;
+          if ( v50 < 0.0 )
+            v50 = 0.0;
+          v73 = v50;
+          v51 = v50;
+          flMax = flCenter + 0.25;
+          flMin_1 = v51;
+          if ( flMax > 1.0 )
+            flMax = 1.0;
+          info.m_vecDamagePosition.z = flMax;
+          if ( HIBYTE(info.m_vecDamageForce.z) )
+          {
+            _Warning(
+              "    RANDOM: Dist %.2f, Ctr: %.2f, Min: %.2f, Max: %.2f\n",
+              info.m_vecReportedPosition.x,
+              flCenter,
+              flMin_1,
+              flMax);
+            x = info.m_vecDamagePosition.x;
+            flMin_1 = v73;
+            flMax = info.m_vecDamagePosition.z;
+          }
+          else
+          {
+            x = info.m_vecDamagePosition.x;
+          }
+        }
+        C_4.x = x;
+        C = -x;
+        v67 = flMax;
+        v62 = flMin_1;
+        B = _RandomFloat(m_pParent, v62, v67);
+        flOut = SimpleSplineRemapValClamped(B, C, C_4.x, C_4.y, C_4.z);
+        v34 = flOut + *(float *)&v72.m_Recipients.m_Memory.m_nGrowSize;
+      }
+      else
+      {
+        info.m_vecReportedPosition.x = *(float *)&v72.m_Recipients.m_Memory.m_pMemory;
+        C_4.x = v32 + v32;
+        v33 = _RandomFloat((IUniformRandomStream *)tf_damage_range.m_pParent, 0.0, C_4.x);
+        v34 = v33 + info.m_vecReportedPosition.z - info.m_vecDamagePosition.z;
+      }
+      info.m_vecDamagePosition.z = v34;
+      if ( (bitsDamage & 8) != 0 )
+        goto LABEL_64;
+      memset(&C_4, 0, sizeof(C_4));
+      C = 0.0;
+    }
+    ((void (__thiscall *)(CTFPlayer *, int))this->SpeakConceptIfAllowed)(this, 1);
+LABEL_64:
+    info.m_flDamage = v64;
+  }
+  v53 = CBaseCombatCharacter::OnTakeDamage(this, &info);
+  if ( v53 )
+  {
+    if ( v63 )
+    {
+      _Warning("    DEALT: Player took %.2f damage.\n", info.m_flDamage);
+      _Warning("    HEALTH LEFT: %d\n", this->m_iHealth.m_Value);
+    }
+    if ( (bitsDamage & 0x4028) == 0 )
+    {
+      C_4 = info.m_vecReportedPosition;
+      if ( Vector::operator==(&C_4, &vec3_origin) && CTakeDamageInfo::GetInflictor(&info) )
+      {
+        v54 = CTakeDamageInfo::GetInflictor(&info);
+        AbsOrigin = CBaseEntity::GetAbsOrigin(v54);
+        C_4.x = AbsOrigin->x;
+        C_4.y = AbsOrigin->y;
+        C_4.z = AbsOrigin->z;
+      }
+      CSingleUserRecipientFilter::CSingleUserRecipientFilter(&v72, this);
+      UserMessageBegin(&v72, "Damage");
+      m_flDamage = (int)info.m_flDamage;
+      if ( m_flDamage <= 255 )
+        v57 = m_flDamage < 0 ? 0 : m_flDamage;
+      else
+        v57 = 255;
+      MessageWriteByte(v57);
+      MessageWriteVec3Coord(&C_4);
+      MessageEnd();
+      CRecipientFilter::~CRecipientFilter(&v72);
+    }
+    if ( CTakeDamageInfo::GetInflictor(&info) && CTakeDamageInfo::GetInflictor(&info)->m_Network.m_pPev )
+    {
+      v58 = CTakeDamageInfo::GetInflictor(&info);
+      this->m_DmgOrigin = *CBaseEntity::GetAbsOrigin(v58);
+    }
+    LODWORD(B) = (int)info.m_flDamage;
+    v59 = 0;
+    this->m_DmgTake = (double)SLODWORD(B) + this->m_DmgTake;
+    do
+    {
+      if ( ((0x8000 << v59) & info.m_bitsDamageType) != 0
+        && g_pGameRules->Damage_IsTimeBased(g_pGameRules, 0x8000 << v59) )
+      {
+        this->m_rgbTimeBasedDamage[v59] = 0;
+      }
+      ++v59;
+    }
+    while ( v59 < 8 );
+    ((void (__thiscall *)(CTFPlayer *, unsigned int, int))this->DamageEffect)(
+      this,
+      info.m_hAttacker.m_Index,
+      bitsDamage);
+    this->m_bitsDamageType |= bitsDamage;
+    this->m_bitsHUDDamage = -1;
+    if ( -2.0 != this->m_Local.m_vecPunchAngle.m_Value.x )
+    {
+      this->m_Local.NetworkStateChanged(&this->m_Local, &this->m_Local.m_vecPunchAngle);
+      this->m_Local.m_vecPunchAngle.m_Value.x = -2.0;
+    }
+    if ( (bitsDamage & 0x40) != 0 )
+      this->OnDamagedByExplosion(this, (const CTakeDamageInfo *)&C);
+    CTFPlayer::PainSound(this, (const CTakeDamageInfo *)&B);
+    CTFPlayer::PlayFlinch(this, (const CTakeDamageInfo *)&B);
+    v60 = (int)((double)this->m_iMaxHealth.m_Value * 0.25);
+    if ( this->m_iHealth.m_Value <= v60 && (int)v61 > v60 )
+      CTFPlayer::ClearExpression(this);
+    CTFGameStats::Event_PlayerDamage(
+      &CTF_GameStats,
+      this,
+      (const CTakeDamageInfo *)&B,
+      (int)&v61[-this->m_iHealth.m_Value]);
+    return v53;
+  }
+  else
+  {
+    if ( !v63 )
+      return 0;
+    _Warning("    ABORTED: Player failed to take the damage.\n");
+    return 0;
+  }
+}

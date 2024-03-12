@@ -84,8 +84,6 @@ ConVar tf_birthday( "tf_birthday", "0", FCVAR_NOTIFY | FCVAR_REPLICATED );
 #ifdef GAME_DLL
 // TF overrides the default value of this convar
 ConVar mp_waitingforplayers_time( "mp_waitingforplayers_time", (IsX360()?"15":"30"), FCVAR_GAMEDLL | FCVAR_DEVELOPMENTONLY, "WaitingForPlayers time length in seconds" );
-ConVar tf_gravetalk( "tf_gravetalk", "1", FCVAR_NOTIFY, "Allows living players to hear dead players using text/voice chat." );
-ConVar tf_spectalk( "tf_spectalk", "1", FCVAR_NOTIFY, "Allows living players to hear spectators using text chat." );
 #endif
 
 #ifdef GAME_DLL
@@ -965,7 +963,7 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 			{
 				if ( pTalker->IsAlive() == false )
 				{
-					if ( pListener->IsAlive() == false || tf_gravetalk.GetBool() )
+					if ( pListener->IsAlive() == false )
 						return ( pListener->InSameTeam( pTalker ) );
 
 					return false;
@@ -3090,17 +3088,6 @@ void CTFGameRules::HandleOvertimeBegin()
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CTFGameRules::ShouldShowTeamGoal( void )
-{
-	if ( State_Get() == GR_STATE_PREROUND || State_Get() == GR_STATE_RND_RUNNING || InSetup() )
-		return true;
-
-	return false;
-}
-
 #endif
 
 #ifdef GAME_DLL
@@ -3195,35 +3182,4 @@ bool CTFGameRules::HasPassedMinRespawnTime( CBasePlayer *pPlayer )
 }
 
 
-#endif
-
-
-#ifdef CLIENT_DLL
-const char *CTFGameRules::GetVideoFileForMap( bool bWithExtension /*= true*/ )
-{
-	char mapname[MAX_MAP_NAME];
-
-	Q_FileBase( engine->GetLevelName(), mapname, sizeof( mapname ) );
-	Q_strlower( mapname );
-
-#ifdef _X360
-	// need to remove the .360 extension on the end of the map name
-	char *pExt = Q_stristr( mapname, ".360" );
-	if ( pExt )
-	{
-		*pExt = '\0';
-	}
-#endif
-
-	static char strFullpath[MAX_PATH];
-	Q_strncpy( strFullpath, "media/", MAX_PATH );	// Assume we must play out of the media directory
-	Q_strncat( strFullpath, mapname, MAX_PATH );
-
-	if ( bWithExtension )
-	{
-		Q_strncat( strFullpath, ".bik", MAX_PATH );		// Assume we're a .bik extension type
-	}
-
-	return strFullpath;
-}
 #endif
