@@ -2846,10 +2846,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tf\tf_hud_teamswitch.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\tf\tf_hud_waitingforplayers_panel.cpp"
 					>
 				</File>

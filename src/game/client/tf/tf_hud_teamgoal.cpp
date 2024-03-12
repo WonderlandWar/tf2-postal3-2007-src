@@ -50,6 +50,9 @@ DECLARE_HUDELEMENT( CHudTeamGoal );
 //-----------------------------------------------------------------------------
 CHudTeamGoal::CHudTeamGoal( const char *pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudTeamGoal" )
 {
+	// TFP3: No clue what could've been here since IDA provides nothing...
+	Panel *pParent = g_pClientMode->GetViewport();
+	SetParent( pParent );
 }
 
 //-----------------------------------------------------------------------------
@@ -81,6 +84,11 @@ bool CHudTeamGoal::ShouldDraw( void )
 
 	if ( TFGameRules() )
 	{
+		// TFP3:
+		// FIXME: This is might be incorrect! Was: if ( !BYTE1(g_pGameRules[3].m_pszName) )
+		if ( !TFGameRules()->InRoundRestart() )
+			return false;
+
 		C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
 		if ( pPlayer && pPlayer->IsAlive() && pPlayer->GetTeamNumber() >= FIRST_GAME_TEAM )
 		{
@@ -107,17 +115,3 @@ bool CHudTeamGoal::ShouldDraw( void )
 
 	return false;
 }
-
-const char *pszTeamRoleIcons[NUM_TEAM_ROLES] =
-{
-	"../hud/hud_icon_capture",		// TEAM_ROLE_NONE = 0,
-	"../hud/hud_icon_defend",		// TEAM_ROLE_DEFENDERS,
-	"../hud/hud_icon_attack",		// TEAM_ROLE_ATTACKERS,
-};
-
-const char *pszTeamRoleSwitch[NUM_TEAM_ROLES] =
-{
-	" ",							// TEAM_ROLE_NONE = 0,
-	"#TF_teamswitch_defenders",		// TEAM_ROLE_DEFENDERS,
-	"#TF_teamswitch_attackers",		// TEAM_ROLE_ATTACKERS,
-};
