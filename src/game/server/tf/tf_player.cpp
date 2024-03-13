@@ -5405,7 +5405,7 @@ void CTFPlayer::NoteSpokeVoiceCommand( const char *pszScenePlayed )
 //-----------------------------------------------------------------------------
 bool CTFPlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const CUserCmd *pCmd, const CBitVec<MAX_EDICTS> *pEntityTransmitBits ) const
 {
-	if ( pPlayer->GetTeamNumber() == GetTeamNumber() && !friendlyfire.GetBool() || !IsPlayerClass( TF_CLASS_MEDIC ) )
+	if ( pPlayer->GetTeamNumber() == GetTeamNumber() && !friendlyfire.GetBool() && !IsPlayerClass( TF_CLASS_MEDIC ) )
 		return false;
 	
 	// If this entity hasn't been transmitted to us and acked, then don't bother lag compensating it.
