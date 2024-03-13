@@ -1,7 +1,7 @@
 void __thiscall CTFFlameEntity::FlameThink(CTFFlameEntity *this)
 {
   touchlink_t *root; // eax
-  touchlink_t *v3; // ebx
+  touchlink_t *root2; // ebx
   touchlink_t *nextLink; // edi
   double v5; // st7
   double m_fValue; // st6
@@ -18,7 +18,7 @@ void __thiscall CTFFlameEntity::FlameThink(CTFFlameEntity *this)
   if ( this->m_flTimeRemove > (double)gpGlobals->curtime )
   {
     root = (touchlink_t *)CBaseEntity::GetDataObject(this, 1);
-    v3 = root;
+    root2 = root;
     if ( root )
     {
       nextLink = root->nextLink;
@@ -36,7 +36,7 @@ void __thiscall CTFFlameEntity::FlameThink(CTFFlameEntity *this)
           }
           nextLink = nextLink->nextLink;
         }
-        while ( nextLink != v3 );
+        while ( nextLink != root2 );
       }
     }
     val = tf_flamethrower_flametime.m_pParent->m_fValue - (this->m_flTimeRemove - gpGlobals->curtime);

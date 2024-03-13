@@ -863,6 +863,9 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 
 	if ( GetTeamNumber() == pOther->GetTeamNumber() )
 		return;
+	
+	if ( m_hEntitiesBurnt.Find( pOther ) != -1 )
+		return;
 
 	// remember that we've burnt this player
 	m_hEntitiesBurnt.AddToTail( pOther );
