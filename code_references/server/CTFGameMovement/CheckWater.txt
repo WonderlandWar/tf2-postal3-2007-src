@@ -1,0 +1,88 @@
+bool __thiscall CTFGameMovement::CheckWater(CTFGameMovement *this)
+{
+  const Vector *v2; // eax
+  float y; // edx
+  float x; // ecx
+  float z; // eax
+  CTFGameMovement_vtbl *v6; // edx
+  int v7; // eax
+  float v8; // edx
+  float v9; // ecx
+  float v10; // eax
+  CBasePlayer *player; // edi
+  CMoveData *mv; // eax
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_nWaterLevel> *p_m_nWaterLevel; // edi
+  double v14; // st6
+  double v15; // st7
+  int v16; // ecx
+  int PointContentsCached; // edi
+  int m_Value; // eax
+  Vector vecPoint; // [esp+8h] [ebp-28h] BYREF
+  Vector vecPlayerMin; // [esp+14h] [ebp-1Ch]
+  Vector vecPlayerMax; // [esp+20h] [ebp-10h]
+  float v23; // [esp+2Ch] [ebp-4h]
+
+  v2 = this->GetPlayerMins(this);
+  y = v2->y;
+  x = v2->x;
+  z = v2->z;
+  vecPlayerMin.z = y;
+  v6 = this->__vftable;
+  vecPlayerMin.y = x;
+  vecPlayerMax.x = z;
+  v7 = (int)v6->GetPlayerMaxs(this);
+  v8 = *(float *)(v7 + 4);
+  v9 = *(float *)v7;
+  v10 = *(float *)(v7 + 8);
+  vecPlayerMax.z = v8;
+  player = this->player;
+  v23 = v10;
+  mv = this->mv;
+  vecPlayerMax.y = v9;
+  p_m_nWaterLevel = &player->m_nWaterLevel;
+  v14 = (v8 + vecPlayerMin.z) * 0.5 + mv->m_vecAbsOrigin.y;
+  v15 = mv->m_vecAbsOrigin.z + vecPlayerMax.x + 1.0;
+  vecPoint.y = 0.5 * (v9 + vecPlayerMin.y) + mv->m_vecAbsOrigin.x;
+  vecPoint.z = v14;
+  vecPlayerMin.x = v15;
+  if ( p_m_nWaterLevel->m_Value )
+  {
+    v16 = 1;
+    if ( !p_m_nWaterLevel->m_Value )
+      v16 = -1;
+  }
+  else
+  {
+    v16 = 0;
+  }
+  if ( v16 )
+  {
+    (*(void (__thiscall **)(unsigned __int8 *, CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_nWaterLevel> *))(*(_DWORD *)&p_m_nWaterLevel[-535].m_Value + 640))(
+      &p_m_nWaterLevel[-535].m_Value,
+      p_m_nWaterLevel);
+    p_m_nWaterLevel->m_Value = 0;
+  }
+  CBaseEntity::SetWaterType(this->player, 0);
+  PointContentsCached = CGameMovement::GetPointContentsCached(this, (Vector *)&vecPoint.y);
+  if ( (PointContentsCached & 0x4030) != 0 )
+  {
+    CTFPlayerShared::SetJumping(&this->m_pTFPlayer->m_Shared, 0);
+    CBaseEntity::SetWaterType(this->player, PointContentsCached);
+    CBaseEntity::SetWaterLevel(this->player, 1);
+    vecPlayerMin.x = (v23 + vecPlayerMax.x) * 0.5 + this->mv->m_vecAbsOrigin.z + 12.0;
+    if ( (enginetrace->GetPointContents(enginetrace, (Vector *)&vecPoint.y, 0) & 0x4030) != 0 )
+    {
+      CBaseEntity::SetWaterLevel(this->player, 2);
+      this->m_vecWaterPoint.x = vecPoint.y;
+      this->m_vecWaterPoint.y = vecPoint.z;
+      this->m_vecWaterPoint.z = vecPlayerMin.x;
+      vecPlayerMin.x = this->mv->m_vecAbsOrigin.z + this->player->GetViewOffset(this->player)->z;
+      if ( (enginetrace->GetPointContents(enginetrace, (Vector *)&vecPoint.y, 0) & 0x4030) != 0 )
+        CBaseEntity::SetWaterLevel(this->player, 3);
+    }
+  }
+  m_Value = this->player->m_nWaterLevel.m_Value;
+  if ( !this->m_nOldWaterLevel && this->player->m_nWaterLevel.m_Value )
+    this->m_flWaterEntryTime = gpGlobals->curtime;
+  return m_Value > 1;
+}

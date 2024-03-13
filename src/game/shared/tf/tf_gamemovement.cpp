@@ -76,10 +76,7 @@ public:
 
 	virtual void	TracePlayerBBox( const Vector& start, const Vector& end, unsigned int fMask, int collisionGroup, trace_t& pm );
 	virtual CBaseHandle	TestPlayerPosition( const Vector& pos, int collisionGroup, trace_t& pm );
-	virtual void	StepMove( Vector &vecDestination, trace_t &trace );
-	virtual bool	GameHasLadders() const;
-	virtual void SetGroundEntity( trace_t *pm );
-	virtual void PlayerRoughLandingEffects( float fvol );
+
 protected:
 
 	virtual void CheckWaterJump(void );
@@ -728,7 +725,7 @@ bool CTFGameMovement::CheckWater( void )
 	int wt = CONTENTS_EMPTY;
 
 	// Check to see if our feet are underwater.
-	int nContents = GetPointContentsCached( vecPoint, 0 );	
+	int nContents = GetPointContentsCached( vecPoint );	
 	if ( nContents & MASK_WATER )
 	{
 		// Clear our jump flag, because we have landed in water.
@@ -742,7 +739,7 @@ bool CTFGameMovement::CheckWater( void )
 
 		// Now check eyes
 		vecPoint.z = mv->GetAbsOrigin().z + player->GetViewOffset()[2];
-		nContents = GetPointContentsCached( vecPoint, 1 );
+		nContents = enginetrace->GetPointContents( vecPoint );
 		if ( nContents & MASK_WATER )
 		{
 			// In over our eyes
@@ -754,7 +751,7 @@ bool CTFGameMovement::CheckWater( void )
 		{
 			// Now check a point that is at the player hull midpoint (waist) and see if that is underwater.
 			vecPoint.z = flWaistZ;
-			nContents = GetPointContentsCached( vecPoint, 2 );
+			nContents = enginetrace->GetPointContents( vecPoint );
 			if ( nContents & MASK_WATER )
 			{
 				// Set the water level at our waist.
@@ -1060,8 +1057,7 @@ void CTFGameMovement::WalkMove( void )
 		mv->m_outWishVel += ( vecWishDirection * flWishSpeed );
 
 		// Try and keep the player on the ground.
-		// NOTE YWB 7/5/07: Don't do this here, our version of CategorizePosition encompasses this test
-		// StayOnGround();
+		StayOnGround();
 
 		return;
 	}
@@ -1077,8 +1073,7 @@ void CTFGameMovement::WalkMove( void )
 	mv->m_outWishVel += ( vecWishDirection * flWishSpeed );
 
 	// Try and keep the player on the ground.
-	// NOTE YWB 7/5/07: Don't do this here, our version of CategorizePosition encompasses this test
-	// StayOnGround();
+	StayOnGround();
 
 #if 0
 	// Debugging!!!
@@ -1239,9 +1234,6 @@ void CTFGameMovement::CategorizePosition( void )
 	if ( player->IsObserver() )
 		return;
 
-	// Reset this each time we-recategorize, otherwise we have bogus friction when we jump into water and plunge downward really quickly
-	player->m_surfaceFriction = 1.0f;
-
 	// Doing this before we move may introduce a potential latency in water detection, but
 	// doing it after can get us stuck on the bottom in water if the amount we move up
 	// is less than the 1 pixel 'threshold' we're about to snap to.	Also, we'll call
@@ -1266,17 +1258,6 @@ void CTFGameMovement::CategorizePosition( void )
 	// Calculate the start and end position.
 	Vector vecStartPos = mv->GetAbsOrigin();
 	Vector vecEndPos( mv->GetAbsOrigin().x, mv->GetAbsOrigin().y, ( mv->GetAbsOrigin().z - 2.0f ) );
-
-	// NOTE YWB 7/5/07:  Since we're already doing a traceline here, we'll subsume the StayOnGround (stair debouncing) check into the main traceline we do here to see what we're standing on
-	bool bUnderwater = ( player->GetWaterLevel() >= WL_Eyes );
-	bool bMoveToEndPos = false;
-	if ( player->GetMoveType() == MOVETYPE_WALK && 
-		player->GetGroundEntity() != NULL && !bUnderwater )
-	{
-		// if walking and still think we're on ground, we'll extend trace down by stepsize so we don't bounce down slopes
-		vecEndPos.z -= player->GetStepSize();
-		bMoveToEndPos = true;
-	}
 
 	trace_t trace;
 	TracePlayerBBox( vecStartPos, vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
@@ -1303,23 +1284,22 @@ void CTFGameMovement::CategorizePosition( void )
 	}
 	else
 	{
-		// YWB:  This logic block essentially lifted from StayOnGround implementation
-		if ( bMoveToEndPos &&
-			!trace.startsolid &&				// not sure we need this check as fraction would == 0.0f?
-			trace.fraction > 0.0f &&			// must go somewhere
-			trace.fraction < 1.0f ) 			// must hit something
-		{
-			float flDelta = fabs( mv->GetAbsOrigin().z - trace.endpos.z );
-			// HACK HACK:  The real problem is that trace returning that strange value 
-			//  we can't network over based on bit precision of networking origins
-			if ( flDelta > 0.5f * COORD_RESOLUTION )
-			{
-				Vector org = mv->GetAbsOrigin();
-				org.z = trace.endpos.z;
-				mv->SetAbsOrigin( org );
-			}
-		}
 		SetGroundEntity( &trace );
+	}
+	
+	if ( m_pTFPlayer->GetGroundEntity() )
+	{
+		m_pTFPlayer->m_Shared.SetAirDash( false );
+		m_pTFPlayer->m_flWaterJumpTime = 0.0;
+	}
+
+	if ( trace.hitbox )
+	{		
+		// Standing on an entity other than the world, so signal that we are touching something.
+		if ( !trace.DidHitWorld() )
+		{
+			MoveHelper()->AddToTouched( trace, mv->m_vecVelocity );
+		}
 	}
 }
 
@@ -1653,139 +1633,4 @@ void CTFGameMovement::FullTossMove( void )
 
 	// Check for in water
 	CheckWater();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Does the basic move attempting to climb up step heights.  It uses
-//          the mv->GetAbsOrigin() and mv->m_vecVelocity.  It returns a new
-//          new mv->GetAbsOrigin(), mv->m_vecVelocity, and mv->m_outStepHeight.
-//-----------------------------------------------------------------------------
-void CTFGameMovement::StepMove( Vector &vecDestination, trace_t &trace )
-{
-	trace_t saveTrace;
-	saveTrace = trace;
-
-	Vector vecEndPos;
-	VectorCopy( vecDestination, vecEndPos );
-
-	Vector vecPos, vecVel;
-	VectorCopy( mv->GetAbsOrigin(), vecPos );
-	VectorCopy( mv->m_vecVelocity, vecVel );
-
-	bool bLowRoad = false;
-	bool bUpRoad = true;
-
-	// First try the "high road" where we move up and over obstacles
-	if ( player->m_Local.m_bAllowAutoMovement )
-	{
-		// Trace up by step height
-		VectorCopy( mv->GetAbsOrigin(), vecEndPos );
-		vecEndPos.z += player->m_Local.m_flStepSize + DIST_EPSILON;
-		TracePlayerBBox( mv->GetAbsOrigin(), vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
-		if ( !trace.startsolid && !trace.allsolid )
-		{
-			mv->SetAbsOrigin( trace.endpos );
-		}
-
-		// Trace over from there
-		TryPlayerMove();
-
-		// Then trace back down by step height to get final position
-		VectorCopy( mv->GetAbsOrigin(), vecEndPos );
-		vecEndPos.z -= player->m_Local.m_flStepSize + DIST_EPSILON;
-		TracePlayerBBox( mv->GetAbsOrigin(), vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
-		// If the trace ended up in empty space, copy the end over to the origin.
-		if ( !trace.startsolid && !trace.allsolid )
-		{
-			mv->SetAbsOrigin( trace.endpos );
-		}
-
-		// If we are not on the standable ground any more or going the "high road" didn't move us at all, then we'll also want to check the "low road"
-		if ( ( trace.fraction != 1.0f && 
-			trace.plane.normal[2] < 0.7 ) || VectorCompare( mv->GetAbsOrigin(), vecPos ) )
-		{
-			bLowRoad = true;
-			bUpRoad = false;
-		}
-	}
-	else
-	{
-		bLowRoad = true;
-		bUpRoad = false;
-	}
-
-	if ( bLowRoad )
-	{
-		// Save off upward results
-		Vector vecUpPos, vecUpVel;
-		if ( bUpRoad )
-		{
-			VectorCopy( mv->GetAbsOrigin(), vecUpPos );
-			VectorCopy( mv->m_vecVelocity, vecUpVel );
-		}
-
-		// Take the "low" road
-		mv->SetAbsOrigin( vecPos );
-		VectorCopy( vecVel, mv->m_vecVelocity );
-		VectorCopy( vecDestination, vecEndPos );
-		TryPlayerMove( &vecEndPos, &saveTrace );
-
-		// Down results.
-		Vector vecDownPos, vecDownVel;
-		VectorCopy( mv->GetAbsOrigin(), vecDownPos );
-		VectorCopy( mv->m_vecVelocity, vecDownVel );
-
-		if ( bUpRoad )
-		{
-			float flUpDist = ( vecUpPos.x - vecPos.x ) * ( vecUpPos.x - vecPos.x ) + ( vecUpPos.y - vecPos.y ) * ( vecUpPos.y - vecPos.y );
-			float flDownDist = ( vecDownPos.x - vecPos.x ) * ( vecDownPos.x - vecPos.x ) + ( vecDownPos.y - vecPos.y ) * ( vecDownPos.y - vecPos.y );
-	
-			// decide which one went farther
-			if ( flUpDist >= flDownDist )
-			{
-				mv->SetAbsOrigin( vecUpPos );
-				VectorCopy( vecUpVel, mv->m_vecVelocity );
-
-				// copy z value from the Low Road move
-				mv->m_vecVelocity.z = vecDownVel.z;
-			}
-		}
-	}
-
-	float flStepDist = mv->GetAbsOrigin().z - vecPos.z;
-	if ( flStepDist > 0 )
-	{
-		mv->m_outStepHeight += flStepDist;
-	}
-}
-
-bool CTFGameMovement::GameHasLadders() const
-{
-	return false;
-}
-
-void CTFGameMovement::SetGroundEntity( trace_t *pm )
-{
-	BaseClass::SetGroundEntity( pm );
-	if ( pm && pm->m_pEnt )
-	{
-		m_pTFPlayer->m_Shared.SetAirDash( false );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFGameMovement::PlayerRoughLandingEffects( float fvol )
-{
-	if ( m_pTFPlayer && m_pTFPlayer->IsPlayerClass(TF_CLASS_SCOUT) )
-	{
-		// Scouts don't play rumble unless they take damage.
-		if ( fvol < 1.0 )
-		{
-			fvol = 0;
-		}
-	}
-
-	BaseClass::PlayerRoughLandingEffects( fvol );
 }

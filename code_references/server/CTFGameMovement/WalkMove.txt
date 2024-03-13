@@ -1,0 +1,247 @@
+void __thiscall CTFGameMovement::WalkMove(CTFGameMovement *this)
+{
+  CMoveData *mv; // eax
+  double m_flForwardMove; // st7
+  double m_flSideMove; // st6
+  CNetworkVarBase<Vector,CTFPlayerShared::NetworkVar_m_vSeparationVelocity> *p_m_vSeparationVelocity; // eax
+  double v6; // st5
+  double v7; // st6
+  double m_flMaxSpeed; // st7
+  CMoveData *v9; // ecx
+  double v10; // st6
+  CMoveData *v11; // eax
+  double v12; // st7
+  CMoveData *v13; // eax
+  double v14; // st7
+  CMoveData *v15; // eax
+  CMoveData *v16; // ecx
+  double v17; // st4
+  double v18; // rt2
+  double v19; // st4
+  double v20; // rtt
+  double v21; // st4
+  double v22; // st5
+  double v23; // st0
+  double v24; // st7
+  CMoveData *v25; // ecx
+  double v26; // st6
+  double v27; // st7
+  double y; // st6
+  double z; // st5
+  double x; // st7
+  double v31; // st7
+  double v32; // rt2
+  float *player; // ecx
+  CMoveData *v34; // eax
+  double v35; // st7
+  CMoveData *v36; // eax
+  Vector *p_m_vecVelocity; // esi
+  CMoveData *v38; // eax
+  CTFGameMovement_vtbl *v39; // edi
+  unsigned int (__thiscall *PlayerSolidMask)(CGameMovement *, bool); // edx
+  int v41; // eax
+  float *p_m_bFirstRunOfFunctions; // eax
+  CMoveData *v43; // eax
+  float *v44; // ecx
+  double v45; // st7
+  Vector *p_m_outWishVel; // eax
+  double v47; // st6
+  double v48; // st7
+  CBasePlayer *v49; // eax
+  float v50; // ecx
+  float v51; // edx
+  CMoveData *v52; // eax
+  double v53; // st7
+  float v54; // [esp+18h] [ebp-BCh]
+  float _X; // [esp+1Ch] [ebp-B8h]
+  float _Xa; // [esp+1Ch] [ebp-B8h]
+  float _Xb; // [esp+1Ch] [ebp-B8h]
+  float _Xc; // [esp+1Ch] [ebp-B8h]
+  Vector vecWishDirection; // [esp+24h] [ebp-B0h] BYREF
+  Vector vecRightMove; // [esp+30h] [ebp-A4h]
+  Vector vecBackMove; // [esp+3Ch] [ebp-98h]
+  Vector vecRight; // [esp+48h] [ebp-8Ch] BYREF
+  Vector vecForward; // [esp+54h] [ebp-80h] BYREF
+  Vector vecDestination; // [esp+60h] [ebp-74h] BYREF
+  Vector vecUp; // [esp+6Ch] [ebp-68h] BYREF
+  CGameTrace trace; // [esp+78h] [ebp-5Ch] BYREF
+
+  CTFGameMovement::AvoidPlayers(this);
+  AngleVectors(&this->mv->m_vecViewAngles, (Vector *)&vecForward.y, (Vector *)&vecRight.y, (Vector *)&vecUp.y);
+  vecDestination.x = 0.0;
+  vecForward.x = 0.0;
+  pfVectorNormalize((Vector *)&vecForward.y);
+  pfVectorNormalize((Vector *)&vecRight.y);
+  mv = this->mv;
+  m_flForwardMove = mv->m_flForwardMove;
+  m_flSideMove = mv->m_flSideMove;
+  p_m_vSeparationVelocity = &this->m_pTFPlayer->m_Shared.m_vSeparationVelocity;
+  v6 = vecRight.y * m_flSideMove + vecForward.y * m_flForwardMove;
+  vecWishDirection.y = v6;
+  v7 = m_flForwardMove * vecForward.z + m_flSideMove * vecRight.z;
+  vecWishDirection.z = v7;
+  vecRightMove.x = 0.0;
+  vecWishDirection.y = v6 + p_m_vSeparationVelocity->m_Value.x;
+  vecWishDirection.z = v7 + p_m_vSeparationVelocity->m_Value.y;
+  vecRightMove.x = p_m_vSeparationVelocity->m_Value.z;
+  m_flMaxSpeed = pfVectorNormalize((Vector *)&vecWishDirection.y);
+  v9 = this->mv;
+  vecWishDirection.x = m_flMaxSpeed;
+  if ( m_flMaxSpeed <= v9->m_flMaxSpeed )
+  {
+    v10 = 0.0;
+    if ( m_flMaxSpeed < 0.0 )
+    {
+      vecWishDirection.x = 0.0;
+      m_flMaxSpeed = 0.0;
+    }
+  }
+  else
+  {
+    m_flMaxSpeed = v9->m_flMaxSpeed;
+    vecWishDirection.x = v9->m_flMaxSpeed;
+    v10 = 0.0;
+  }
+  v9->m_vecVelocity.z = v10;
+  v54 = m_flMaxSpeed;
+  ((void (__thiscall *)(_DWORD, _DWORD, _DWORD, _DWORD))this->Accelerate)(
+    this,
+    &vecWishDirection.y,
+    LODWORD(v54),
+    sv_accelerate.m_pParent->m_fValue);
+  v11 = this->mv;
+  _X = v11->m_vecVelocity.z * v11->m_vecVelocity.z
+     + v11->m_vecVelocity.y * v11->m_vecVelocity.y
+     + v11->m_vecVelocity.x * v11->m_vecVelocity.x;
+  v12 = pfSqrt(_X);
+  if ( v12 > this->mv->m_flMaxSpeed )
+  {
+    v13 = this->mv;
+    v14 = v13->m_flMaxSpeed / v12;
+    v13->m_vecVelocity.x = v13->m_vecVelocity.x * v14;
+    this->mv->m_vecVelocity.y = v14 * this->mv->m_vecVelocity.y;
+  }
+  if ( tf_clamp_back_speed.m_pParent->m_fValue < 1.0 )
+  {
+    v15 = this->mv;
+    _Xa = v15->m_vecVelocity.z * v15->m_vecVelocity.z
+        + v15->m_vecVelocity.y * v15->m_vecVelocity.y
+        + v15->m_vecVelocity.x * v15->m_vecVelocity.x;
+    if ( pfSqrt(_Xa) > (double)tf_clamp_back_speed_min.m_pParent->m_fValue )
+    {
+      v16 = this->mv;
+      v17 = v16->m_vecVelocity.x * vecForward.y
+          + v16->m_vecVelocity.z * vecDestination.x
+          + v16->m_vecVelocity.y * vecForward.z;
+      if ( v17 < 0.0 )
+      {
+        v18 = v17;
+        v19 = vecForward.y * v17;
+        vecBackMove.y = v19;
+        v20 = v19;
+        v21 = vecForward.z * v18;
+        vecBackMove.z = v21;
+        v22 = vecDestination.x * v18;
+        vecRight.x = v22;
+        v23 = v16->m_vecVelocity.x * vecRight.y
+            + v16->m_vecVelocity.z * vecForward.x
+            + v16->m_vecVelocity.y * vecRight.z;
+        vecRightMove.y = vecRight.y * v23;
+        vecRightMove.z = vecRight.z * v23;
+        vecBackMove.x = vecForward.x * v23;
+        _Xb = v21 * v21 + v22 * v22 + v20 * v20;
+        v24 = pfSqrt(_Xb);
+        v25 = this->mv;
+        v26 = v25->m_flMaxSpeed * tf_clamp_back_speed.m_pParent->m_fValue;
+        if ( v26 >= v24 )
+        {
+          x = vecRight.x;
+          y = vecBackMove.y;
+          z = vecBackMove.z;
+        }
+        else
+        {
+          v27 = v26 / v24;
+          y = vecBackMove.y * v27;
+          z = vecBackMove.z * v27;
+          x = v27 * vecRight.x;
+        }
+        v31 = x + vecBackMove.x;
+        v32 = z + vecRightMove.z;
+        v25->m_vecVelocity.x = y + vecRightMove.y;
+        v25->m_vecVelocity.y = v32;
+        v25->m_vecVelocity.z = v31;
+      }
+    }
+  }
+  player = (float *)this->player;
+  v34 = this->mv;
+  v35 = player[138] + v34->m_vecVelocity.x;
+  player += 138;
+  v34->m_vecVelocity.x = v35;
+  v34->m_vecVelocity.y = v34->m_vecVelocity.y + player[1];
+  v34->m_vecVelocity.z = v34->m_vecVelocity.z + player[2];
+  v36 = this->mv;
+  _Xc = v36->m_vecVelocity.z * v36->m_vecVelocity.z
+      + v36->m_vecVelocity.y * v36->m_vecVelocity.y
+      + v36->m_vecVelocity.x * v36->m_vecVelocity.x;
+  if ( pfSqrt(_Xc) >= 1.0 )
+  {
+    v38 = this->mv;
+    v39 = this->__vftable;
+    PlayerSolidMask = this->PlayerSolidMask;
+    vecDestination.y = v38->m_vecVelocity.x * gpGlobals->frametime + v38->m_vecAbsOrigin.x;
+    vecDestination.z = v38->m_vecVelocity.y * gpGlobals->frametime + v38->m_vecAbsOrigin.y;
+    vecUp.x = v38->m_vecAbsOrigin.z;
+    v41 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))PlayerSolidMask)(this, 0, 8, &trace.startpos.y);
+    ((void (__thiscall *)(CTFGameMovement *, Vector *, Vector *, int))v39->TracePlayerBBox)(
+      this,
+      &this->mv->m_vecAbsOrigin,
+      &vecUp,
+      v41);
+    if ( 1.0 == *(float *)&trace.contents )
+    {
+      p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+      p_m_bFirstRunOfFunctions[25] = trace.endpos.y;
+      p_m_bFirstRunOfFunctions += 25;
+      p_m_bFirstRunOfFunctions[1] = trace.endpos.z;
+      p_m_bFirstRunOfFunctions[2] = trace.plane.normal.x;
+      v43 = this->mv;
+      v44 = (float *)this->player;
+      v45 = v43->m_vecVelocity.x - v44[138];
+      v44 += 138;
+      v43->m_vecVelocity.x = v45;
+      v43->m_vecVelocity.y = v43->m_vecVelocity.y - v44[1];
+      v43->m_vecVelocity.z = v43->m_vecVelocity.z - v44[2];
+    }
+    else
+    {
+      CGameMovement::StepMove(this, (Vector *)&vecDestination.y, (CGameTrace *)&trace.startpos.y);
+      v49 = this->player;
+      v50 = v49->m_vecBaseVelocity.m_Value.y;
+      vecRightMove.y = v49->m_vecBaseVelocity.m_Value.x;
+      v51 = v49->m_vecBaseVelocity.m_Value.z;
+      v52 = this->mv;
+      v53 = v52->m_vecVelocity.x;
+      vecRightMove.z = v50;
+      vecBackMove.x = v51;
+      v52->m_vecVelocity.x = v53 - vecRightMove.y;
+      v52->m_vecVelocity.y = v52->m_vecVelocity.y - vecRightMove.z;
+      v52->m_vecVelocity.z = v52->m_vecVelocity.z - vecBackMove.x;
+    }
+    p_m_outWishVel = &this->mv->m_outWishVel;
+    v47 = vecWishDirection.x * vecRightMove.x;
+    v48 = vecWishDirection.z * vecWishDirection.x;
+    p_m_outWishVel->x = vecWishDirection.y * vecWishDirection.x + p_m_outWishVel->x;
+    p_m_outWishVel->y = v48 + p_m_outWishVel->y;
+    p_m_outWishVel->z = v47 + p_m_outWishVel->z;
+    CGameMovement::StayOnGround(this);
+  }
+  else
+  {
+    p_m_vecVelocity = &this->mv->m_vecVelocity;
+    p_m_vecVelocity->x = 0.0;
+    p_m_vecVelocity->y = 0.0;
+    p_m_vecVelocity->z = 0.0;
+  }
+}

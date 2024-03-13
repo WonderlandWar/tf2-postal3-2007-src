@@ -159,9 +159,9 @@ public:
 //This is ok since MAX_PLAYERS is used for code specific things like arrays and loops, but it doesn't really means that this is the max number of players allowed
 //Since this is decided by the gamerules (and it can be whatever number as long as its less than MAX_PLAYERS).
 #if defined( CSTRIKE_DLL )
-	#define MAX_PLAYERS				65  // Absolute max players supported
+	#define MAX_PLAYERS				64  // Absolute max players supported
 #else
-	#define MAX_PLAYERS				33  // Absolute max players supported
+	#define MAX_PLAYERS				32  // Absolute max players supported
 #endif
 
 #define MAX_PLACE_NAME_LENGTH		18
@@ -789,7 +789,6 @@ enum
 // Commentary Mode
 //-----------------------------------------------------------------------------
 #if defined(TF_DLL) || defined(TF_CLIENT_DLL)
-#define GAME_HAS_NO_USE_KEY
 
 #if defined( SPROP_COORD )
 #undef SPROP_COORD
@@ -800,11 +799,7 @@ enum
 #endif
 
 // The player's method of starting / stopping commentary
-#ifdef GAME_HAS_NO_USE_KEY
-#define COMMENTARY_BUTTONS		(IN_ATTACK | IN_ATTACK2 | IN_USE)
-#else
 #define COMMENTARY_BUTTONS		(IN_USE)
-#endif
 
 enum tprbGameInfo_e
 {

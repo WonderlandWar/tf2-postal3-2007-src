@@ -1,0 +1,168 @@
+class CGameMovement : public IGameMovement
+{
+    public void CGameMovement(class CGameMovement & );
+    public void CGameMovement();
+    public void ~CGameMovement();
+	
+    public void ProcessMovement(class CBasePlayer * ,class CMoveData * );
+	
+    public void StartTrackPredictionErrors(class CBasePlayer * );
+    public void FinishTrackPredictionErrors(class CBasePlayer * );
+    public void DiffPrint(char * ,<btNoType> );
+    protected class Vector & GetPlayerMins();
+    public class Vector & GetPlayerMins(bool );
+    protected class Vector & GetPlayerMaxs();
+    public class Vector & GetPlayerMaxs(bool );
+    public class Vector & GetPlayerViewOffset(bool );
+	
+    protected class CMoveData * mv;
+    protected class CBasePlayer * player;
+	
+    protected int m_nOldWaterLevel;
+    protected float m_flWaterEntryTime;
+    protected int m_nOnLadder;
+	
+    protected class Vector m_vecForward;
+    protected class Vector m_vecRight;
+    protected class Vector m_vecUp;
+	
+    protected void PlayerMove();
+	
+    protected void FinishMove();
+	
+    protected float CalcRoll(class QAngle & ,class Vector & ,float ,float );
+	
+    protected void DecayPunchAngle();
+	
+    protected void CheckWaterJump();
+	
+    protected void WaterMove();
+	
+    protected void WaterJump();
+	
+    protected void Friction();
+	
+    protected void AirAccelerate(class Vector & ,float ,float );
+	
+    protected void AirMove();
+	
+    protected bool CanAccelerate();
+    protected void Accelerate(class Vector & ,float ,float );
+	
+    protected void WalkMove();
+	
+    protected void StayOnGround();
+	
+    protected void FullWalkMove();
+	
+    protected void OnTryPlayerMoveCollision(class CGameTrace & );
+	
+    enum IntervalType_t
+    {
+        GROUND=0,
+        STUCK=1,
+        LADDER=2
+    };
+    protected int GetCheckInterval(enum CGameMovement::IntervalType_t );
+	
+    protected bool CheckInterval(enum CGameMovement::IntervalType_t );
+	
+    protected void StartGravity();
+    protected void FinishGravity();
+	
+    protected void AddGravity();
+	
+    protected void FullNoClipMove(float ,float );
+	
+    protected bool CheckJumpButton();
+	
+    protected void FullTossMove();
+	
+    protected void FullObserverMove();
+	
+    protected void FullLadderMove();
+	
+    protected int TryPlayerMove(class Vector * ,class CGameTrace * );
+	
+    protected bool LadderMove();
+    protected bool OnLadder(class CGameTrace & );
+    protected float LadderDistance();
+    protected unsigned int LadderMask();
+    protected float ClimbSpeed();
+    protected float LadderLateralMultiplier();
+	
+    protected void CheckVelocity();
+	
+    protected void PushEntity(class Vector & ,class CGameTrace * );
+	
+    protected int ClipVelocity(class Vector & ,class Vector & ,class Vector & ,float );
+	
+    protected int CheckStuck();
+	
+    protected bool CheckWater();
+	
+    protected void CategorizePosition();
+	
+    protected void CheckParameters();
+	
+    protected void ReduceTimers();
+	
+    protected void CheckFalling();
+	
+    protected void PlayerRoughLandingEffects(float );
+	
+    protected void PlayerWaterSounds();
+	
+    protected void ResetGetPointContentsCache();
+    protected int GetPointContentsCached(class Vector & );
+	
+    protected void Duck();
+    protected void HandleDuckingSpeedCrop();
+    protected void FinishUnDuck();
+    protected void FinishDuck();
+    protected bool CanUnduck();
+    protected void UpdateDuckJumpEyeOffset();
+    protected bool CanUnDuckJump(class CGameTrace & );
+    protected void StartUnDuckJump();
+    protected void FinishUnDuckJump(class CGameTrace & );
+    protected void SetDuckedEyeOffset(float );
+    protected void FixPlayerCrouchStuck(bool );
+	
+    protected float SplineFraction(float ,float );
+	
+    protected void CategorizeGroundSurface();
+	
+    protected bool InWater();
+	
+    protected void IsometricMove();
+	
+    protected void TracePlayerBBox(class Vector & ,class Vector & ,unsigned int ,int ,class CGameTrace & );
+	
+    protected class CBaseHandle TestPlayerPosition(class Vector & ,int ,class CGameTrace & );
+	
+    protected void PlaySwimSound();
+	
+    protected bool IsDead();
+	
+    protected float ComputeConstraintSpeedFactor();
+	
+    protected void SetGroundEntity(class CBaseEntity * );
+	
+    protected void StepMove(class Vector & ,class CGameTrace & );
+	
+    protected unsigned int PlayerSolidMask(bool );
+	
+    protected void PerformFlyCollisionResolution(class CGameTrace & ,class Vector & );
+	
+    protected int m_CachedGetPointContents;
+    protected class Vector m_CachedGetPointContentsPoint;
+	
+    protected class Vector m_vecProximityMins;
+    protected class Vector m_vecProximityMaxs;
+	
+    protected float m_fFrameTime;
+	
+    protected bool m_bSpeedCropped;
+	
+    protected float m_flStuckCheckTime[33][2];
+};

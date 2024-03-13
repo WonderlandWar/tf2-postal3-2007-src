@@ -76,30 +76,6 @@ bool g_bMovementOptimizations = true;
 
 extern IGameMovement *g_pGameMovement;
 
-#if defined( PLAYER_GETTING_STUCK_TESTING )
-
-// If you ever get stuck walking around, then you can run this code to find the code which would leave the player in a bad spot
-void CMoveData::SetAbsOrigin( const Vector &vec )
-{
-	CGameMovement *gm = dynamic_cast< CGameMovement * >( g_pGameMovement );
-	if ( gm && gm->GetMoveData() &&
-		 gm->player && 
-		 gm->player->entindex() == 1 && 
-		 gm->player->GetMoveType() == MOVETYPE_WALK )
-	{
-		trace_t pm;
-		gm->TracePlayerBBox( vec, vec, gm->PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
-		if ( pm.startsolid || pm.allsolid || pm.fraction != 1.0f )
-		{
-			Msg( "Player will become stuck at %f %f %f\n", VectorExpand( vec ) );
-		}
-	}
-
-	m_vecAbsOrigin = vec;
-}
-
-#endif
-
 // See shareddefs.h
 #if PREDICTION_ERROR_CHECK_LEVEL > 0
 
@@ -2842,9 +2818,6 @@ bool CGameMovement::LadderMove( void )
 	if ( player->GetMoveType() == MOVETYPE_NOCLIP )
 		return false;
 
-	if ( !GameHasLadders() )
-		return false;
-
 	// If I'm already moving on a ladder, use the previous ladder direction
 	if ( player->GetMoveType() == MOVETYPE_LADDER )
 	{
@@ -3425,32 +3398,21 @@ bool CGameMovement::InWater( void )
 
 void CGameMovement::ResetGetPointContentsCache()
 {
-	for ( int slot = 0; slot < MAX_PC_CACHE_SLOTS; ++slot )
-	{
-		for ( int i = 0; i < MAX_PLAYERS; ++i )
-		{
-			m_CachedGetPointContents[ i ][ slot ] = -9999;
-		}
-	}
+	m_CachedGetPointContents = -9999;
 }
 
 
-int CGameMovement::GetPointContentsCached( const Vector &point, int slot )
+int CGameMovement::GetPointContentsCached( const Vector &point )
 {
 	if ( g_bMovementOptimizations ) 
 	{
-		Assert( player );
-		Assert( slot >= 0 && slot < MAX_PC_CACHE_SLOTS );
-
-		int idx = player->entindex() - 1;
-
-		if ( m_CachedGetPointContents[ idx ][ slot ] == -9999 || point.DistToSqr( m_CachedGetPointContentsPoint[ idx ][ slot ] ) > 1 )
+		if ( m_CachedGetPointContents == -9999 || point.DistToSqr( m_CachedGetPointContentsPoint ) > 1 )
 		{
-			m_CachedGetPointContents[ idx ][ slot ] = enginetrace->GetPointContents ( point );
-			m_CachedGetPointContentsPoint[ idx ][ slot ] = point;
+			m_CachedGetPointContents = enginetrace->GetPointContents ( point );
+			m_CachedGetPointContentsPoint = point;
 		}
 		
-		return m_CachedGetPointContents[ idx ][ slot ];
+		return m_CachedGetPointContents;
 	}
 	else
 	{
@@ -3479,7 +3441,7 @@ bool CGameMovement::CheckWater( void )
 	player->SetWaterType( CONTENTS_EMPTY );
 
 	// Grab point contents.
-	cont = GetPointContentsCached( point, 0 );	
+	cont = GetPointContentsCached( point );	
 	
 	// Are we under water? (not solid and not empty?)
 	if ( cont & MASK_WATER )
@@ -3492,7 +3454,7 @@ bool CGameMovement::CheckWater( void )
 
 		// Now check a point that is at the player hull midpoint.
 		point[2] = mv->GetAbsOrigin()[2] + (GetPlayerMins()[2] + GetPlayerMaxs()[2])*0.5;
-		cont = GetPointContentsCached( point, 1 );
+		cont = enginetrace->GetPointContents( point );
 		// If that point is also under water...
 		if ( cont & MASK_WATER )
 		{
@@ -3501,7 +3463,7 @@ bool CGameMovement::CheckWater( void )
 
 			// Now check the eye position.  (view_ofs is relative to the origin)
 			point[2] = mv->GetAbsOrigin()[2] + player->GetViewOffset()[2];
-			cont = GetPointContentsCached( point, 2 );
+			cont = enginetrace->GetPointContents( point );
 			if ( cont & MASK_WATER )
 				player->SetWaterLevel( WL_Eyes );  // In over our eyes
 		}
@@ -3660,9 +3622,6 @@ void CGameMovement::CategorizePosition( void )
 {
 	Vector point;
 	trace_t pm;
-
-	// Reset this each time we-recategorize, otherwise we have bogus friction when we jump into water and plunge downward really quickly
-	player->m_surfaceFriction = 1.0f;
 
 	// if the player hull point one unit down is solid, the player
 	// is on ground
@@ -4739,9 +4698,3 @@ void CGameMovement::IsometricMove( void )
 }
 
 #pragma warning (default : 4701)
-
-
-bool CGameMovement::GameHasLadders() const
-{
-	return true;
-}

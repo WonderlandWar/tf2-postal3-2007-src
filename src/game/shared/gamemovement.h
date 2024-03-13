@@ -46,15 +46,10 @@ public:
 	virtual const Vector&	GetPlayerMaxs( bool ducked ) const;
 	virtual const Vector&	GetPlayerViewOffset( bool ducked ) const;
 
-// For sanity checking getting stuck on CMoveData::SetAbsOrigin
-	virtual void			TracePlayerBBox( const Vector& start, const Vector& end, unsigned int fMask, int collisionGroup, trace_t& pm );
-#define BRUSH_ONLY true
-	virtual unsigned int PlayerSolidMask( bool brushOnly = false );	///< returns the solid mask for the given player, so bots can have a more-restrictive set
-	CBasePlayer		*player;
-	CMoveData *GetMoveData() { return mv; }
 protected:
 	// Input/Output for this movement
 	CMoveData		*mv;
+	CBasePlayer		*player;
 	
 	int				m_nOldWaterLevel;
 	float			m_flWaterEntryTime;
@@ -194,7 +189,7 @@ protected:
 	void			PlayerWaterSounds( void );
 
 	void ResetGetPointContentsCache();
-	int GetPointContentsCached( const Vector &point, int slot );
+	int GetPointContentsCached( const Vector &point );
 
 	// Ducking
 	virtual void	Duck( void );
@@ -217,6 +212,9 @@ protected:
 
 	// Commander view movement
 	void			IsometricMove( void );
+	
+	// Traces the player bbox as it is swept from start to end
+	void			TracePlayerBBox( const Vector& start, const Vector& end, unsigned int fMask, int collisionGroup, trace_t& pm );
 
 	// Traces the player bbox as it is swept from start to end
 	virtual CBaseHandle		TestPlayerPosition( const Vector& pos, int collisionGroup, trace_t& pm );
@@ -233,22 +231,17 @@ protected:
 
 	virtual void	StepMove( Vector &vecDestination, trace_t &trace );
 
+	#define BRUSH_ONLY true
+	virtual unsigned int PlayerSolidMask( bool brushOnly = false );	///< returns the solid mask for the given player, so bots can have a more-restrictive set
+
 protected:
 
 	// Performs the collision resolution for fliers.
 	void			PerformFlyCollisionResolution( trace_t &pm, Vector &move );
 
-	virtual bool	GameHasLadders() const;
-
-	enum
-	{
-		// eyes, waist, feet points (since they are all deterministic
-		MAX_PC_CACHE_SLOTS = 3,
-	};
-
 	// Cache used to remove redundant calls to GetPointContents().
-	int m_CachedGetPointContents[ MAX_PLAYERS ][ MAX_PC_CACHE_SLOTS ];
-	Vector m_CachedGetPointContentsPoint[ MAX_PLAYERS ][ MAX_PC_CACHE_SLOTS ];	
+	int m_CachedGetPointContents;
+	Vector m_CachedGetPointContentsPoint;	
 
 	Vector			m_vecProximityMins;		// Used to be globals in sv_user.cpp.
 	Vector			m_vecProximityMaxs;

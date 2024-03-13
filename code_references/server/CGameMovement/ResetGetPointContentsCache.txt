@@ -1,0 +1,4 @@
+void __thiscall CGameMovement::ResetGetPointContentsCache(CGameMovement *this)
+{
+  this->m_CachedGetPointContents = -9999;
+}

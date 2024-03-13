@@ -1,0 +1,30 @@
+void __thiscall CTFGameMovement::AirDash(CTFGameMovement *this)
+{
+  CMoveData *mv; // eax
+  double m_flForwardMove; // st7
+  double m_flSideMove; // st6
+  double v5; // st5
+  double v6; // st6
+  double v7; // st7
+  Vector vecRight; // [esp+0h] [ebp-1Ch] BYREF
+  Vector vecForward; // [esp+Ch] [ebp-10h] BYREF
+  float v10; // [esp+18h] [ebp-4h]
+
+  AngleVectors(&this->mv->m_vecViewAngles, (Vector *)&vecForward.y, (Vector *)&vecRight.y, 0);
+  v10 = 0.0;
+  vecForward.x = 0.0;
+  pfVectorNormalize((Vector *)&vecForward.y);
+  pfVectorNormalize((Vector *)&vecRight.y);
+  mv = this->mv;
+  m_flForwardMove = mv->m_flForwardMove;
+  m_flSideMove = mv->m_flSideMove;
+  v5 = m_flSideMove * vecRight.z;
+  v6 = vecRight.y * m_flSideMove + vecForward.y * m_flForwardMove;
+  v7 = m_flForwardMove * vecForward.z + v5;
+  mv->m_vecVelocity.x = v6;
+  mv->m_vecVelocity.y = v7;
+  mv->m_vecVelocity.z = 0.0;
+  mv->m_vecVelocity.z = mv->m_vecVelocity.z + 268.32816;
+  CTFPlayerShared::SetAirDash(&this->m_pTFPlayer->m_Shared, 1);
+  CTFPlayer::DoAnimationEvent(this->m_pTFPlayer, PLAYERANIMEVENT_DOUBLEJUMP, 0);
+}

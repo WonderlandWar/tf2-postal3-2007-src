@@ -1,0 +1,121 @@
+void __thiscall CTFGameMovement::CategorizePosition(CTFGameMovement *this)
+{
+  CMoveData *v2; // ecx
+  CMoveData *mv; // eax
+  double y; // st7
+  CTFGameMovement_vtbl *v5; // edi
+  unsigned int (__thiscall *PlayerSolidMask)(CGameMovement *, bool); // edx
+  double v7; // st6
+  double v8; // st6
+  double v9; // st7
+  int v10; // eax
+  CMoveData *v11; // eax
+  CTFGameMovement_vtbl *v12; // edi
+  unsigned int (__thiscall *v13)(CGameMovement *, bool); // edx
+  int v14; // eax
+  const Vector *v15; // eax
+  CBasePlayer *player; // eax
+  const Vector *v17; // [esp+1Ch] [ebp-88h]
+  CBaseEntity *v18; // [esp+20h] [ebp-84h]
+  unsigned int v19; // [esp+24h] [ebp-80h]
+  Vector vecStartPos; // [esp+30h] [ebp-74h] BYREF
+  Vector vecEndPos; // [esp+3Ch] [ebp-68h] BYREF
+  CGameTrace trace; // [esp+48h] [ebp-5Ch] BYREF
+
+  if ( (this->player->m_afPhysicsFlags & 8) == 0 )
+  {
+    this->CheckWater(this);
+    if ( this->player->m_MoveType.m_Value == 9 || (v2 = this->mv, v2->m_vecVelocity.z > 250.0) )
+    {
+      this->SetGroundEntity(this, 0);
+    }
+    else
+    {
+      mv = this->mv;
+      y = v2->m_vecAbsOrigin.y;
+      v5 = this->__vftable;
+      PlayerSolidMask = this->PlayerSolidMask;
+      v7 = v2->m_vecAbsOrigin.z + 2.0;
+      vecStartPos.y = v2->m_vecAbsOrigin.x;
+      vecStartPos.z = y;
+      vecEndPos.x = v7;
+      v8 = mv->m_vecAbsOrigin.y;
+      v9 = mv->m_vecAbsOrigin.z - 2.0;
+      vecEndPos.y = mv->m_vecAbsOrigin.x;
+      vecEndPos.z = v8;
+      trace.startpos.x = v9;
+      v10 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))PlayerSolidMask)(
+              this,
+              0,
+              8,
+              &trace.startpos.y);
+      ((void (__thiscall *)(CTFGameMovement *, Vector *, CGameTrace *, int))v5->TracePlayerBBox)(
+        this,
+        &vecEndPos,
+        &trace,
+        v10);
+      if ( HIBYTE(trace.fractionleftsolid) )
+      {
+        v11 = this->mv;
+        v12 = this->__vftable;
+        v13 = this->PlayerSolidMask;
+        vecStartPos.y = v11->m_vecAbsOrigin.x;
+        vecStartPos.z = v11->m_vecAbsOrigin.y;
+        vecEndPos.x = v11->m_vecAbsOrigin.z;
+        v14 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))v13)(this, 0, 8, &trace.startpos.y);
+        ((void (__thiscall *)(CTFGameMovement *, Vector *, CGameTrace *, int))v12->TracePlayerBBox)(
+          this,
+          &vecEndPos,
+          &trace,
+          v14);
+      }
+      if ( trace.plane.dist >= 0.69999999 )
+      {
+        this->SetGroundEntity(this, (CBaseEntity *)trace.hitbox);
+      }
+      else
+      {
+        v19 = this->PlayerSolidMask(this, 0);
+        v18 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->mv->m_nPlayerHandle);
+        v17 = this->GetPlayerMaxs(this);
+        v15 = this->GetPlayerMins(this);
+        TracePlayerBBoxForGround(
+          (Vector *)&vecStartPos.y,
+          (Vector *)&vecEndPos.y,
+          v15,
+          v17,
+          v18,
+          v19,
+          8,
+          (CGameTrace *)&trace.startpos.y);
+        if ( trace.plane.dist >= 0.69999999 )
+        {
+          this->SetGroundEntity(this, (CBaseEntity *)trace.hitbox);
+        }
+        else
+        {
+          this->SetGroundEntity(this, 0);
+          if ( this->mv->m_vecVelocity.z > 0.0 )
+          {
+            player = this->player;
+            if ( player->m_MoveType.m_Value != 8 )
+              player->m_surfaceFriction = 0.25;
+          }
+        }
+      }
+      if ( CBaseEntity::GetGroundEntity(this->player) )
+      {
+        CTFPlayerShared::SetAirDash(&this->m_pTFPlayer->m_Shared, 0);
+        this->player->m_flWaterJumpTime = 0.0;
+      }
+      if ( trace.hitbox )
+      {
+        if ( !CGameTrace::DidHitWorld((CGameTrace *)&trace.startpos.y) )
+          IMoveHelper::sm_pSingleton->AddToTouched(
+            IMoveHelper::sm_pSingleton,
+            (CGameTrace *)&trace.startpos.y,
+            &this->mv->m_vecVelocity);
+      }
+    }
+  }
+}

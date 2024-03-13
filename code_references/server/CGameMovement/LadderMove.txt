@@ -1,0 +1,174 @@
+bool __thiscall CGameMovement::LadderMove(CGameMovement *this)
+{
+  CBasePlayer *player; // eax
+  unsigned __int8 m_Value; // cl
+  double v4; // st6
+  double v5; // st7
+  CMoveData *mv; // ecx
+  bool result; // al
+  CMoveData *v8; // eax
+  CGameMovement_vtbl *v9; // edi
+  int v10; // eax
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide> *p_m_MoveCollide; // ecx
+  float *v12; // eax
+  CGameMovement_vtbl *v13; // edx
+  float *p_m_bFirstRunOfFunctions; // eax
+  double v15; // st7
+  double v16; // st7
+  const Vector *(__thiscall *GetPlayerMins)(CGameMovement *); // eax
+  int v18; // eax
+  bool v19; // bl
+  CGameMovement_vtbl *v20; // edx
+  CMoveData *v21; // ecx
+  double v22; // st5
+  int m_nButtons; // eax
+  double v24; // st4
+  double v25; // st7
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide> *v26; // ecx
+  Vector *p_m_vecVelocity; // esi
+  double v28; // st1
+  float scale; // [esp+20h] [ebp-D4h]
+  float scalea; // [esp+20h] [ebp-D4h]
+  float scaleb; // [esp+20h] [ebp-D4h]
+  Vector *v32; // [esp+28h] [ebp-CCh]
+  Vector wishdir; // [esp+34h] [ebp-C0h] BYREF
+  Vector velocity; // [esp+40h] [ebp-B4h] BYREF
+  Vector tmp; // [esp+4Ch] [ebp-A8h] BYREF
+  Vector perp; // [esp+58h] [ebp-9Ch] BYREF
+  Vector cross; // [esp+64h] [ebp-90h]
+  Vector floor; // [esp+70h] [ebp-84h] BYREF
+  float normal; // [esp+7Ch] [ebp-78h]
+  Vector lateral; // [esp+80h] [ebp-74h] BYREF
+  Vector end; // [esp+8Ch] [ebp-68h] BYREF
+  CGameTrace pm; // [esp+98h] [ebp-5Ch] BYREF
+
+  player = this->player;
+  m_Value = player->m_MoveType.m_Value;
+  if ( m_Value == 8 )
+    return 0;
+  if ( m_Value == 9 )
+  {
+    v4 = -player->m_vecLadderNormal.y;
+    v5 = -player->m_vecLadderNormal.z;
+    wishdir.y = -player->m_vecLadderNormal.x;
+    wishdir.z = v4;
+    velocity.x = v5;
+  }
+  else
+  {
+    mv = this->mv;
+    if ( 0.0 == mv->m_flForwardMove && 0.0 == mv->m_flSideMove )
+      return 0;
+    v8 = this->mv;
+    wishdir.y = this->m_vecRight.x * mv->m_flSideMove + this->m_vecForward.x * v8->m_flForwardMove;
+    wishdir.z = this->m_vecRight.y * v8->m_flSideMove + this->m_vecForward.y * v8->m_flForwardMove;
+    velocity.x = this->m_vecRight.z * v8->m_flSideMove + this->m_vecForward.z * v8->m_flForwardMove;
+    pfVectorNormalize((Vector *)&wishdir.y);
+  }
+  scale = this->LadderDistance(this);
+  VectorMA(&this->mv->m_vecAbsOrigin, scale, (Vector *)&wishdir.y, (Vector *)&end.y);
+  v9 = this->__vftable;
+  v10 = ((int (__thiscall *)(CGameMovement *, int, float *))this->LadderMask)(this, 8, &pm.startpos.y);
+  ((void (__thiscall *)(CGameMovement *, Vector *, CGameTrace *, int))v9->TracePlayerBBox)(
+    this,
+    &this->mv->m_vecAbsOrigin,
+    &pm,
+    v10);
+  if ( 1.0 == *(float *)&pm.contents || !this->OnLadder(this, (CGameTrace *)&pm.startpos.y) )
+    return 0;
+  CBaseEntity::SetMoveType(this->player, MOVETYPE_LADDER, MOVECOLLIDE_DEFAULT);
+  p_m_MoveCollide = &this->player->m_MoveCollide;
+  HIBYTE(wishdir.x) = 0;
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide>::Set(
+    p_m_MoveCollide,
+    (const unsigned __int8 *)&wishdir.x + 3);
+  v12 = (float *)this->player;
+  v13 = this->__vftable;
+  v12[853] = pm.plane.normal.y;
+  v12 += 853;
+  v12[1] = pm.plane.normal.z;
+  v12[2] = pm.plane.dist;
+  p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+  v15 = p_m_bFirstRunOfFunctions[25];
+  p_m_bFirstRunOfFunctions += 25;
+  floor.y = v15;
+  floor.z = p_m_bFirstRunOfFunctions[1];
+  v16 = p_m_bFirstRunOfFunctions[2];
+  GetPlayerMins = v13->GetPlayerMins;
+  normal = v16;
+  v18 = (int)GetPlayerMins(this);
+  normal = *(float *)(v18 + 8) - 1.0 + normal;
+  v19 = enginetrace->GetPointContents(enginetrace, (Vector *)&floor.y, 0) == 1
+     || CBaseEntity::GetGroundEntity(this->player);
+  v20 = this->__vftable;
+  this->player->m_flGravity = 0.0;
+  v20->ClimbSpeed(this);
+  v21 = this->mv;
+  v22 = 0.0;
+  m_nButtons = v21->m_nButtons;
+  v24 = 0.0;
+  if ( (m_nButtons & 0x10) != 0 )
+    v22 = -0.0;
+  if ( (m_nButtons & 8) != 0 )
+    v22 = v22 + 0.0;
+  if ( (m_nButtons & 0x200) != 0 )
+    v24 = -0.0;
+  if ( (m_nButtons & 0x400) != 0 )
+    v25 = v24 + 0.0;
+  else
+    v25 = v24;
+  if ( (m_nButtons & 2) != 0 )
+  {
+    CBaseEntity::SetMoveType(this->player, MOVETYPE_WALK, MOVECOLLIDE_DEFAULT);
+    v26 = &this->player->m_MoveCollide;
+    HIBYTE(wishdir.x) = 0;
+    CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide>::Set(
+      v26,
+      (const unsigned __int8 *)&wishdir.x + 3);
+    p_m_vecVelocity = &this->mv->m_vecVelocity;
+    result = 1;
+    p_m_vecVelocity->x = pm.plane.normal.y * 270.0;
+    p_m_vecVelocity->y = pm.plane.normal.z * 270.0;
+    p_m_vecVelocity->z = 270.0 * pm.plane.dist;
+  }
+  else if ( 0.0 == v22 && 0.0 == v25 )
+  {
+    result = 1;
+    v21->m_vecVelocity.x = 0.0;
+    v21->m_vecVelocity.y = 0.0;
+    v21->m_vecVelocity.z = 0.0;
+  }
+  else
+  {
+    velocity.y = this->m_vecForward.x * v22;
+    velocity.z = this->m_vecForward.y * v22;
+    tmp.x = v22 * this->m_vecForward.z;
+    scalea = v25;
+    VectorMA((Vector *)&velocity.y, scalea, &this->m_vecRight, (Vector *)&velocity.y);
+    tmp.y = vec3_origin.x;
+    tmp.z = vec3_origin.y;
+    perp.x = 1.0;
+    perp.y = vec3_origin.y * pm.plane.dist - pm.plane.normal.z;
+    perp.z = pm.plane.normal.y - pm.plane.dist * vec3_origin.x;
+    cross.x = vec3_origin.x * pm.plane.normal.z - vec3_origin.y * pm.plane.normal.y;
+    pfVectorNormalize((Vector *)&perp.y);
+    v28 = velocity.y * pm.plane.normal.y + velocity.z * pm.plane.normal.z + tmp.x * pm.plane.dist;
+    lateral.x = v28;
+    cross.y = pm.plane.normal.y * v28;
+    cross.z = pm.plane.normal.z * v28;
+    floor.x = pm.plane.dist * v28;
+    lateral.y = velocity.y - cross.y;
+    lateral.z = velocity.z - cross.z;
+    end.x = tmp.x - floor.x;
+    v32 = &this->mv->m_vecVelocity;
+    tmp.y = cross.x * pm.plane.normal.z - perp.z * pm.plane.dist;
+    tmp.z = pm.plane.dist * perp.y - cross.x * pm.plane.normal.y;
+    perp.x = pm.plane.normal.y * perp.z - perp.y * pm.plane.normal.z;
+    scaleb = -v28;
+    VectorMA((Vector *)&lateral.y, scaleb, (Vector *)&tmp.y, v32);
+    if ( v19 && lateral.x > 0.0 )
+      VectorMA(&this->mv->m_vecVelocity, 200.0, (const Vector *)&pm.plane.normal.y, &this->mv->m_vecVelocity);
+    return 1;
+  }
+  return result;
+}
