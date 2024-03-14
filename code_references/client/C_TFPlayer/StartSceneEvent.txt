@@ -1,0 +1,21 @@
+bool __thiscall C_TFPlayer::StartSceneEvent(
+        C_TFPlayer *this,
+        CSceneEventInfo *info,
+        CChoreoScene *scene,
+        CChoreoEvent *event,
+        CChoreoActor *actor,
+        C_BaseEntity *pTarget)
+{
+  const char *Parameters; // eax
+  int v8; // eax
+
+  if ( (unsigned int)(CChoreoEvent::GetType(event) - 6) > 1 )
+    return C_BaseFlex::StartSceneEvent(this, info, scene, event, actor, pTarget);
+  Parameters = CChoreoEvent::GetParameters(event);
+  v8 = C_BaseAnimating::LookupSequence(this, Parameters);
+  info->m_nSequence = v8;
+  if ( v8 < 0 )
+    return 0;
+  CMultiPlayerAnimState::AddVCDSequenceToGestureSlot(this->m_PlayerAnimState, 5, v8, 1);
+  return 1;
+}

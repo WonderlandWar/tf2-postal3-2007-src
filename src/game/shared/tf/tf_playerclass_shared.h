@@ -36,7 +36,6 @@ struct TFPlayerClassData_t
 {
 	char		m_szClassName[TF_NAME_LENGTH];
 	char		m_szModelName[TF_NAME_LENGTH];
-	char		m_szHWMModelName[TF_NAME_LENGTH];
 	char		m_szLocalizableName[TF_NAME_LENGTH];
 	float		m_flMaxSpeed;
 	int			m_nMaxHealth;
@@ -60,7 +59,6 @@ struct TFPlayerClassData_t
 #endif
 
 	TFPlayerClassData_t();
-	const char *GetModelName() const;
 	void Parse( const char *pszClassName );
 
 private:
@@ -89,7 +87,7 @@ public:
 	int			GetClassIndex( void )							{ return m_iClass; }
 
 	const char	*GetName( void ) const							{ return GetPlayerClassData( m_iClass )->m_szClassName; }
-	const char	*GetModelName( void ) const						{ return GetPlayerClassData( m_iClass )->GetModelName(); }		
+	const char	*GetModelName( void ) const						{ return GetPlayerClassData( m_iClass )->m_szModelName; }		
 	float		GetMaxSpeed( void )								{ return GetPlayerClassData( m_iClass )->m_flMaxSpeed; }
 	int			GetMaxHealth( void )							{ return GetPlayerClassData( m_iClass )->m_nMaxHealth; }
 	int			GetMaxArmor( void )								{ return GetPlayerClassData( m_iClass )->m_nMaxArmor; }

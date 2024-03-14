@@ -1,0 +1,89 @@
+void __thiscall CTFGameMovement::PlayerMove(CTFGameMovement *this)
+{
+  CTFPlayer *m_pTFPlayer; // edi
+  int m_Value; // ebx
+  int m_nOldWaterLevel; // eax
+  float x; // ecx
+  float y; // edx
+  CTFPlayer *v7; // edi
+  float v8; // eax
+  float z; // ecx
+  CTFPlayer *v10; // ebx
+  CTFPlayer *v11; // edi
+  CTFPlayer *v12; // ebx
+  const char *v13; // [esp-18h] [ebp-9Ch]
+  QAngle v14; // [esp-8h] [ebp-8Ch]
+  CTFPlayer *v15; // [esp-4h] [ebp-88h]
+  CTFPlayer *v16; // [esp+4h] [ebp-80h]
+  Vector vecEnd; // [esp+10h] [ebp-74h] BYREF
+  Vector vecStart; // [esp+1Ch] [ebp-68h] BYREF
+  CGameTrace tr; // [esp+28h] [ebp-5Ch] BYREF
+
+  CGameMovement::PlayerMove(this);
+  m_pTFPlayer = this->m_pTFPlayer;
+  m_Value = m_pTFPlayer->m_nWaterLevel.m_Value;
+  m_nOldWaterLevel = this->m_nOldWaterLevel;
+  if ( m_nOldWaterLevel != m_Value )
+  {
+    if ( !m_nOldWaterLevel )
+    {
+      if ( (m_pTFPlayer->m_iEFlags & 0x1000) != 0 )
+        CBaseEntity::CalcAbsoluteVelocity(this->m_pTFPlayer);
+      x = m_pTFPlayer->m_vecAbsVelocity.x;
+      y = m_pTFPlayer->m_vecAbsVelocity.y;
+      vecStart.x = m_pTFPlayer->m_vecAbsVelocity.z;
+      vecEnd.y = x;
+      vecEnd.z = y;
+      if ( vecStart.x <= -200.0 )
+        goto LABEL_9;
+      v7 = this->m_pTFPlayer;
+      if ( (v7->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this->m_pTFPlayer);
+      v8 = v7->m_vecAbsOrigin.y;
+      z = v7->m_vecAbsOrigin.z;
+      vecStart.y = v7->m_vecAbsOrigin.x;
+      vecEnd.y = vecStart.y;
+      vecStart.z = v8;
+      vecEnd.z = v8;
+      v15 = this->m_pTFPlayer;
+      tr.startpos.x = z;
+      vecStart.x = z - 20.0;
+      UTIL_TraceLine((Vector *)&vecStart.y, (Vector *)&vecEnd.y, 0x200400Bu, v15, 0, (CGameTrace *)&tr.startpos.y);
+      if ( *(float *)&tr.contents >= 1.0 )
+LABEL_9:
+        CBaseEntity::EmitSound(this->m_pTFPlayer, "Physics.WaterSplash", 0.0, 0);
+    }
+    if ( m_Value == 3 && gpGlobals->curtime - this->m_flWaterEntryTime < 0.5 )
+    {
+      v10 = this->m_pTFPlayer;
+      if ( (v10->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this->m_pTFPlayer);
+      v11 = this->m_pTFPlayer;
+      if ( (v11->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this->m_pTFPlayer);
+      v16 = this->m_pTFPlayer;
+      v14.x = v10->m_angAbsRotation.x;
+      v14.y = v10->m_angAbsRotation.y;
+      v14.z = v10->m_angAbsRotation.z;
+      v13 = "water_playerdive";
+LABEL_24:
+      DispatchParticleEffect(v13, v11->m_vecAbsOrigin, v14, v16);
+      return;
+    }
+    if ( this->m_nOldWaterLevel == 3 && m_Value < 3 )
+    {
+      v12 = this->m_pTFPlayer;
+      if ( (v12->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this->m_pTFPlayer);
+      v11 = this->m_pTFPlayer;
+      if ( (v11->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this->m_pTFPlayer);
+      v16 = this->m_pTFPlayer;
+      v14.x = v12->m_angAbsRotation.x;
+      v14.y = v12->m_angAbsRotation.y;
+      v14.z = v12->m_angAbsRotation.z;
+      v13 = "water_playeremerge";
+      goto LABEL_24;
+    }
+  }
+}

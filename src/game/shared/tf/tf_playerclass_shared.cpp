@@ -49,7 +49,6 @@ TFPlayerClassData_t::TFPlayerClassData_t()
 {
 	m_szClassName[0] = '\0';
 	m_szModelName[0] = '\0';
-	m_szHWMModelName[0] = '\0';
 	m_szLocalizableName[0] = '\0';
 	m_flMaxSpeed = 0.0f;
 	m_nMaxHealth = 0;
@@ -116,36 +115,10 @@ void TFPlayerClassData_t::Parse( const char *szName )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-const char *TFPlayerClassData_t::GetModelName() const
-{
-#ifdef CLIENT_DLL
-	if ( UseHWMorphModels() )
-	{
-		if ( m_szHWMModelName[0] != '\0' )
-		{
-			return m_szHWMModelName;
-		}
-	}
-
-	return m_szModelName;
-#else
-	return m_szModelName;
-#endif
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void TFPlayerClassData_t::ParseData( KeyValues *pKeyValuesData )
 {
 	// Attributes.
 	Q_strncpy( m_szClassName, pKeyValuesData->GetString( "name" ), TF_NAME_LENGTH );
-
-	// Load the high res model or the lower res model.
-	if ( !IsX360() )
-	{
-		Q_strncpy( m_szHWMModelName, pKeyValuesData->GetString( "model_hwm" ), TF_NAME_LENGTH );
-	}
 	Q_strncpy( m_szModelName, pKeyValuesData->GetString( "model" ), TF_NAME_LENGTH );
 	Q_strncpy( m_szLocalizableName, pKeyValuesData->GetString( "localize_name" ), TF_NAME_LENGTH );
 

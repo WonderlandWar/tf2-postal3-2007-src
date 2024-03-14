@@ -1,0 +1,7 @@
+const Vector *__thiscall CTFGameMovement::GetPlayerViewOffset(CTFGameMovement *this, bool ducked)
+{
+  if ( ducked )
+    return &g_pGameRules->GetViewVectors(g_pGameRules)->m_vDuckView;
+  else
+    return CTFPlayer::GetClassEyeHeight(this->m_pTFPlayer);
+}

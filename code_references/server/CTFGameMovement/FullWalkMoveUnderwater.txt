@@ -1,0 +1,23 @@
+void __thiscall CTFGameMovement::FullWalkMoveUnderwater(CTFGameMovement *this)
+{
+  CBasePlayer *player; // ecx
+  CMoveData *mv; // edx
+
+  if ( this->player->m_nWaterLevel.m_Value == 2 )
+    this->CheckWaterJump(this);
+  if ( this->mv->m_vecVelocity.z < 0.0 )
+  {
+    player = this->player;
+    if ( 0.0 != player->m_flWaterJumpTime )
+      player->m_flWaterJumpTime = 0.0;
+  }
+  mv = this->mv;
+  if ( (mv->m_nButtons & 2) != 0 )
+    this->CheckJumpButton(this);
+  else
+    mv->m_nOldButtons &= ~2u;
+  this->WaterMove(this);
+  this->CategorizePosition(this);
+  if ( CBaseEntity::GetGroundEntity(this->player) )
+    this->mv->m_vecVelocity.z = 0.0;
+}

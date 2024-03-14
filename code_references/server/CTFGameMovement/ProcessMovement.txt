@@ -1,0 +1,22 @@
+void __thiscall CTFGameMovement::ProcessMovement(CTFGameMovement *this, CBasePlayer *pBasePlayer, CMoveData *pMove)
+{
+  bool v4; // al
+  CTFPlayer *v5; // eax
+
+  if ( pBasePlayer )
+  {
+    if ( pMove )
+    {
+      CGameMovement::ResetGetPointContentsCache(this);
+      this->m_bSpeedCropped = 0;
+      v4 = pBasePlayer->IsPlayer(pBasePlayer);
+      this->mv = pMove;
+      v5 = v4 ? (CTFPlayer *)pBasePlayer : 0;
+      this->m_pTFPlayer = v5;
+      this->player = v5;
+      pMove->m_flMaxSpeed = 400.0;
+      this->PlayerMove(this);
+      CGameMovement::FinishMove(this);
+    }
+  }
+}

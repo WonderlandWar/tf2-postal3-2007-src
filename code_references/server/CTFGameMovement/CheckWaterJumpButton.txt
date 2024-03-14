@@ -1,0 +1,42 @@
+char __thiscall CTFGameMovement::CheckWaterJumpButton(CTFGameMovement *this)
+{
+  CBasePlayer *player; // ecx
+  CBasePlayer *v3; // edx
+  CBasePlayer *v5; // ecx
+
+  player = this->player;
+  if ( 0.0 == player->m_flWaterJumpTime )
+  {
+    if ( player->m_nWaterLevel.m_Value < 2u )
+    {
+      return 1;
+    }
+    else
+    {
+      this->SetGroundEntity(this, 0);
+      if ( CBaseEntity::GetWaterType(this->player) == 32 )
+      {
+        this->mv->m_vecVelocity.z = 100.0;
+      }
+      else if ( CBaseEntity::GetWaterType(this->player) == 16 )
+      {
+        this->mv->m_vecVelocity.z = 80.0;
+      }
+      v5 = this->player;
+      if ( v5->m_flSwimSoundTime <= 0.0 )
+      {
+        v5->m_flSwimSoundTime = 1000.0;
+        CGameMovement::PlaySwimSound(this);
+      }
+      return 0;
+    }
+  }
+  else
+  {
+    player->m_flWaterJumpTime = player->m_flWaterJumpTime - gpGlobals->frametime;
+    v3 = this->player;
+    if ( v3->m_flWaterJumpTime < 0.0 )
+      v3->m_flWaterJumpTime = 0.0;
+    return 0;
+  }
+}

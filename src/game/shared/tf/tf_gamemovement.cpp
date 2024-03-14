@@ -1169,6 +1169,9 @@ BaseClass( passentity, collisionGroup )
 
 bool CTraceFilterObject::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
+	if ( staticpropmgr->IsStaticProp( pHandleEntity ) )
+		return false;
+
 	CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
 
 	if ( pEntity && pEntity->IsBaseObject() )

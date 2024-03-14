@@ -1,0 +1,128 @@
+void __thiscall CTFGameMovement::CheckWaterJump(CTFGameMovement *this)
+{
+  CMoveData *mv; // eax
+  bool v3; // bl
+  CMoveData *v4; // ecx
+  CMoveData *v5; // eax
+  double v6; // st7
+  CMoveData *v7; // eax
+  double m_flForwardMove; // st7
+  double m_flSideMove; // st6
+  const Vector *v10; // edi
+  const Vector *v11; // eax
+  double v12; // st6
+  double v13; // rt0
+  CTFGameMovement_vtbl *v14; // edi
+  int v15; // eax
+  int v16; // ecx
+  CTFGameMovement_vtbl *v17; // edi
+  int v18; // eax
+  CTFGameMovement_vtbl *v19; // edi
+  unsigned int (__thiscall *PlayerSolidMask)(CGameMovement *, bool); // eax
+  int v21; // eax
+  CMoveData *v22; // eax
+  Vector vecStart; // [esp+30h] [ebp-A8h] BYREF
+  Vector vecEnd; // [esp+3Ch] [ebp-9Ch] BYREF
+  Vector flatforward; // [esp+48h] [ebp-90h] BYREF
+  Vector flatvelocity; // [esp+54h] [ebp-84h] BYREF
+  float curspeed; // [esp+60h] [ebp-78h]
+  Vector right; // [esp+64h] [ebp-74h] BYREF
+  Vector forward; // [esp+70h] [ebp-68h] BYREF
+  CGameTrace tr; // [esp+7Ch] [ebp-5Ch] BYREF
+
+  mv = this->mv;
+  v3 = (mv->m_nButtons & 2) != 0;
+  AngleVectors(&mv->m_vecViewAngles, (Vector *)&forward.y, (Vector *)&right.y, 0);
+  if ( 0.0 == this->player->m_flWaterJumpTime )
+  {
+    v4 = this->mv;
+    if ( v4->m_vecVelocity.z >= -180.0 )
+    {
+      v5 = this->mv;
+      flatvelocity.y = v4->m_vecVelocity.x;
+      flatvelocity.z = v5->m_vecVelocity.y;
+      curspeed = 0.0;
+      v6 = pfVectorNormalize((Vector *)&flatvelocity.y);
+      v7 = this->mv;
+      right.x = v6;
+      m_flForwardMove = v7->m_flForwardMove;
+      m_flSideMove = v7->m_flSideMove;
+      flatforward.y = right.y * m_flSideMove + forward.y * m_flForwardMove;
+      flatforward.z = m_flForwardMove * forward.z + m_flSideMove * right.z;
+      flatvelocity.x = 0.0;
+      pfVectorNormalize((Vector *)&flatforward.y);
+      if ( 0.0 == right.x
+        || flatvelocity.z * flatforward.z + curspeed * flatvelocity.x + flatforward.y * flatvelocity.y >= 0.0
+        || v3 )
+      {
+        v10 = this->GetPlayerMaxs(this);
+        v11 = this->GetPlayerMins(this);
+        v12 = (v10->y + v11->y) * 0.5 + this->mv->m_vecAbsOrigin.y;
+        v13 = (v10->z + v11->z) * 0.5 + this->mv->m_vecAbsOrigin.z;
+        vecStart.y = (v10->x + v11->x) * 0.5 + this->mv->m_vecAbsOrigin.x;
+        vecStart.z = v12;
+        vecEnd.x = v13;
+        VectorMA((Vector *)&vecStart.y, 30.0, (Vector *)&flatforward.y, (Vector *)&vecEnd.y);
+        v14 = this->__vftable;
+        v15 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))this->PlayerSolidMask)(
+                this,
+                0,
+                8,
+                &tr.startpos.y);
+        ((void (__thiscall *)(CTFGameMovement *, Vector *, Vector *, int))v14->TracePlayerBBox)(
+          this,
+          &vecEnd,
+          &flatforward,
+          v15);
+        if ( *(float *)&tr.contents < 1.0 )
+        {
+          v16 = *(_DWORD *)(tr.hitbox + 512);
+          if ( !v16 || ((*(int (__thiscall **)(int))(*(_DWORD *)v16 + 76))(v16) & 4) == 0 )
+          {
+            vecEnd.x = this->player->GetViewOffset(this->player)->z + this->mv->m_vecAbsOrigin.z + 8.0;
+            VectorMA((Vector *)&vecStart.y, 30.0, (Vector *)&flatforward.y, (Vector *)&vecEnd.y);
+            VectorMA(&vec3_origin, -50.0, (const Vector *)&tr.plane.normal.y, &this->player->m_vecWaterJumpVel);
+            v17 = this->__vftable;
+            v18 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))this->PlayerSolidMask)(
+                    this,
+                    0,
+                    8,
+                    &tr.startpos.y);
+            ((void (__thiscall *)(CTFGameMovement *, Vector *, Vector *, int))v17->TracePlayerBBox)(
+              this,
+              &vecEnd,
+              &flatforward,
+              v18);
+            if ( 1.0 == *(float *)&tr.contents )
+            {
+              v19 = this->__vftable;
+              vecStart.y = vecEnd.y;
+              vecStart.z = vecEnd.z;
+              PlayerSolidMask = v19->PlayerSolidMask;
+              vecEnd.x = flatforward.x;
+              flatforward.x = flatforward.x - 1024.0;
+              v21 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))PlayerSolidMask)(
+                      this,
+                      0,
+                      8,
+                      &tr.startpos.y);
+              ((void (__thiscall *)(CTFGameMovement *, Vector *, Vector *, int))v19->TracePlayerBBox)(
+                this,
+                &vecEnd,
+                &flatforward,
+                v21);
+              if ( *(float *)&tr.contents < 1.0 && tr.plane.dist >= 0.7 )
+              {
+                v22 = this->mv;
+                v22->m_vecVelocity.z = 300.0;
+                v22->m_nOldButtons |= 2u;
+                CBaseEntity::AddFlag(this->player, 4);
+                this->player->m_flWaterJumpTime = 2000.0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -347,7 +347,7 @@ void C_TFRagdoll::CreateTFRagdoll()
 	TFPlayerClassData_t *pData = GetPlayerClassData( m_iClass );
 	if ( pData )
 	{
-		int nModelIndex = modelinfo->GetModelIndex( pData->GetModelName() );
+		int nModelIndex = modelinfo->GetModelIndex( pData->m_szModelName );
 		SetModelIndex( nModelIndex );	
 
 		if ( m_iTeam == TF_TEAM_RED )
@@ -1074,6 +1074,12 @@ const QAngle& C_TFPlayer::GetRenderAngles()
 //-----------------------------------------------------------------------------
 void C_TFPlayer::UpdateOnRemove( void )
 {
+	if ( m_pBurningSound )
+	{
+		CSoundEnvelopeController::GetController().SoundDestroy( m_pBurningSound );
+		m_pBurningSound = NULL;
+	}
+
 	// Stop the taunt.
 	if ( m_bWasTaunting )
 	{
@@ -1083,14 +1089,6 @@ void C_TFPlayer::UpdateOnRemove( void )
 	// HACK!!! ChrisG needs to fix this in the particle system.
 	ParticleProp()->OwnerSetDormantTo( true );
 	ParticleProp()->StopParticlesInvolving( this );
-
-	m_Shared.RemoveAllCond( this );
-
-	if ( IsLocalPlayer() )
-	{
-		CTFStatPanel *pStatPanel = GetStatPanel();
-		pStatPanel->OnLocalPlayerRemove( this );
-	}
 
 	BaseClass::UpdateOnRemove();
 }
@@ -2410,8 +2408,9 @@ C_BaseObject *C_TFPlayer::GetObjectOfType( int iObjectType )
 		if ( !pObj )
 			continue;
 
-		if ( pObj->IsDormant() || pObj->IsMarkedForDeletion() )
-			continue;
+		// TFP3: This doesn't appear to exist in the dlls
+		//if ( pObj->IsDormant() || pObj->IsMarkedForDeletion() )
+		//	continue;
 
 		if ( pObj->GetType() == iObjectType )
 		{
@@ -2759,16 +2758,11 @@ void C_TFPlayer::ValidateModelIndex( void )
 {
 	if ( m_Shared.InCond( TF_COND_DISGUISED ) && IsEnemyPlayer() )
 	{
-		TFPlayerClassData_t *pData = GetPlayerClassData( m_Shared.GetDisguiseClass() );
-		m_nModelIndex = modelinfo->GetModelIndex( pData->GetModelName() );
+		m_nModelIndex = m_nDisguiseModelIndex;
 	}
 	else
 	{
-		C_TFPlayerClass *pClass = GetPlayerClass();
-		if ( pClass )
-		{
-			m_nModelIndex = modelinfo->GetModelIndex( pClass->GetModelName() );
-		}
+		m_nModelIndex = m_nPlayerModelIndex;
 	}
 
 	if ( m_iSpyMaskBodygroup > -1 && GetModelPtr() != NULL )

@@ -214,7 +214,6 @@ public:
 
 	void SetTeamRespawnWaveTime( int iTeam, float flValue );
 	void AddTeamRespawnWaveTime( int iTeam, float flValue );
-	virtual void FillOutTeamplayRoundWinEvent( IGameEvent *event ) {}	// derived classes may implement to add fields to this event
 
 protected:
 	virtual void Think( void );

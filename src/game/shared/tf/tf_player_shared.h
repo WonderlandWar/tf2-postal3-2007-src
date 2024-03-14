@@ -126,16 +126,7 @@ public:
 	int		GetDisguiseClass( void ) 			{ return m_nDisguiseClass; }
 	int		GetDesiredDisguiseClass( void )		{ return m_nDesiredDisguiseClass; }
 	int		GetDesiredDisguiseTeam( void )		{ return m_nDesiredDisguiseTeam; }
-	EHANDLE GetDisguiseTarget( void ) 	
-	{
-#ifdef CLIENT_DLL
-		if ( m_iDisguiseTargetIndex == TF_DISGUISE_TARGET_INDEX_NONE )
-			return NULL;
-		return cl_entitylist->GetNetworkableHandle( m_iDisguiseTargetIndex );
-#else
-		return m_hDisguiseTarget.Get();
-#endif
-	}
+	EHANDLE GetDisguiseTarget( void )			{ return m_hDisguiseTarget.Get(); }
 	int		GetDisguiseHealth( void )			{ return m_iDisguiseHealth; }
 	void	SetDisguiseHealth( int iDisguiseHealth );
 
@@ -146,13 +137,11 @@ public:
 	CTFWeaponInfo *GetDisguiseWeaponInfo( void );
 #endif
 
-#ifdef GAME_DLL
 	void	Heal( CTFPlayer *pPlayer, float flAmount, bool bDispenserHeal = false );
 	void	StopHealing( CTFPlayer *pPlayer );
 	void	RecalculateInvuln( bool bInstantRemove = false );
 	int		FindHealerIndex( CTFPlayer *pPlayer );
 	EHANDLE	GetFirstHealer();
-#endif
 	int		GetNumHealers( void ) { return m_nNumHealers; }
 
 	void	Burn( CTFPlayer *pPlayer );
@@ -174,9 +163,6 @@ public:
 	void	NoteLastDamageTime( int nDamage );
 	void	OnSpyTouchedByEnemy( void );
 	float	GetLastStealthExposedTime( void ) { return m_flLastStealthExposeTime; }
-	//		TFP3: Restored accessor function
-	bool	IsInvulnerableFading( void ) { return m_flInvulnerableOffTime == 0.0; }
-
 	int		GetDesiredPlayerClassIndex( void );
 
 	float	GetSpyCloakMeter() const		{ return m_flCloakMeter; }
@@ -190,11 +176,13 @@ public:
 	void	DebugPrintConditions( void );
 
 	float	GetStealthNoAttackExpireTime( void );
+	bool	IsInvulnerableFading( void ) { return m_flInvulnerableOffTime == 0.0; }
 
-	void	SetPlayerDominated( CTFPlayer *pPlayer, bool bDominated );
+	void	SetPlayerDominated( int iPlayerIndex, bool bDominated );
 	bool	IsPlayerDominated( int iPlayerIndex );
-	bool	IsPlayerDominatingMe( int iPlayerIndex );
-	void	SetPlayerDominatingMe( CTFPlayer *pPlayer, bool bDominated );
+
+    void SetPlayerPushTime(int ,float );
+    float GetPlayerPushTime(int );
 
 private:
 
@@ -222,11 +210,11 @@ private:
 	void  RecordDamageEvent( const CTakeDamageInfo &info, bool bKill );
 	void  ClearDamageEvents( void ) { m_DamageEvents.Purge(); }
 	int	  GetNumKillsInTime( float flTime );
+#endif
 
 	// Invulnerable.
 	bool  IsProvidingInvuln( CTFPlayer *pPlayer );
 	void  SetInvulnerable( bool bState, bool bInstant = false );
-#endif
 
 private:
 
@@ -239,14 +227,13 @@ private:
 //...maybe store the name instead of the index?
 	CNetworkVar( int, m_nDisguiseTeam );		// Team spy is disguised as.
 	CNetworkVar( int, m_nDisguiseClass );		// Class spy is disguised as.
-	EHANDLE m_hDisguiseTarget;					// Playing the spy is using for name disguise.
-	CNetworkVar( int, m_iDisguiseTargetIndex );
+	CNetworkHandle( CBaseEntity, m_hDisguiseTarget );					// Playing the spy is using for name disguise.
 	CNetworkVar( int, m_iDisguiseHealth );		// Health to show our enemies in player id
 	CNetworkVar( int, m_nDesiredDisguiseClass );
 	CNetworkVar( int, m_nDesiredDisguiseTeam );
 
-	bool m_bEnableSeparation;		// Keeps separation forces on when player stops moving, but still penetrating
-	Vector m_vSeparationVelocity;	// Velocity used to keep player seperate from teammates
+	CNetworkVar( bool, m_bEnableSeparation );		// Keeps separation forces on when player stops moving, but still penetrating
+	CNetworkVar( Vector, m_vSeparationVelocity );	// Velocity used to keep player seperate from teammates
 
 	float m_flInvisibility;
 	CNetworkVar( float, m_flInvisChangeCompleteTime );		// when uncloaking, must be done by this time
@@ -258,7 +245,6 @@ private:
 	// Vars that are not networked.
 	OuterClass			*m_pOuter;					// C_TFPlayer or CTFPlayer (client/server).
 
-#ifdef GAME_DLL
 	// Healer handling
 	struct healers_t
 	{
@@ -270,10 +256,6 @@ private:
 	float					m_flHealFraction;	// Store fractional health amounts
 	float					m_flDisguiseHealFraction;	// Same for disguised healing
 
-#endif
-	
-	CNetworkVar( float, m_flInvulnerableOffTime );
-
 	// Burn handling
 	CHandle<CTFPlayer>		m_hBurnAttacker;
 	CNetworkVar( int,		m_nNumFlames );
@@ -281,6 +263,7 @@ private:
 	float					m_flFlameRemoveTime;
 	float					m_flTauntRemoveTime;
 
+	CNetworkVar( float, m_flInvulnerableOffTime );
 
 	float m_flDisguiseCompleteTime;
 
@@ -298,20 +281,17 @@ private:
 
 	CNetworkVar( float, m_flStealthNoAttackExpire );
 
-	CNetworkVar( int, m_iCritMult );
+	CNetworkVar( float, m_flCritMult );
 
 	CNetworkArray( bool, m_bPlayerDominated, MAX_PLAYERS+1 );		// array of state per other player whether player is dominating other players
-	CNetworkArray( bool, m_bPlayerDominatingMe, MAX_PLAYERS+1 );	// array of state per other player whether other players are dominating this player
+	CNetworkArray( float, m_flPlayerPushTime, MAX_PLAYERS+1 );
 	
 #ifdef GAME_DLL
 	float	m_flNextCritUpdate;
 	CUtlVector<CTFDamageEvent> m_DamageEvents;
 #else
 	int m_iDisguiseWeaponModelIndex;
-	int m_iOldDisguiseWeaponModelIndex;
 	CTFWeaponInfo *m_pDisguiseWeaponInfo;
-
-	WEAPON_FILE_INFO_HANDLE	m_hDisguiseWeaponInfo;
 #endif
 };			   
 

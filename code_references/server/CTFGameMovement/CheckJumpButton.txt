@@ -1,0 +1,65 @@
+char __thiscall CTFGameMovement::CheckJumpButton(CTFGameMovement *this)
+{
+  bool bScout; // bl
+  bool bNoGround; // zf
+  CBasePlayer *player; // eax
+  CMoveData *mv; // eax
+  double jumpFactor; // st7
+  CBasePlayer *v8; // eax
+  surfacedata_t *m_pSurfaceData; // ecx
+  double v10; // st7
+  CMoveData *v11; // ecx
+  float z; // [esp+14h] [ebp-4h]
+
+  if ( this->player->pl.deadflag.m_Value || !CTFGameMovement::CheckWaterJumpButton(this) )
+    return 0;
+  bScout = this->m_pTFPlayer->m_PlayerClass.m_iClass.m_Value == 1;
+  bNoGround = CBaseEntity::GetGroundEntity(this->player) == 0;
+  player = this->player;
+  if ( (player->m_fFlags.m_Value & 2) != 0 && (!bScout || !bNoGround) )
+    return 0;
+  if ( player->m_Local.m_bDucking.m_Value && (player->m_fFlags.m_Value & 2) != 0 )
+    return 0;
+  if ( player->m_Local.m_flDuckJumpTime.m_Value > 0.0 )
+    return 0;
+  mv = this->mv;
+  if ( (mv->m_nOldButtons & 2) != 0 )
+    return 0;
+  if ( bNoGround )
+  {
+    if ( !bScout || this->m_pTFPlayer->m_Shared.m_bAirDash.m_Value )
+    {
+      mv->m_nOldButtons |= 2u;
+      return 0;
+    }
+    CTFGameMovement::AirDash(this);
+    return 1;
+  }
+  else
+  {
+    CTFPlayer::DoAnimationEvent(this->m_pTFPlayer, PLAYERANIMEVENT_JUMP, 0);
+    ((void (__stdcall *)(Vector *, surfacedata_t *, _DWORD, int))this->player->PlayStepSound)(
+      &this->mv->m_vecAbsOrigin,
+      this->player->m_pSurfaceData,
+      1.0,
+      1);
+    CTFPlayerShared::SetJumping(&this->m_pTFPlayer->m_Shared, 1);
+    this->SetGroundEntity(this, 0);
+    jumpFactor = 1.0;
+    v8 = this->player;
+    m_pSurfaceData = v8->m_pSurfaceData;
+    if ( m_pSurfaceData )
+      jumpFactor = m_pSurfaceData->game.jumpFactor;
+    v10 = jumpFactor * 268.32816;
+    v11 = this->mv;
+    z = v11->m_vecVelocity.z;
+    if ( !v8->m_Local.m_bDucking.m_Value && (v8->m_fFlags.m_Value & 2) == 0 )
+      v10 = v10 + v11->m_vecVelocity.z;
+    v11->m_vecVelocity.z = v10;
+    CGameMovement::FinishGravity(this);
+    this->mv->m_outJumpVel.z = this->mv->m_vecVelocity.z - z + this->mv->m_outJumpVel.z;
+    this->mv->m_outStepHeight = this->mv->m_outStepHeight + 0.15000001;
+    this->mv->m_nOldButtons |= 2u;
+    return 1;
+  }
+}

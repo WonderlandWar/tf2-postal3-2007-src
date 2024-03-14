@@ -1,0 +1,12 @@
+bool __thiscall CTFGameMovement::CanAccelerate(CTFGameMovement *this)
+{
+  CTFPlayer *m_pTFPlayer; // eax
+  CBasePlayer *player; // ecx
+
+  m_pTFPlayer = this->m_pTFPlayer;
+  player = this->player;
+  if ( m_pTFPlayer->m_Shared.m_nPlayerState.m_Value )
+    return (player->m_afPhysicsFlags & 8) != 0;
+  else
+    return CBasePlayer::GetWaterJumpTime(player) == 0.0;
+}

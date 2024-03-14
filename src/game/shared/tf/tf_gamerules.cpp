@@ -84,6 +84,7 @@ ConVar tf_birthday( "tf_birthday", "0", FCVAR_NOTIFY | FCVAR_REPLICATED );
 #ifdef GAME_DLL
 // TF overrides the default value of this convar
 ConVar mp_waitingforplayers_time( "mp_waitingforplayers_time", (IsX360()?"15":"30"), FCVAR_GAMEDLL | FCVAR_DEVELOPMENTONLY, "WaitingForPlayers time length in seconds" );
+ConVar mp_maxrounds( "mp_maxrounds", "0", FCVAR_REPLICATED | FCVAR_NOTIFY, "max number of rounds to play before server changes maps", true, 0, false, 0 );
 #endif
 
 #ifdef GAME_DLL
@@ -391,10 +392,6 @@ CTFGameRules::CTFGameRules()
 
 	Q_memset( m_vecPlayerPositions,0, sizeof(m_vecPlayerPositions) );
 
-	m_iPrevRoundState = -1;
-	m_iCurrentRoundState = -1;
-	m_flTimerMayExpireAt = -1.0f;
-
 	// Lets execute a map specific cfg file
 	// ** execute this after server.cfg!
 	char szCommand[32];
@@ -566,16 +563,6 @@ bool CTFGameRules::ShouldCreateEntity( const char *pszClassName )
 	return BaseClass::ShouldCreateEntity( pszClassName );
 }
 
-void CTFGameRules::CleanUpMap( void )
-{
-	BaseClass::CleanUpMap();
-
-	if ( HLTVDirector() )
-	{
-		HLTVDirector()->BuildCameraList();
-	}
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------ob
@@ -630,11 +617,6 @@ void CTFGameRules::SetupOnRoundStart( void )
 	for ( int i = 0; i < MAX_TEAMS; i++ )
 	{
 		ObjectiveResource()->SetBaseCP( -1, i );
-	}
-
-	for ( int i = 0; i < TF_TEAM_COUNT; i++ )
-	{
-		m_iNumCaps[i] = 0;
 	}
 
 	// Let all entities know that a new round is starting
@@ -1131,12 +1113,13 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 			{
 				if ( State_Get() != GR_STATE_TEAM_WIN )
 				{
-					if ( CheckCapsPerRound() )
+					if ( CheckCapsPerRound() && !CheckMaxRounds() )
 						return;
 				}
 			}
 		}
 
+		RunPlayerConditionThink();
 		BaseClass::Think();
 	}
 
@@ -1153,13 +1136,6 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 				pPlayer->m_Shared.ConditionGameRulesThink();
 			}
 		}
-	}
-
-	void CTFGameRules::FrameUpdatePostEntityThink()
-	{
-		BaseClass::FrameUpdatePostEntityThink();
-
-		RunPlayerConditionThink();
 	}
 
 	bool CTFGameRules::CheckCapsPerRound()
@@ -1196,6 +1172,32 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 			}
 		}
 
+		return false;
+	}
+
+	bool CTFGameRules::CheckMaxRounds()
+	{
+		if ( mp_maxrounds.GetInt() != 0 )
+		{
+			CTFTeam *pTeamBlue = TFTeamMgr()->GetTeam( TF_TEAM_BLUE );
+			CTFTeam *pTeamRed = TFTeamMgr()->GetTeam( TF_TEAM_RED );
+
+			if ( pTeamBlue->GetScore() + pTeamRed->GetScore() >= mp_maxrounds.GetInt() )
+			{
+				UTIL_LogPrintf("World triggered \"Intermission_Round_Limit\"\n");
+
+				IGameEvent *event = gameeventmanager->CreateEvent( "tf_game_over" );
+				if ( event )
+				{
+					event->SetString( "reason", "Reached round limit" );
+					gameeventmanager->FireEvent( event );
+				}
+
+				GoToIntermission();
+				return true;
+			}
+		}
+		
 		return false;
 	}
 
@@ -1695,11 +1697,52 @@ void CTFGameRules::PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &in
 	CTFPlayer *pTFPlayerVictim = ToTFPlayer( pVictim );
 	CTFPlayer *pTFPlayerScorer = ToTFPlayer( pScorer );
 	if ( pScorer )
-	{	
-		CalcDominationAndRevenge( pTFPlayerScorer, pTFPlayerVictim, false, &iDeathFlags );
+	{
+		PlayerStats_t *pStatsVictim = CTF_GameStats.FindPlayerStats( pVictim );
+
+		// calculate # of unanswered kills between killer & victim - add 1 to include current kill
+		int iKillsUnanswered = pStatsVictim->statsKills.iNumKilledByUnanswered[pTFPlayerVictim->entindex()] + 1;		
+		if ( TF_KILLS_DOMINATION == iKillsUnanswered )
+		{			
+			// this is the Nth unanswered kill between killer and victim, killer is now dominating victim
+			iDeathFlags |= TF_DEATH_DOMINATION;
+			// set victim to be dominated by killer
+			pTFPlayerScorer->m_Shared.SetPlayerDominated( pTFPlayerVictim->entindex(), true );
+			// record stats
+			CTF_GameStats.Event_PlayerDominatedOther( pTFPlayerScorer );
+		}
+		else if ( pTFPlayerVictim->m_Shared.IsPlayerDominated( pTFPlayerScorer->entindex() ) )
+		{
+			// the killer killed someone who was dominating him, gains revenge
+			iDeathFlags |= TF_DEATH_REVENGE;
+			// set victim to no longer be dominating the killer
+			pTFPlayerVictim->m_Shared.SetPlayerDominated( pTFPlayerScorer->entindex(), false );
+			// record stats
+			CTF_GameStats.Event_PlayerRevenge( pTFPlayerScorer );
+		}
+
 		if ( pAssister )
 		{
-			CalcDominationAndRevenge( pAssister, pTFPlayerVictim, true, &iDeathFlags );
+			// calculate # of unanswered kills between killer & victim - add 1 to include current kill
+			int iKillsUnanswered = pStatsVictim->statsKills.iNumKilledByUnanswered[pTFPlayerVictim->entindex()] + 1;		
+			if ( TF_KILLS_DOMINATION == iKillsUnanswered )
+			{			
+				// this is the Nth unanswered kill between killer and victim, killer is now dominating victim
+				iDeathFlags |= TF_DEATH_ASSISTER_DOMINATION;
+				// set victim to be dominated by killer
+				pAssister->m_Shared.SetPlayerDominated( pTFPlayerVictim->entindex(), true );
+				// record stats
+				CTF_GameStats.Event_PlayerDominatedOther( pAssister );
+			}
+			else if ( pTFPlayerVictim->m_Shared.IsPlayerDominated( pAssister->entindex() ) )
+			{
+				// the killer killed someone who was dominating him, gains revenge
+				iDeathFlags |= TF_DEATH_ASSISTER_REVENGE;
+				// set victim to no longer be dominating the killer
+				pTFPlayerVictim->m_Shared.SetPlayerDominated( pAssister->entindex(), false );
+				// record stats
+				CTF_GameStats.Event_PlayerRevenge( pAssister );
+			}
 		}
 	}
 	pTFPlayerVictim->SetDeathFlags( iDeathFlags );	
@@ -1710,36 +1753,6 @@ void CTFGameRules::PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &in
 	}
 
 	BaseClass::PlayerKilled( pVictim, info );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Determines if attacker and victim have gotten domination or revenge
-//-----------------------------------------------------------------------------
-void CTFGameRules::CalcDominationAndRevenge( CTFPlayer *pAttacker, CTFPlayer *pVictim, bool bIsAssist, int *piDeathFlags )
-{
-	PlayerStats_t *pStatsVictim = CTF_GameStats.FindPlayerStats( pVictim );
-
-	// calculate # of unanswered kills between killer & victim - add 1 to include current kill
-	int iKillsUnanswered = pStatsVictim->statsKills.iNumKilledByUnanswered[pAttacker->entindex()] + 1;		
-	if ( TF_KILLS_DOMINATION == iKillsUnanswered )
-	{			
-		// this is the Nth unanswered kill between killer and victim, killer is now dominating victim
-		*piDeathFlags |= ( bIsAssist ? TF_DEATH_ASSISTER_DOMINATION : TF_DEATH_DOMINATION );
-		// set victim to be dominated by killer
-		pAttacker->m_Shared.SetPlayerDominated( pVictim, true );
-		// record stats
-		CTF_GameStats.Event_PlayerDominatedOther( pAttacker );
-	}
-	else if ( pVictim->m_Shared.IsPlayerDominated( pAttacker->entindex() ) )
-	{
-		// the killer killed someone who was dominating him, gains revenge
-		*piDeathFlags |= ( bIsAssist ? TF_DEATH_ASSISTER_REVENGE : TF_DEATH_REVENGE );
-		// set victim to no longer be dominating the killer
-		pVictim->m_Shared.SetPlayerDominated( pAttacker, false );
-		// record stats
-		CTF_GameStats.Event_PlayerRevenge( pAttacker );
-	}
-
 }
 
 //-----------------------------------------------------------------------------
@@ -2116,33 +2129,6 @@ int CTFGameRules::PlayerRoundScoreSortFunc( const PlayerRoundScore_t *pRoundScor
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called when the teamplay_round_win event is about to be sent, gives
-//			this method a chance to add more data to it
-//-----------------------------------------------------------------------------
-void CTFGameRules::FillOutTeamplayRoundWinEvent( IGameEvent *event )
-{
-	// determine the losing team
-	int iLosingTeam;
-
-	switch( event->GetInt( "team" ) )
-	{
-	case TF_TEAM_RED:
-		iLosingTeam = TF_TEAM_BLUE;
-		break;
-	case TF_TEAM_BLUE:
-		iLosingTeam = TF_TEAM_RED;
-		break;
-	case TEAM_UNASSIGNED:
-	default:
-		iLosingTeam = TEAM_UNASSIGNED;
-		break;
-	}
-
-	// set the number of caps that team got any time during the round
-	event->SetInt( "losing_team_num_caps", m_iNumCaps[iLosingTeam] );
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CTFGameRules::SetupSpawnPointsForRound( void )
@@ -2204,22 +2190,10 @@ void CTFGameRules::ShowRoundInfoPanel( CTFPlayer *pPlayer /* = NULL */ )
 {
 	KeyValues *data = new KeyValues( "data" );
 
-	if ( m_iCurrentRoundState < 0 )
-	{
-		// Haven't set up the round state yet
-		return;
-	}
-
-	// if prev and cur are equal, we are starting from a fresh round
-	if ( m_iPrevRoundState >= 0 && pPlayer == NULL )	// we have data about a previous state
-	{
-		data->SetInt( "prev", m_iPrevRoundState );
-	}
-	else
-	{
-		// don't send a delta if this is just to one player, they are joining mid-round
-		data->SetInt( "prev", m_iCurrentRoundState );	
-	}
+	data->SetString( "title", m_szCurrentRoundName );
+	data->SetString( "red", m_szCurrentRoundImageRed );
+	data->SetString( "blue", m_szCurrentRoundImageBlue );
+	data->SetString( "state", m_szCurrentRoundStateImage );
 
 	if ( pPlayer )
 	{
@@ -2250,14 +2224,9 @@ bool CTFGameRules::TimerMayExpire( void )
 	{
 		if ( ObjectiveResource()->GetCappingTeam( iPoint ) )
 		{
-			// HACK: Fix for some maps adding time to the clock 0.05s after CP is capped.
-			m_flTimerMayExpireAt = gpGlobals->curtime + 0.1f;
 			return false;
 		}
 	}
-
-	if ( m_flTimerMayExpireAt >= gpGlobals->curtime )
-		return false;
 
 	return true;
 }
@@ -2318,12 +2287,6 @@ void CTFGameRules::InternalHandleTeamWin( int iWinningTeam )
 				if ( pPlayer->GetTeamNumber() != iWinningTeam )
 				{
 					pPlayer->RemoveInvisibility();
-//					pPlayer->RemoveDisguise();
-
-					if ( pPlayer->HasTheFlag() )
-					{
-						pPlayer->DropFlag();
-					}
 				}
 
 				pPlayer->TeamFortress_SetSpeed();
@@ -2343,12 +2306,6 @@ void CTFGameRules::InternalHandleTeamWin( int iWinningTeam )
 				pSentry->SetDisabled( true );
 			}
 		}
-	}
-
-	if ( m_bForceMapReset )
-	{
-		m_iPrevRoundState = -1;
-		m_iCurrentRoundState = -1;
 	}
 }
 
@@ -2848,12 +2805,6 @@ void CTFGameRules::FireGameEvent( IGameEvent *event )
 	{
 #ifdef GAME_DLL
 		RecalculateControlPointState();
-
-		// keep track of how many times each team caps
-		int iTeam = event->GetInt( "team" );
-		Assert( iTeam >= FIRST_GAME_TEAM && iTeam < TF_TEAM_COUNT );
-		m_iNumCaps[iTeam]++;
-
 		// award a capture to all capping players
 		const char *cappers = event->GetString( "cappers" );
 
@@ -3095,24 +3046,6 @@ void CTFGameRules::HandleOvertimeBegin()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFGameRules::ShutdownCustomResponseRulesDicts()
-{
-	DestroyCustomResponseSystems();
-
-	if ( m_ResponseRules.Count() != 0 )
-	{
-		int nRuleCount = m_ResponseRules.Count();
-		for ( int iRule = 0; iRule < nRuleCount; ++iRule )
-		{
-			m_ResponseRules[iRule].m_ResponseSystems.Purge();
-		}
-		m_ResponseRules.Purge();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void CTFGameRules::InitCustomResponseRulesDicts()
 {
 	MEM_ALLOC_CREDIT();
@@ -3164,21 +3097,6 @@ void CTFGameRules::SendHudNotification( IRecipientFilter &filter, const char *ps
 		WRITE_STRING( pszIcon );
 		WRITE_BYTE( iTeam );
 	MessageEnd();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Is the player past the required delays for spawning
-//-----------------------------------------------------------------------------
-bool CTFGameRules::HasPassedMinRespawnTime( CBasePlayer *pPlayer )
-{
-	CTFPlayer *pTFPlayer = ToTFPlayer( pPlayer );
-
-	if ( pTFPlayer && pTFPlayer->GetPlayerClass()->GetClassIndex() == TF_CLASS_UNDEFINED )
-		return true;
-
-	float flMinSpawnTime = GetMinTimeWhenPlayerMaySpawn( pPlayer ); 
-
-	return ( gpGlobals->curtime > flMinSpawnTime );
 }
 
 

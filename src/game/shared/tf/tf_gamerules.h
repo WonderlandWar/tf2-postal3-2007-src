@@ -110,9 +110,6 @@ public:
 	// Override this to prevent removal of game specific entities that need to persist
 	virtual bool	RoundCleanupShouldIgnore( CBaseEntity *pEnt );
 	virtual bool	ShouldCreateEntity( const char *pszClassName );
-	virtual void	CleanUpMap( void );
-
-	virtual void	FrameUpdatePostEntityThink();
 
 	// Called when a new round is being initialized
 	virtual void	SetupOnRoundStart( void );
@@ -155,9 +152,6 @@ public:
 
 	// Speaking, vcds, voice commands.
 	virtual void	InitCustomResponseRulesDicts();
-	virtual void	ShutdownCustomResponseRulesDicts();
-
-	virtual bool	HasPassedMinRespawnTime( CBasePlayer *pPlayer );
 
 protected:
 	virtual void	InitTeams( void );
@@ -167,8 +161,6 @@ protected:
 	virtual void	InternalHandleTeamWin( int iWinningTeam );
 	
 	static int		PlayerRoundScoreSortFunc( const PlayerRoundScore_t *pRoundScore1, const PlayerRoundScore_t *pRoundScore2 );
-
-	virtual void FillOutTeamplayRoundWinEvent( IGameEvent *event );
 #endif // GAME_DLL
 
 public:
@@ -213,9 +205,11 @@ public:
 	virtual void Think();
 
 	bool CheckTimeLimit();
+    bool CheckMaxRounds();
 	bool CheckWinLimit();
 	bool CheckCapsPerRound();
 
+	void CheckRespawnWaves();
 	virtual bool FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker );
 
 	// Spawing rules.
@@ -236,8 +230,6 @@ public:
 	float GetPreMatchEndTime() const;	// Returns the time at which the prematch will be over.
 	void GoToIntermission( void );
 
-	virtual int GetAutoAimMode()	{ return AUTOAIM_NONE; }
-
 	bool CanHaveAmmo( CBaseCombatCharacter *pPlayer, int iAmmoIndex );
 
 	virtual const char *GetGameDescription( void ){ return "Team Fortress"; }
@@ -248,8 +240,6 @@ public:
 	virtual void PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	virtual void DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	virtual CBasePlayer *GetDeathScorer( CBaseEntity *pKiller, CBaseEntity *pInflictor, CBaseEntity *pVictim );
-
-	void CalcDominationAndRevenge( CTFPlayer *pAttacker, CTFPlayer *pVictim, bool bIsAssist, int *piDeathFlags );
 
 	const char *GetKillingWeaponName( const CTakeDamageInfo &info, CTFPlayer *pVictim );
 	CBasePlayer *GetAssister( CBasePlayer *pVictim, CBasePlayer *pScorer, CBaseEntity *pInflictor );
@@ -279,17 +269,25 @@ private:
 private:
 
 #ifdef GAME_DLL
+	
+	void SetCurrentRoundName( char * );
+	void SetCurrentRoundImageRed( char * );
+	void SetCurrentRoundImageBlue( char * );
+	void SetCurrentRoundStateImage( char * );
+	char *GetCurrentRoundName();
+	char *GetCurrentRoundImageRed();
+	char *GetCurrentRoundImageBlue();
+	char *GetCurrentRoundStateImage();
 
 	Vector2D	m_vecPlayerPositions[MAX_PLAYERS];
 
-	CUtlVector<CHandle<CHealthKit> > m_hDisabledHealthKits;	
+	CUtlVector<CHandle<CHealthKit> > m_hDisabledHealthKits; 
+	char m_szCurrentRoundName[32];
+	char m_szCurrentRoundImageRed[64];
+	char m_szCurrentRoundImageBlue[64];
+	char m_szCurrentRoundStateImage[64];
 	
 	char	m_szMostRecentCappers[MAX_PLAYERS+1];	// list of players who made most recent capture.  Stored as string so it can be passed in events.
-	int		m_iNumCaps[TF_TEAM_COUNT];				// # of captures ever by each team during a round
-
-	int m_iPrevRoundState;	// bit string representing the state of the points at the start of the previous miniround
-	int m_iCurrentRoundState;
-	float m_flTimerMayExpireAt;
 
 #endif
 

@@ -1,0 +1,12 @@
+void __thiscall CTFGameMovement::Duck(CTFGameMovement *this)
+{
+  CBasePlayer *player; // ecx
+
+  player = this->player;
+  if ( player->m_nWaterLevel.m_Value && !CBaseEntity::GetGroundEntity(player)
+    || this->player->m_nWaterLevel.m_Value >= 3u )
+  {
+    this->mv->m_nButtons &= ~4u;
+  }
+  CGameMovement::Duck(this);
+}

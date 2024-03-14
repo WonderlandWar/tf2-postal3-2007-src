@@ -1,0 +1,15 @@
+void __thiscall CTFGameMovement::CheckFalling(CTFGameMovement *this)
+{
+  CTFPlayer *m_pTFPlayer; // eax
+
+  if ( CBaseEntity::GetGroundEntity(this->player) )
+  {
+    if ( !CGameMovement::IsDead(this) )
+    {
+      m_pTFPlayer = this->m_pTFPlayer;
+      if ( m_pTFPlayer->m_Shared.m_bJumping.m_Value )
+        CTFPlayerShared::SetJumping(&m_pTFPlayer->m_Shared, 0);
+    }
+  }
+  CGameMovement::CheckFalling(this);
+}

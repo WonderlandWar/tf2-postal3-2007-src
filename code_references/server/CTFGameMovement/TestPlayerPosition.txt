@@ -1,0 +1,61 @@
+CBaseHandle *__thiscall CTFGameMovement::TestPlayerPosition(
+        CTFGameMovement *this,
+        CBaseHandle *result,
+        const Vector *pos,
+        int collisionGroup,
+        CGameTrace *pm)
+{
+  CBaseHandle *v6; // eax
+  const Vector *v7; // eax
+  unsigned int m_Index; // eax
+  CTFWeaponBase *m_pEntity; // eax
+  IEngineTrace_vtbl *v10; // ebx
+  int v11; // eax
+  unsigned int v12; // ecx
+  const Vector *v13; // [esp-4h] [ebp-4Ch]
+  CTraceFilterObject traceFilter; // [esp+4h] [ebp-44h] BYREF
+  Ray_t ray; // [esp+10h] [ebp-38h] BYREF
+
+  if ( tf_solidobjects.m_pParent->m_nValue )
+  {
+    v13 = this->GetPlayerMaxs(this);
+    v7 = this->GetPlayerMins(this);
+    Ray_t::Init((Ray_t *)&ray.m_Start.y, pos, pos, v7, v13);
+    m_Index = this->mv->m_nPlayerHandle.m_Index;
+    if ( m_Index == -1
+      || g_pEntityList->m_EntPtrArray[this->mv->m_nPlayerHandle.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->mv->m_nPlayerHandle.m_Index & 0xFFF].m_pEntity;
+    }
+    CTraceFilterSimple::CTraceFilterSimple((CTraceFilterSimple *)&traceFilter.m_pPassEnt, m_pEntity, collisionGroup);
+    traceFilter.m_pPassEnt = (const IHandleEntity *)&CTraceFilterObject::`vftable';
+    v10 = enginetrace->__vftable;
+    v11 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, const IHandleEntity **, CGameTrace *))this->PlayerSolidMask)(
+            this,
+            0,
+            &traceFilter.m_pPassEnt,
+            pm);
+    ((void (__thiscall *)(IEngineTrace *, Vector *, int))v10->TraceRay)(enginetrace, &ray.m_Delta, v11);
+    if ( (this->PlayerSolidMask(this, 0) & pm->contents) != 0 && pm->m_pEnt )
+    {
+      v12 = pm->m_pEnt->GetRefEHandle(pm->m_pEnt)->m_Index;
+      v6 = result;
+      result->m_Index = v12;
+    }
+    else
+    {
+      v6 = result;
+      result->m_Index = -1;
+    }
+  }
+  else
+  {
+    CGameMovement::TestPlayerPosition(this, result, pos, collisionGroup, pm);
+    return result;
+  }
+  return v6;
+}

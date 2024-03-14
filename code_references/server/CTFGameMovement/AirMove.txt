@@ -1,0 +1,59 @@
+void __thiscall CTFGameMovement::AirMove(CTFGameMovement *this)
+{
+  CMoveData *mv; // eax
+  double m_flMaxSpeed; // st7
+  CMoveData *v4; // ecx
+  CMoveData *v5; // eax
+  float *player; // ecx
+  double v7; // st7
+  CMoveData *v8; // eax
+  float *v9; // esi
+  double v10; // st7
+  float v11; // [esp+0h] [ebp-44h]
+  float fmove; // [esp+Ch] [ebp-38h]
+  Vector right; // [esp+10h] [ebp-34h] BYREF
+  Vector forward; // [esp+1Ch] [ebp-28h] BYREF
+  Vector wishdir; // [esp+28h] [ebp-1Ch] BYREF
+  Vector up; // [esp+34h] [ebp-10h] BYREF
+
+  CTFGameMovement::AvoidPlayers(this);
+  AngleVectors(&this->mv->m_vecViewAngles, (Vector *)&forward.y, (Vector *)&right.y, (Vector *)&up.y);
+  mv = this->mv;
+  right.x = mv->m_flForwardMove;
+  fmove = mv->m_flSideMove;
+  wishdir.x = 0.0;
+  forward.x = 0.0;
+  pfVectorNormalize((Vector *)&forward.y);
+  pfVectorNormalize((Vector *)&right.y);
+  wishdir.y = forward.y * right.x + right.y * fmove;
+  wishdir.z = right.x * forward.z + fmove * right.z;
+  up.x = 0.0;
+  m_flMaxSpeed = pfVectorNormalize((Vector *)&wishdir.y);
+  if ( 0.0 != m_flMaxSpeed )
+  {
+    v4 = this->mv;
+    if ( m_flMaxSpeed > v4->m_flMaxSpeed )
+      m_flMaxSpeed = v4->m_flMaxSpeed;
+  }
+  v11 = m_flMaxSpeed;
+  ((void (__thiscall *)(_DWORD, _DWORD, _DWORD, _DWORD))this->AirAccelerate)(
+    this,
+    &wishdir.y,
+    LODWORD(v11),
+    sv_airaccelerate.m_pParent->m_fValue);
+  v5 = this->mv;
+  player = (float *)this->player;
+  v7 = v5->m_vecVelocity.x + player[138];
+  player += 138;
+  v5->m_vecVelocity.x = v7;
+  v5->m_vecVelocity.y = v5->m_vecVelocity.y + player[1];
+  v5->m_vecVelocity.z = v5->m_vecVelocity.z + player[2];
+  this->TryPlayerMove(this, 0, 0);
+  v8 = this->mv;
+  v9 = (float *)this->player;
+  v10 = v8->m_vecVelocity.x - v9[138];
+  v9 += 138;
+  v8->m_vecVelocity.x = v10;
+  v8->m_vecVelocity.y = v8->m_vecVelocity.y - v9[1];
+  v8->m_vecVelocity.z = v8->m_vecVelocity.z - v9[2];
+}

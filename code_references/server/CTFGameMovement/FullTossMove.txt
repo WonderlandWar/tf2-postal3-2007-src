@@ -1,0 +1,105 @@
+void __thiscall CTFGameMovement::FullTossMove(CTFGameMovement *this)
+{
+  double v1; // st7
+  CMoveData *mv; // ecx
+  CMoveData *v4; // eax
+  double m_flUpMove; // st4
+  double m_flMaxSpeed; // st7
+  CMoveData *v7; // edx
+  CBasePlayer *v8; // ecx
+  double x; // st7
+  CNetworkVarBase<Vector,CBaseEntity::NetworkVar_m_vecBaseVelocity> *v10; // ecx
+  CMoveData *v11; // ecx
+  double v12; // st4
+  Vector *p_m_vecVelocity; // ecx
+  CMoveData *v14; // eax
+  float *player; // ecx
+  double v16; // st7
+  CMoveData *v17; // eax
+  double frametime; // st7
+  CNetworkVarBase<Vector,CBaseEntity::NetworkVar_m_vecBaseVelocity> *p_m_vecBaseVelocity; // ecx
+  float *p_m_bFirstRunOfFunctions; // esi
+  float v21; // [esp+0h] [ebp-A8h]
+  float fmove; // [esp+Ch] [ebp-9Ch]
+  Vector forward; // [esp+10h] [ebp-98h] BYREF
+  Vector move; // [esp+1Ch] [ebp-8Ch] BYREF
+  Vector right; // [esp+28h] [ebp-80h] BYREF
+  Vector wishdir; // [esp+34h] [ebp-74h] BYREF
+  Vector up; // [esp+40h] [ebp-68h] BYREF
+  CGameTrace pm; // [esp+4Ch] [ebp-5Ch] BYREF
+
+  v1 = 0.0;
+  mv = this->mv;
+  if ( 0.0 != mv->m_flForwardMove || 0.0 != mv->m_flSideMove || 0.0 != mv->m_flUpMove )
+  {
+    AngleVectors(&mv->m_vecViewAngles, (Vector *)&forward.y, (Vector *)&right.y, (Vector *)&up.y);
+    v4 = this->mv;
+    forward.x = v4->m_flForwardMove;
+    fmove = v4->m_flSideMove;
+    pfVectorNormalize((Vector *)&forward.y);
+    pfVectorNormalize((Vector *)&right.y);
+    m_flUpMove = this->mv->m_flUpMove;
+    wishdir.y = forward.y * forward.x + right.y * fmove;
+    wishdir.z = right.z * fmove + forward.z * forward.x;
+    up.x = forward.x * move.x + fmove * wishdir.x + m_flUpMove;
+    m_flMaxSpeed = pfVectorNormalize((Vector *)&wishdir.y);
+    v7 = this->mv;
+    if ( m_flMaxSpeed > v7->m_flMaxSpeed )
+      m_flMaxSpeed = v7->m_flMaxSpeed;
+    v21 = m_flMaxSpeed;
+    ((void (__thiscall *)(_DWORD, _DWORD, _DWORD, _DWORD))this->Accelerate)(
+      this,
+      &wishdir.y,
+      LODWORD(v21),
+      sv_accelerate.m_pParent->m_fValue);
+    v1 = 0.0;
+  }
+  if ( v1 < this->mv->m_vecVelocity.z )
+    this->SetGroundEntity(this, 0);
+  if ( !CBaseEntity::GetGroundEntity(this->player)
+    || (v8 = this->player, x = v8->m_vecBaseVelocity.m_Value.x, v10 = &v8->m_vecBaseVelocity, vec3_origin.x != x)
+    || vec3_origin.y != v10->m_Value.y
+    || vec3_origin.z != v10->m_Value.z
+    || (v11 = this->mv, v12 = v11->m_vecVelocity.x, p_m_vecVelocity = &v11->m_vecVelocity, v12 != vec3_origin.x)
+    || p_m_vecVelocity->y != vec3_origin.y
+    || p_m_vecVelocity->z != vec3_origin.z )
+  {
+    CGameMovement::CheckVelocity(this);
+    if ( this->player->m_MoveType.m_Value == 5 )
+      CGameMovement::AddGravity(this);
+    v14 = this->mv;
+    player = (float *)this->player;
+    v16 = player[138];
+    player += 138;
+    v14->m_vecVelocity.x = v16 + v14->m_vecVelocity.x;
+    v14->m_vecVelocity.y = player[1] + v14->m_vecVelocity.y;
+    v14->m_vecVelocity.z = player[2] + v14->m_vecVelocity.z;
+    CGameMovement::CheckVelocity(this);
+    v17 = this->mv;
+    frametime = gpGlobals->frametime;
+    p_m_vecBaseVelocity = &this->player->m_vecBaseVelocity;
+    move.y = v17->m_vecVelocity.x * frametime;
+    move.z = v17->m_vecVelocity.y * frametime;
+    right.x = frametime * v17->m_vecVelocity.z;
+    v17->m_vecVelocity.x = v17->m_vecVelocity.x - p_m_vecBaseVelocity->m_Value.x;
+    v17->m_vecVelocity.y = v17->m_vecVelocity.y - p_m_vecBaseVelocity->m_Value.y;
+    v17->m_vecVelocity.z = v17->m_vecVelocity.z - p_m_vecBaseVelocity->m_Value.z;
+    CGameMovement::PushEntity(this, (Vector *)&move.y, (CGameTrace *)&pm.startpos.y);
+    CGameMovement::CheckVelocity(this);
+    if ( BYTE2(pm.fractionleftsolid) )
+    {
+      this->SetGroundEntity(this, (CBaseEntity *)pm.hitbox);
+      p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+      p_m_bFirstRunOfFunctions[16] = 0.0;
+      p_m_bFirstRunOfFunctions += 16;
+      p_m_bFirstRunOfFunctions[1] = 0.0;
+      p_m_bFirstRunOfFunctions[2] = 0.0;
+    }
+    else
+    {
+      if ( 1.0 != *(float *)&pm.contents )
+        CGameMovement::PerformFlyCollisionResolution(this, (CGameTrace *)&pm.startpos.y, (Vector *)&move.y);
+      this->CheckWater(this);
+    }
+  }
+}

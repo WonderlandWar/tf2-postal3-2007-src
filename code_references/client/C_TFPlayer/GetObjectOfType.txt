@@ -1,0 +1,32 @@
+C_BaseObject *__thiscall C_TFPlayer::GetObjectOfType(C_TFPlayer *this, int iObjectType)
+{
+  int m_Size; // edi
+  int v3; // edx
+  CHandle<C_BaseObject> *i; // esi
+  C_BaseObject **v5; // ecx
+  C_BaseObject *result; // eax
+
+  m_Size = this->m_aObjects.m_Size;
+  v3 = 0;
+  if ( m_Size <= 0 )
+    return 0;
+  for ( i = this->m_aObjects.m_Memory.m_pMemory; ; ++i )
+  {
+    if ( i->m_Index != -1 )
+    {
+      v5 = (C_BaseObject **)&g_pEntityList->m_EntPtrArray[i->m_Index & 0xFFF];
+      if ( g_pEntityList->m_EntPtrArray[i->m_Index & 0xFFF].m_SerialNumber == i->m_Index >> 12 )
+      {
+        result = *v5;
+        if ( *v5 )
+        {
+          if ( result->m_iObjectType == iObjectType )
+            break;
+        }
+      }
+    }
+    if ( ++v3 >= m_Size )
+      return 0;
+  }
+  return result;
+}

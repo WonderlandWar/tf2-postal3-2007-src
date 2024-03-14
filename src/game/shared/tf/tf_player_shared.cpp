@@ -106,14 +106,13 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerSharedLocal )
 	RecvPropTime( RECVINFO( m_flStealthNoAttackExpire ) ),
 	RecvPropFloat( RECVINFO( m_flCloakMeter) ),
 	RecvPropArray3( RECVINFO_ARRAY( m_bPlayerDominated ), RecvPropBool( RECVINFO( m_bPlayerDominated[0] ) ) ),
-	RecvPropArray3( RECVINFO_ARRAY( m_bPlayerDominatingMe ), RecvPropBool( RECVINFO( m_bPlayerDominatingMe[0] ) ) ),
 END_RECV_TABLE()
 
 BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_nPlayerCond ) ),
 	RecvPropInt( RECVINFO( m_bJumping) ),
 	RecvPropInt( RECVINFO( m_nNumHealers ) ),
-	RecvPropInt( RECVINFO( m_iCritMult) ),
+	RecvPropFloat( RECVINFO( m_flCritMult) ),
 	RecvPropInt( RECVINFO( m_bAirDash) ),
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
 	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
@@ -125,8 +124,8 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropTime( RECVINFO ( m_flLastStealthExposeTime ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseTeam ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseClass ) ),
-	RecvPropInt( RECVINFO( m_iDisguiseTargetIndex ) ),
 	RecvPropInt( RECVINFO( m_iDisguiseHealth ) ),
+	RecvPropEHandle( RECVINFO( m_hDisguiseTarget ) ),
 	// Local Data.
 	RecvPropDataTable( "tfsharedlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_TFPlayerSharedLocal) ),
 END_RECV_TABLE()
@@ -148,14 +147,13 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerSharedLocal )
 	SendPropInt( SENDINFO( m_nDesiredDisguiseClass ), 4, SPROP_UNSIGNED ),
 	SendPropFloat( SENDINFO( m_flCloakMeter ), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN, 0.0, 100.0 ),
 	SendPropArray3( SENDINFO_ARRAY3( m_bPlayerDominated ), SendPropBool( SENDINFO_ARRAY( m_bPlayerDominated ) ) ),
-	SendPropArray3( SENDINFO_ARRAY3( m_bPlayerDominatingMe ), SendPropBool( SENDINFO_ARRAY( m_bPlayerDominatingMe ) ) ),
 END_SEND_TABLE()
 
 BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropInt( SENDINFO( m_nPlayerCond ), TF_COND_LAST, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_bJumping ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_nNumHealers ), 5, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-	SendPropInt( SENDINFO( m_iCritMult ), 8, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+	SendPropFloat( SENDINFO( m_flCritMult ), 8, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
@@ -167,8 +165,8 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropTime( SENDINFO ( m_flLastStealthExposeTime ) ),
 	SendPropInt( SENDINFO( m_nDisguiseTeam ), 3, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_nDisguiseClass ), 4, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_iDisguiseTargetIndex ), 7, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iDisguiseHealth ), 10 ),
+	SendPropEHandle( SENDINFO( m_hDisguiseTarget ) ),
 	// Local Data.
 	SendPropDataTable( "tfsharedlocaldata", 0, &REFERENCE_SEND_TABLE( DT_TFPlayerSharedLocal ), SendProxy_SendLocalDataTable ),	
 END_SEND_TABLE()
@@ -190,7 +188,7 @@ CTFPlayerShared::CTFPlayerShared()
 	m_bJumping = false;
 	m_bAirDash = false;
 	m_flStealthNoAttackExpire = 0.0f;
-	m_iCritMult = 0;
+	m_flCritMult = 0;
 	m_flInvisibility = 0.0f;
 
 #ifdef CLIENT_DLL
@@ -302,7 +300,6 @@ void CTFPlayerShared::OnPreDataChanged( void )
 {
 	m_nOldConditions = m_nPlayerCond;
 	m_nOldDisguiseClass = GetDisguiseClass();
-	m_iOldDisguiseWeaponModelIndex = m_iDisguiseWeaponModelIndex;
 }
 
 //-----------------------------------------------------------------------------
@@ -321,16 +318,6 @@ void CTFPlayerShared::OnDataChanged( void )
 	if ( m_nOldDisguiseClass != GetDisguiseClass() )
 	{
 		OnDisguiseChanged();
-	}
-
-	if ( m_iDisguiseWeaponModelIndex != m_iOldDisguiseWeaponModelIndex )
-	{
-		C_BaseCombatWeapon *pWeapon = m_pOuter->GetActiveWeapon();
-
-		if( pWeapon )
-		{
-			pWeapon->SetModelIndex( pWeapon->GetWorldModelIndex() );
-		}
 	}
 }
 
@@ -1001,21 +988,17 @@ void CTFPlayerShared::OnRemoveDisguised( void )
 	if ( !m_pOuter->InSameTeam( pLocalPlayer ) )
 	{
 		TFPlayerClassData_t *pData = GetPlayerClassData( TF_CLASS_SPY );
-		int iIndex = modelinfo->GetModelIndex( pData->GetModelName() );
+		int iIndex = modelinfo->GetModelIndex( pData->m_szModelName );
 
 		m_pOuter->SetModelIndex( iIndex );
 	}
 
 	m_pOuter->EmitSound( "Player.Spy_Disguise" );
 
-	// They may have called for medic and created a visible medic bubble
-	m_pOuter->ParticleProp()->StopParticlesNamed( "speech_mediccall", true );
-
 #else
 	m_nDisguiseTeam  = TF_SPY_UNDEFINED;
 	m_nDisguiseClass.Set( TF_CLASS_UNDEFINED );
 	m_hDisguiseTarget.Set( NULL );
-	m_iDisguiseTargetIndex = TF_DISGUISE_TARGET_INDEX_NONE;
 	m_iDisguiseHealth = 0;
 
 	// Update the player model and skin.
@@ -1081,20 +1064,9 @@ float CTFPlayerShared::GetStealthNoAttackExpireTime( void )
 //-----------------------------------------------------------------------------
 // Purpose: Sets whether this player is dominating the specified other player
 //-----------------------------------------------------------------------------
-void CTFPlayerShared::SetPlayerDominated( CTFPlayer *pPlayer, bool bDominated )
+void CTFPlayerShared::SetPlayerDominated( int iPlayerIndex, bool bDominated )
 {
-	int iPlayerIndex = pPlayer->entindex();
 	m_bPlayerDominated.Set( iPlayerIndex, bDominated );
-	pPlayer->m_Shared.SetPlayerDominatingMe( m_pOuter, bDominated );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Sets whether this player is being dominated by the other player
-//-----------------------------------------------------------------------------
-void CTFPlayerShared::SetPlayerDominatingMe( CTFPlayer *pPlayer, bool bDominated )
-{
-	int iPlayerIndex = pPlayer->entindex();
-	m_bPlayerDominatingMe.Set( iPlayerIndex, bDominated );
 }
 
 //-----------------------------------------------------------------------------
@@ -1102,31 +1074,7 @@ void CTFPlayerShared::SetPlayerDominatingMe( CTFPlayer *pPlayer, bool bDominated
 //-----------------------------------------------------------------------------
 bool CTFPlayerShared::IsPlayerDominated( int iPlayerIndex )
 {
-#ifdef CLIENT_DLL
-	// On the client, we only have data for the local player.
-	// As a result, it's only valid to ask for dominations related to the local player
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( !pLocalPlayer )
-		return false;
-
-	Assert( m_pOuter->IsLocalPlayer() || pLocalPlayer->entindex() == iPlayerIndex );
-
-	if ( m_pOuter->IsLocalPlayer() )
-		return m_bPlayerDominated.Get( iPlayerIndex );
-
-	return pLocalPlayer->m_Shared.IsPlayerDominatingMe( m_pOuter->entindex() );
-#else
-	// Server has all the data.
 	return m_bPlayerDominated.Get( iPlayerIndex );
-#endif
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-bool CTFPlayerShared::IsPlayerDominatingMe( int iPlayerIndex )
-{
-	return m_bPlayerDominatingMe.Get( iPlayerIndex );
 }
 
 //-----------------------------------------------------------------------------
@@ -1301,15 +1249,6 @@ void CTFPlayerShared::Disguise( int nTeam, int nClass )
 void CTFPlayerShared::FindDisguiseTarget( void )
 {
 	m_hDisguiseTarget = m_pOuter->TeamFortress_GetDisguiseTarget( m_nDisguiseTeam, m_nDisguiseClass );
-	if ( m_hDisguiseTarget )
-	{
-		m_iDisguiseTargetIndex.Set( m_hDisguiseTarget.Get()->entindex() );
-		Assert( m_iDisguiseTargetIndex >= 1 && m_iDisguiseTargetIndex <= MAX_PLAYERS );
-	}
-	else
-	{
-		m_iDisguiseTargetIndex.Set( TF_DISGUISE_TARGET_INDEX_NONE );
-	}
 }
 #endif
 
@@ -1660,14 +1599,7 @@ void CTFPlayerShared::SetAirDash( bool bAirDash )
 //-----------------------------------------------------------------------------
 float CTFPlayerShared::GetCritMult( void )
 {
-	float flRemapCritMul = RemapValClamped( m_iCritMult, 0, 255, 1.0, 4.0 );
-/*#ifdef CLIENT_DLL
-	Msg("CLIENT: Crit mult %.2f - %d\n",flRemapCritMul, m_iCritMult);
-#else
-	Msg("SERVER: Crit mult %.2f - %d\n", flRemapCritMul, m_iCritMult );
-#endif*/
-
-	return flRemapCritMul;
+	return m_flCritMult;
 }
 
 #ifdef GAME_DLL
@@ -1681,7 +1613,7 @@ void CTFPlayerShared::UpdateCritMult( void )
 
 	if ( m_DamageEvents.Count() == 0 )
 	{
-		m_iCritMult = RemapValClamped( flMinMult, 1.0, 4.0, 0, 255 );
+		m_flCritMult = RemapValClamped( flMinMult, 1.0, 4.0, 0, 255 );
 		return;
 	}
 
@@ -1720,7 +1652,7 @@ void CTFPlayerShared::UpdateCritMult( void )
 
 	//Msg( "   TotalDamage: %.2f   -> Mult %.2f\n", flTotalDamage, flMult );
 
-	m_iCritMult = (int)RemapValClamped( flMult, 1.0, 4.0, 0, 255 );
+	m_flCritMult = (int)RemapValClamped( flMult, 1.0, 4.0, 0, 255 );
 }
 
 //-----------------------------------------------------------------------------

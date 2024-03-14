@@ -1,0 +1,183 @@
+void __thiscall CTFGameMovement::WaterMove(CTFGameMovement *this)
+{
+  CMoveData *mv; // eax
+  double v3; // st7
+  double v4; // st6
+  double v5; // st5
+  double m_flMaxSpeed; // st7
+  CMoveData *v7; // ecx
+  double v8; // st7
+  double v9; // st7
+  double v10; // st4
+  CMoveData *v11; // eax
+  double v12; // st7
+  double v13; // rt1
+  double v14; // st4
+  double v15; // st7
+  double v16; // st6
+  double x; // st7
+  CMoveData *v18; // eax
+  double v19; // st6
+  double v20; // st6
+  double v21; // st7
+  CMoveData *v22; // edx
+  float *player; // ecx
+  double v24; // st7
+  CTFGameMovement_vtbl *v25; // edi
+  int v26; // eax
+  CBasePlayer *v27; // eax
+  CTFGameMovement_vtbl *v28; // edi
+  int v29; // eax
+  CMoveData *v30; // eax
+  float *v31; // esi
+  double v32; // st7
+  Vector vecWishVelocity; // [esp+10h] [ebp-C4h] BYREF
+  float wishspeed; // [esp+1Ch] [ebp-B8h]
+  Vector dest; // [esp+20h] [ebp-B4h] BYREF
+  float addspeed; // [esp+2Ch] [ebp-A8h] BYREF
+  Vector start; // [esp+30h] [ebp-A4h]
+  Vector vecForward; // [esp+3Ch] [ebp-98h] BYREF
+  Vector temp; // [esp+48h] [ebp-8Ch] BYREF
+  Vector vecRight; // [esp+54h] [ebp-80h] BYREF
+  Vector wishdir; // [esp+60h] [ebp-74h] BYREF
+  Vector vecUp; // [esp+6Ch] [ebp-68h] BYREF
+  CGameTrace pm; // [esp+78h] [ebp-5Ch] BYREF
+
+  AngleVectors(&this->mv->m_vecViewAngles, (Vector *)&vecForward.y, (Vector *)&vecRight.y, (Vector *)&vecUp.y);
+  mv = this->mv;
+  v3 = vecForward.y * mv->m_flForwardMove + mv->m_flSideMove * vecRight.y;
+  vecWishVelocity.y = v3;
+  v4 = vecForward.z * mv->m_flForwardMove + mv->m_flSideMove * vecRight.z;
+  vecWishVelocity.z = v4;
+  v5 = temp.x * mv->m_flForwardMove + mv->m_flSideMove * wishdir.x;
+  wishspeed = v5;
+  if ( (mv->m_nButtons & 2) != 0 )
+  {
+    if ( this->player->m_nWaterLevel.m_Value != 3 )
+      goto LABEL_10;
+    v5 = v5 + mv->m_flClientMaxSpeed;
+  }
+  else if ( 0.0 == mv->m_flForwardMove && 0.0 == mv->m_flSideMove && 0.0 == mv->m_flUpMove )
+  {
+    v5 = v5 - 60.0;
+  }
+  else
+  {
+    v5 = v5 + mv->m_flUpMove;
+  }
+  wishspeed = v5;
+LABEL_10:
+  wishdir.y = v3;
+  wishdir.z = v4;
+  vecUp.x = v5;
+  m_flMaxSpeed = pfVectorNormalize((Vector *)&wishdir.y);
+  v7 = this->mv;
+  if ( m_flMaxSpeed > v7->m_flMaxSpeed )
+  {
+    v8 = v7->m_flMaxSpeed / m_flMaxSpeed;
+    vecWishVelocity.y = vecWishVelocity.y * v8;
+    vecWishVelocity.z = vecWishVelocity.z * v8;
+    wishspeed = v8 * wishspeed;
+    m_flMaxSpeed = v7->m_flMaxSpeed;
+  }
+  dest.x = m_flMaxSpeed * 0.8;
+  temp.y = v7->m_vecVelocity.x;
+  temp.z = v7->m_vecVelocity.y;
+  vecRight.x = v7->m_vecVelocity.z;
+  v9 = pfVectorNormalize((Vector *)&temp.y);
+  if ( 0.0 == v9 )
+  {
+    v15 = 0.0;
+  }
+  else
+  {
+    v10 = v9 - this->player->m_surfaceFriction * sv_friction.m_pParent->m_fValue * gpGlobals->frametime * v9;
+    if ( v10 < 0.1 )
+      v10 = 0.0;
+    v11 = this->mv;
+    v12 = v10 / v9;
+    v11->m_vecVelocity.x = v11->m_vecVelocity.x * v12;
+    v11->m_vecVelocity.y = v11->m_vecVelocity.y * v12;
+    v13 = v10;
+    v14 = v12 * v11->m_vecVelocity.z;
+    v15 = v13;
+    v11->m_vecVelocity.z = v14;
+  }
+  if ( dest.x >= 0.1 )
+  {
+    v16 = dest.x - v15;
+    start.x = v16;
+    if ( v16 > 0.0 )
+    {
+      pfVectorNormalize((Vector *)&vecWishVelocity.y);
+      x = this->player->m_surfaceFriction * sv_accelerate.m_pParent->m_fValue * gpGlobals->frametime * dest.x;
+      if ( start.x < x )
+        x = start.x;
+      v18 = this->mv;
+      v19 = vecWishVelocity.y * x;
+      v18->m_vecVelocity.x = v18->m_vecVelocity.x + v19;
+      v18->m_outWishVel.x = v19 + v18->m_outWishVel.x;
+      v20 = vecWishVelocity.z * x;
+      v18->m_vecVelocity.y = v18->m_vecVelocity.y + v20;
+      v18->m_outWishVel.y = v20 + v18->m_outWishVel.y;
+      v21 = x * wishspeed;
+      v18->m_vecVelocity.z = v18->m_vecVelocity.z + v21;
+      v18->m_outWishVel.z = v21 + v18->m_outWishVel.z;
+    }
+  }
+  v22 = this->mv;
+  player = (float *)this->player;
+  v24 = v22->m_vecVelocity.x + player[138];
+  player += 138;
+  v22->m_vecVelocity.x = v24;
+  v22->m_vecVelocity.y = v22->m_vecVelocity.y + player[1];
+  v22->m_vecVelocity.z = v22->m_vecVelocity.z + player[2];
+  VectorMA(&v22->m_vecAbsOrigin, gpGlobals->frametime, &v22->m_vecVelocity, (Vector *)&dest.y);
+  v25 = this->__vftable;
+  v26 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))this->PlayerSolidMask)(this, 0, 8, &pm.startpos.y);
+  ((void (__thiscall *)(CTFGameMovement *, Vector *, float *, int))v25->TracePlayerBBox)(
+    this,
+    &this->mv->m_vecAbsOrigin,
+    &addspeed,
+    v26);
+  if ( 1.0 != *(float *)&pm.contents )
+  {
+    if ( CBaseEntity::GetGroundEntity(this->player) )
+    {
+      CGameMovement::StepMove(this, (Vector *)&dest.y, (CGameTrace *)&pm.startpos.y);
+      goto LABEL_30;
+    }
+LABEL_27:
+    this->TryPlayerMove(this, 0, 0);
+LABEL_30:
+    v30 = this->mv;
+    goto LABEL_31;
+  }
+  v27 = this->player;
+  start.y = dest.y;
+  start.z = dest.z;
+  vecForward.x = addspeed;
+  if ( v27->m_Local.m_bAllowAutoMovement.m_Value )
+    vecForward.x = addspeed + v27->m_Local.m_flStepSize.m_Value + 1.0;
+  v28 = this->__vftable;
+  v29 = ((int (__thiscall *)(CTFGameMovement *, _DWORD, int, float *))this->PlayerSolidMask)(this, 0, 8, &pm.startpos.y);
+  ((void (__thiscall *)(CTFGameMovement *, Vector *, float *, int))v28->TracePlayerBBox)(
+    this,
+    &vecForward,
+    &addspeed,
+    v29);
+  if ( HIWORD(pm.fractionleftsolid) )
+    goto LABEL_27;
+  this->mv->m_outStepHeight = pm.plane.normal.x - this->mv->m_vecAbsOrigin.z + this->mv->m_outStepHeight;
+  v30 = this->mv;
+  v30->m_vecAbsOrigin.x = pm.endpos.y;
+  v30->m_vecAbsOrigin.y = pm.endpos.z;
+  v30->m_vecAbsOrigin.z = pm.plane.normal.x;
+LABEL_31:
+  v31 = (float *)this->player;
+  v32 = v30->m_vecVelocity.x - v31[138];
+  v31 += 138;
+  v30->m_vecVelocity.x = v32;
+  v30->m_vecVelocity.y = v30->m_vecVelocity.y - v31[1];
+  v30->m_vecVelocity.z = v30->m_vecVelocity.z - v31[2];
+}
