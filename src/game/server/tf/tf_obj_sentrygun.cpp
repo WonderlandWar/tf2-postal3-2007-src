@@ -627,34 +627,11 @@ bool CObjectSentrygun::IsBetterTarget( CBaseEntity *pNewTarget )
 {
 	if ( !m_hEnemy )
 		return true;
+	
+	Vector vecCurrentTargetDist = EyePosition() - m_hEnemy->WorldSpaceCenter();
+	Vector vecNewTargetDist = EyePosition() - pNewTarget->WorldSpaceCenter();
 
-	Vector vecOldTargetPos = m_hEnemy->EyePosition();	
-	Vector vecEyePos1 = EyePosition();
-	
-	float vecCurrentTargetDist_8 = vecEyePos1.x - vecOldTargetPos.x;
-	
-	Vector vecNewTargetDist;
-	vecNewTargetDist.x = vecEyePos1.y - vecOldTargetPos.y;
-	
-	Vector vecNewTargetPos = pNewTarget->EyePosition();
-	Vector vecEyePos2 = EyePosition();
-
-	vecNewTargetDist.y = vecEyePos2.x - vecNewTargetPos.x;
-	vecNewTargetDist.z = vecEyePos2.y - vecNewTargetPos.y;
-	
-	float v19[2];
-	v19[0] = vecEyePos2.z - vecNewTargetPos.z;
-	
-	float vecCurrentTargetDist_4 = v19[0];
-
-	float _X = vecNewTargetDist.x * vecNewTargetDist.x
-		+ vecCurrentTargetDist_8 * vecCurrentTargetDist_8
-		+ vecCurrentTargetDist_4 * vecCurrentTargetDist_4;
-	
-	float pNewTargeta = pfSqrt(_X);
-	
-	float _Xa = v19[0] * v19[0] + vecNewTargetDist.z * vecNewTargetDist.z + vecNewTargetDist.y * vecNewTargetDist.y;
-	return pNewTargeta - pfSqrt(_Xa) > tf_sentrygun_newtarget_dist.GetFloat();
+	return vecCurrentTargetDist.Length() - vecNewTargetDist.Length() > tf_sentrygun_newtarget_dist.GetFloat();
 }
 
 //-----------------------------------------------------------------------------
