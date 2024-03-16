@@ -12,9 +12,9 @@
 #include "c_tf_player.h"
 
 // for spy material proxy
-#include "proxyentity.h"
-#include "materialsystem/imaterial.h"
-#include "materialsystem/imaterialvar.h"
+#include "ProxyEntity.h"
+#include "materialsystem/IMaterial.h"
+#include "materialsystem/IMaterialVar.h"
 #include "prediction.h"
 
 #endif
@@ -201,7 +201,7 @@ void CTFViewModel::StandardBlendingRules( CStudioHdr *hdr, Vector pos[], Quatern
 
 		Assert( iBarrelBone != -1 );
 
-		if ( iBarrelBone != -1 && ( hdr->boneFlags( iBarrelBone ) & boneMask ) )
+		if ( iBarrelBone != -1 )
 		{
 			RadianEuler a;
 			QuaternionAngles( q[iBarrelBone], a );

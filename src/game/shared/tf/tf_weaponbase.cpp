@@ -116,16 +116,11 @@ BEGIN_NETWORK_TABLE( CTFWeaponBase, DT_TFWeaponBase )
 	SendPropBool( SENDINFO( m_bResetParity ) ),
 	SendPropInt( SENDINFO( m_iReloadMode ), 4, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bReloadedThroughAnimEvent ) ),
-
-	// World models have no animations so don't send these.
-	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
-	SendPropExclude( "DT_AnimTimeMustBeFirst", "m_flAnimTime" ),
 #endif
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CTFWeaponBase )
 #ifdef CLIENT_DLL
-	DEFINE_PRED_FIELD( m_nSequence, FIELD_INTEGER, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_FIELD( m_bLowered, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_iReloadMode, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bReloadedThroughAnimEvent, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),

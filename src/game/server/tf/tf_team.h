@@ -48,17 +48,12 @@ public:
 	void			SetFlagCaptures( int nCaptures ) { m_nFlagCaptures = nCaptures; }
 	void			IncrementFlagCaptures( void ) { m_nFlagCaptures++; }
 
-	// Roles
-	void			SetRole( int iTeamRole ) { m_iRole = iTeamRole; }
-	int				GetRole( void ) { return m_iRole; }
-
 private:
 	
 	color32						m_TeamColor;
 	CUtlVector< CHandle<CBaseObject> >	m_aObjects;			// List of team objects.
 
 	CNetworkVar( int, m_nFlagCaptures );
-	CNetworkVar( int, m_iRole );
 };
 
 class CTFTeamManager

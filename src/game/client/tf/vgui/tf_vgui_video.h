@@ -27,16 +27,14 @@ public:
 	virtual void GetPanelPos( int &xpos, int &ypos );
 	virtual void Shutdown();
 
-	float GetStartDelay(){ return m_flStartAnimDelay; }
-	float GetEndDelay(){ return m_flEndAnimDelay; }
+	float GetDelay(){ return m_flDelay; }
 
 protected:
 	virtual void ReleaseVideo();
 	virtual void OnVideoOver();
 
 private:
-	float m_flStartAnimDelay;
-	float m_flEndAnimDelay;
+	float m_flDelay;
 };
 
 #endif // TF_VGUI_VIDEO_H

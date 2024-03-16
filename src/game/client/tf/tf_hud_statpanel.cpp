@@ -21,7 +21,6 @@
 #include <vgui/ISurface.h>
 #include "tf/c_tf_player.h"
 #include "tf/c_tf_team.h"
-#include "tf/tf_steamstats.h"
 #include "filesystem.h"
 #include "dmxloader/dmxloader.h"
 #include "fmtstr.h"
@@ -37,7 +36,6 @@
 #include "tier0/memdbgon.h"
 
 DECLARE_HUDELEMENT_DEPTH( CTFStatPanel, 1 );
-DECLARE_HUD_MESSAGE( CTFStatPanel, PlayerStatsUpdate );
 
 BEGIN_DMXELEMENT_UNPACK( RoundStats_t )
 	DMXELEMENT_UNPACK_FIELD( "iNumShotsHit", "0", int, m_iStat[TFSTAT_SHOTS_HIT] )
@@ -106,7 +104,6 @@ const char *g_szLocalizedRecordText[] =
 
 
 static CTFStatPanel *statPanel = NULL;
-extern CAchievementMgr g_AchievementMgrTF;
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns the static stats panel
@@ -126,24 +123,18 @@ CTFStatPanel::CTFStatPanel( const char *pElementName )
 	Assert( ARRAYSIZE( g_statPriority ) + ARRAYSIZE( g_statUnused ) == TFSTAT_MAX );
 
 	ResetDisplayedStat();
-	m_bStatsChanged = false;
-	m_bLocalFileTrusted = false;
-	m_flTimeLastSpawn = 0;
+	m_iCurStatClassIndex = -1;
+	m_bStatsChanged = true;
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
-	m_bShouldBeVisible = false;
+	SetVisible( false );
 	SetScheme( "ClientScheme" );
 	statPanel = this;
-	m_bNeedToCalcMaxs = false;
 
 	m_pClassImage = new CTFClassImage( this, "StatPanelClassImage" );
-	m_iClassCurrentLife = TF_CLASS_UNDEFINED;
-	m_iTeamCurrentLife = TEAM_UNASSIGNED;
 
 	// Read stats from disk.  (Definitive stat store for X360; for PC, whatever we get from Steam is authoritative.)
 	ReadStats();
-
-	RegisterForRenderGroup( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -153,17 +144,6 @@ CTFStatPanel::~CTFStatPanel()
 {
 	if ( statPanel == this )
 		statPanel = NULL;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: called when level is shutting down
-//-----------------------------------------------------------------------------
-void CTFStatPanel::LevelShutdown()
-{
-	// write out stats if they've changed
-	CalcMaxsAndRecords();
-	WriteStats();
-	UpdateStatSummaryPanel();
 }
 
 //-----------------------------------------------------------------------------
@@ -192,9 +172,9 @@ void CTFStatPanel::ResetDisplayedStat()
 {
 	m_iCurStatValue = 0;
 	m_iCurStatTeam = TEAM_UNASSIGNED;
-	m_statRecord = TFSTAT_UNDEFINED;
+	m_statType = TFSTAT_UNDEFINED;
 	m_recordBreakType = RECORDBREAK_NONE;
-	m_iCurStatClass = TF_CLASS_UNDEFINED;
+	m_bDisplayAfterSpawn = 0;
 	m_flTimeHide = 0;
 }
 
@@ -204,8 +184,9 @@ void CTFStatPanel::ResetDisplayedStat()
 void CTFStatPanel::Init()
 {
 	// listen for events
-	HOOK_HUD_MESSAGE( CTFStatPanel, PlayerStatsUpdate );
+	ListenForGameEvent( "teamplay_stat_panel" );
 	ListenForGameEvent( "player_spawn" );
+	ListenForGameEvent( "game_newmap" );
 	
 	Hide();
 
@@ -215,117 +196,115 @@ void CTFStatPanel::Init()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFStatPanel::UpdateStats( int iMsgType )
+void CTFStatPanel::UpdateStats( int iClass, RoundStats_t &stats, bool bShowNow )
 {
 	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
 	if ( !pPlayer )
 		return;
 
-	// don't count stats if cheats on, commentary mode, etc
-	if ( !g_AchievementMgrTF.CheckAchievementsEnabled() )
-		return;
-
-	ClassStats_t &classStats = GetClassStats( m_iClassCurrentLife );
-	
-	if ( iMsgType == STATMSG_PLAYERDEATH || iMsgType == STATMSG_PLAYERRESPAWN )
+	int i;
+	for( i = 0; i < m_aClassStats.Count(); i++ )
 	{
-		// if the player just died, accumulate current life into total and check for maxs and records
-		classStats.AccumulateRound( m_RoundStatsCurrentLife );
-		classStats.accumulated.m_iStat[TFSTAT_MAXSENTRYKILLS] = 0;	// sentry kills is a max value rather than a count, meaningless to accumulate
-		CalcMaxsAndRecords();
-
-		// reset current life stats
-		m_iClassCurrentLife = TF_CLASS_UNDEFINED;
-		m_iTeamCurrentLife = TEAM_UNASSIGNED;
-		m_RoundStatsCurrentLife.Reset();
-	}
-	
-	m_bStatsChanged = true;
-
-	if ( m_statRecord > TFSTAT_UNDEFINED )
-	{
-		bool bAlive = ( iMsgType != STATMSG_PLAYERDEATH );
-		if ( !bAlive || ( gpGlobals->curtime - m_flTimeLastSpawn < 3.0 ) )
+		if ( m_aClassStats[i].iPlayerClass == iClass )
 		{
-			// show the panel now if dead or very recently spawned
-			vgui::ivgui()->AddTickSignal( GetVPanel(), 1000 );
-			ShowStatPanel( m_iCurStatClass, m_iCurStatTeam, m_iCurStatValue, m_statRecord, m_recordBreakType, bAlive );
-			m_flTimeHide = gpGlobals->curtime + ( bAlive ? 12.0f : 20.0f );
-			m_statRecord = TFSTAT_UNDEFINED;
+			break;
 		}
 	}
-
-	IGameEvent * event = gameeventmanager->CreateEvent( "player_stats_updated" );
-	if ( event )
-	{
-		event->SetBool( "forceupload", false );
-		gameeventmanager->FireEventClientSide( event );
+	
+	if ( i >= m_aClassStats.Count() )
+	{		
+		ClassStats_t src;
+		src.iPlayerClass = iClass;
+		statPanel->m_aClassStats.AddToTail( src );
 	}
 
-	UpdateStatSummaryPanel();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Sees if current life stats have broken records & keep track of max values
-//-----------------------------------------------------------------------------
-void CTFStatPanel::CalcMaxsAndRecords()
-{
-	if ( m_iClassCurrentLife == TF_CLASS_UNDEFINED )
-		return;
-
-	ClassStats_t &classStats = GetClassStats( m_iClassCurrentLife );
-
+	ClassStats_t &classStats = m_aClassStats[i];
+	
 	ResetDisplayedStat();
-	m_iCurStatClass = m_iClassCurrentLife;
-	m_iCurStatTeam = m_iTeamCurrentLife;
 		
 	// run through all stats we keep records for, update the max value, and if a record is set,
 	// remember the highest priority record
 	for ( int i= ARRAYSIZE( g_statPriority )-1; i >= 0; i-- )
 	{
 		TFStatType_t statType = g_statPriority[i];
-		int iCur = m_RoundStatsCurrentLife.m_iStat[statType];
+		int iCur = stats.m_iStat[statType];
 		int iMax = classStats.max.m_iStat[statType];
 		if ( iCur > iMax )
 		{
 			// Record was set, remember what stat set a record.
 			classStats.max.m_iStat[statType] = iCur;
 			m_iCurStatValue = iCur;
-			m_statRecord = statType;
+			m_statType = statType;
 			m_recordBreakType = RECORDBREAK_BEST;
 		}
 		else if ( ( iCur > 0 ) && ( m_recordBreakType <= RECORDBREAK_TIE ) && ( iCur == iMax ) )
 		{
 			// if we haven't broken a record and we tied this one, display it
 			m_iCurStatValue = iCur;
-			m_statRecord = statType;
+			m_statType = statType;
 			m_recordBreakType = RECORDBREAK_TIE;
 		}
 		else if ( ( iCur > 0 ) && ( m_recordBreakType <= RECORDBREAK_CLOSE ) && ( iCur >= (int) ( (float) iMax * 0.8f ) ) )
 		{
 			// if we haven't broken a record or tied a record but we came close to this one, display it
 			m_iCurStatValue = iCur;
-			m_statRecord = statType;
+			m_statType = statType;
 			m_recordBreakType = RECORDBREAK_CLOSE;
 		}
+	}
+
+	m_bStatsChanged = true;
+
+	if ( m_statType > TFSTAT_UNDEFINED )
+	{
+		m_iCurStatTeam = pPlayer->GetTeamNumber();
+		if ( bShowNow )
+		{
+			// show the panel now if dead or very recently spawned
+			vgui::ivgui()->AddTickSignal( GetVPanel(), 1000 );
+			ShowStatPanel( m_iCurStatClassIndex, m_iCurStatTeam, m_iCurStatValue, m_statType, m_recordBreakType );
+			m_flTimeHide = gpGlobals->curtime + 20.0f;
+		}
+		else
+		{
+			m_bDisplayAfterSpawn = true;
+		}
+		WriteStats();
 	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFStatPanel::TestStatPanel( TFStatType_t statType, RecordBreakType_t recordType )
+void CTFStatPanel::TestStatPanel( TFStatType_t statType )
 {
 	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
 	if ( !pPlayer )
 		return;
 	
-	m_iCurStatClass = pPlayer->GetPlayerClass()->GetClassIndex();
-	ClassStats_t &classStats = GetClassStats( m_iCurStatClass );;
+	int i;
+	for( i = 0; i < m_aClassStats.Count(); i++ )
+	{
+		if ( m_aClassStats[i].iPlayerClass == pPlayer->GetPlayerClass()->GetClassIndex() )
+		{
+			break;
+		}
+	}
+	
+	if ( i >= m_aClassStats.Count() )
+	{		
+		ClassStats_t src;
+		src.iPlayerClass = pPlayer->GetPlayerClass()->GetClassIndex();
+		statPanel->m_aClassStats.AddToTail( src );
+	}
+
+	ClassStats_t &classStats = m_aClassStats[i];
+	
+	m_iCurStatClassIndex = i;
 	m_iCurStatValue = classStats.max.m_iStat[statType];
 	m_iCurStatTeam = pPlayer->GetTeamNumber();
 
-	ShowStatPanel( m_iCurStatClass, m_iCurStatTeam, m_iCurStatValue, statType, recordType, false );
+	ShowStatPanel( m_iCurStatClassIndex, m_iCurStatTeam, m_iCurStatValue, statType, RECORDBREAK_BEST );
 }
 
 //-----------------------------------------------------------------------------
@@ -344,20 +323,7 @@ void CTFStatPanel::WriteStats( void )
 	CDmxElement *pPlayerStats = CreateDmxElement( "PlayerStats" );
 	CDmxElementModifyScope modify( pPlayerStats );
 
-	// get Steam ID.  If not logged into Steam, use 0
-	int iSteamID = 0;
-	/*
-	if ( SteamUser() )
-	{
-		CSteamID steamID = SteamUser()->GetSteamID();
-		iSteamID = steamID.GetAccountID();
-	}	*/
-	// Calc CRC of all data to make the local data file somewhat tamper-resistant
-	int iCRC = CalcCRC( iSteamID );
-
 	pPlayerStats->SetValue( "iVersion", static_cast<int>( PLAYERSTATS_FILE_VERSION ) );
-	pPlayerStats->SetValue( "SteamID", iSteamID );	
-	pPlayerStats->SetValue( "iTimestamp", iCRC );	// store the CRC with a non-obvious name
 
 	CDmxAttribute *pClassStatsList = pPlayerStats->AddAttribute( "aClassStats" );
 	CUtlVector< CDmxElement* >& classStats = pClassStatsList->GetArrayForEdit<CDmxElement*>();
@@ -464,9 +430,6 @@ bool CTFStatPanel::ReadStats( void )
 		// file is beyond our comprehension
 		return false;
 	}
-
-	int iSteamID = pPlayerStats->GetValue<int>( "SteamID" );
-	int iCRCFile = pPlayerStats->GetValue<int>( "iTimestamp" );	
 	
 	const CUtlVector< CDmxElement* > &aClassStatsList = pPlayerStats->GetArray< CDmxElement * >( "aClassStats" );
 	int iCount = aClassStatsList.Count();
@@ -487,66 +450,24 @@ bool CTFStatPanel::ReadStats( void )
 
 	CleanupDMX( pPlayerStats );
 
-	UpdateStatSummaryPanel();
-
-	// check file CRC and steam ID to see if we think this file has not been tampered with
-	int iCRC = CalcCRC( iSteamID );
-	// does file CRC match CRC generated from file data, and is there a Steam ID in the file
-	if ( ( iCRC == iCRCFile ) && ( iSteamID > 0 ) ) 
-	{		
-		// does the file Steam ID match current Steam ID (so you can't hand around files)
-		/*CSteamID steamID = SteamUser()->GetSteamID();
-		if ( steamID.GetAccountID() == (uint32) iSteamID )
-		{
-			m_bLocalFileTrusted = true;
-		}*/
-	}
-
 	m_bStatsChanged = false;
 
 	return true;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Calcs CRC of all stat data
-//-----------------------------------------------------------------------------
-int CTFStatPanel::CalcCRC( int iSteamID )
-{
-	CRC32_t crc;
-	CRC32_Init( &crc );
-	
-	// make a CRC of stat data
-	CRC32_ProcessBuffer( &crc, &iSteamID, sizeof( iSteamID ) );
-
-	for ( int iClass = TF_FIRST_NORMAL_CLASS; iClass <= TF_LAST_NORMAL_CLASS; iClass++ )
-	{
-		// add each class' data to the CRC
-		ClassStats_t &classStats = GetClassStats( iClass );
-		CRC32_ProcessBuffer( &crc, &classStats, sizeof( classStats ) );
-		// since the class data structure is highly guessable from the file, add one other thing to make the CRC hard to hack w/o code disassembly
-		int iObfuscate = iClass * iClass;
-		CRC32_ProcessBuffer( &crc, &iObfuscate, sizeof( iObfuscate ) );	
-	}
-
-	CRC32_Final( &crc );
-
-	return (int) ( crc & 0x7FFFFFFF );
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFStatPanel::ShowStatPanel( int iClass, int iTeam, int iCurStatValue, TFStatType_t statType, RecordBreakType_t recordBreakType,
-								 bool bAlive )
+void CTFStatPanel::ShowStatPanel( int iClass, int iTeam, int iCurStatValue, TFStatType_t statType, RecordBreakType_t recordBreakType )
 {
-	ClassStats_t &classStats = GetClassStats( iClass );
+	ClassStats_t &classStats = m_aClassStats[iClass];
 	vgui::Label *pLabel = dynamic_cast<Label *>( FindChildByName( "summaryLabel" ) );
 	if ( !pLabel )
 		return;
 
 	const char *pRecordTextSuffix[RECORDBREAK_MAX] = { "", "close", "tie", "best" };
 
-	const char *pLocalizedTitle = bAlive ? "#StatPanel_Title_Alive" : "#StatPanel_Title_Dead";
+	const char *pLocalizedTitle = m_bDisplayAfterSpawn ? "#StatPanel_Title_Alive" : "#StatPanel_Title_Dead";
 	SetDialogVariable( "title", g_pVGuiLocalize->Find( pLocalizedTitle ) );
 	SetDialogVariable( "stattextlarge", "" );
 	SetDialogVariable( "stattextsmall", "" );
@@ -587,11 +508,9 @@ void CTFStatPanel::ShowStatPanel( int iClass, int iTeam, int iCurStatValue, TFSt
 	if ( ( iClass >= TF_FIRST_NORMAL_CLASS ) && ( iClass <= TF_LAST_NORMAL_CLASS ) )
 	{
 		pszPlayerClass = g_pVGuiLocalize->Find( g_aPlayerClassNames[ iClass ] );
+		g_pVGuiLocalize->ConstructString( szSummary, sizeof( szSummary ), szOriginalSummary, 1, pszPlayerClass );
+		pLabel->SetText( szSummary );	
 	}
-
-	g_pVGuiLocalize->ConstructString( szSummary, sizeof( szSummary ), szOriginalSummary, 1, pszPlayerClass );
-
-	pLabel->SetText( szSummary );
 
 	if ( m_pClassImage )
 	{
@@ -617,8 +536,27 @@ void CTFStatPanel::FireGameEvent( IGameEvent * event )
 
 		// hide panel if we're currently showing it
 		Hide();
-
-		m_flTimeLastSpawn = gpGlobals->curtime;
+	}
+	else if ( Q_strcmp( "teamplay_stat_panel", pEventName ) == 0 )
+	{
+		RoundStats_t stats;
+		int userid = event->GetInt( "userid" );
+		int iClass = event->GetInt( "class" );
+		bool bShowNow = event->GetInt( "alive" ) == 0;
+		
+		C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
+		if ( pPlayer && pPlayer->GetUserID() == userid )
+		{
+			for ( int i = 0; i < TFSTAT_MAX; ++i )
+			{
+				stats.m_iStat[i] = event->GetInt( g_szStatEventParamName[i] );
+			}
+			UpdateStats( iClass, stats, bShowNow );
+		}
+	}
+	else if ( Q_strcmp( "game_newmap", pEventName ) == 0 )
+	{
+		WriteStats();
 	}
 }
 
@@ -659,9 +597,17 @@ void CTFStatPanel::OnTick()
 //-----------------------------------------------------------------------------
 void CTFStatPanel::Show()
 {
-	m_bShouldBeVisible = true;
+	bool bShow = true;
+	CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
+	if ( pWinPanel )
+	{
+		if ( !m_bDisplayAfterSpawn /*&& pWinPanel->m_bActive*/ )
+		{
+			bShow = false;
+		}
+	}
 
-	HideLowerPriorityHudElementsInGroup( "mid" );
+	SetVisible( bShow );
 }
 
 //-----------------------------------------------------------------------------
@@ -669,14 +615,12 @@ void CTFStatPanel::Show()
 //-----------------------------------------------------------------------------
 void CTFStatPanel::Hide()
 {
-	m_bShouldBeVisible = false;
+	SetVisible( false );
 	if ( m_flTimeHide > 0 )
 	{
 		m_flTimeHide = 0;
 		vgui::ivgui()->RemoveTickSignal( GetVPanel() );
 	}
-
-	UnhideLowerPriorityHudElementsInGroup( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -684,7 +628,7 @@ void CTFStatPanel::Hide()
 //-----------------------------------------------------------------------------
 bool CTFStatPanel::ShouldDraw( void )
 {
-	if ( !m_bShouldBeVisible )
+	if ( !IsVisible() )
 		return false;
 
 	if ( IsTakingAFreezecamScreenshot() )
@@ -694,69 +638,20 @@ bool CTFStatPanel::ShouldDraw( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: called when the local player object is being destroyed
-//-----------------------------------------------------------------------------
-void CTFStatPanel::OnLocalPlayerRemove( C_TFPlayer *pPlayer )
-{
-	// this handles the case of map change/server shutdown while player is still alive -- accumulate values for this life.
-	if ( pPlayer->IsAlive() && g_AchievementMgrTF.CheckAchievementsEnabled() )
-	{
-		m_RoundStatsCurrentLife.m_iStat[TFSTAT_PLAYTIME] = gpGlobals->curtime - m_flTimeCurrentLifeStart;
-		ClassStats_t &classStats = GetClassStats( m_iClassCurrentLife );
-		classStats.AccumulateRound( m_RoundStatsCurrentLife );
-		classStats.accumulated.m_iStat[TFSTAT_MAXSENTRYKILLS] = 0;	// sentry kills is a max value rather than a count, meaningless to accumulate
-		m_bStatsChanged = true;
-	}
-}
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFStatPanel::ClearStatsInMemory( void )
-{
-	m_aClassStats.RemoveAll();
-	m_bStatsChanged = true;
-	ResetDisplayedStat();
-	UpdateStatSummaryPanel();
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CTFStatPanel::ResetStats( void )
 {
-	ClearStatsInMemory();
-
-	WriteStats();
-	g_TFSteamStats.UploadStats();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: returns class stat struct for specified class
-//-----------------------------------------------------------------------------
-ClassStats_t &CTFStatPanel::GetClassStats( int iClass )
-{
-	Assert( statPanel );
-	Assert( iClass >= TF_FIRST_NORMAL_CLASS );
-	Assert( iClass <= TF_LAST_NORMAL_CLASS );
-	int i;
-	for( i = 0; i < statPanel->m_aClassStats.Count(); i++ )
-	{
-		if ( statPanel->m_aClassStats[i].iPlayerClass == iClass )
-			return statPanel->m_aClassStats[i];
-	}
-
-	ClassStats_t stats;
-	stats.iPlayerClass = iClass;
-	statPanel->m_aClassStats.AddToTail( stats );
-	return statPanel->m_aClassStats[statPanel->m_aClassStats.Count()-1];
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Updates the stat summary panel w/current stats
-//-----------------------------------------------------------------------------
-void CTFStatPanel::UpdateStatSummaryPanel()
-{
+	m_flTimeHide = 0.0;
+	m_bStatsChanged = true;
+	m_iCurStatValue = 0;
+	m_iCurStatTeam = 0;
+	m_statType = TFSTAT_UNDEFINED;
+	m_recordBreakType = RECORDBREAK_NONE;
+	m_iCurStatClassIndex = -1;
+	m_bDisplayAfterSpawn = false;
 	GStatsSummaryPanel()->SetStats( m_aClassStats );
+	WriteStats();
 }
 
 //-----------------------------------------------------------------------------
@@ -776,100 +671,6 @@ void CTFStatPanel::GetStatValueAsString( int iValue, TFStatType_t statType, char
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Called when we get a stat update for the local player
-//-----------------------------------------------------------------------------
-void CTFStatPanel::MsgFunc_PlayerStatsUpdate( bf_read &msg )
-{
-	// get the fixed-size information
-	int iClass = msg.ReadByte();
-	int iMsgType = msg.ReadByte();
-	int iSendBits = msg.ReadLong();
-
-	bool bAlive = true;
-	bool bSpawned = false;
-
-	switch ( iMsgType )
-	{
-	case STATMSG_RESET:
-		m_RoundStatsCurrentGame.Reset();
-		m_RoundStatsLifeStart.Reset();
-		return;
-	case STATMSG_PLAYERSPAWN:
-	case STATMSG_PLAYERRESPAWN:
-		bSpawned = true;
-		break;
-	case STATMSG_PLAYERDEATH:
-		bAlive = false;
-		break;
-	case STATMSG_UPDATE:
-		break;
-	default:
-		Assert( false );
-	}
-
-	Assert( iClass >= TF_FIRST_NORMAL_CLASS && iClass <= TF_LAST_NORMAL_CLASS );
-	if ( iClass < TF_FIRST_NORMAL_CLASS || iClass > TF_LAST_NORMAL_CLASS )
-		return;
-	
-	m_iClassCurrentLife = iClass;
-	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( pPlayer )
-	{
-		m_iTeamCurrentLife = pPlayer->GetTeamNumber();
-	}
-
-//	Msg( "Stat update: (msg %d) ", iMsgType );
-	// the bitfield indicates which stats are contained in the message.  Set the stats appropriately.
-	int iStat = TFSTAT_FIRST;
-	while ( iSendBits > 0 )
-	{
-		if ( iSendBits & 1 )
-		{	
-			int iVal = msg.ReadLong();
-//			Msg( "#%d=%d ", iStat, iVal );
-			m_RoundStatsCurrentGame.m_iStat[iStat] = iVal;
-		}
-		iSendBits >>= 1;
-		iStat++;
-	}
-//	Msg( "\n" );
-	// Calculate stat values for current life.  Take current game stats and subtract what the values were at the start of this life
-	for ( iStat = TFSTAT_FIRST; iStat < TFSTAT_MAX; iStat++ )
-	{
-		if ( iStat == TFSTAT_MAXSENTRYKILLS )
-		{
-			// max sentry kills is special, it is a max value.  Always use absolute value, do not use delta from earlier value.
-			m_RoundStatsCurrentLife.m_iStat[TFSTAT_MAXSENTRYKILLS] = m_RoundStatsCurrentGame.m_iStat[TFSTAT_MAXSENTRYKILLS];
-			continue;
-		}
-		int iDelta = m_RoundStatsCurrentGame.m_iStat[iStat] - m_RoundStatsLifeStart.m_iStat[iStat];
-		Assert( iDelta >= 0 );
-		m_RoundStatsCurrentLife.m_iStat[iStat] = iDelta;
-	}
-
-	if ( iMsgType == STATMSG_PLAYERDEATH || iMsgType == STATMSG_PLAYERRESPAWN )
-	{
-		m_RoundStatsCurrentLife.m_iStat[TFSTAT_PLAYTIME] = gpGlobals->curtime - m_flTimeCurrentLifeStart;
-	}
-
-	if ( bSpawned )
-	{
-		// if the player just spawned, use current stats as baseline to calculate stats for next life
-		m_RoundStatsLifeStart = m_RoundStatsCurrentGame;
-		m_flTimeCurrentLifeStart = gpGlobals->curtime;
-	}
-
-	// sanity check: the message should contain exactly the # of bytes we expect based on the bit field
-	Assert( !msg.IsOverflowed() );
-	Assert( 0 == msg.GetNumBytesLeft() );
-	// if byte count isn't correct, bail out and don't use this data, rather than risk polluting player stats with garbage
-	if ( msg.IsOverflowed() || ( 0 != msg.GetNumBytesLeft() ) )
-		return;
-
-	UpdateStats( iMsgType );
-}
-
 /**********************************************************************************/
 
 void TestStatPanel( const CCommand &args )
@@ -878,29 +679,23 @@ void TestStatPanel( const CCommand &args )
 
 	if( args.ArgC() < 2 )
 	{
-		ConMsg( "Usage:  teststatpanel < panel type > < optional record type >\n" );
-		ConMsg( "Usable panel types are %d to %d. Record types are %d to %d\n", TFSTAT_UNDEFINED + 1, TFSTAT_MAX - 1, RECORDBREAK_NONE+1, RECORDBREAK_MAX-1 );
+		ConMsg( "Usage:  teststatpanel < panel type >\n" );
+		ConMsg( "Usable panel types are %d to %d\n", TFSTAT_UNDEFINED + 1, TFSTAT_MAX - 1 );
 		return;
 	}
 
 	if ( statPanel )
 	{
 		iPanelType = atoi( args.Arg( 1 ) );
-		int iRecordType = RECORDBREAK_BEST;
 
-		if ( args.ArgC() >= 3 )
+		if ( ( iPanelType <= TFSTAT_UNDEFINED ) || ( iPanelType >= TFSTAT_MAX ) )
 		{
-			iRecordType = atoi( args.Arg( 2 ) );
-		}
-
-		if ( ( iPanelType <= TFSTAT_UNDEFINED ) || ( iPanelType >= TFSTAT_MAX ) || (iRecordType <= RECORDBREAK_NONE) || (iRecordType >= RECORDBREAK_MAX) )
-		{
-			ConMsg( "Usage:  teststatpanel < panel type > < optional record type >\n" );
-			ConMsg( "Usable panel types are %d to %d. Record types are %d to %d\n", TFSTAT_UNDEFINED + 1, TFSTAT_MAX - 1, RECORDBREAK_NONE+1, RECORDBREAK_MAX-1 );
+			ConMsg( "Usage:  teststatpanel < panel type >\n" );
+			ConMsg( "Usable panel types are %d to %d\n", TFSTAT_UNDEFINED + 1, TFSTAT_MAX - 1 );
 			return;
 		}
 
-		statPanel->TestStatPanel( (TFStatType_t) iPanelType, (RecordBreakType_t)iRecordType );
+		statPanel->TestStatPanel( (TFStatType_t) iPanelType );
 	}
 }
 
@@ -926,22 +721,6 @@ void ResetPlayerStats()
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void RefreshPlayerStats()
-{
-	if ( statPanel )
-	{
-		if ( !statPanel->ReadStats() )
-		{
-			// Read failed, need to clear everything
-			statPanel->ClearStatsInMemory();
-		}
-	}
-}
-
 ConCommand teststatpanel( "teststatpanel", TestStatPanel, "", FCVAR_DEVELOPMENTONLY );
 ConCommand hidestatpanel( "hidestatpanel", HideStatPanel, "", FCVAR_DEVELOPMENTONLY );
 ConCommand resetplayerstats( "resetplayerstats", ResetPlayerStats, "" );
-ConCommand refreshplayerstats( "refreshplayerstats", RefreshPlayerStats, "", FCVAR_DEVELOPMENTONLY );

@@ -25,7 +25,7 @@ void RegisterUserMessages()
 	usermessages->Register( "Fade", 10 );		// fade HUD in/out
 	usermessages->Register( "VGUIMenu", -1 );	// Show VGUI menu
 	usermessages->Register( "Rumble", 3 );	// Send a rumble to a controller
-	usermessages->Register( "CloseCaption", -1 ); // Show a caption (by string id number)(duration in 10th of a second)
+	usermessages->Register( "CloseCaption", 7 ); // Show a caption (by string id number)(duration in 10th of a second)
 
 	usermessages->Register( "SendAudio", -1 );	// play radion command
 
@@ -38,7 +38,7 @@ void RegisterUserMessages()
 	
 	usermessages->Register( "HudMsg", -1 );
 	usermessages->Register( "AmmoDenied", 2 );
-	usermessages->Register( "AchievementEvent", -1 );
+	usermessages->Register( "MarkAchievement", -1 );
 
 	usermessages->Register( "UpdateRadar", -1 );
 
@@ -46,7 +46,5 @@ void RegisterUserMessages()
 
 	usermessages->Register( "HudNotify", 1 );
 	usermessages->Register( "HudNotifyCustom", -1 );
-
-	usermessages->Register( "PlayerStatsUpdate", -1 );
 }
 

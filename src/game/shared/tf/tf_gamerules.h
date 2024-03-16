@@ -64,8 +64,6 @@ public:
 	void	InputAddBlueTeamRespawnWaveTime( inputdata_t &inputdata );
 	void	InputSetRedTeamGoalString( inputdata_t &inputdata );
 	void	InputSetBlueTeamGoalString( inputdata_t &inputdata );
-	void	InputSetRedTeamRole( inputdata_t &inputdata );
-	void	InputSetBlueTeamRole( inputdata_t &inputdata );
 
 	virtual void Activate();
 #endif

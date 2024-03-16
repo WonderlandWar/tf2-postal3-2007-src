@@ -820,10 +820,10 @@ void CTFPlayer::RemoveNemesisRelationships()
 		if ( pTemp && pTemp != this )
 		{
 			// set this player to be not dominating anyone else
-			m_Shared.SetPlayerDominated( pTemp, false );
+			m_Shared.SetPlayerDominated( pTemp->entindex(), false );
 
 			// set no one else to be dominating this player
-			pTemp->m_Shared.SetPlayerDominated( this, false );
+			pTemp->m_Shared.SetPlayerDominated( entindex(), false );
 		}
 	}	
 	// reset the matrix of who has killed whom with respect to this player
@@ -1005,7 +1005,7 @@ void CTFPlayer::ManageRegularWeapons( TFPlayerClassData_t *pData )
 		if ( pData->m_aWeapons[iWeapon] != TF_WEAPON_NONE )
 		{
 			int iWeaponID = pData->m_aWeapons[iWeapon];
-			const char *pszWeaponName = WeaponIdToClassname( iWeaponID );
+			const char *pszWeaponName = WeaponIdToAlias( iWeaponID );
 
 			CTFWeaponBase *pWeapon = (CTFWeaponBase *)GetWeapon( iWeapon );
 
@@ -5233,7 +5233,13 @@ void CTFPlayer::ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet )
 //-----------------------------------------------------------------------------
 bool CTFPlayer::CanHearAndReadChatFrom( CBasePlayer *pPlayer )
 {
-	return	pPlayer->m_lifeState && !m_lifeState || BaseClass::CanHearAndReadChatFrom( pPlayer );
+	//Everyone can chat like normal when the round/game ends
+	if ( pPlayer->m_lifeState != LIFE_ALIVE && m_lifeState == LIFE_ALIVE )
+	{
+		return true;
+	}
+
+	return BaseClass::CanHearAndReadChatFrom( pPlayer);
 }
 
 //-----------------------------------------------------------------------------

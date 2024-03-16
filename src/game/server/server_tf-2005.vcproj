@@ -263,26 +263,6 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath="..\shared\achievement_saverestore.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievement_saverestore.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievementmgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievementmgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievements_hlx.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\shared\activitylist.cpp"
 				>
 			</File>
@@ -820,14 +800,6 @@
 			</File>
 			<File
 				RelativePath=".\base_transmit_proxy.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\baseachievement.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\baseachievement.h"
 				>
 			</File>
 			<File
@@ -3581,10 +3553,6 @@
 			<Filter
 				Name="TF_DLL"
 				>
-				<File
-					RelativePath="..\shared\tf\achievements_tf.cpp"
-					>
-				</File>
 				<File
 					RelativePath="..\shared\tf\baseobject_shared.cpp"
 					>

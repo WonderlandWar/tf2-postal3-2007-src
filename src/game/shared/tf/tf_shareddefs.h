@@ -304,7 +304,6 @@ int GetWeaponFromDamage( const CTakeDamageInfo &info );
 #endif
 int GetBuildableId( const char *pszBuildableName );
 const char *WeaponIdToAlias( int iWeapon );
-const char *WeaponIdToClassname( int iWeapon );
 
 enum
 {

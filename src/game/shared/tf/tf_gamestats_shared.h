@@ -48,6 +48,7 @@ enum TFStatType_t
 #define TFSTAT_FIRST (TFSTAT_UNDEFINED+1)
 #define TFSTAT_LAST (TFSTAT_MAX-1)
 
+extern const char* g_szStatEventParamName[];
 
 //=============================================================================
 //
@@ -309,14 +310,6 @@ struct TFReportedStats_t
 
 	TF_Gamestats_LevelStats_t								*m_pCurrentGame;
 	CUtlDict<TF_Gamestats_LevelStats_t, unsigned short>		m_dictMapStats;
-};
-
-enum { 
-	STATMSG_UPDATE,
-	STATMSG_RESET,
-	STATMSG_PLAYERSPAWN,
-	STATMSG_PLAYERRESPAWN,
-	STATMSG_PLAYERDEATH
 };
 
 #endif // TF_GAMESTATS_SHARED_H

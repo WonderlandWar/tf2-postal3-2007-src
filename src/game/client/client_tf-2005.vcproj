@@ -267,34 +267,6 @@
 			Name="Source Files"
 			>
 			<File
-				RelativePath=".\achievement_notification_panel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\achievement_notification_panel.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievement_saverestore.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievement_saverestore.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievementmgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievementmgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\achievements_hlx.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\shared\activitylist.cpp"
 				>
 			</File>
@@ -328,14 +300,6 @@
 			</File>
 			<File
 				RelativePath="..\shared\base_playeranimstate.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\baseachievement.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\baseachievement.h"
 				>
 			</File>
 			<File
@@ -2486,10 +2450,6 @@
 				Name="TF_DLL"
 				>
 				<File
-					RelativePath="..\shared\tf\achievements_tf.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\shared\tf\baseobject_shared.cpp"
 					>
 				</File>
@@ -2943,14 +2903,6 @@
 				</File>
 				<File
 					RelativePath="..\shared\tf\tf_shareddefs.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\tf_steamstats.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\tf_steamstats.h"
 					>
 				</File>
 				<File

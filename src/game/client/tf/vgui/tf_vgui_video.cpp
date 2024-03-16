@@ -30,8 +30,7 @@ CTFVideoPanel::CTFVideoPanel( vgui::Panel *parent, const char *panelName ) : Vid
 
 	SetBlackBackground( false );
 
-	m_flStartAnimDelay = 0.0f;
-	m_flEndAnimDelay = 0.0f;
+	m_flDelay = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -65,8 +64,7 @@ void CTFVideoPanel::ApplySettings( KeyValues *inResourceData )
 	BaseClass::ApplySettings( inResourceData );
 
 	SetExitCommand( inResourceData->GetString( "command", "" ) );
-	m_flStartAnimDelay = inResourceData->GetFloat( "start_delay", 0.0 );
-	m_flEndAnimDelay = inResourceData->GetFloat( "end_delay", 0.0 );
+	m_flDelay = inResourceData->GetFloat( "delay", 0.0 );
 }
 
 //-----------------------------------------------------------------------------

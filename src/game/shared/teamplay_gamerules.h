@@ -53,7 +53,6 @@ public:
 
 	// Return false if players aren't allowed to cap points at this time (i.e. in WaitingForPlayers)
 	virtual bool PointsMayBeCaptured( void ) { return true; }
-	virtual void SetLastCapPointChanged( int iIndex ) { return; }
 
 #ifdef CLIENT_DLL
 
@@ -99,8 +98,6 @@ public:
 	virtual void SetScrambleTeams( bool bScramble ){ m_bScrambleTeams = bScramble; }
 	virtual bool ShouldScrambleTeams( void ){ return m_bScrambleTeams; }
 	virtual void HandleScrambleTeams( void ){ return; }
-
-	virtual bool PointsMayAlwaysBeBlocked(){ return false; }
 	
 protected:
 	bool m_DisableDeathMessages;

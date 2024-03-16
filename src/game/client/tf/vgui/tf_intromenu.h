@@ -58,7 +58,6 @@ public:
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual void ShowPanel( bool bShow );
 	virtual void OnCommand( const char *command );
-	virtual void OnKeyCodePressed( KeyCode code );
 
 	void OnTick();
 
@@ -66,29 +65,18 @@ public:
 
 private:
 	void SetNextThink( float flActionThink, int iAction );
-	void Shutdown( void );
-	bool LoadCaptions( void );
-	void UpdateCaptions( void );
 
 private:
 
 	CTFVideoPanel	*m_pVideo;
 	CModelPanel		*m_pModel;
-	CTFLabel		*m_pCaptionLabel;
 
 #ifdef _X360
 	CTFFooter		*m_pFooter;
-#else
-	CTFButton		*m_pBack;
-	CTFButton		*m_pOK;
 #endif
 
-	float			m_flActionThink;
+	float			m_flThink;
 	int				m_iAction;
-
-	CUtlVector< CVideoCaption* > m_Captions;
-	int				m_iCurrentCaption;
-	float			m_flVideoStartTime;
 };
 
 

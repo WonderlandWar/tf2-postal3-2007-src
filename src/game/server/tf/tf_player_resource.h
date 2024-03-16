@@ -27,6 +27,18 @@ public:
 
 protected:
 	CNetworkArray( int,	m_iTotalScore, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iCaptures, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iDefenses, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iDominations, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iRevenge, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iBuildingsDestroyed, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iHeadshots, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iBackstabs, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iHealPoints, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iInvulns, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iTeleports, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iResupplyPoints, MAX_PLAYERS+1 );
+	CNetworkArray( int,	m_iKillAssists, MAX_PLAYERS+1 );
 	CNetworkArray( int, m_iMaxHealth, MAX_PLAYERS+1 );
 	CNetworkArray( int, m_iPlayerClass, MAX_PLAYERS+1 );
 };

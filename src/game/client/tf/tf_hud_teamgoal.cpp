@@ -84,9 +84,7 @@ bool CHudTeamGoal::ShouldDraw( void )
 
 	if ( TFGameRules() )
 	{
-		// TFP3:
-		// FIXME: This is might be incorrect! Was: if ( !BYTE1(g_pGameRules[3].m_pszName) )
-		if ( !TFGameRules()->InRoundRestart() )
+		if ( !TFGameRules()->InSetup() )
 			return false;
 
 		C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();

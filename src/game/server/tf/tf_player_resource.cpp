@@ -14,7 +14,19 @@
 
 // Datatable
 IMPLEMENT_SERVERCLASS_ST( CTFPlayerResource, DT_TFPlayerResource )
-	SendPropArray3( SENDINFO_ARRAY3( m_iTotalScore ), SendPropInt( SENDINFO_ARRAY( m_iTotalScore ), 12, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iTotalScore ), SendPropInt( SENDINFO_ARRAY( m_iTotalScore ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iCaptures ), SendPropInt( SENDINFO_ARRAY( m_iCaptures ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iDefenses ), SendPropInt( SENDINFO_ARRAY( m_iDefenses ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iDominations ), SendPropInt( SENDINFO_ARRAY( m_iDominations ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iRevenge ), SendPropInt( SENDINFO_ARRAY( m_iRevenge ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iBuildingsDestroyed ), SendPropInt( SENDINFO_ARRAY( m_iBuildingsDestroyed ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iHeadshots ), SendPropInt( SENDINFO_ARRAY( m_iHeadshots ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iBackstabs ), SendPropInt( SENDINFO_ARRAY( m_iBackstabs ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iHealPoints ), SendPropInt( SENDINFO_ARRAY( m_iHealPoints ), 20, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iInvulns ), SendPropInt( SENDINFO_ARRAY( m_iInvulns ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iTeleports ), SendPropInt( SENDINFO_ARRAY( m_iTeleports ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iResupplyPoints ), SendPropInt( SENDINFO_ARRAY( m_iResupplyPoints ), 10, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iKillAssists ), SendPropInt( SENDINFO_ARRAY( m_iKillAssists ), 10, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3( m_iMaxHealth ), SendPropInt( SENDINFO_ARRAY( m_iMaxHealth ), 10, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3( m_iPlayerClass ), SendPropInt( SENDINFO_ARRAY( m_iPlayerClass ), 5, SPROP_UNSIGNED ) ),
 END_SEND_TABLE()

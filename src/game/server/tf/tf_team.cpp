@@ -10,32 +10,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-
-//-----------------------------------------------------------------------------
-// Purpose: SendProxy that converts the UtlVector list of objects to entindexes, where it's reassembled on the client
-//-----------------------------------------------------------------------------
-void SendProxy_TeamObjectList( const SendProp *pProp, const void *pStruct, const void *pData, DVariant *pOut, int iElement, int objectID )
-{
-	CTFTeam *pTeam = (CTFTeam*)pStruct;
-
-	Assert( iElement < pTeam->GetNumObjects() );
-
-	CBaseObject *pObject = pTeam->GetObject(iElement);
-
-	EHANDLE hObject;
-	hObject = pObject;
-
-	SendProxy_EHandleToInt( pProp, pStruct, &hObject, pOut, iElement, objectID );
-}
-
-int SendProxyArrayLength_TeamObjects( const void *pStruct, int objectID )
-{
-	CTFTeam *pTeam = (CTFTeam*)pStruct;
-	int iObjects = pTeam->GetNumObjects();
-	Assert( iObjects <= MAX_OBJECTS_PER_PLAYER );
-	return iObjects;
-}
-
 //=============================================================================
 //
 // TF Team tables.
@@ -43,15 +17,6 @@ int SendProxyArrayLength_TeamObjects( const void *pStruct, int objectID )
 IMPLEMENT_SERVERCLASS_ST( CTFTeam, DT_TFTeam )
 
 	SendPropInt( SENDINFO( m_nFlagCaptures ), 8 ),
-	SendPropInt( SENDINFO( m_iRole ), 4, SPROP_UNSIGNED ),
-
-	SendPropArray2( 
-	SendProxyArrayLength_TeamObjects,
-	SendPropInt( "team_object_array_element", 0, SIZEOF_IGNORE, NUM_NETWORKED_EHANDLE_BITS, SPROP_UNSIGNED, SendProxy_TeamObjectList ), 
-	MAX_PLAYERS * MAX_OBJECTS_PER_PLAYER, 
-	0, 
-	"team_object_array"
-	),
 
 END_SEND_TABLE()
 

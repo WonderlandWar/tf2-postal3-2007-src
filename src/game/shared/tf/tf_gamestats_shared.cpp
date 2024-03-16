@@ -6,12 +6,35 @@
 
 #include "cbase.h"
 #ifdef GAME_DLL
-#include "gamestats.h"
+#include "GameStats.h"
 #endif
 #include "tf_gamestats_shared.h"
 
-// memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+const char *g_szStatEventParamName[] =
+{
+	"undefined",			// TFSTAT_UNDEFINED
+	"shots_hit",			// TFSTAT_SHOTS_HIT
+	"shots_fired",			// TFSTAT_SHOTS_FIRED
+	"kills",				// TFSTAT_KILLS
+	"deaths",				// TFSTAT_DEATHS
+	"damage_dealt",			// TFSTAT_DAMAGE
+	"captures",				// TFSTAT_CAPTURES
+	"defenses",				// TFSTAT_DEFENSES
+	"new_dominations",		// TFSTAT_DOMINATIONS
+	"revenge",				// TFSTAT_REVENGE
+	"points_scored",		// TFSTAT_POINTSSCORED
+	"buildings_destroyed",	// TFSTAT_BUILDINGSDESTROYED
+	"num_headshots",		// TFSTAT_HEADSHOTS
+	"play_time",			// TFSTAT_PLAYTIME
+	"healed",				// TFSTAT_HEALING
+	"num_invulnerable",		// TFSTAT_INVULNS
+	"killassists",			// TFSTAT_KILLASSISTS
+	"num_backstabs",		// TFSTAT_BACKSTABS
+	"health_leached",		// TFSTAT_HEALTHLEACHED
+	"num_buildings",		// TFSTAT_BUILDINGSBUILT
+	"num_sentry_kills",		// TFSTAT_MAXSENTRYKILLS
+	"num_teleports",		// TFSTAT_TELEPORTS
+};
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor

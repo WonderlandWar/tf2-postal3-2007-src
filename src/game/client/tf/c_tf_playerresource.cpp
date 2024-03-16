@@ -16,6 +16,18 @@
 
 IMPLEMENT_CLIENTCLASS_DT( C_TF_PlayerResource, DT_TFPlayerResource, CTFPlayerResource )
 	RecvPropArray3( RECVINFO_ARRAY( m_iTotalScore ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iCaptures ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iDefenses ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iDominations ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iRevenge ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iBuildingsDestroyed ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iHeadshots ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iBackstabs ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iHealPoints ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iInvulns ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iTeleports ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iResupplyPoints ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_iKillAssists ), RecvPropInt( RECVINFO( m_iTotalScore[0] ) ) ),
 	RecvPropArray3( RECVINFO_ARRAY( m_iMaxHealth ), RecvPropInt( RECVINFO( m_iMaxHealth[0] ) ) ),
 	RecvPropArray3( RECVINFO_ARRAY( m_iPlayerClass ), RecvPropInt( RECVINFO( m_iPlayerClass[0] ) ) ),
 END_RECV_TABLE()
@@ -54,19 +66,13 @@ int C_TF_PlayerResource::GetArrayValue( int iIndex, int *pArray, int iDefaultVal
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int C_TF_PlayerResource::GetCountForPlayerClass( int iTeam, int iClass, bool bExcludeLocalPlayer /*=false*/ )
+int C_TF_PlayerResource::GetCountForPlayerClass( int iClass )
 {
 	int count = 0;
-	int iLocalPlayerIndex = GetLocalPlayerIndex();
 
 	for ( int i = 1 ; i <= MAX_PLAYERS ; i++ )
 	{
-		if ( bExcludeLocalPlayer && ( i == iLocalPlayerIndex ) )
-		{
-			continue;
-		}
-
-		if ( ( GetTeam( i ) == iTeam ) && ( GetPlayerClass( i ) == iClass ) )
+		if ( ( GetPlayerClass( i ) == iClass ) )
 		{
 			count++;
 		}

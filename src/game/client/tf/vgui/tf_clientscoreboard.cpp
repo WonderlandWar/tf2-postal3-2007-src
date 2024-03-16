@@ -520,27 +520,19 @@ void CTFClientScoreBoardDialog::UpdatePlayerDetails()
 	if ( !tf_PR->IsConnected( playerIndex ) ) 
 		return;
 
-	if ( engine->IsHLTV() )
-	{
-		SetDialogVariable( "playername", tf_PR->GetPlayerName( playerIndex ) );
-		return;
-	}
-
-	RoundStats_t &roundStats = GetStatPanel()->GetRoundStatsCurrentGame();
-
 	SetDialogVariable( "kills", tf_PR->GetPlayerScore( playerIndex ) );
 	SetDialogVariable( "deaths", tf_PR->GetDeaths( playerIndex ) );
-	SetDialogVariable( "assists", roundStats.m_iStat[TFSTAT_KILLASSISTS] );
-	SetDialogVariable( "destruction", roundStats.m_iStat[TFSTAT_BUILDINGSDESTROYED] );
-	SetDialogVariable( "captures", roundStats.m_iStat[TFSTAT_CAPTURES] );
-	SetDialogVariable( "defenses", roundStats.m_iStat[TFSTAT_DEFENSES] );
-	SetDialogVariable( "dominations", roundStats.m_iStat[TFSTAT_DOMINATIONS] );
-	SetDialogVariable( "revenge", roundStats.m_iStat[TFSTAT_REVENGE] );
-	SetDialogVariable( "healing", roundStats.m_iStat[TFSTAT_HEALING] );
-	SetDialogVariable( "invulns", roundStats.m_iStat[TFSTAT_INVULNS] );
-	SetDialogVariable( "teleports", roundStats.m_iStat[TFSTAT_TELEPORTS] );
-	SetDialogVariable( "headshots", roundStats.m_iStat[TFSTAT_HEADSHOTS] );
-	SetDialogVariable( "backstabs", roundStats.m_iStat[TFSTAT_BACKSTABS] );
+	SetDialogVariable( "assists",tf_PR->GetKillAssists( playerIndex ) );
+	SetDialogVariable( "destruction", tf_PR->GetBuildingsDestroyed( playerIndex ) );
+	SetDialogVariable( "captures", tf_PR->GetCaptures( playerIndex ) );
+	SetDialogVariable( "defenses", tf_PR->GetDefenses( playerIndex ) );
+	SetDialogVariable( "dominations", tf_PR->GetDominations( playerIndex ) );
+	SetDialogVariable( "revenge", tf_PR->GetRevenge( playerIndex ) );
+	SetDialogVariable( "healing", tf_PR->GetHealPoints( playerIndex ) );
+	SetDialogVariable( "invulns", tf_PR->GetInvulns( playerIndex ) );
+	SetDialogVariable( "teleports", tf_PR->GetTeleports( playerIndex ) );
+	SetDialogVariable( "headshots", tf_PR->GetHeadshots( playerIndex ) );
+	SetDialogVariable( "backstabs", tf_PR->GetBackstabs( playerIndex ) );
 	SetDialogVariable( "playername", tf_PR->GetPlayerName( playerIndex ) );
 	SetDialogVariable( "playerscore", GetPointsString( tf_PR->GetTotalScore( playerIndex ) ) );
 	Color clr = g_PR->GetTeamColor( g_PR->GetTeam( playerIndex ) );

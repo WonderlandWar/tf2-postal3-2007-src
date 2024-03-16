@@ -33,18 +33,10 @@ public:
 	virtual			~C_TFTeam();
 
 	int				GetFlagCaptures( void ) { return m_nFlagCaptures; }
-	int				GetRole( void ) { return m_iRole; }
-	char			*Get_Name( void );
-
-	int				GetNumObjects( int iObjectType = -1 );
-	CBaseObject		*GetObject( int num );
-
-	CUtlVector< CHandle<C_BaseObject> > m_aObjects;
 
 private:
 
 	int		m_nFlagCaptures;
-	int		m_iRole;
 };
 
 C_TFTeam *GetGlobalTFTeam( int iTeamNumber );

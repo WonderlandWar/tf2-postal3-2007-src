@@ -87,17 +87,6 @@ CTFClassMenu::CTFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 
 	Q_memset( m_pClassButtons, 0, sizeof( m_pClassButtons ) );
 
-#ifndef _X360
-	char tempName[MAX_PATH];
-	for ( int i = 0 ; i < CLASS_COUNT_IMAGES ; ++i )
-	{
-		Q_snprintf( tempName, sizeof( tempName ), "countImage%d", i );
-		m_ClassCountImages[i] = new CTFImagePanel( this, tempName );
-	}
-
-	m_pCountLabel = NULL;
-#endif
-
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
 }
 
@@ -109,20 +98,6 @@ void CTFClassMenu::ApplySchemeSettings( IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	LoadControlSettings( "Resource/UI/ClassMenu.res" );
-}
-
-void CTFClassMenu::PerformLayout()
-{
-	BaseClass::PerformLayout();
-
-#ifndef _X360
-	m_pCountLabel = dynamic_cast< CTFLabel * >( FindChildByName( "CountLabel" ) );
-
-	if ( m_pCountLabel )
-	{
-		m_pCountLabel->SizeToContents();
-	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -228,8 +203,6 @@ void CTFClassMenu::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 void CTFClassMenu::OnKeyCodePressed( KeyCode code )
 {
-	m_KeyRepeat.KeyDown( code );
-
 	if ( ( m_iClassMenuKey != BUTTON_CODE_INVALID && m_iClassMenuKey == code ) ||
 		code == KEY_XBUTTON_BACK || 
 		code == KEY_XBUTTON_B )
@@ -241,101 +214,14 @@ void CTFClassMenu::OnKeyCodePressed( KeyCode code )
 			ShowPanel( false );
 		}
 	}
-	else if( code == KEY_SPACE || code == KEY_XBUTTON_A || code == KEY_XBUTTON_RTRIGGER )
+	else if( code == KEY_SPACE || code == KEY_XBUTTON_A )
 	{
 		ipanel()->SendMessage( GetFocusNavGroup().GetDefaultButton(), new KeyValues( "PressButton" ), GetVPanel() );
-	}
-	else if( code == KEY_XBUTTON_RIGHT || code == KEY_XSTICK1_RIGHT )
-	{
-		int loopCheck = 0;
-
-		do 
-		{
-			loopCheck++;
-			m_iCurrentClassIndex++;
-			m_iCurrentClassIndex = ( m_iCurrentClassIndex % TF_CLASS_MENU_BUTTONS );
-		} while( ( m_pClassButtons[ iRemapIndexToClass[m_iCurrentClassIndex] ] == NULL ) && ( loopCheck < TF_CLASS_MENU_BUTTONS ) );
-		
-		CImageMouseOverButton<CTFClassInfoPanel> *pButton = m_pClassButtons[ iRemapIndexToClass[m_iCurrentClassIndex] ];
-		if ( pButton )
-		{
-			pButton->OnCursorEntered();
-		}
-	}
-	else if( code == KEY_XBUTTON_LEFT || code == KEY_XSTICK1_LEFT )
-	{
-		int loopCheck = 0;
-
-		do 
-		{
-			loopCheck++;
-			m_iCurrentClassIndex--;
-			if ( m_iCurrentClassIndex <= 0 )
-			{
-				m_iCurrentClassIndex = TF_CLASS_RANDOM;
-			}
-		} while( ( m_pClassButtons[ iRemapIndexToClass[m_iCurrentClassIndex] ] == NULL ) && ( loopCheck < TF_CLASS_MENU_BUTTONS ) );
-
-		CImageMouseOverButton<CTFClassInfoPanel> *pButton = m_pClassButtons[ iRemapIndexToClass[m_iCurrentClassIndex] ];
-		if ( pButton )
-		{
-			pButton->OnCursorEntered();
-		}
-	}
-	else if( code == KEY_XBUTTON_UP || code == KEY_XSTICK1_UP )
-	{
-		// Scroll class info text up
-		if ( g_lastPanel )
-		{
-			CTFRichText *pRichText = dynamic_cast< CTFRichText * >( g_lastPanel->FindChildByName( "classInfo" ) );
-
-			if ( pRichText )
-			{
-				PostMessage( pRichText, new KeyValues("MoveScrollBarDirect", "delta", 1) );
-			}
-		}
-	}
-	else if( code == KEY_XBUTTON_DOWN || code == KEY_XSTICK1_DOWN )
-	{
-		// Scroll class info text up
-		if ( g_lastPanel )
-		{
-			CTFRichText *pRichText = dynamic_cast< CTFRichText * >( g_lastPanel->FindChildByName( "classInfo" ) );
-
-			if ( pRichText )
-			{
-				PostMessage( pRichText, new KeyValues("MoveScrollBarDirect", "delta", -1) );
-			}
-		}
 	}
 	else
 	{
 		BaseClass::OnKeyCodePressed( code );
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFClassMenu::OnKeyCodeReleased( vgui::KeyCode code )
-{
-	m_KeyRepeat.KeyUp( code );
-
-	BaseClass::OnKeyCodeReleased( code );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFClassMenu::OnThink()
-{
-	vgui::KeyCode code = m_KeyRepeat.KeyRepeated();
-	if ( code )
-	{
-		OnKeyCodePressed( code );
-	}
-
-	BaseClass::OnThink();
 }
 
 //-----------------------------------------------------------------------------
@@ -422,8 +308,6 @@ void CTFClassMenu::OnTick( void )
 		SetVisibleButton( "CancelButton", false );
 	}
 
-	UpdateClassCounts();
-
 #endif
 
 	BaseClass::OnTick();
@@ -445,8 +329,6 @@ void CTFClassMenu::OnClose()
 void CTFClassMenu::SetVisible( bool state )
 {
 	BaseClass::SetVisible( state );
-
-	m_KeyRepeat.Reset();
 
 	if ( state )
 	{
@@ -472,146 +354,4 @@ void CTFClassMenu::Join_Class( const CCommand &args )
 		OnCommand( cmd );
 		ShowPanel( false );
 	}
-}
-
-static const char *g_sDialogVariables[] = {
-	"",
-	"numScout",
-	"numSoldier",
-	"numPyro",
-
-	"numDemoman",
-	"numHeavy",
-	"numEngineer",
-	
-	"numMedic",
-	"numSniper",
-	"numSpy",
-	"",
-};
-
-static const char *g_sClassImagesBlue[] = {
-	"",
-	"class_sel_sm_scout_blu",
-	"class_sel_sm_soldier_blu",
-	"class_sel_sm_pyro_blu",
-
-	"class_sel_sm_demo_blu",
-	"class_sel_sm_heavy_blu",
-	"class_sel_sm_engineer_blu",
-
-	"class_sel_sm_medic_blu",
-	"class_sel_sm_sniper_blu",
-	"class_sel_sm_spy_blu",
-	"",
-};
-
-static const char *g_sClassImagesRed[] = {
-	"",
-	"class_sel_sm_scout_red",
-	"class_sel_sm_soldier_red",
-	"class_sel_sm_pyro_red",
-	
-	"class_sel_sm_demo_red",
-	"class_sel_sm_heavy_red",
-	"class_sel_sm_engineer_red",
-	
-	"class_sel_sm_medic_red",
-	"class_sel_sm_sniper_red",
-	"class_sel_sm_spy_red",
-	"",
-};
-
-static int g_sClassDefines[] = {
-	0,
-	TF_CLASS_SCOUT,	
-	TF_CLASS_SOLDIER,
-	TF_CLASS_PYRO,
-
-	TF_CLASS_DEMOMAN,
-	TF_CLASS_HEAVYWEAPONS,
-	TF_CLASS_ENGINEER,
-
-	TF_CLASS_MEDIC,
-	TF_CLASS_SNIPER,
-	TF_CLASS_SPY,
-	0,
-};
-
-void CTFClassMenu::UpdateNumClassLabels( int iTeam )
-{
-#ifndef _X360
-	int nTotalCount = 0;
-
-	// count how many of each class there are
-	C_TF_PlayerResource *tf_PR = dynamic_cast<C_TF_PlayerResource *>( g_PR );
-
-	if ( !tf_PR )
-		return;
-
-	if ( iTeam < FIRST_GAME_TEAM || iTeam >= TF_TEAM_COUNT ) // invalid team number
-		return;
-
-	for( int i = TF_FIRST_NORMAL_CLASS ; i <= TF_LAST_NORMAL_CLASS ; i++ )
-	{
-		int classCount = tf_PR->GetCountForPlayerClass( iTeam, g_sClassDefines[i], true );
-
-		if ( classCount > 0 )
-		{
-			SetDialogVariable( g_sDialogVariables[i], classCount );
-		}
-		else
-		{
-			SetDialogVariable( g_sDialogVariables[i], "" );
-		}
-
-
-		if ( nTotalCount < CLASS_COUNT_IMAGES )
-		{
-			for ( int j = 0 ; j < classCount ; ++j )
-			{
-				CTFImagePanel *pImage = m_ClassCountImages[nTotalCount];
-				if ( pImage )
-				{
-					pImage->SetVisible( true );
-					pImage->SetImage( iTeam == TF_TEAM_BLUE ? g_sClassImagesBlue[i] : g_sClassImagesRed[i] );
-				}
-
-				nTotalCount++;
-				if ( nTotalCount >= CLASS_COUNT_IMAGES )
-				{
-					break;
-				}
-			}
-		}
-	}
-
-	if ( nTotalCount == 0 )
-	{
-		// no classes for our team yet
-		if ( m_pCountLabel && m_pCountLabel->IsVisible() )
-		{
-			m_pCountLabel->SetVisible( false );
-		}
-	}
-	else
-	{
-		if ( m_pCountLabel && !m_pCountLabel->IsVisible() )
-		{
-			m_pCountLabel->SetVisible( true );
-		}
-	}
-
-	// turn off any unused images
-	while ( nTotalCount < CLASS_COUNT_IMAGES )
-	{
-		CTFImagePanel *pImage = m_ClassCountImages[nTotalCount];
-		if ( pImage )
-		{
-			pImage->SetVisible( false );
-		}
-
-		nTotalCount++;
-	}
-#endif
 }

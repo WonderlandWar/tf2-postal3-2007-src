@@ -428,11 +428,11 @@ void CTFGameMovement::AvoidPlayers( void )
 			if ( pIntersectObject )
 				break;
 
-			CTFTeam *pTeam = (CTFTeam*)m_pTFPlayer->GetTeam();
+			CTFPlayer *pPlayer = pAvoidPlayerList[iPlayer];
 
-			for ( int iObject = 0; iObject < pTeam->GetNumObjects(); ++iObject )
+			for ( int iObject = 0; iObject < pPlayer->GetObjectCount(); ++iObject )
 			{
-				CBaseObject *pAvoidObject = pTeam->GetObject( iObject );
+				CBaseObject *pAvoidObject = pPlayer->GetObject( iObject );
 				if ( !pAvoidObject )
 					continue;
 

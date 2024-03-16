@@ -1238,8 +1238,6 @@ void C_TFPlayer::OnDataChanged( DataUpdateType_t updateType )
 		}
 	}
 
-	UpdateVisibility();
-
 	// Check for full health and remove decals.
 	if ( ( m_iHealth > m_iOldHealth && m_iHealth >= GetMaxHealth() ) || m_Shared.InCond( TF_COND_INVULNERABLE ) )
 	{

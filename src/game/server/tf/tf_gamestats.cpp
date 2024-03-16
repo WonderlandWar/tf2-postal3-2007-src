@@ -169,8 +169,6 @@ void CTFGameStats::ResetPlayerStats( CTFPlayer *pPlayer )
 	stats.Reset();
 	// reset the matrix of who killed whom with respect to this player
 	ResetKillHistory( pPlayer );
-	// let the client know to reset its stats
-	SendStatsToPlayer( pPlayer, STATMSG_RESET );
 }
 
 //-----------------------------------------------------------------------------
@@ -207,7 +205,6 @@ void CTFGameStats::ResetRoundStats()
 void CTFGameStats::IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int iValue )
 {
 	PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
-	stats.statsCurrentLife.m_iStat[statType] += iValue;
 	stats.statsCurrentRound.m_iStat[statType] += iValue;
 	stats.statsAccumulated.m_iStat[statType] += iValue;	
 
@@ -221,68 +218,29 @@ void CTFGameStats::IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFGameStats::SendStatsToPlayer( CTFPlayer *pPlayer, int iMsgType )
+void CTFGameStats::SendStatsToPlayer( CTFPlayer *pPlayer, bool bIsAlive )
 {
 	PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
+	stats.statsCurrentLife.m_iStat[TFSTAT_PLAYTIME] = gpGlobals->curtime - pPlayer->GetSpawnTime();
+	stats.statsCurrentLife.m_iStat[TFSTAT_POINTSSCORED] = TFGameRules()->CalcPlayerScore( &stats.statsCurrentLife );
+	stats.statsCurrentLife.m_iStat[TFSTAT_MAXSENTRYKILLS] = pPlayer->GetMaxSentryKills();
 
-	int iSendBits = stats.iStatsChangedBits;
-	switch ( iMsgType )
+	IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_stat_panel" );
+	if ( event )
 	{
-	case STATMSG_PLAYERDEATH:
-	case STATMSG_PLAYERRESPAWN:
-		// Calc player score from this life.
-		AccumulateAndResetPerLifeStats( pPlayer );
-		iSendBits = stats.iStatsChangedBits;
-		break;
-	case STATMSG_RESET:
-		// this is a reset message, no need to send any stat values with it
-		iSendBits = 0;
-		break;
-	case STATMSG_UPDATE:
-		// if nothing changed, no need to send a message
-		if ( iSendBits == 0 )
-			return;
-		break;
-	case STATMSG_PLAYERSPAWN:
-		// do a full update at player spawn
-		for ( int i = TFSTAT_FIRST; i < TFSTAT_MAX; i++ )
+		event->SetInt( "userid", engine->GetPlayerUserId( pPlayer->edict() ) );
+		event->SetInt( "class", pPlayer->GetPlayerClass()->GetClassIndex() );
+		event->SetInt( "alive", bIsAlive );
+		
+		for ( int i = 1; i < TFSTAT_MAX; ++i )
 		{
-			iSendBits |= ( 1 << ( i - TFSTAT_FIRST ) );
+			const char *pszKey = g_szStatEventParamName[i];
+			event->SetInt( pszKey, stats.statsCurrentLife.m_iStat[i] );
 		}
-		break;
-	default:
-		Assert( false );
+		gameeventmanager->FireEvent( event );
 	}
 
-	int iStat = TFSTAT_FIRST;
-	CSingleUserRecipientFilter filter( pPlayer );
-	UserMessageBegin( filter, "PlayerStatsUpdate" );
-	WRITE_BYTE( pPlayer->GetPlayerClass()->GetClassIndex() );		// write the class
-	WRITE_BYTE( iMsgType );											// type of message
-	WRITE_LONG( iSendBits );										// write the bit mask of which stats follow in the message
-
-	// write all the stats specified in the bit mask
-	while ( iSendBits > 0 )
-	{
-		if ( iSendBits & 1 )
-		{
-			WRITE_LONG( stats.statsAccumulated.m_iStat[iStat] );
-		}
-		iSendBits >>= 1;
-		iStat ++;
-	}
-	MessageEnd();
-
-	stats.iStatsChangedBits = 0;
-	stats.m_flTimeLastSend = gpGlobals->curtime;
-
-	if ( iMsgType == STATMSG_PLAYERDEATH || iMsgType == STATMSG_PLAYERRESPAWN )
-	{
-		// max sentry kills is different from other stats, it is a max value and can span player lives.  Reset it to zero so 
-		// it doesn't get re-reported in the next life unless the sentry stays alive and gets more kills.
-		pPlayer->SetMaxSentryKills( 0 );
-		Event_MaxSentryKills( pPlayer, 0 );
-	}
+	AccumulateAndResetPerLifeStats( pPlayer );
 }
 
 //-----------------------------------------------------------------------------
@@ -303,11 +261,6 @@ void CTFGameStats::AccumulateAndResetPerLifeStats( CTFPlayer *pPlayer )
 	stats.statsCurrentRound.m_iStat[TFSTAT_POINTSSCORED] += iScore;
 	stats.statsAccumulated.m_iStat[TFSTAT_POINTSSCORED] += iScore;
 	stats.statsCurrentLife.Reset();	
-
-	if ( iScore != 0 )
-	{
-		stats.iStatsChangedBits |= 1 << ( TFSTAT_POINTSSCORED - TFSTAT_FIRST );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -344,8 +297,6 @@ void CTFGameStats::Event_PlayerDisconnected( CBasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 void CTFGameStats::Event_PlayerChangedClass( CTFPlayer *pPlayer )
 {
-	pPlayer->SetMaxSentryKills( 0 );
-	Event_MaxSentryKills( pPlayer, 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -363,25 +314,6 @@ void CTFGameStats::Event_PlayerSpawned( CTFPlayer *pPlayer )
 			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iSpawns++;
 		}
 	}
-
-	TF_Gamestats_LevelStats_t *map = m_reportedStats.m_pCurrentGame;
-	if ( !map )
-		return;
-
-	// calculate peak player count on each team
-	for ( iTeam = FIRST_GAME_TEAM; iTeam < TF_TEAM_COUNT; iTeam++ )
-	{
-		int iPlayerCount = GetGlobalTeam( iTeam )->GetNumPlayers();
-		if ( iPlayerCount > map->m_iPeakPlayerCount[iTeam] )
-		{
-			map->m_iPeakPlayerCount[iTeam] = iPlayerCount;
-		}
-	}
-
-	if ( iClass >= TF_FIRST_NORMAL_CLASS && iClass <= TF_LAST_NORMAL_CLASS )
-	{
-		SendStatsToPlayer( pPlayer, STATMSG_PLAYERSPAWN );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -392,7 +324,7 @@ void CTFGameStats::Event_PlayerForceRespawn( CTFPlayer *pPlayer )
 	if ( pPlayer->IsAlive() )
 	{		
 		// send stats to player
-		SendStatsToPlayer( pPlayer, STATMSG_PLAYERRESPAWN );
+		SendStatsToPlayer( pPlayer, true );
 
 		// if player is alive before respawn, add time from this life to class stat
 		int iClass = pPlayer->GetPlayerClass()->GetClassIndex();
@@ -401,6 +333,8 @@ void CTFGameStats::Event_PlayerForceRespawn( CTFPlayer *pPlayer )
 			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pPlayer->GetSpawnTime() );
 		}
 	}
+
+	AccumulateAndResetPerLifeStats( pPlayer );
 }
 
 //-----------------------------------------------------------------------------
@@ -583,7 +517,6 @@ void CTFGameStats::Event_PlayerDamage( CBasePlayer *pBasePlayer, const CTakeDama
 
 	TF_Gamestats_LevelStats_t::PlayerDamageLump_t damage;
 	Vector killerOrg;
-	killerOrg.Init();
 
 	// set the location where the target was hit
 	const Vector &org = pTarget->GetAbsOrigin();
@@ -724,7 +657,7 @@ void CTFGameStats::Event_PlayerKilledOther( CBasePlayer *pAttacker, CBaseEntity 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFGameStats::Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRoundTime, bool bWasSuddenDeathWin )
+void CTFGameStats::Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRoundTime )
 {
 	TF_Gamestats_LevelStats_t *map = m_reportedStats.m_pCurrentGame;
 	Assert( map );
@@ -743,17 +676,9 @@ void CTFGameStats::Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRo
 	{
 	case TF_TEAM_RED:
 		map->m_Header.m_iRedWins++;
-		if ( bWasSuddenDeathWin )
-		{
-			map->m_Header.m_iRedSuddenDeathWins++;
-		}
 		break;
 	case TF_TEAM_BLUE:
 		map->m_Header.m_iBlueWins++;
-		if ( bWasSuddenDeathWin )
-		{
-			map->m_Header.m_iBlueSuddenDeathWins++;
-		}
 		break;
 	case TEAM_UNASSIGNED:
 		map->m_Header.m_iStalemates++;
@@ -815,10 +740,10 @@ void CTFGameStats::Event_MaxSentryKills( CTFPlayer *pAttacker, int iMaxKills )
 	// any single sentry the player builds during his lifetime.  It does not increase monotonically
 	// so this is a little different than the other stat code.
 	PlayerStats_t &stats = m_aPlayerStats[pAttacker->entindex()];
-	int iCur = stats.statsAccumulated.m_iStat[TFSTAT_MAXSENTRYKILLS];
+	int iCur = stats.statsCurrentRound.m_iStat[TFSTAT_MAXSENTRYKILLS];
 	if ( iCur != iMaxKills )
 	{
-		stats.statsAccumulated.m_iStat[TFSTAT_MAXSENTRYKILLS] = iMaxKills;
+		stats.statsCurrentRound.m_iStat[TFSTAT_MAXSENTRYKILLS] = iMaxKills;
 		stats.iStatsChangedBits |= ( 1 << ( TFSTAT_MAXSENTRYKILLS - TFSTAT_FIRST ) );
 	}
 }
@@ -832,7 +757,8 @@ void CTFGameStats::Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamageIn
 	CTFPlayer *pTFPlayer = ToTFPlayer( pPlayer );
 
 	IncrementStat( pTFPlayer, TFSTAT_DEATHS, 1 );
-	SendStatsToPlayer( pTFPlayer, STATMSG_PLAYERDEATH );
+	SendStatsToPlayer( pTFPlayer, false );
+	AccumulateAndResetPerLifeStats( pTFPlayer );
 
 	TF_Gamestats_LevelStats_t::PlayerDeathsLump_t death;
 	Vector killerOrg;
@@ -893,23 +819,6 @@ void CTFGameStats::Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamageIn
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFGameStats::Event_GameEnd( void )
-{
-	// Calculate score and send out stats to everyone.
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-	{
-		CTFPlayer *pPlayer = ToTFPlayer( UTIL_PlayerByIndex( i ) );
-		if ( pPlayer && pPlayer->IsAlive() )
-		{
-			AccumulateAndResetPerLifeStats( pPlayer );
-			SendStatsToPlayer( pPlayer, STATMSG_UPDATE );
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Per-frame handler
 //-----------------------------------------------------------------------------
 void CTFGameStats::FrameUpdatePostEntityThink()
@@ -925,7 +834,7 @@ void CTFGameStats::FrameUpdatePostEntityThink()
 			// send one now.
 			if ( ( stats.iStatsChangedBits > 0 ) && ( gpGlobals->curtime >= stats.m_flTimeLastSend + 1.0f ) )
 			{
-				SendStatsToPlayer( pPlayer, STATMSG_UPDATE );
+				//SendStatsToPlayer( pPlayer, STATMSG_UPDATE );
 			}						
 		}
 	}

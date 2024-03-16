@@ -766,7 +766,7 @@ int CObjectTeleporter::DrawDebugTextOverlays(void)
 		text_offset++;
 
 		// state
-		Q_snprintf( tempstr, sizeof( tempstr ), "State: %d", m_iState.Get() );
+		Q_snprintf( tempstr, sizeof( tempstr ), "State: %d", m_iState );
 		EntityText(text_offset,tempstr,0);
 		text_offset++;
 

@@ -40,23 +40,18 @@ public:
 	virtual bool IsVisible(){ return BaseClass::IsVisible(); }
 	virtual void SetParent( vgui::VPANEL parent ){ BaseClass::SetParent( parent ); }
 
-	static const char *GetMapType( const char *mapName );
-
 protected:
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
+	virtual void PerformLayout( void );
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual void OnCommand( const char *command );
-	virtual void OnKeyCodeReleased( vgui::KeyCode code );
-	virtual void OnThink();
 	
 private:
 	// helper functions
 	void LoadMapPage( const char *mapName );
 	void SetMapTitle();
-	bool HasViewedMovieForMap();
 	bool CheckForIntroMovie();
-	void CheckIntroState();
-	void CheckBackContinueButtons();
+	void CheckIntroButton();
 
 protected:
 	IViewPort			*m_pViewPort;
@@ -74,8 +69,6 @@ protected:
 	vgui::ImagePanel	*m_pMapImage;
 
 	char				m_szMapName[MAX_PATH];
-
-	vgui::CKeyRepeatHandler	m_KeyRepeat;
 };
 
 

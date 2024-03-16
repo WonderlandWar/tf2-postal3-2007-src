@@ -210,8 +210,6 @@ BEGIN_DATADESC( CTFGameRulesProxy )
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "AddBlueTeamRespawnWaveTime", InputAddBlueTeamRespawnWaveTime ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetRedTeamGoalString", InputSetRedTeamGoalString ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetBlueTeamGoalString", InputSetBlueTeamGoalString ),
-	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetRedTeamRole", InputSetRedTeamRole ),
-	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetBlueTeamRole", InputSetBlueTeamRole ),
 END_DATADESC()
 
 //-----------------------------------------------------------------------------
@@ -260,30 +258,6 @@ void CTFGameRulesProxy::InputSetRedTeamGoalString( inputdata_t &inputdata )
 void CTFGameRulesProxy::InputSetBlueTeamGoalString( inputdata_t &inputdata )
 {
 	TFGameRules()->SetTeamGoalString( TF_TEAM_BLUE, inputdata.value.String() );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFGameRulesProxy::InputSetRedTeamRole( inputdata_t &inputdata )
-{
-	CTFTeam *pTeam = TFTeamMgr()->GetTeam( TF_TEAM_RED );
-	if ( pTeam )
-	{
-		pTeam->SetRole( inputdata.value.Int() );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFGameRulesProxy::InputSetBlueTeamRole( inputdata_t &inputdata )
-{
-	CTFTeam *pTeam = TFTeamMgr()->GetTeam( TF_TEAM_BLUE );
-	if ( pTeam )
-	{
-		pTeam->SetRole( inputdata.value.Int() );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1249,9 +1223,15 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 
 	void CTFGameRules::GoToIntermission( void )
 	{
-		CTF_GameStats.Event_GameEnd();
-
 		BaseClass::GoToIntermission();
+		
+		for ( int i = 1; i <= MAX_PLAYERS; ++i )
+		{
+			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+			if ( pPlayer )
+				pPlayer->AddFlag( FL_FROZEN );
+
+		}
 	}
 
 	bool CTFGameRules::FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker)
@@ -1652,28 +1632,6 @@ void CTFGameRules::PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &in
 	{
 		pObject->IncrementKills();
 		pInflictor = pObject;
-
-		if ( pObject->ObjectType() == OBJ_SENTRYGUN )
-		{
-			CTFPlayer *pOwner = pObject->GetOwner();
-			if ( pOwner )
-			{
-				int iKills = pObject->GetKills();
-
-				// keep track of max kills per a single sentry gun in the player object
-				if ( pOwner->GetMaxSentryKills() < iKills )
-				{
-					pOwner->SetMaxSentryKills( iKills );
-					CTF_GameStats.Event_MaxSentryKills( pOwner, iKills );
-				}
-
-				// if we just got 10 kills with one sentry, tell the owner's client, which will award achievement if it doesn't have it already
-				if ( iKills == 10 )
-				{
-					pOwner->AwardAchievement( ACHIEVEMENT_TF_GET_TURRETKILLS );
-				}
-			}
-		}
 	}
 
 	// if not killed by  suicide or killed by world, see if the scorer had an assister, and if so give the assister credit
@@ -2217,15 +2175,13 @@ void CTFGameRules::ShowRoundInfoPanel( CTFPlayer *pPlayer /* = NULL */ )
 // Purpose: 
 //-----------------------------------------------------------------------------
 bool CTFGameRules::TimerMayExpire( void )
-{
+{	
 	// Prevent timers expiring while control points are contested
 	int iNumControlPoints = ObjectiveResource()->GetNumControlPoints();
-	for ( int iPoint = 0; iPoint < iNumControlPoints; iPoint++ )
+	for ( int iPoint = 0; iPoint < iNumControlPoints; iPoint ++ )
 	{
-		if ( ObjectiveResource()->GetCappingTeam( iPoint ) )
-		{
+		if ( ObjectiveResource()->GetCappingTeam(iPoint) )
 			return false;
-		}
 	}
 
 	return true;
@@ -2257,8 +2213,6 @@ void CTFGameRules::RoundRespawn( void )
 
 		pTeam->SetFlagCaptures( 0 );
 	}
-
-	CTF_GameStats.ResetRoundStats();
 
 	BaseClass::RoundRespawn();
 
@@ -2834,8 +2788,7 @@ void CTFGameRules::FireGameEvent( IGameEvent *event )
 		int iWinningTeam = event->GetInt( "team" );
 		bool bFullRound = event->GetBool( "full_round" );
 		float flRoundTime = event->GetFloat( "round_time" );
-		bool bWasSuddenDeath = event->GetBool( "was_sudden_death" );
-		CTF_GameStats.Event_RoundEnd( iWinningTeam, bFullRound, flRoundTime, bWasSuddenDeath );
+		CTF_GameStats.Event_RoundEnd( iWinningTeam, bFullRound, flRoundTime );
 #endif
 	}
 	else if ( !Q_strcmp( eventName, "teamplay_flag_event" ) )

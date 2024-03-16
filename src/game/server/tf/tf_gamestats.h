@@ -9,7 +9,7 @@
 #pragma once
 #endif
 
-#include "gamestats.h"
+#include "GameStats.h"
 #include "tf_gamestats_shared.h"
 #include "GameEventListener.h"
 
@@ -48,7 +48,7 @@ public:
 	virtual void Event_LevelInit( void );
 	virtual void Event_LevelShutdown( float flElapsed );
 	virtual void Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamageInfo &info );
-	void Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRoundTime, bool bWasSuddenDeathWin );
+	void Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRoundTime );
 	void Event_PlayerConnected( CBasePlayer *pPlayer );
 	void Event_PlayerDisconnected( CBasePlayer *pPlayer );
 	void Event_PlayerChangedClass( CTFPlayer *pPlayer );
@@ -72,7 +72,6 @@ public:
 	void Event_PlayerDominatedOther( CTFPlayer *pAttacker );
 	void Event_PlayerRevenge( CTFPlayer *pAttacker );
 	void Event_MaxSentryKills( CTFPlayer *pAttacker, int iMaxKills );
-	void Event_GameEnd( void );
 
 	virtual void FrameUpdatePostEntityThink();
 
@@ -89,7 +88,7 @@ public:
 	void						ResetRoundStats();
 protected:	
 	void						IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int iValue );
-	void						SendStatsToPlayer( CTFPlayer *pPlayer, int iMsgType );
+	void						SendStatsToPlayer( CTFPlayer *pPlayer, bool bIsAlive );
 	void						AccumulateAndResetPerLifeStats( CTFPlayer *pPlayer );
 	void						TrackKillStats( CBasePlayer *pAttacker, CBasePlayer *pVictim );
 

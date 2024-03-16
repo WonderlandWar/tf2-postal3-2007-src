@@ -78,50 +78,9 @@ CTFMapInfoMenu::~CTFMapInfoMenu()
 //-----------------------------------------------------------------------------
 void CTFMapInfoMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
-	BaseClass::ApplySchemeSettings( pScheme );
-
 	LoadControlSettings("Resource/UI/MapInfoMenu.res");
-
-	CheckIntroState();
-	CheckBackContinueButtons();
-
-	char mapname[MAX_MAP_NAME];
-
-	Q_FileBase( engine->GetLevelName(), mapname, sizeof(mapname) );
-
-	// Save off the map name so we can re-load the page in ApplySchemeSettings().
-	Q_strncpy( m_szMapName, mapname, sizeof( m_szMapName ) );
-	Q_strupr( m_szMapName );
-
-#ifdef _X360
-	char *pExt = Q_stristr( m_szMapName, ".360" );
-	if ( pExt )
-	{
-		*pExt = '\0';
-	}
-#endif
-
-	LoadMapPage( m_szMapName );
 	SetMapTitle();
-
-#ifndef _X360
-	if ( m_pContinue )
-	{
-		m_pContinue->RequestFocus();
-	}
-#endif
-
-	if ( IsX360() )
-	{
-		SetDialogVariable( "gamemode", g_pVGuiLocalize->Find( GetMapType( m_szMapName ) ) );
-	}
-	else
-	{
-		if ( GameRules() )
-		{
-			SetDialogVariable( "gamemode", g_pVGuiLocalize->Find( GameRules()->GetGameTypeName() ) );
-		}
-	}
+	BaseClass::ApplySchemeSettings( pScheme );
 }
 
 //-----------------------------------------------------------------------------
@@ -132,13 +91,11 @@ void CTFMapInfoMenu::ShowPanel( bool bShow )
 	if ( IsVisible() == bShow )
 		return;
 
-	m_KeyRepeat.Reset();
-
 	if ( bShow )
 	{
 		Activate();
 		SetMouseInputEnabled( true );
-		CheckIntroState();
+		SetDialogVariable( "gamemode", g_pVGuiLocalize->Find( g_pGameRules->GetGameTypeName() ) );
 	}
 	else
 	{
@@ -152,77 +109,53 @@ void CTFMapInfoMenu::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 bool CTFMapInfoMenu::CheckForIntroMovie()
 {
-	if ( g_pFullFileSystem->FileExists( TFGameRules()->GetVideoFileForMap() ) )
+	char mapname[MAX_MAP_NAME];
+
+	Q_FileBase( engine->GetLevelName(), mapname, sizeof( mapname ) );
+	Q_strlower( mapname );
+
+#ifdef _X360
+	// need to remove the .360 extension on the end of the map name
+	char *pExt = Q_stristr( mapname, ".360" );
+	if ( pExt )
+	{
+		*pExt = '\0';
+	}
+#endif
+
+	static char strFullpath[MAX_PATH];
+	Q_strncpy( strFullpath, "media/", MAX_PATH );	// Assume we must play out of the media directory
+	Q_strncat( strFullpath, mapname, MAX_PATH );
+	Q_strncat( strFullpath, ".bik", MAX_PATH );		// Assume we're a .bik extension type
+
+	if ( g_pFullFileSystem->FileExists( strFullpath ) )
 		return true;
 
 	return false;
 }
 
-const char *COM_GetModDirectory();
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-bool CTFMapInfoMenu::HasViewedMovieForMap()
+void CTFMapInfoMenu::CheckIntroButton()
 {
-	return ( UTIL_GetMapKeyCount( "viewed" ) > 0 );
-}
+	if ( !IsVisible() )
+		return;
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFMapInfoMenu::CheckIntroState()
-{
-	if ( CheckForIntroMovie() && HasViewedMovieForMap() )
+	if ( CheckForIntroMovie() )
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "intro", true );
-		}
-#else
 		if ( m_pIntro && !m_pIntro->IsVisible() )
-		{
+		{				
 			m_pIntro->SetVisible( true );
 		}
-#endif
 	}
-	else
+	else 
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "intro", false );
-		}
-#else
 		if ( m_pIntro && m_pIntro->IsVisible() )
 		{
 			m_pIntro->SetVisible( false );
 		}
-#endif
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFMapInfoMenu::CheckBackContinueButtons()
-{
-#ifndef _X360
-	if ( m_pBack && m_pContinue )
-	{
-		if ( GetLocalPlayerTeam() == TEAM_UNASSIGNED )
-		{
-			m_pBack->SetVisible( true );
-			m_pContinue->SetText( "#TF_Continue" );
-		}
-		else
-		{
-			m_pBack->SetVisible( false );
-			m_pContinue->SetText( "#TF_Close" );
-		}
-	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -230,8 +163,6 @@ void CTFMapInfoMenu::CheckBackContinueButtons()
 //-----------------------------------------------------------------------------
 void CTFMapInfoMenu::OnCommand( const char *command )
 {
-	m_KeyRepeat.Reset();
-
 	if ( !Q_strcmp( command, "back" ) )
 	{
 		 // only want to go back to the Welcome menu if we're not already on a team
@@ -438,8 +369,6 @@ void CTFMapInfoMenu::SetMapTitle()
 //-----------------------------------------------------------------------------
 void CTFMapInfoMenu::OnKeyCodePressed( KeyCode code )
 {
-	m_KeyRepeat.KeyDown( code );
-
 	if ( code == KEY_XBUTTON_A )
 	{
 		OnCommand( "continue" );
@@ -470,28 +399,20 @@ void CTFMapInfoMenu::OnKeyCodePressed( KeyCode code )
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFMapInfoMenu::OnKeyCodeReleased( vgui::KeyCode code )
+void CTFMapInfoMenu::PerformLayout( void )
 {
-	m_KeyRepeat.KeyUp( code );
+	char mapname[32];
 
-	BaseClass::OnKeyCodeReleased( code );
-}
+	BaseClass::PerformLayout();
+	V_FileBase( engine->GetLevelName(), mapname, sizeof( mapname ) );
+	V_strncpy( m_szMapName, mapname, sizeof( m_szMapName ) );
+	strupr( m_szMapName );
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFMapInfoMenu::OnThink()
-{
-	vgui::KeyCode code = m_KeyRepeat.KeyRepeated();
-	if ( code )
-	{
-		OnKeyCodePressed( code );
-	}
+	CTFMapInfoMenu::LoadMapPage( mapname );
+	SetMapTitle();
 
-	BaseClass::OnThink();
+	if ( m_pContinue )
+		m_pContinue->RequestFocus( 0 );
 }
 
 struct s_MapInfo
@@ -570,23 +491,4 @@ const char *GetMapDisplayName( const char *mapName )
 	Q_strupr( szDisplayName );
 
 	return szDisplayName;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-const char *CTFMapInfoMenu::GetMapType( const char *mapName )
-{
-	if ( IsX360() && mapName )
-	{
-		for ( int i = 0; i < ARRAYSIZE( s_Maps ); ++i )
-		{
-			if ( !Q_stricmp( s_Maps[i].pDiskName, mapName ) )
-			{
-				return s_Maps[i].pGameType;
-			}
-		}
-	}
-
-	return "";
 }

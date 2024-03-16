@@ -83,22 +83,17 @@ public:
 	virtual void OnTick( void );
 	virtual void PaintBackground( void );
 	virtual void SetVisible( bool state );
-	virtual void PerformLayout();
 
 	MESSAGE_FUNC_CHARPTR( OnShowPage, "ShowPage", page );
 	CON_COMMAND_MEMBER_F( CTFClassMenu, "join_class", Join_Class, "Send a joinclass command", 0 );
 
 	virtual void OnClose();
 	virtual void ShowPanel( bool bShow );
-	virtual void UpdateClassCounts( void ){}
 
 protected:
 	virtual void ApplySchemeSettings( IScheme *pScheme );
 	virtual void OnKeyCodePressed( KeyCode code );
 	virtual CImageMouseOverButton<CTFClassInfoPanel> *GetCurrentClassButton();
-	virtual void OnKeyCodeReleased( vgui::KeyCode code );
-	virtual void OnThink();
-	virtual void UpdateNumClassLabels( int iTeam );
 
 protected:
 
@@ -113,12 +108,6 @@ private:
 
 	ButtonCode_t	m_iClassMenuKey;
 	int				m_iCurrentClassIndex;
-	vgui::CKeyRepeatHandler	m_KeyRepeat;
-
-#ifndef _X360
-	CTFImagePanel *m_ClassCountImages[CLASS_COUNT_IMAGES];
-	CTFLabel *m_pCountLabel;
-#endif
 };
 
 //-----------------------------------------------------------------------------
@@ -131,7 +120,7 @@ private:
 	DECLARE_CLASS_SIMPLE( CTFClassMenu_Blue, CTFClassMenu );
 
 public:
-	CTFClassMenu_Blue( IViewPort *pViewPort ) : BaseClass( pViewPort )
+	CTFClassMenu_Blue::CTFClassMenu_Blue( IViewPort *pViewPort ) : BaseClass( pViewPort )
 	{
 		m_pClassButtons[TF_CLASS_SCOUT] = new CImageMouseOverButton<CTFClassInfoPanel>( this, "scout_blue", m_pClassInfoPanel );
 		m_pClassButtons[TF_CLASS_SOLDIER] = new CImageMouseOverButton<CTFClassInfoPanel>( this, "soldier_blue", m_pClassInfoPanel );
@@ -163,20 +152,6 @@ public:
 		}
 	}
 
-	virtual void ShowPanel( bool bShow )
-	{
-		if ( bShow )
-		{
-			// make sure the Red class menu isn't open
-			if ( gViewPortInterface )
-			{
-				gViewPortInterface->ShowPanel( PANEL_CLASS_RED, false );
-			}
-		}
-
-		BaseClass::ShowPanel( bShow );
-	}
-
 	virtual const char *GetName( void )
 	{ 
 		return PANEL_CLASS_BLUE; 
@@ -186,8 +161,6 @@ public:
 	{
 		return TF_TEAM_BLUE;
 	}
-
-	virtual void UpdateClassCounts( void ){ UpdateNumClassLabels( TF_TEAM_BLUE ); }
 };
 
 //-----------------------------------------------------------------------------
@@ -200,7 +173,7 @@ private:
 	DECLARE_CLASS_SIMPLE( CTFClassMenu_Red, CTFClassMenu );
 
 public:
-	CTFClassMenu_Red( IViewPort *pViewPort ) : BaseClass( pViewPort )
+	CTFClassMenu_Red::CTFClassMenu_Red( IViewPort *pViewPort ) : BaseClass( pViewPort )
 	{
 		m_pClassButtons[TF_CLASS_SCOUT] = new CImageMouseOverButton<CTFClassInfoPanel>( this, "scout_red", m_pClassInfoPanel );
 		m_pClassButtons[TF_CLASS_SOLDIER] = new CImageMouseOverButton<CTFClassInfoPanel>( this, "soldier_red", m_pClassInfoPanel );
@@ -232,20 +205,6 @@ public:
 		}
 	}
 
-	virtual void ShowPanel( bool bShow )
-	{
-		if ( bShow )
-		{
-			// make sure the Red class menu isn't open
-			if ( gViewPortInterface )
-			{
-				gViewPortInterface->ShowPanel( PANEL_CLASS_BLUE, false );
-			}
-		}
-
-		BaseClass::ShowPanel( bShow );
-	}
-
 	virtual const char *GetName( void )
 	{ 
 		return PANEL_CLASS_RED;
@@ -255,8 +214,6 @@ public:
 	{
 		return TF_TEAM_RED;
 	}
-
-	virtual void UpdateClassCounts( void ){ UpdateNumClassLabels( TF_TEAM_RED ); }
 };
 
 #endif // TF_CLASSMENU_H
