@@ -1,0 +1,16 @@
+void __thiscall CTFGameStats::CTFGameStats(CTFGameStats *this)
+{
+  PlayerStats_t *m_aPlayerStats; // edi
+  int i; // ebx
+
+  CBaseGameStats::CBaseGameStats(this);
+  this->__vftable = (CTFGameStats_vtbl *)&CTFGameStats::`vftable';
+  TFReportedStats_t::TFReportedStats_t(&this->m_reportedStats);
+  m_aPlayerStats = this->m_aPlayerStats;
+  for ( i = 32; i >= 0; --i )
+    PlayerStats_t::PlayerStats_t(m_aPlayerStats++);
+  gamestats = this;
+  TFReportedStats_t::Clear(&this->m_reportedStats);
+  memset((unsigned __int8 *)this->m_aPlayerStats, 0, sizeof(this->m_aPlayerStats));
+  CBaseGameStats::Clear(this);
+}

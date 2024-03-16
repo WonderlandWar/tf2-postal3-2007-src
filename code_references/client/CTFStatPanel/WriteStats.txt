@@ -1,0 +1,140 @@
+void __thiscall CTFStatPanel::WriteStats(CTFStatPanel *this)
+{
+  CTFStatPanel *v1; // ebx
+  CDmxElement *DmxElement; // esi
+  CDmxAttribute *v3; // edi
+  _DWORD *m_pData; // edi
+  CDmxAttribute *v5; // eax
+  CDmxAttribute *v6; // edi
+  _DWORD *v7; // eax
+  int *v8; // edi
+  vgui::TreeNode *v9; // esi
+  const char *v10; // ebx
+  CDmxAttribute *v11; // eax
+  CDmxElement *v12; // ebx
+  CDmxAttribute *v13; // ebp
+  _DWORD *v14; // ebp
+  CDmxElement *v15; // ebp
+  CDmxAttribute *v16; // edi
+  _DWORD *v17; // edi
+  bool v18; // sf
+  int m_Size; // [esp-14h] [ebp-64h]
+  CUtlVector<CDmxElement *,CUtlMemory<CDmxElement *,int> > *classStats; // [esp+4h] [ebp-4Ch]
+  CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *v21; // [esp+8h] [ebp-48h]
+  int i; // [esp+10h] [ebp-40h]
+  CDmxElementModifyScope modify; // [esp+14h] [ebp-3Ch]
+  CDmxElement *pClass; // [esp+18h] [ebp-38h]
+  vgui::TreeNode *src; // [esp+1Ch] [ebp-34h] BYREF
+  _DWORD v27[12]; // [esp+20h] [ebp-30h] BYREF
+
+  v1 = this;
+  if ( this->m_bStatsChanged )
+  {
+    DmxElement = CreateDmxElement("PlayerStats");
+    i = (int)DmxElement;
+    pClass = DmxElement;
+    CDmxElement::LockForChanges(DmxElement, 1);
+    CDmxElement::LockForChanges(DmxElement, 1);
+    v3 = CDmxElement::AddAttribute(DmxElement, "iVersion");
+    CDmxAttribute::AllocateDataMemory(v3, AT_INT);
+    m_pData = v3->m_pData;
+    if ( m_pData )
+      *m_pData = 0;
+    if ( DmxElement )
+      CDmxElement::LockForChanges(DmxElement, 0);
+    v5 = CDmxElement::AddAttribute(DmxElement, "aClassStats");
+    v6 = v5;
+    if ( v5->m_Type == AT_FIRST_ARRAY_TYPE )
+    {
+      v21 = (CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *)v5->m_pData;
+    }
+    else
+    {
+      CDmxAttribute::AllocateDataMemory(v5, AT_FIRST_ARRAY_TYPE);
+      v7 = v6->m_pData;
+      if ( v7 )
+      {
+        *v7 = 0;
+        v7[1] = 0;
+        v7[2] = 0;
+        v7[3] = 0;
+        v7[4] = 0;
+      }
+      v21 = (CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *)v6->m_pData;
+    }
+    if ( DmxElement )
+    {
+      CDmxElement::LockForChanges(DmxElement, 0);
+      pClass = 0;
+    }
+    modify.m_pElement = 0;
+    if ( v1->m_aClassStats.m_Size > 0 )
+    {
+      classStats = 0;
+      do
+      {
+        v8 = (int *)((char *)classStats + (unsigned int)v1->m_aClassStats.m_Memory.m_pMemory);
+        if ( *v8 <= 9 && *v8 >= 1 )
+        {
+          v9 = (vgui::TreeNode *)CreateDmxElement("ClassStats_t");
+          m_Size = v21->m_Size;
+          src = v9;
+          CUtlVector<C_SlideshowDisplay *,CUtlMemory<C_SlideshowDisplay *,int>>::InsertBefore(v21, m_Size, &src);
+          CDmxElement::LockForChanges((CDmxElement *)v9, 1);
+          v10 = g_aPlayerClassNames_NonLocalized[*v8];
+          CDmxElement::LockForChanges((CDmxElement *)v9, 1);
+          v11 = CDmxElement::AddAttribute((CDmxElement *)v9, "comment: classname");
+          CDmxAttribute::SetValue(v11, v10);
+          if ( v9 )
+            CDmxElement::LockForChanges((CDmxElement *)v9, 0);
+          CDmxElement::AddAttributesFromStructure((CDmxElement *)v9, v8, s_ClassStatsUnpack);
+          v12 = CreateDmxElement("RoundStats_t");
+          CDmxElement::AddAttributesFromStructure(v12, v8 + 2, s_RoundStatsUnpack);
+          CDmxElement::LockForChanges((CDmxElement *)v9, 1);
+          v13 = CDmxElement::AddAttribute((CDmxElement *)v9, "accumulated");
+          CDmxAttribute::AllocateDataMemory(v13, AT_FIRST_VALUE_TYPE);
+          v14 = v13->m_pData;
+          if ( v14 )
+            *v14 = v12;
+          if ( v9 )
+            CDmxElement::LockForChanges((CDmxElement *)v9, 0);
+          v15 = CreateDmxElement("RoundStats_t");
+          CDmxElement::AddAttributesFromStructure(v15, v8 + 24, s_RoundStatsUnpack);
+          CDmxElement::LockForChanges((CDmxElement *)v9, 1);
+          v16 = CDmxElement::AddAttribute((CDmxElement *)v9, "max");
+          CDmxAttribute::AllocateDataMemory(v16, AT_FIRST_VALUE_TYPE);
+          v17 = v16->m_pData;
+          if ( v17 )
+            *v17 = v15;
+          if ( v9 )
+          {
+            CDmxElement::LockForChanges((CDmxElement *)v9, 0);
+            CDmxElement::LockForChanges((CDmxElement *)v9, 0);
+          }
+          DmxElement = (CDmxElement *)i;
+          v1 = this;
+        }
+        classStats = (CUtlVector<CDmxElement *,CUtlMemory<CDmxElement *,int> > *)((char *)classStats + 184);
+        ++modify.m_pElement;
+      }
+      while ( (int)modify.m_pElement < v1->m_aClassStats.m_Size );
+    }
+    CUtlBuffer::CUtlBuffer((CUtlBuffer *)v27, 0, 0, 1);
+    if ( SerializeDMX((CUtlBuffer *)v27, DmxElement, "tf2_playerstats.dmx") )
+      filesystem->WriteFile(&filesystem->IBaseFileSystem, "tf2_playerstats.dmx", "MOD", (CUtlBuffer *)v27);
+    CleanupDMX(DmxElement);
+    v18 = v27[2] < 0;
+    v1->m_bStatsChanged = 0;
+    if ( !v18 )
+    {
+      if ( v27[0] )
+      {
+        _g_pMemAlloc->Free(_g_pMemAlloc, (void *)v27[0]);
+        v27[0] = 0;
+      }
+      v27[1] = 0;
+    }
+    if ( pClass )
+      CDmxElement::LockForChanges(pClass, 0);
+  }
+}

@@ -1,0 +1,19 @@
+void __thiscall CTFStatPanel::GetStatValueAsString(
+        CTFStatPanel *this,
+        int iValue,
+        TFStatType_t statType,
+        char *value,
+        int valuelen)
+{
+  const char *v5; // eax
+
+  if ( statType == TFSTAT_PLAYTIME )
+  {
+    v5 = FormatSeconds(iValue);
+    V_strncpy(value, v5, valuelen);
+  }
+  else
+  {
+    V_snprintf(value, valuelen, "%d", iValue);
+  }
+}

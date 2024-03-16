@@ -1,0 +1,23 @@
+void __thiscall CTFGameStats::Event_PlayerDisconnected(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  int v3; // eax
+  int *p_iTotalTime; // edi
+
+  if ( pPlayer )
+  {
+    if ( pPlayer->IsPlayer(pPlayer) )
+    {
+      v3 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+      PlayerStats_t::Reset(&this->m_aPlayerStats[v3]);
+      CTFGameStats::ResetKillHistory(this, pPlayer);
+      if ( pPlayer->IsAlive(pPlayer) )
+      {
+        if ( this->m_reportedStats.m_pCurrentMap )
+        {
+          p_iTotalTime = &this->m_reportedStats.m_pCurrentMap->m_aClassStats[pPlayer->m_PlayerClass.m_iClass.m_Value].iTotalTime;
+          *p_iTotalTime += (int)(gpGlobals->curtime - pPlayer->m_flSpawnTime);
+        }
+      }
+    }
+  }
+}

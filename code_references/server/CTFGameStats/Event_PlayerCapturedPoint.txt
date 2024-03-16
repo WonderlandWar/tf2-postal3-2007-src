@@ -1,0 +1,11 @@
+void __thiscall CTFGameStats::Event_PlayerCapturedPoint(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  PlayerStats_t *v3; // eax
+
+  v3 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+  ++v3->statsCurrentLife.m_iStat[6];
+  ++v3->statsCurrentRound.m_iStat[6];
+  ++v3->statsAccumulated.m_iStat[6];
+  if ( this->m_reportedStats.m_pCurrentMap )
+    ++this->m_reportedStats.m_pCurrentMap->m_aClassStats[pPlayer->m_PlayerClass.m_iClass.m_Value].iCaptures;
+}

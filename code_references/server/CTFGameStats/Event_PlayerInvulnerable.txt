@@ -1,0 +1,9 @@
+void __thiscall CTFGameStats::Event_PlayerInvulnerable(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  PlayerStats_t *v2; // eax
+
+  v2 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+  ++v2->statsCurrentLife.m_iStat[15];
+  ++v2->statsCurrentRound.m_iStat[15];
+  ++v2->statsAccumulated.m_iStat[15];
+}

@@ -1,0 +1,188 @@
+void __thiscall CTFGameRules::PlayerKilled(CTFGameRules *this, CTFPlayer *pVictim, const CTakeDamageInfo *info)
+{
+  unsigned int m_Index; // eax
+  CBaseEntity *pInflictor; // esi
+  unsigned int v5; // eax
+  int v6; // edx
+  CTFWeaponBase *pKiller; // ebx
+  CBaseMultiplayerPlayer *pScorer; // edi
+  CBaseObject *pObject; // eax
+  CTFPlayer *v10; // esi
+  CBasePlayer *Assister; // eax
+  CTFPlayer *v12; // esi
+  bool (__thiscall *IsPlayer)(CBaseEntity *); // eax
+  bool v14; // al
+  CBaseEntity *EntityByClassname; // eax
+  CTriggerAreaCapture *i; // esi
+  CBaseMultiplayerPlayer *v17; // eax
+  CBaseEntity *pArea; // eax
+  int iDeathFlags; // ebp
+  CTFPlayer *v20; // edi
+  CTFPlayer *v21; // esi
+  CTFPlayer *v22; // eax
+  PlayerStats_t *PlayerStats; // ebx
+  int v24; // eax
+  IVEngineServer_vtbl *v25; // edx
+  int v26; // eax
+  int v27; // eax
+  CTFPlayerShared *p_m_Shared; // edi
+  int v29; // eax
+  CTFPlayer *v30; // ebx
+  int v31; // eax
+  int v32; // eax
+  CTFGameRules *v33; // ecx
+  CTFPlayer *pTFPlayerVictim; // [esp+14h] [ebp-10h]
+  CTFPlayer *pAssister; // [esp+18h] [ebp-Ch] BYREF
+  CTFPlayer *pAttacker; // [esp+1Ch] [ebp-8h]
+  CTFGameRules *v37; // [esp+20h] [ebp-4h]
+
+  m_Index = info->m_hInflictor.m_Index;
+  v37 = this;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    pInflictor = 0;
+  else
+    pInflictor = g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_pEntity;
+  v5 = info->m_hAttacker.m_Index;
+  pAssister = (CTFPlayer *)pInflictor;
+  if ( v5 == -1 || (v6 = v5 & 0xFFF, g_pEntityList->m_EntPtrArray[v6].m_SerialNumber != v5 >> 12) )
+    pKiller = 0;
+  else
+    pKiller = g_pEntityList->m_EntPtrArray[v6].m_pEntity;
+  pScorer = (CBaseMultiplayerPlayer *)this->GetDeathScorer(v37, pKiller, pInflictor, pVictim);
+  if ( pScorer && pScorer->IsPlayer(pScorer) )
+  {
+    pTFPlayerVictim = (CTFPlayer *)pScorer;
+  }
+  else
+  {
+    pTFPlayerVictim = 0;
+    pScorer = 0;
+  }
+  pAttacker = 0;
+  if ( pInflictor && pInflictor->IsBaseObject(pInflictor) )
+  {
+    pObject = (CBaseObject *)__RTDynamicCast(
+                               pInflictor,
+                               0,
+                               &CBaseEntity `RTTI Type Descriptor',
+                               &CBaseObject `RTTI Type Descriptor',
+                               0);
+  }
+  else
+  {
+    if ( !pKiller || !pKiller->IsBaseObject(pKiller) )
+      goto LABEL_21;
+    pObject = (CBaseObject *)__RTDynamicCast(
+                               pKiller,
+                               0,
+                               &CBaseEntity `RTTI Type Descriptor',
+                               &CBaseObject `RTTI Type Descriptor',
+                               0);
+  }
+  v10 = (CTFPlayer *)pObject;
+  if ( pObject )
+  {
+    pAssister = (CTFPlayer *)(pObject->m_iKills.m_Value + 1);
+    CNetworkVarBase<int,CBaseObject::NetworkVar_m_iKills>::Set(&pObject->m_iKills, (const int *)&pAssister);
+    pAssister = v10;
+  }
+LABEL_21:
+  if ( pVictim != pScorer && pKiller )
+  {
+    Assister = CTFGameRules::GetAssister(v37, pVictim, pScorer, pAssister);
+    v12 = (CTFPlayer *)Assister;
+    if ( Assister && Assister->IsPlayer(Assister) )
+    {
+      IsPlayer = v12->IsPlayer;
+      pAttacker = v12;
+      v14 = IsPlayer(v12);
+      CTFGameStats::Event_AssistKill(&CTF_GameStats, v14 ? v12 : 0, pVictim);
+    }
+    else
+    {
+      pAttacker = 0;
+    }
+  }
+  EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "trigger_capture_area");
+  for ( i = (CTriggerAreaCapture *)__RTDynamicCast(
+                                     EntityByClassname,
+                                     0,
+                                     &CBaseEntity `RTTI Type Descriptor',
+                                     &CTriggerAreaCapture `RTTI Type Descriptor',
+                                     0);
+        i;
+        i = (CTriggerAreaCapture *)__RTDynamicCast(
+                                     pArea,
+                                     0,
+                                     &CBaseEntity `RTTI Type Descriptor',
+                                     &CTriggerAreaCapture `RTTI Type Descriptor',
+                                     0) )
+  {
+    if ( pVictim && pVictim->IsPlayer(pVictim) )
+      v17 = pVictim;
+    else
+      v17 = 0;
+    if ( CTriggerAreaCapture::CheckIfDeathCausesBlock(i, v17, pScorer) )
+      break;
+    pArea = CGlobalEntityList::FindEntityByClassname(&gEntList, i, "trigger_capture_area");
+  }
+  iDeathFlags = 0;
+  if ( pVictim && pVictim->IsPlayer(pVictim) )
+  {
+    v20 = pVictim;
+    pAssister = pVictim;
+  }
+  else
+  {
+    pAssister = 0;
+    v20 = 0;
+  }
+  v21 = pTFPlayerVictim;
+  if ( !pTFPlayerVictim || !pTFPlayerVictim->IsPlayer(pTFPlayerVictim) )
+    v21 = 0;
+  if ( pVictim && pVictim->IsPlayer(pVictim) )
+    v22 = pVictim;
+  else
+    v22 = 0;
+  PlayerStats = CTFGameStats::FindPlayerStats(&CTF_GameStats, v22);
+  if ( PlayerStats && pTFPlayerVictim )
+  {
+    v24 = engine->IndexOfEdict(engine, pTFPlayerVictim->m_Network.m_pPev);
+    v25 = engine->__vftable;
+    if ( PlayerStats->statsKills.iNumKilledByUnanswered[v24] == 3 )
+    {
+      iDeathFlags = 1;
+      v26 = ((int (__stdcall *)(edict_t *))v25->IndexOfEdict)(v20->m_Network.m_pPev);
+      CTFPlayerShared::SetPlayerDominated(&v21->m_Shared, v26, 1);
+      CTFGameStats::Event_PlayerDominatedOther(&CTF_GameStats, v21);
+    }
+    else
+    {
+      v27 = ((int (__stdcall *)(edict_t *))v25->IndexOfEdict)(v21->m_Network.m_pPev);
+      p_m_Shared = &v20->m_Shared;
+      if ( CTFPlayerShared::IsPlayerDominated(p_m_Shared, v27) )
+      {
+        iDeathFlags = 2;
+        v29 = engine->IndexOfEdict(engine, v21->m_Network.m_pPev);
+        CTFPlayerShared::SetPlayerDominated(p_m_Shared, v29, 0);
+        CTFGameStats::Event_PlayerRevenge(&CTF_GameStats, v21);
+      }
+      v20 = pAssister;
+    }
+    v30 = pAttacker;
+    if ( pAttacker )
+    {
+      v31 = engine->IndexOfEdict(engine, pAttacker->m_Network.m_pPev);
+      if ( CTFPlayerShared::IsPlayerDominated(&v20->m_Shared, v31) )
+      {
+        iDeathFlags |= 4u;
+        v32 = engine->IndexOfEdict(engine, v30->m_Network.m_pPev);
+        CTFPlayerShared::SetPlayerDominated(&v20->m_Shared, v32, 0);
+        CTFGameStats::Event_PlayerRevenge(&CTF_GameStats, v30);
+      }
+    }
+  }
+  v33 = v37;
+  v20->m_iDeathFlags = iDeathFlags;
+  CTeamplayRules::PlayerKilled(v33, pVictim, info);
+}

@@ -1,0 +1,8 @@
+void __thiscall CTFGameStats::Event_PlayerSpawned(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  if ( (unsigned int)CBaseEntity::GetTeamNumber(pPlayer) >= 2 )
+  {
+    if ( this->m_reportedStats.m_pCurrentMap )
+      ++this->m_reportedStats.m_pCurrentMap->m_aClassStats[pPlayer->m_PlayerClass.m_iClass.m_Value].iSpawns;
+  }
+}

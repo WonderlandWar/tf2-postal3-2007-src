@@ -919,7 +919,7 @@ void CTFPlayerShared::OnAddStealthed( void )
 #endif
 
 	m_flInvisChangeCompleteTime = gpGlobals->curtime + tf_spy_invis_time.GetFloat();
-	m_flInvisChangeTotalTime = gpGlobals->curtime + tf_spy_invis_time.GetFloat();
+	m_flInvisChangeTotalTime = tf_spy_invis_time.GetFloat();
 
 	// set our offhand weapon to be the invis weapon
 	int i;

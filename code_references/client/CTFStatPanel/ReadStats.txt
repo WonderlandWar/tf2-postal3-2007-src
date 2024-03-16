@@ -1,0 +1,108 @@
+bool __thiscall CTFStatPanel::ReadStats(CTFStatPanel *this)
+{
+  CTFStatPanel *v1; // esi
+  bool result; // al
+  const CDmxAttribute *Attribute; // eax
+  int v4; // ebx
+  const CUtlVector<CDmxElement *,CUtlMemory<CDmxElement *,int> > *v5; // edi
+  int v6; // ebp
+  CDmxElement *v7; // edi
+  ClassStats_t *v8; // esi
+  const CDmxAttribute *v9; // eax
+  int *m_pData; // eax
+  const CDmxAttribute *v11; // eax
+  int *v12; // eax
+  CTFStatsSummaryPanel *v13; // eax
+  int m_Size; // [esp-14h] [ebp-24h]
+  const CUtlVector<CDmxElement *,CUtlMemory<CDmxElement *,int> > *aClassStatsList; // [esp+8h] [ebp-8h] BYREF
+  const CUtlVector<CDmxElement *,CUtlMemory<CDmxElement *,int> > *v17; // [esp+Ch] [ebp-4h]
+
+  v1 = this;
+  result = UnserializeDMX("tf2_playerstats.dmx", "MOD", 1, (CDmxElement **)&aClassStatsList);
+  if ( result )
+  {
+    Attribute = CDmxElement::GetAttribute((CDmxElement *)aClassStatsList, "iVersion");
+    v4 = 0;
+    if ( Attribute )
+    {
+      if ( Attribute->m_Type == AT_INT )
+      {
+        if ( *(int *)Attribute->m_pData > 0 )
+          return 0;
+      }
+      else
+      {
+        `CDmxAttribute::GetValue<int>'::`4'::defaultValue = 0;
+      }
+    }
+    else
+    {
+      `CDmxElement::GetValue<int>'::`4'::defaultValue = 0;
+    }
+    v5 = CDmxElement::GetArray<CDmxElement *>((CDmxElement *)aClassStatsList, "aClassStats");
+    m_Size = v5->m_Size;
+    v17 = v5;
+    v1->m_aClassStats.m_Size = 0;
+    CUtlVector<ClassStats_t,CUtlMemory<ClassStats_t,int>>::InsertMultipleBefore(&v1->m_aClassStats, 0, m_Size, 0);
+    v6 = 0;
+    if ( v1->m_aClassStats.m_Size > 0 )
+    {
+      while ( 1 )
+      {
+        v7 = v5->m_Memory.m_pMemory[v6];
+        v8 = &v1->m_aClassStats.m_Memory.m_pMemory[v4];
+        CDmxElement::UnpackIntoStructure(v7, v8, s_ClassStatsUnpack);
+        v9 = CDmxElement::GetAttribute(v7, "accumulated");
+        if ( v9 )
+        {
+          if ( v9->m_Type == AT_FIRST_VALUE_TYPE )
+          {
+            m_pData = (int *)v9->m_pData;
+          }
+          else
+          {
+            `CDmxAttribute::GetValue<CDmxElement *>'::`4'::defaultValue = 0;
+            m_pData = &`CDmxAttribute::GetValue<CDmxElement *>'::`4'::defaultValue;
+          }
+        }
+        else
+        {
+          `CDmxElement::GetValue<CDmxElement *>'::`4'::defaultValue = 0;
+          m_pData = &`CDmxElement::GetValue<CDmxElement *>'::`4'::defaultValue;
+        }
+        CDmxElement::UnpackIntoStructure((CDmxElement *)*m_pData, &v8->accumulated, s_RoundStatsUnpack);
+        v11 = CDmxElement::GetAttribute(v7, "max");
+        if ( v11 )
+        {
+          if ( v11->m_Type == AT_FIRST_VALUE_TYPE )
+          {
+            v12 = (int *)v11->m_pData;
+          }
+          else
+          {
+            `CDmxAttribute::GetValue<CDmxElement *>'::`4'::defaultValue = 0;
+            v12 = &`CDmxAttribute::GetValue<CDmxElement *>'::`4'::defaultValue;
+          }
+        }
+        else
+        {
+          `CDmxElement::GetValue<CDmxElement *>'::`4'::defaultValue = 0;
+          v12 = &`CDmxElement::GetValue<CDmxElement *>'::`4'::defaultValue;
+        }
+        CDmxElement::UnpackIntoStructure((CDmxElement *)*v12, &v8->max, s_RoundStatsUnpack);
+        ++v6;
+        ++v4;
+        v1 = this;
+        if ( v6 >= this->m_aClassStats.m_Size )
+          break;
+        v5 = v17;
+      }
+    }
+    CleanupDMX((CDmxElement *)aClassStatsList);
+    v13 = GStatsSummaryPanel();
+    CTFStatsSummaryPanel::SetStats(v13, &v1->m_aClassStats);
+    v1->m_bStatsChanged = 0;
+    return 1;
+  }
+  return result;
+}

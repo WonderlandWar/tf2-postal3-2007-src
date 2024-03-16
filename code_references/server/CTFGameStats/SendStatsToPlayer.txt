@@ -1,0 +1,31 @@
+void __thiscall CTFGameStats::SendStatsToPlayer(CTFGameStats *this, CTFPlayer *pPlayer, bool bIsAlive)
+{
+  CTFGameStats *v3; // ebx
+  PlayerStats_t *stats; // edi
+  IGameEvent *event; // esi
+  int v6; // eax
+  const char **v7; // ebx
+  int *v8; // edi
+
+  v3 = this;
+  stats = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+  stats->statsCurrentLife.m_iStat[13] = (int)((double)(int)gpGlobals->curtime - pPlayer->m_flSpawnTime);
+  stats->statsCurrentLife.m_iStat[10] = CTFGameRules::CalcPlayerScore(&stats->statsCurrentLife);
+  stats->statsCurrentLife.m_iStat[20] = pPlayer->m_iMaxSentryKills;
+  event = gameeventmanager->CreateEvent(gameeventmanager, "teamplay_stat_panel", 0);
+  if ( event )
+  {
+    v6 = engine->GetPlayerUserId(engine, pPlayer->m_Network.m_pPev);
+    event->SetInt(event, "userid", v6);
+    event->SetInt(event, "class", pPlayer->m_PlayerClass.m_iClass.m_Value);
+    event->SetInt(event, "alive", bIsAlive);
+    v7 = &g_szStatEventParamName[1];
+    v8 = &stats->statsCurrentLife.m_iStat[1];
+    do
+      event->SetInt(event, *v7++, *v8++);
+    while ( (int)v7 <= (int)&g_szStatEventParamName[21] );
+    gameeventmanager->FireEvent(gameeventmanager, event, 0);
+    v3 = this;
+  }
+  CTFGameStats::AccumulateAndResetPerLifeStats(v3, pPlayer);
+}

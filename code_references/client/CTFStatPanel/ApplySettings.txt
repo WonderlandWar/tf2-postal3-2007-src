@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CTFStatPanel::ApplySettings(CTFStatPanel *this, KeyValues *inResourceData)
+{
+  vgui::EditablePanel::ApplySettings(this, inResourceData);
+}

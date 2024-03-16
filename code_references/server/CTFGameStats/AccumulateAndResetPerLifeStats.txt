@@ -1,0 +1,36 @@
+void __thiscall CTFGameStats::AccumulateAndResetPerLifeStats(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  int m_Value; // ebx
+  PlayerStats_t *v4; // esi
+  int v5; // eax
+
+  m_Value = pPlayer->m_PlayerClass.m_iClass.m_Value;
+  v4 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+  v5 = CTFGameRules::CalcPlayerScore(&v4->statsCurrentLife);
+  if ( this->m_reportedStats.m_pCurrentMap )
+    this->m_reportedStats.m_pCurrentMap->m_aClassStats[m_Value].iScore += v5;
+  v4->statsCurrentRound.m_iStat[10] += v5;
+  v4->statsAccumulated.m_iStat[10] += v5;
+  v4->statsCurrentLife.m_iStat[0] = 0;
+  v4->statsCurrentLife.m_iStat[1] = 0;
+  v4->statsCurrentLife.m_iStat[2] = 0;
+  v4->statsCurrentLife.m_iStat[3] = 0;
+  v4->statsCurrentLife.m_iStat[4] = 0;
+  v4->statsCurrentLife.m_iStat[5] = 0;
+  v4->statsCurrentLife.m_iStat[6] = 0;
+  v4->statsCurrentLife.m_iStat[7] = 0;
+  v4->statsCurrentLife.m_iStat[8] = 0;
+  v4->statsCurrentLife.m_iStat[9] = 0;
+  v4->statsCurrentLife.m_iStat[10] = 0;
+  v4->statsCurrentLife.m_iStat[11] = 0;
+  v4->statsCurrentLife.m_iStat[12] = 0;
+  v4->statsCurrentLife.m_iStat[13] = 0;
+  v4->statsCurrentLife.m_iStat[14] = 0;
+  v4->statsCurrentLife.m_iStat[15] = 0;
+  v4->statsCurrentLife.m_iStat[16] = 0;
+  v4->statsCurrentLife.m_iStat[17] = 0;
+  v4->statsCurrentLife.m_iStat[18] = 0;
+  v4->statsCurrentLife.m_iStat[19] = 0;
+  v4->statsCurrentLife.m_iStat[20] = 0;
+  v4->statsCurrentLife.m_iStat[21] = 0;
+}

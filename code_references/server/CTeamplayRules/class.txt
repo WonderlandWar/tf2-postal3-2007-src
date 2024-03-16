@@ -1,0 +1,60 @@
+class CTeamplayRules : public CMultiplayRules
+{
+
+    public int GetCaptureValueForPlayer(class CBasePlayer * );
+    public bool TeamMayCapturePoint(int ,int );
+    public bool PlayerMayCapturePoint(class CBasePlayer * ,int ,char * ,int );
+    public bool PlayerMayBlockPoint(class CBasePlayer * ,int ,char * ,int );
+	
+    public bool PointsMayBeCaptured();
+	
+    public void CTeamplayRules(class CTeamplayRules & );
+    public void CTeamplayRules();
+    public void ~CTeamplayRules();
+	
+    public void Precache();
+	
+    public bool ClientCommand(class CBaseEntity * ,class CCommand & );
+    public void ClientSettingsChanged(class CBasePlayer * );
+    public bool IsTeamplay();
+    public bool FPlayerCanTakeDamage(class CBasePlayer * ,class CBaseEntity * );
+    public int PlayerRelationship(class CBaseEntity * ,class CBaseEntity * );
+    public bool PlayerCanHearChat(class CBasePlayer * ,class CBasePlayer * );
+    public char * GetTeamID(class CBaseEntity * );
+    public bool ShouldAutoAim(class CBasePlayer * ,struct edict_t * );
+    public int IPointsForKill(class CBasePlayer * ,class CBasePlayer * );
+    public void InitHUD(class CBasePlayer * );
+    public void DeathNotice(class CBasePlayer * ,class CTakeDamageInfo & );
+    public char * GetGameDescription();
+    public void PlayerKilled(class CBasePlayer * ,class CTakeDamageInfo & );
+    public void Think();
+    public int GetTeamIndex(char * );
+    public char * GetIndexedTeamName(int );
+    public bool IsValidTeam(char * );
+    public char * SetDefaultPlayerTeam(class CBasePlayer * );
+    public void ChangePlayerTeam(class CBasePlayer * ,char * ,bool ,bool );
+    public void ClientDisconnected(struct edict_t * );
+    public bool TimerMayExpire();
+	
+    public void SetWinningTeam(int ,int ,bool ,bool );
+    public void SetStalemate(bool );
+	
+    public void SetSwitchTeams(bool );
+    public bool ShouldSwitchTeams();
+    public void HandleSwitchTeams();
+	
+    public void SetScrambleTeams(bool );
+    public bool ShouldScrambleTeams();
+    public void HandleScrambleTeams();
+	
+    protected bool m_DisableDeathMessages;
+	
+    private void RecountTeams();
+    private char * TeamWithFewestPlayers();
+	
+    private bool m_DisableDeathPenalty;
+    private bool m_teamLimit;
+    private char m_szTeamList[512];
+    private bool m_bSwitchTeams;
+    private bool m_bScrambleTeams;
+};

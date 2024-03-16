@@ -1,0 +1,4 @@
+PlayerStats_t *__thiscall CTFGameStats::FindPlayerStats(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  return &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+}

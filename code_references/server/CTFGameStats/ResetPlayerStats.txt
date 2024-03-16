@@ -1,0 +1,8 @@
+void __thiscall CTFGameStats::ResetPlayerStats(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  int v3; // eax
+
+  v3 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+  PlayerStats_t::Reset(&this->m_aPlayerStats[v3]);
+  CTFGameStats::ResetKillHistory(this, pPlayer);
+}

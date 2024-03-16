@@ -1,0 +1,25 @@
+void __thiscall CTFStatPanel::Reset(CTFStatPanel *this)
+{
+  float *p_actionSignalTargetDar; // esi
+  int (__thiscall **v2)(char *); // edx
+  vgui::IVGui *v3; // edi
+  vgui::IVGui_vtbl *v4; // ebx
+  int v5; // eax
+
+  if ( *(float *)&this->m_SkipChild.m_iPanelID < (double)*(float *)(gpGlobals.m_Index + 12) )
+  {
+    p_actionSignalTargetDar = (float *)&this[-1]._actionSignalTargetDar;
+    (*((void (__thiscall **)(vgui::Dar<unsigned long> *, _DWORD))this[-1]._actionSignalTargetDar.m_Memory.m_pMemory + 31))(
+      &this[-1]._actionSignalTargetDar,
+      0);
+    if ( p_actionSignalTargetDar[71] > 0.0 )
+    {
+      v2 = *(int (__thiscall ***)(char *))p_actionSignalTargetDar;
+      p_actionSignalTargetDar[71] = 0.0;
+      v3 = g_pVGui;
+      v4 = g_pVGui->__vftable;
+      v5 = (*v2)((char *)p_actionSignalTargetDar);
+      v4->RemoveTickSignal(v3, v5);
+    }
+  }
+}

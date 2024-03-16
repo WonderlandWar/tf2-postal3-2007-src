@@ -1,0 +1,61 @@
+class CTFGameStats : private CBaseGameStats
+{
+    public void CTFGameStats(class CTFGameStats & );
+    public void CTFGameStats();
+    public void ~CTFGameStats();
+	
+    public void Clear();
+	
+    public bool StatTrackingEnabledForMod();
+    public bool ShouldTrackStandardStats();
+    public bool AutoUpload_OnLevelShutdown();
+    public bool AutoSave_OnShutdown();
+    public bool AutoUpload_OnShutdown();
+	
+    public bool LoadFromFile();
+	
+    public void AppendCustomDataToSaveBuffer(class CUtlBuffer & );
+    public void LoadCustomDataFromBuffer(class CUtlBuffer & );
+	
+    public void Event_LevelInit();
+    public void Event_LevelShutdown(float );
+    public void Event_PlayerKilled(class CBasePlayer * ,class CTakeDamageInfo & );
+    public void Event_RoundEnd(int ,bool ,float );
+    public void Event_PlayerConnected(class CBasePlayer * );
+    public void Event_PlayerDisconnected(class CBasePlayer * );
+    public void Event_PlayerChangedClass(class CTFPlayer * );
+    public void Event_PlayerSpawned(class CTFPlayer * );
+    public void Event_PlayerForceRespawn(class CTFPlayer * );
+    public void Event_PlayerLeachedHealth(class CTFPlayer * ,float );
+    public void Event_PlayerHealedOther(class CTFPlayer * ,float );
+    public void Event_AssistKill(class CTFPlayer * ,class CBaseEntity * );
+    public void Event_PlayerInvulnerable(class CTFPlayer * );
+    public void Event_PlayerCreatedBuilding(class CTFPlayer * ,class CBaseObject * );
+    public void Event_PlayerDestroyedBuilding(class CTFPlayer * ,class CBaseObject * );
+    public void Event_AssistDestroyBuilding(class CTFPlayer * ,class CBaseObject * );
+    public void Event_Headshot(class CTFPlayer * );
+    public void Event_Backstab(class CTFPlayer * );
+    public void Event_PlayerUsedTeleport(class CTFPlayer * ,class CTFPlayer * );
+    public void Event_PlayerFiredWeapon(class CTFPlayer * ,bool );
+    public void Event_PlayerDamage(class CBasePlayer * ,class CTakeDamageInfo & ,int );
+    public void Event_PlayerKilledOther(class CBasePlayer * ,class CBaseEntity * ,class CTakeDamageInfo & );
+    public void Event_PlayerCapturedPoint(class CTFPlayer * );
+    public void Event_PlayerDefendedPoint(class CTFPlayer * );
+    public void Event_PlayerDominatedOther(class CTFPlayer * );
+    public void Event_PlayerRevenge(class CTFPlayer * );
+	
+    public struct TF_Gamestats_LevelStats_t * GetCurrentMap();
+	
+    public struct PlayerStats_t * FindPlayerStats(class CTFPlayer * );
+    public void ResetPlayerStats(class CTFPlayer * );
+    public void ResetKillHistory(class CTFPlayer * );
+	public void ResetRoundStats();
+    
+	protected void IncrementStat(class CTFPlayer * ,enum TFStatType_t ,int );
+    protected void SendStatsToPlayer(class CTFPlayer * ,bool );
+    protected void AccumulateAndResetPerLifeStats(class CTFPlayer * );
+	
+    public struct TFReportedStats_t m_reportedStats;
+	
+    protected struct PlayerStats_t m_aPlayerStats[33];
+};

@@ -1,0 +1,126 @@
+void __thiscall CTFGameStats::Event_PlayerKilled(CTFGameStats *this, CBasePlayer *pPlayer, const CTakeDamageInfo *info)
+{
+  CBasePlayer *v4; // ebx
+  PlayerStats_t *v5; // eax
+  double y; // st7
+  int v7; // eax
+  double z; // st7
+  unsigned int m_Index; // eax
+  CTFWeaponBase *m_pEntity; // ebp
+  unsigned int v11; // eax
+  CTFWeaponBase *v12; // eax
+  int v13; // eax
+  int v14; // edi
+  double v15; // st7
+  double x; // st7
+  __int16 WeaponFromDamage; // ax
+  double v18; // st7
+  double v19; // st5
+  double v20; // st4
+  const char *pszValue; // eax
+  _DWORD *v22; // edi
+  TF_Gamestats_LevelStats_t *v23; // eax
+  CBasePlayer *v24; // eax
+  int v25; // eax
+  float _X; // [esp+10h] [ebp-3Ch]
+  float killerOrg_4; // [esp+2Ch] [ebp-20h]
+  float killerOrg_8; // [esp+30h] [ebp-1Ch]
+  float v29; // [esp+34h] [ebp-18h]
+  TF_Gamestats_LevelStats_t::PlayerDeathsLump_t death; // [esp+38h] [ebp-14h] BYREF
+  __int16 v31; // [esp+44h] [ebp-8h]
+  char v32; // [esp+46h] [ebp-6h]
+  char z_low; // [esp+47h] [ebp-5h]
+
+  *(_DWORD *)death.nPosition = this;
+  if ( pPlayer && pPlayer->IsPlayer(pPlayer) )
+    v4 = pPlayer;
+  else
+    v4 = 0;
+  v5 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, v4->m_Network.m_pPev)];
+  ++v5->statsCurrentLife.m_iStat[4];
+  ++v5->statsCurrentRound.m_iStat[4];
+  ++v5->statsAccumulated.m_iStat[4];
+  CTFGameStats::SendStatsToPlayer(this, (CTFPlayer *)v4, 0);
+  if ( (pPlayer->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(pPlayer);
+  y = pPlayer->m_vecAbsOrigin.y;
+  death.nPosition[2] = (int)pPlayer->m_vecAbsOrigin.x;
+  v7 = (int)y;
+  z = pPlayer->m_vecAbsOrigin.z;
+  death.iWeapon = v7;
+  death.iDistance = (int)z;
+  m_Index = info->m_hInflictor.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+  v11 = info->m_hAttacker.m_Index;
+  if ( v11 == -1 || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v11 >> 12 )
+    v12 = 0;
+  else
+    v12 = g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+  v13 = ((int (__thiscall *)(CGameRules *, CTFWeaponBase *, CTFWeaponBase *, CBasePlayer *))g_pGameRules->__vftable[1].Name)(
+          g_pGameRules,
+          v12,
+          m_pEntity,
+          pPlayer);
+  v14 = v13;
+  if ( !v13 || !(*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)v13 + 304))(v13) )
+    v14 = 0;
+  if ( __RTDynamicCast(m_pEntity, 0, &CBaseEntity `RTTI Type Descriptor', &CObjectSentrygun `RTTI Type Descriptor', 0) )
+  {
+    if ( (m_pEntity->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(m_pEntity);
+    killerOrg_4 = m_pEntity->m_vecAbsOrigin.x;
+    killerOrg_8 = m_pEntity->m_vecAbsOrigin.y;
+    v15 = m_pEntity->m_vecAbsOrigin.z;
+  }
+  else if ( v14 )
+  {
+    if ( v14 == -4340 )
+      v32 = v14 - 12;
+    else
+      v32 = *(_BYTE *)(v14 + 4344);
+    if ( (*(_DWORD *)(v14 + 172) & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition((CBaseEntity *)v14);
+    killerOrg_4 = *(float *)(v14 + 668);
+    killerOrg_8 = *(float *)(v14 + 672);
+    v15 = *(float *)(v14 + 676);
+  }
+  else
+  {
+    x = pPlayer->m_vecAbsOrigin.x;
+    v32 = 0;
+    killerOrg_4 = x;
+    killerOrg_8 = pPlayer->m_vecAbsOrigin.y;
+    v15 = pPlayer->m_vecAbsOrigin.z;
+  }
+  v29 = v15;
+  if ( v4 == (CBasePlayer *)-4340 )
+    z_low = (_BYTE)v4 - 12;
+  else
+    z_low = LOBYTE(v4[1].m_vecAngVelocity.z);
+  WeaponFromDamage = GetWeaponFromDamage(info);
+  v18 = killerOrg_4 - pPlayer->m_vecAbsOrigin.x;
+  *(_WORD *)&death.iAttackClass = WeaponFromDamage;
+  v19 = v29 - pPlayer->m_vecAbsOrigin.z;
+  v20 = killerOrg_8 - pPlayer->m_vecAbsOrigin.y;
+  _X = v18 * v18 + v20 * v20 + v19 * v19;
+  v31 = (int)pfSqrt(_X);
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  v22 = (_DWORD *)(*(_DWORD *)death.nPosition + 92);
+  v23 = TFReportedStats_t::FindOrAddMapStats((TFReportedStats_t *)(*(_DWORD *)death.nPosition + 92), pszValue);
+  CUtlVector<Vector,CUtlMemory<Vector,int>>::InsertBefore(
+    (CUtlVector<QAngle,CUtlMemory<QAngle,int> > *)&v23->m_aPlayerDeaths,
+    v23->m_aPlayerDeaths.m_Size,
+    (const QAngle *)&death.nPosition[2]);
+  v24 = pPlayer->IsPlayer(pPlayer) ? pPlayer : 0;
+  if ( *(_DWORD *)(*(_DWORD *)death.nPosition + 92) )
+  {
+    v25 = 28 * LODWORD(v24[1].m_vecAngVelocity.z);
+    ++*(_DWORD *)(v25 + *v22 + 148);
+    *(_DWORD *)(v25 + *v22 + 136) += (int)(gpGlobals->curtime - *(float *)&v4[1].m_OnUser2.m_ActionList);
+  }
+}

@@ -1,0 +1,99 @@
+void __userpurge CTFStatPanel::ShowStatPanel(
+        CTFStatPanel *this@<ecx>,
+        int a2@<edi>,
+        int iClassIndex,
+        int iTeam,
+        int iCurStatValue,
+        TFStatType_t statType,
+        int recordBreakType,
+        TFStatType_t a8,
+        int a9)
+{
+  ClassStats_t *v10; // ebx
+  vgui::Panel *ChildByName; // eax
+  vgui::Label *pLabel; // ebp
+  bool v13; // zf
+  const char *v14; // eax
+  CTFStatPanel_vtbl *v15; // edi
+  int pLocalizedTitle; // eax
+  wchar_t *v17; // eax
+  CTFStatPanel_vtbl *v18; // edi
+  const char *v19; // eax
+  wchar_t *v20; // eax
+  int iPlayerClass; // ebx
+  vgui::ILocalize_vtbl *v22; // edi
+  wchar_t *v23; // eax
+  CTFClassImage *m_pClassImage; // ecx
+  const char *pRecordTextSuffix[4]; // [esp+48h] [ebp-4D8h]
+  char szValue[32]; // [esp+58h] [ebp-4C8h] BYREF
+  char szCur[32]; // [esp+78h] [ebp-4A8h] BYREF
+  wchar_t wzCur[32]; // [esp+98h] [ebp-488h] BYREF
+  wchar_t wzBest[32]; // [esp+D8h] [ebp-448h] BYREF
+  wchar_t szOriginalSummary[256]; // [esp+118h] [ebp-408h] BYREF
+  wchar_t szSummary[256]; // [esp+318h] [ebp-208h] BYREF
+
+  v10 = &this->m_aClassStats.m_Memory.m_pMemory[iClassIndex];
+  ((void (__stdcall *)(int, int))this->InvalidateLayout)(1, 1);
+  ChildByName = vgui::Panel::FindChildByName(this, "summaryLabel", 0);
+  pLabel = (vgui::Label *)__RTDynamicCast(
+                         ChildByName,
+                         0,
+                         &vgui::Panel `RTTI Type Descriptor',
+                         &vgui::Label `RTTI Type Descriptor',
+                         0);
+  if ( pLabel )
+  {
+    v13 = !this->m_bDisplayAfterSpawn;
+    pRecordTextSuffix[2] = "close";
+    pRecordTextSuffix[3] = "tie";
+    *(_DWORD *)szValue = "best";
+    v14 = "#StatPanel_Title_Alive";
+    if ( v13 )
+      v14 = "#StatPanel_Title_Dead";
+    v15 = this->vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable;
+    pLocalizedTitle = ((int (__thiscall *)(vgui::ILocalize *, const char *, int))g_pVGuiLocalize->Find)(g_pVGuiLocalize, v14, a2);
+    v15->SetDialogVariable(this, "title", (const wchar_t *)pLocalizedTitle);
+    this->SetDialogVariable(this, "stattextlarge", locale);
+    this->SetDialogVariable(this, "stattextsmall", locale);
+    if ( a9 == 1 )
+    {
+      CTFStatPanel::GetStatValueAsString(this, recordBreakType, a8, &szCur[12], 32);
+      CTFStatPanel::GetStatValueAsString(this, v10->max.m_iStat[a8], a8, &szValue[12], 32);
+      ((void (__thiscall *)(vgui::ILocalize *, char *, wchar_t *))g_pVGuiLocalize->ConvertANSIToUnicode)(
+        g_pVGuiLocalize,
+        &szCur[12],
+        &wzCur[6]);
+      g_pVGuiLocalize->ConvertANSIToUnicode(g_pVGuiLocalize, &szValue[8], &wzBest[4], 64);
+      v17 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#StatPanel_Format_Close");
+      g_pVGuiLocalize->ConstructString(g_pVGuiLocalize, &szOriginalSummary[4], 512, v17, 2, &wzCur[4], &wzBest[4]);
+      this->SetDialogVariable(this, "stattextsmall", &szOriginalSummary[4]);
+      pLabel = (vgui::Label *)locale;
+    }
+    else
+    {
+      CTFStatPanel::GetStatValueAsString(this, recordBreakType, a8, &szValue[12], 32);
+      ((void (__thiscall *)(CTFStatPanel *, const char *))this->SetDialogVariable)(this, "stattextlarge");
+    }
+    CFmtStrN<256>::CFmtStrN<256>(
+      (CFmtStrN<256> *)&szOriginalSummary[4],
+      "%s_%s",
+      g_szLocalizedRecordText[a8],
+      pRecordTextSuffix[a8 + 2]);
+    v18 = this->vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable;
+    v20 = g_pVGuiLocalize->Find(g_pVGuiLocalize, v19);
+    v18->SetDialogVariable(this, "statdesc", v20);
+    iPlayerClass = v10->iPlayerClass;
+    if ( (unsigned int)(iPlayerClass - 1) <= 8 )
+    {
+      pLabel->GetText(pLabel, &szOriginalSummary[2], 512);
+      v22 = g_pVGuiLocalize->__vftable;
+      v23 = g_pVGuiLocalize->Find(g_pVGuiLocalize, g_aPlayerClassNames[iPlayerClass]);
+      v22->ConstructString(g_pVGuiLocalize, &szSummary[2], 512, &szOriginalSummary[2], 1, v23);
+      pLabel->SetText(pLabel, &szSummary[2], 0);
+    }
+    m_pClassImage = this->m_pClassImage;
+    if ( m_pClassImage )
+      CTFClassImage::SetClass(m_pClassImage, iTeam, iPlayerClass, 0);
+    CTFStatPanel::Show(this);
+  }
+}

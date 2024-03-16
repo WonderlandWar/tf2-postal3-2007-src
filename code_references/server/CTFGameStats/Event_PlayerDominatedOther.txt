@@ -1,0 +1,9 @@
+void __thiscall CTFGameStats::Event_PlayerDominatedOther(CTFGameStats *this, CTFPlayer *pAttacker)
+{
+  PlayerStats_t *v2; // eax
+
+  v2 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pAttacker->m_Network.m_pPev)];
+  ++v2->statsCurrentLife.m_iStat[8];
+  ++v2->statsCurrentRound.m_iStat[8];
+  ++v2->statsAccumulated.m_iStat[8];
+}

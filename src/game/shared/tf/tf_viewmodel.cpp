@@ -79,16 +79,6 @@ void CTFViewModel::AddViewModelBob( CBasePlayer *owner, Vector& eyePosition, QAn
 void CTFViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
 {
 #ifdef CLIENT_DLL
-	if ( prediction->InPrediction() )
-	{
-		return;
-	}
-
-	if ( cl_wpn_sway_interp.GetFloat() <= 0.0f )
-	{
-		return;
-	}
-
 	// Calculate our drift
 	Vector	forward, right, up;
 	AngleVectors( angles, &forward, &right, &up );
@@ -307,7 +297,7 @@ bool CViewModelInvisProxy::Init( IMaterial *pMaterial, KeyValues* pKeyValues )
 	return bFound;
 }
 
-ConVar tf_vm_min_invis( "tf_vm_min_invis", "0.22", FCVAR_DEVELOPMENTONLY, "minimum invisibility value for view model", true, 0.0, true, 1.0 );
+#define TF_VM_MIN_INVIS 0
 ConVar tf_vm_max_invis( "tf_vm_max_invis", "0.5", FCVAR_DEVELOPMENTONLY, "maximum invisibility value for view model", true, 0.0, true, 1.0 );
 
 //-----------------------------------------------------------------------------
@@ -339,11 +329,9 @@ void CViewModelInvisProxy::OnBind( C_BaseEntity *pEnt )
 
 	float flPercentInvisible = pPlayer->GetPercentInvisible();
 
-	// remap from 0.22 to 0.5
+	// remap from 0.0 to 0.5
 	// but drop to 0.0 if we're not invis at all
-	float flWeaponInvis = ( flPercentInvisible < 0.01 ) ?
-		0.0 :
-		RemapVal( flPercentInvisible, 0.0, 1.0, tf_vm_min_invis.GetFloat(), tf_vm_max_invis.GetFloat() );
+	float flWeaponInvis = RemapVal( flPercentInvisible, 0.0, 1.0, TF_VM_MIN_INVIS, tf_vm_max_invis.GetFloat() );
 
 	m_pPercentInvisible->SetFloatValue( flWeaponInvis );
 }

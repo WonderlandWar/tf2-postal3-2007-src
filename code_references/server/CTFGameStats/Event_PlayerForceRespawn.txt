@@ -1,0 +1,15 @@
+void __thiscall CTFGameStats::Event_PlayerForceRespawn(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  int *p_iTotalTime; // ebx
+
+  if ( pPlayer->IsAlive(pPlayer) )
+  {
+    CTFGameStats::SendStatsToPlayer(this, pPlayer, 1);
+    if ( this->m_reportedStats.m_pCurrentMap )
+    {
+      p_iTotalTime = &this->m_reportedStats.m_pCurrentMap->m_aClassStats[pPlayer->m_PlayerClass.m_iClass.m_Value].iTotalTime;
+      *p_iTotalTime += (int)(gpGlobals->curtime - pPlayer->m_flSpawnTime);
+    }
+  }
+  CTFGameStats::AccumulateAndResetPerLifeStats(this, pPlayer);
+}

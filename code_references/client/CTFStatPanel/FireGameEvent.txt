@@ -1,0 +1,79 @@
+void __thiscall CTFStatPanel::FireGameEvent(CTFStatPanel *this, IGameEvent *event)
+{
+  const char *v4; // eax
+  int v5; // esi
+  C_TFPlayer *LocalTFPlayer; // eax
+  vgui::IVGui *v7; // ebx
+  void (__thiscall **p_AddTickSignal)(vgui::IVGui *, unsigned int, int); // esi
+  int v9; // eax
+  double v10; // st7
+  int v11; // esi
+  int v12; // edi
+  C_TFPlayer *pPlayer; // eax
+  int i; // esi
+  TFStatType_t v15; // [esp+10h] [ebp-68h]
+  int v16; // [esp+14h] [ebp-64h]
+  RoundStats_t stats; // [esp+1Ch] [ebp-5Ch] BYREF
+  bool bShowNow; // [esp+7Ch] [ebp+4h]
+
+  v4 = event->GetName(event);
+  if ( !strcmp("player_spawn", v4) )
+  {
+    v5 = event->GetInt(event, "userid", 0);
+    if ( C_TFPlayer::GetLocalTFPlayer() )
+    {
+      LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+      if ( C_BasePlayer::GetUserID(LocalTFPlayer) == v5 )
+      {
+        if ( LOBYTE(this->m_pTooltips) )
+        {
+          v7 = g_pVGui;
+          p_AddTickSignal = &g_pVGui->AddTickSignal;
+          v9 = (*(int (__thiscall **)(vgui::Dar<unsigned long> *, int))this[-1]._actionSignalTargetDar.m_Memory.m_pMemory)(
+                 &this[-1]._actionSignalTargetDar,
+                 1000);
+          ((void (__thiscall *)(vgui::IVGui *, int))*p_AddTickSignal)(v7, v9);
+          CTFStatPanel::ShowStatPanel(
+            (CTFStatPanel *)((char *)this - 232),
+            (int)&this[-1]._actionSignalTargetDar,
+            *(_DWORD *)&this->m_InternalInvalidateLayout_register,
+            (int)this->m_pDragDrop,
+            *(_DWORD *)&this->m_InternalKeyTyped_register,
+            *(_DWORD *)&this->m_clrDragFrame,
+            *(_DWORD *)&this->m_clrDropFrame,
+            v15,
+            v16);
+          v10 = *(float *)(gpGlobals.m_Index + 12) + 12.0;
+          LOBYTE(this->m_pTooltips) = 0;
+          *(float *)&this->m_SkipChild.m_iPanelID = v10;
+        }
+        else
+        {
+          CTFStatPanel::Hide((CTFStatPanel *)((char *)this - 232));
+        }
+      }
+    }
+  }
+  else if ( !strcmp("teamplay_stat_panel", v4) )
+  {
+    RoundStats_t::RoundStats_t((RoundStats_t *)&stats.m_iStat[1]);
+    v11 = event->GetInt(event, "userid", 0);
+    v12 = event->GetInt(event, "class", 0);
+    bShowNow = event->GetInt(event, "alive", 0) == 0;
+    pPlayer = C_TFPlayer::GetLocalTFPlayer();
+    if ( pPlayer && C_BasePlayer::GetUserID(pPlayer) == v11 )
+    {
+      for ( i = 0; i <= 20; ++i )
+        stats.m_iStat[i + 2] = event->GetInt(event, g_szStatEventParamName[i + 1], 0);
+      CTFStatPanel::UpdateStats(
+        (CTFStatPanel *)((char *)this - 232),
+        v12,
+        (const RoundStats_t *)&stats.m_iStat[1],
+        bShowNow);
+    }
+  }
+  else if ( !strcmp("game_newmap", v4) )
+  {
+    CTFStatPanel::WriteStats((CTFStatPanel *)((char *)this - 232));
+  }
+}

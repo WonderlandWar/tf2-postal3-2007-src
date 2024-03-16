@@ -1,0 +1,8 @@
+void __thiscall CTFGameStats::AppendCustomDataToSaveBuffer(CTFGameStats *this, CUtlBuffer *SaveBuffer)
+{
+  TFReportedStats_t *p_m_reportedStats; // esi
+
+  p_m_reportedStats = &this->m_reportedStats;
+  TFReportedStats_t::AppendCustomDataToSaveBuffer(&this->m_reportedStats, SaveBuffer);
+  TFReportedStats_t::Clear(p_m_reportedStats);
+}

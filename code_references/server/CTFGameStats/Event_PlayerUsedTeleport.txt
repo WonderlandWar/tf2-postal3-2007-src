@@ -1,0 +1,12 @@
+void __thiscall CTFGameStats::Event_PlayerUsedTeleport(
+        CTFGameStats *this,
+        CTFPlayer *pTeleportOwner,
+        CTFPlayer *pTeleportingPlayer)
+{
+  PlayerStats_t *v3; // eax
+
+  v3 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pTeleportOwner->m_Network.m_pPev)];
+  ++v3->statsCurrentLife.m_iStat[21];
+  ++v3->statsCurrentRound.m_iStat[21];
+  ++v3->statsAccumulated.m_iStat[21];
+}

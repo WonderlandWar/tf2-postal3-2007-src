@@ -1,0 +1,22 @@
+void __thiscall CTFStatPanel::ApplySchemeSettings(CTFStatPanel *this, vgui::IScheme *pScheme)
+{
+  vgui::IScheme *v2; // ebx
+  vgui::Panel *ChildByName; // esi
+  vgui::Panel_vtbl *v5; // ebp
+  Color *v6; // eax
+
+  v2 = pScheme;
+  vgui::Panel::ApplySchemeSettings(this, pScheme);
+  if ( C_TFPlayer::GetLocalTFPlayer() )
+  {
+    this->LoadControlSettings(this, "resource/UI/StatPanel_Base.res", 0, 0);
+    ChildByName = vgui::Panel::FindChildByName(this, "StatBox", 0);
+    if ( ChildByName )
+    {
+      ChildByName->ApplySchemeSettings(ChildByName, v2);
+      v5 = ChildByName->__vftable;
+      v6 = this->GetSchemeColor(this, &pScheme, "TransparentLightBlack", v2);
+      v5->SetBgColor(ChildByName, *v6);
+    }
+  }
+}

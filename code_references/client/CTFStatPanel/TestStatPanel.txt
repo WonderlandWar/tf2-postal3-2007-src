@@ -1,0 +1,54 @@
+void __thiscall CTFStatPanel::TestStatPanel(CTFStatPanel *this, TFStatType_t statType)
+{
+  C_TFPlayer *LocalTFPlayer; // eax
+  C_TFPlayer *v4; // ebx
+  int m_Size; // ecx
+  int m_Value; // ebp
+  int v7; // edi
+  ClassStats_t *m_pMemory; // eax
+  ClassStats_t *v9; // eax
+  int v10; // eax
+  int m_iCurStatClassIndex; // [esp-1Ch] [ebp-DCh]
+  int m_iCurStatValue; // [esp-14h] [ebp-D4h]
+  int v13; // [esp-10h] [ebp-D0h]
+  ClassStats_t stats; // [esp+4h] [ebp-BCh] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  v4 = LocalTFPlayer;
+  if ( LocalTFPlayer )
+  {
+    m_Size = this->m_aClassStats.m_Size;
+    m_Value = LocalTFPlayer->m_PlayerClass.m_iClass.m_Value;
+    v7 = 0;
+    if ( m_Size > 0 )
+    {
+      m_pMemory = this->m_aClassStats.m_Memory.m_pMemory;
+      do
+      {
+        if ( m_pMemory->iPlayerClass == m_Value )
+          break;
+        ++v7;
+        ++m_pMemory;
+      }
+      while ( v7 < m_Size );
+    }
+    if ( v7 >= m_Size )
+    {
+      ClassStats_t::ClassStats_t((ClassStats_t *)&stats.iNumberOfRounds);
+      v13 = this->m_aClassStats.m_Size;
+      stats.iNumberOfRounds = m_Value;
+      CUtlVector<ClassStats_t,CUtlMemory<ClassStats_t,int>>::InsertBefore(
+        &this->m_aClassStats,
+        v13,
+        (const ClassStats_t *)&stats.iNumberOfRounds);
+    }
+    v9 = this->m_aClassStats.m_Memory.m_pMemory;
+    this->m_iCurStatClassIndex = v7;
+    this->m_iCurStatValue = v9[v7].max.m_iStat[statType];
+    v10 = v4->GetTeamNumber(v4);
+    m_iCurStatValue = this->m_iCurStatValue;
+    m_iCurStatClassIndex = this->m_iCurStatClassIndex;
+    this->m_iCurStatTeam = v10;
+    CTFStatPanel::ShowStatPanel(this, m_iCurStatClassIndex, v10, m_iCurStatValue, statType, RECORDBREAK_BEST);
+  }
+}

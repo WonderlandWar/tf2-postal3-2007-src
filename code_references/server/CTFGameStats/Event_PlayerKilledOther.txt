@@ -1,0 +1,32 @@
+void __thiscall CTFGameStats::Event_PlayerKilledOther(
+        CTFGameStats *this,
+        CBasePlayer *pAttacker,
+        CBaseEntity *pVictim,
+        const CTakeDamageInfo *info)
+{
+  PlayerStats_t *v5; // eax
+  CBaseEntity *v6; // ebp
+  int v7; // esi
+  int v8; // eax
+  PlayerStats_t *v9; // edx
+  PlayerStats_t *v10; // ecx
+
+  v5 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pAttacker->m_Network.m_pPev)];
+  ++v5->statsCurrentLife.m_iStat[3];
+  ++v5->statsCurrentRound.m_iStat[3];
+  ++v5->statsAccumulated.m_iStat[3];
+  if ( pVictim->IsPlayer(pVictim) )
+  {
+    v6 = pVictim->IsPlayer(pVictim) ? pVictim : 0;
+    v7 = engine->IndexOfEdict(engine, pAttacker->m_Network.m_pPev);
+    v8 = engine->IndexOfEdict(engine, v6->m_Network.m_pPev);
+    v9 = &this->m_aPlayerStats[v7];
+    v10 = &this->m_aPlayerStats[v8];
+    ++v10->statsKills.iNumKilledBy[v7];
+    ++v10->statsKills.iNumKilledByUnanswered[v7];
+    ++v9->statsKills.iNumKilled[v8];
+    v9->statsKills.iNumKilledByUnanswered[v8] = 0;
+  }
+  if ( this->m_reportedStats.m_pCurrentMap )
+    ++this->m_reportedStats.m_pCurrentMap->m_aClassStats[LODWORD(pAttacker[1].m_vecAngVelocity.z)].iKills;
+}

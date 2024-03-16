@@ -1,0 +1,6 @@
+void __thiscall CTFGameStats::Clear(CTFGameStats *this)
+{
+  TFReportedStats_t::Clear(&this->m_reportedStats);
+  memset((unsigned __int8 *)this->m_aPlayerStats, 0, sizeof(this->m_aPlayerStats));
+  CBaseGameStats::Clear(this);
+}

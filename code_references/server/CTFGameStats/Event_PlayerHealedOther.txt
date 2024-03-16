@@ -1,0 +1,11 @@
+void __thiscall CTFGameStats::Event_PlayerHealedOther(CTFGameStats *this, CTFPlayer *pPlayer, float amount)
+{
+  int v4; // esi
+  int v5; // eax
+
+  v4 = (int)amount;
+  v5 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+  this->m_aPlayerStats[v5].statsCurrentLife.m_iStat[14] += v4;
+  this->m_aPlayerStats[v5].statsCurrentRound.m_iStat[14] += v4;
+  this->m_aPlayerStats[v5].statsAccumulated.m_iStat[14] += v4;
+}

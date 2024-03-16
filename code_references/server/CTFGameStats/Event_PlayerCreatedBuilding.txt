@@ -1,0 +1,15 @@
+void __thiscall CTFGameStats::Event_PlayerCreatedBuilding(
+        CTFGameStats *this,
+        CTFPlayer *pPlayer,
+        CBaseObject *pBuilding)
+{
+  PlayerStats_t *v4; // eax
+
+  if ( !__RTDynamicCast(pBuilding, 0, &CBaseObject `RTTI Type Descriptor', &CObjectSapper `RTTI Type Descriptor', 0) )
+  {
+    v4 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev)];
+    ++v4->statsCurrentLife.m_iStat[19];
+    ++v4->statsCurrentRound.m_iStat[19];
+    ++v4->statsAccumulated.m_iStat[19];
+  }
+}

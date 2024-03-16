@@ -1,0 +1,19 @@
+void __thiscall CTFStatPanel::ResetStats(CTFStatPanel *this)
+{
+  CTFStatsSummaryPanel *v2; // eax
+  CUtlVector<ClassStats_t,CUtlMemory<ClassStats_t,int> > *p_m_aClassStats; // [esp-4h] [ebp-8h]
+
+  this->m_aClassStats.m_Size = 0;
+  this->m_flTimeHide = 0.0;
+  p_m_aClassStats = &this->m_aClassStats;
+  this->m_bStatsChanged = 1;
+  this->m_iCurStatValue = 0;
+  this->m_iCurStatTeam = 0;
+  this->m_statType = TFSTAT_UNDEFINED;
+  this->m_recordBreakType = RECORDBREAK_NONE;
+  this->m_iCurStatClassIndex = -1;
+  this->m_bDisplayAfterSpawn = 0;
+  v2 = GStatsSummaryPanel();
+  CTFStatsSummaryPanel::SetStats(v2, p_m_aClassStats);
+  CTFStatPanel::WriteStats(this);
+}

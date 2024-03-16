@@ -1,0 +1,4 @@
+void __thiscall CTFGameStats::LoadCustomDataFromBuffer(CTFGameStats *this, CUtlBuffer *LoadBuffer)
+{
+  TFReportedStats_t::LoadCustomDataFromBuffer(&this->m_reportedStats, LoadBuffer);
+}

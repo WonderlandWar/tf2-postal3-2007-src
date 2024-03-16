@@ -1,0 +1,12 @@
+class C_TFTeam : public C_Team
+{
+    private int YouForgotToImplementOrDeclareClientClass();
+    private class ClientClass * GetClientClass();
+    private class RecvTable * m_pClassRecvTable;
+    public void C_TFTeam(class C_TFTeam & );
+    public void C_TFTeam();
+    public void ~C_TFTeam();
+    public int GetFlagCaptures();
+	
+    private int m_nFlagCaptures;
+};

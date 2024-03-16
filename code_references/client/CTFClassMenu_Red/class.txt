@@ -1,0 +1,38 @@
+class CTFClassMenu_Red : public CTFClassMenu
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFClassMenu_Red_RegisterMap
+    {
+        public void CTFClassMenu_Red_RegisterMap();
+    };
+    public class CTFClassMenu_Red::CTFClassMenu_Red_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFClassMenu_Red_Register
+    {
+        public void CTFClassMenu_Red_Register();
+    };
+    public class CTFClassMenu_Red::CTFClassMenu_Red_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFClassMenu_Red_RegisterKBMap
+    {
+        public void CTFClassMenu_Red_RegisterKBMap();
+    };
+    public class CTFClassMenu_Red::CTFClassMenu_Red_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFClassMenu_Red(class CTFClassMenu_Red & );
+    public void CTFClassMenu_Red(class IViewPort * );
+    
+	public void ApplySchemeSettings(class vgui::IScheme * );
+    
+	public char * GetName();
+	
+    public int GetTeamNumber();
+};

@@ -1,0 +1,19 @@
+void __thiscall CTFGameStats::Event_AssistKill(CTFGameStats *this, CTFPlayer *pAttacker, CBaseEntity *pVictim)
+{
+  PlayerStats_t *statsAttacker; // eax
+  CTFPlayer *pPlayerVictim; // edi
+  PlayerStats_t *statsVictim; // esi
+
+  statsAttacker = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pAttacker->m_Network.m_pPev)];
+  ++statsAttacker->statsCurrentLife.m_iStat[16];
+  ++statsAttacker->statsCurrentRound.m_iStat[16];
+  ++statsAttacker->statsAccumulated.m_iStat[16];
+  if ( this->m_reportedStats.m_pCurrentMap )
+    ++this->m_reportedStats.m_pCurrentMap->m_aClassStats[pAttacker->m_PlayerClass.m_iClass.m_Value].iAssists;
+  if ( pVictim->IsPlayer(pVictim) )
+  {
+    pPlayerVictim = pVictim->IsPlayer(pVictim) ? (CTFPlayer *)pVictim : 0;
+    statsVictim = &this->m_aPlayerStats[engine->IndexOfEdict(engine, pPlayerVictim->m_Network.m_pPev)];
+    statsVictim->statsKills.iNumKilledByUnanswered[engine->IndexOfEdict(engine, pPlayerVictim->m_Network.m_pPev)] = 0;
+  }
+}

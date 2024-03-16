@@ -1,0 +1,71 @@
+class CTFClassMenu : public CClassMenu
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFClassMenu_RegisterMap
+    {
+        public void CTFClassMenu_RegisterMap();
+    };
+    public class CTFClassMenu::CTFClassMenu_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFClassMenu_Register
+    {
+        public void CTFClassMenu_Register();
+    };
+    public class CTFClassMenu::CTFClassMenu_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFClassMenu_RegisterKBMap
+    {
+        public void CTFClassMenu_RegisterKBMap();
+    };
+    public class CTFClassMenu::CTFClassMenu_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+	
+    public void CTFClassMenu(class CTFClassMenu & );
+    public void CTFClassMenu(class IViewPort * );
+	
+    public void Update();
+    public class vgui::Panel * CreateControlByName(char * );
+    public void OnTick();
+    public void PaintBackground();
+    public void SetVisible(bool );
+	
+    class PanelMessageFunc_OnShowPage
+    {
+        public void InitVar();
+        public void PanelMessageFunc_OnShowPage();
+    };
+    public class CTFClassMenu::PanelMessageFunc_OnShowPage m_OnShowPage_register;
+    public void OnShowPage(char * );
+    public void Join_Class(class CCommand & );
+    class CCommandMemberInitializer_Join_Class
+    {
+        public void CCommandMemberInitializer_Join_Class(class CTFClassMenu::CCommandMemberInitializer_Join_Class & );
+        public void CCommandMemberInitializer_Join_Class();
+        private class CConCommandMemberAccessor<CTFClassMenu> m_ConCommandAccessor;
+        public void ~CCommandMemberInitializer_Join_Class();
+        public class CTFClassMenu::CCommandMemberInitializer_Join_Class & operator=(class CTFClassMenu::CCommandMemberInitializer_Join_Class & );
+        public void * __vecDelDtor(unsigned int );
+    };
+    public class CTFClassMenu::CCommandMemberInitializer_Join_Class m_Join_Class_register;
+	
+    public void OnClose();
+    public void ShowPanel(bool );
+	
+    protected void ApplySchemeSettings(class vgui::IScheme * );
+    protected void OnKeyCodePressed(enum ButtonCode_t );
+    protected class CImageMouseOverButton<CTFClassInfoPanel> * GetCurrentClassButton();
+	
+    protected class CImageMouseOverButton<CTFClassInfoPanel> * m_pClassButtons[13];
+    protected class CTFClassInfoPanel * m_pClassInfoPanel;
+	
+    private enum ButtonCode_t m_iClassMenuKey;
+    private int m_iCurrentClassIndex;
+};

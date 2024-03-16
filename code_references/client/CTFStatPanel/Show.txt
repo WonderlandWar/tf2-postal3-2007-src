@@ -1,0 +1,20 @@
+void __thiscall CTFStatPanel::Show(CTFStatPanel *this)
+{
+  CHudElement *Element; // eax
+  bool *p_m_bActive; // ecx
+  bool v4; // [esp+4h] [ebp-4h]
+
+  v4 = 1;
+  Element = CHud::FindElement(&gHUD, "CTFWinPanel");
+  if ( Element )
+    p_m_bActive = &Element[-10].m_bActive;
+  else
+    p_m_bActive = 0;
+  if ( !this->m_bDisplayAfterSpawn
+    && p_m_bActive
+    && (*(unsigned __int8 (__thiscall **)(bool *))(*(_DWORD *)p_m_bActive + 128))(p_m_bActive) )
+  {
+    v4 = 0;
+  }
+  this->SetVisible(this, v4);
+}

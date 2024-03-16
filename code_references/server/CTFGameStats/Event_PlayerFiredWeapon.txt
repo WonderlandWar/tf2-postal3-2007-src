@@ -1,0 +1,31 @@
+void __thiscall CTFGameStats::Event_PlayerFiredWeapon(CTFGameStats *this, CTFPlayer *pPlayer, bool bCritical)
+{
+  CTFWeaponBase *ActiveTFWeapon; // eax
+  int v5; // eax
+  TF_Gamestats_LevelStats_t *m_pCurrentMap; // ecx
+  int v7; // eax
+  int v8; // eax
+  int v9; // eax
+
+  if ( g_pGameRules[67].__vftable == (CGameRules_vtbl *)4 )
+  {
+    ActiveTFWeapon = CTFPlayer::GetActiveTFWeapon(pPlayer);
+    if ( ActiveTFWeapon )
+    {
+      v5 = ActiveTFWeapon->GetWeaponID(ActiveTFWeapon);
+      m_pCurrentMap = this->m_reportedStats.m_pCurrentMap;
+      if ( m_pCurrentMap )
+      {
+        v7 = v5;
+        ++m_pCurrentMap->m_aWeaponStats[v7].iShotsFired;
+        v8 = (int)&m_pCurrentMap->m_aWeaponStats[v7];
+        if ( bCritical )
+          ++*(_DWORD *)(v8 + 4);
+      }
+    }
+  }
+  v9 = engine->IndexOfEdict(engine, pPlayer->m_Network.m_pPev);
+  ++this->m_aPlayerStats[v9].statsCurrentLife.m_iStat[2];
+  ++this->m_aPlayerStats[v9].statsCurrentRound.m_iStat[2];
+  ++this->m_aPlayerStats[v9].statsAccumulated.m_iStat[2];
+}

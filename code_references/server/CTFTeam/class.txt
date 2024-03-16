@@ -1,0 +1,35 @@
+class CTFTeam : public CTeam
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void CTFTeam(class CTFTeam & );
+    public void CTFTeam();
+	
+    public void SetColor(struct color32_s );
+    public struct color32_s GetColor();
+	
+    public void ShowScore(class CBasePlayer * );
+	
+    public void AddObject(class CBaseObject * );
+    public void RemoveObject(class CBaseObject * );
+    public bool IsObjectOnTeam(class CBaseObject * );
+    public int GetNumObjects(int );
+    public class CBaseObject * GetObject(int );
+	
+    public int GetFlagCaptures();
+    public void SetFlagCaptures(int );
+    public void IncrementFlagCaptures();
+	
+    private struct color32_s m_TeamColor;
+    private class CUtlVector<CHandle<CBaseObject>,CUtlMemory<CHandle<CBaseObject>,int> > m_aObjects;
+	
+    class NetworkVar_m_nFlagCaptures
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CTFTeam::NetworkVar_m_nFlagCaptures> m_nFlagCaptures;
+	
+    public void ~CTFTeam();
+};

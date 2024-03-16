@@ -1,0 +1,18 @@
+void __thiscall CTFStatPanel::Hide(CTFStatPanel *this)
+{
+  CTFStatPanel_vtbl *v2; // eax
+  vgui::IVGui *v3; // edi
+  vgui::IVGui_vtbl *v4; // ebx
+  int v5; // eax
+
+  this->SetVisible(this, 0);
+  if ( this->m_flTimeHide > 0.0 )
+  {
+    v2 = this->vgui::EditablePanel::vgui::Panel::vgui::IClientPanel::__vftable;
+    this->m_flTimeHide = 0.0;
+    v3 = g_pVGui;
+    v4 = g_pVGui->__vftable;
+    v5 = v2->GetVPanel(this);
+    v4->RemoveTickSignal(v3, v5);
+  }
+}

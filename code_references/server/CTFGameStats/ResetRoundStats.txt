@@ -1,0 +1,36 @@
+void __thiscall CTFGameStats::ResetRoundStats(CTFGameStats *this)
+{
+  RoundStats_t *p_statsCurrentRound; // eax
+  int v2; // edx
+
+  p_statsCurrentRound = &this->m_aPlayerStats[0].statsCurrentRound;
+  v2 = 33;
+  do
+  {
+    p_statsCurrentRound->m_iStat[0] = 0;
+    p_statsCurrentRound->m_iStat[1] = 0;
+    p_statsCurrentRound->m_iStat[2] = 0;
+    p_statsCurrentRound->m_iStat[3] = 0;
+    p_statsCurrentRound->m_iStat[4] = 0;
+    p_statsCurrentRound->m_iStat[5] = 0;
+    p_statsCurrentRound->m_iStat[6] = 0;
+    p_statsCurrentRound->m_iStat[7] = 0;
+    p_statsCurrentRound->m_iStat[8] = 0;
+    p_statsCurrentRound->m_iStat[9] = 0;
+    p_statsCurrentRound->m_iStat[10] = 0;
+    p_statsCurrentRound->m_iStat[11] = 0;
+    p_statsCurrentRound->m_iStat[12] = 0;
+    p_statsCurrentRound->m_iStat[13] = 0;
+    p_statsCurrentRound->m_iStat[14] = 0;
+    p_statsCurrentRound->m_iStat[15] = 0;
+    p_statsCurrentRound->m_iStat[16] = 0;
+    p_statsCurrentRound->m_iStat[17] = 0;
+    p_statsCurrentRound->m_iStat[18] = 0;
+    p_statsCurrentRound->m_iStat[19] = 0;
+    p_statsCurrentRound->m_iStat[20] = 0;
+    p_statsCurrentRound->m_iStat[21] = 0;
+    p_statsCurrentRound = (RoundStats_t *)((char *)p_statsCurrentRound + 660);
+    --v2;
+  }
+  while ( v2 );
+}

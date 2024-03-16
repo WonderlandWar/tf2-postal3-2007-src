@@ -1,0 +1,12 @@
+void __thiscall CTFGameStats::Event_PlayerConnected(CTFGameStats *this, CTFPlayer *pPlayer)
+{
+  CTFPlayer *v2; // esi
+  int v4; // eax
+
+  v2 = pPlayer;
+  if ( !pPlayer || !pPlayer->IsPlayer(pPlayer) )
+    v2 = 0;
+  v4 = engine->IndexOfEdict(engine, v2->m_Network.m_pPev);
+  PlayerStats_t::Reset(&this->m_aPlayerStats[v4]);
+  CTFGameStats::ResetKillHistory(this, v2);
+}

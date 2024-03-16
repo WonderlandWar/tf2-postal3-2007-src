@@ -1,0 +1,9 @@
+void __thiscall CTFGameStats::Event_LevelShutdown(CTFGameStats *this, float flElapsed)
+{
+  TF_Gamestats_LevelStats_t *m_pCurrentMap; // ecx
+
+  CBaseGameStats::Event_LevelShutdown(this, flElapsed);
+  m_pCurrentMap = this->m_reportedStats.m_pCurrentMap;
+  if ( m_pCurrentMap )
+    CTeamplayRoundBasedRules::InternalHandleTeamWin((vgui::TreeView *)m_pCurrentMap, COERCE_INT(gpGlobals->curtime));
+}

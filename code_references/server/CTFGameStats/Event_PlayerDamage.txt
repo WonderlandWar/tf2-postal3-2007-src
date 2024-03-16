@@ -1,0 +1,221 @@
+void __thiscall CTFGameStats::Event_PlayerDamage(
+        CTFGameStats *this,
+        CBasePlayer *pBasePlayer,
+        CTakeDamageInfo *info,
+        int iDamageTaken)
+{
+  CBaseEntity *v4; // esi
+  CBasePlayer *v5; // edi
+  unsigned int m_Index; // eax
+  CEntInfo *v7; // ecx
+  const edict_t **v8; // ebp
+  unsigned int v9; // eax
+  CTFWeaponBase *m_pEntity; // eax
+  PlayerStats_t *v11; // eax
+  double y; // st7
+  int v13; // eax
+  double z; // st7
+  unsigned int v15; // eax
+  CTFWeaponBase *v16; // edi
+  int v17; // ebp
+  CBasePlayer *v18; // ebp
+  unsigned int v19; // ecx
+  const Vector *AbsOrigin; // eax
+  double v21; // st7
+  double x; // st7
+  __int16 WeaponFromDamage; // ax
+  bool v24; // zf
+  TF_Gamestats_LevelStats_t *m_pCurrentMap; // ecx
+  int v26; // edx
+  int v27; // esi
+  float v28; // edx
+  float v29; // eax
+  CBaseEntity *Inflictor; // eax
+  const Vector *v31; // eax
+  float fTime; // ecx
+  const Vector *v33; // eax
+  CBasePlayer_vtbl *v34; // edx
+  bool v35; // dl
+  bool v36; // sf
+  const char *pszValue; // eax
+  TF_Gamestats_LevelStats_t *v38; // eax
+  CBasePlayer *v39; // [esp+10h] [ebp-40h]
+  float killerOrg_4; // [esp+18h] [ebp-38h]
+  float killerOrg_8; // [esp+1Ch] [ebp-34h]
+  Vector vecDamageOrigin; // [esp+20h] [ebp-30h] BYREF
+  float v44; // [esp+2Ch] [ebp-24h]
+  TF_Gamestats_LevelStats_t::PlayerDamageLump_t damage; // [esp+30h] [ebp-20h] BYREF
+  char v46; // [esp+48h] [ebp-8h]
+  char z_low; // [esp+49h] [ebp-7h]
+  bool v48; // [esp+4Ah] [ebp-6h]
+  bool v49; // [esp+4Bh] [ebp-5h]
+
+  v4 = 0;
+  LODWORD(damage.fTime) = pBasePlayer;
+  if ( pBasePlayer && pBasePlayer->IsPlayer(pBasePlayer) )
+  {
+    v5 = pBasePlayer;
+    v39 = pBasePlayer;
+  }
+  else
+  {
+    v39 = 0;
+    v5 = 0;
+  }
+  m_Index = info->m_hAttacker.m_Index;
+  if ( m_Index == -1
+    || (v7 = &g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF],
+        g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12)
+    || (v8 = (const edict_t **)v7->m_pEntity) == 0
+    || !((unsigned __int8 (__thiscall *)(CTFWeaponBase *))(*v8)[15].m_NetworkSerialNumber)(v7->m_pEntity) )
+  {
+    v9 = info->m_hAttacker.m_Index;
+    if ( v9 == -1 || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v9 >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+    v4 = (CBaseEntity *)__RTDynamicCast(
+                          m_pEntity,
+                          0,
+                          &CBaseEntity `RTTI Type Descriptor',
+                          &CObjectSentrygun `RTTI Type Descriptor',
+                          0);
+    if ( !v4 )
+      return;
+    v8 = (const edict_t **)((int (__thiscall *)(CBaseEntity *))v4->__vftable[1].DoImpactEffect)(v4);
+  }
+  if ( v5 != (CBasePlayer *)v8 )
+  {
+    v11 = &this->m_aPlayerStats[engine->IndexOfEdict(engine, v8[86])];
+    v11->statsCurrentLife.m_iStat[5] += iDamageTaken;
+    v11->statsCurrentRound.m_iStat[5] += iDamageTaken;
+    v11->statsAccumulated.m_iStat[5] += iDamageTaken;
+    if ( (v5->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(v5);
+    y = v5->m_vecAbsOrigin.y;
+    damage.nTargetPosition[2] = (int)v5->m_vecAbsOrigin.x;
+    v13 = (int)y;
+    z = v5->m_vecAbsOrigin.z;
+    damage.nAttackerPosition[0] = v13;
+    damage.nAttackerPosition[1] = (int)z;
+    v15 = info->m_hInflictor.m_Index;
+    if ( v15 == -1 || g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v15 >> 12 )
+      v16 = 0;
+    else
+      v16 = g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity;
+    v17 = ((int (__thiscall *)(CGameRules *, const edict_t **, CTFWeaponBase *, CBasePlayer *))g_pGameRules->__vftable[1].Name)(
+            g_pGameRules,
+            v8,
+            v16,
+            v39);
+    if ( v4
+      || (v4 = (CBaseEntity *)__RTDynamicCast(
+                                v16,
+                                0,
+                                &CBaseEntity `RTTI Type Descriptor',
+                                &CObjectSentrygun `RTTI Type Descriptor',
+                                0)) != 0 )
+    {
+      if ( (v4->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(v4);
+      v18 = v39;
+      killerOrg_4 = v4->m_vecAbsOrigin.x;
+      killerOrg_8 = v4->m_vecAbsOrigin.y;
+      v19 = ((unsigned int)info->m_bitsDamageType >> 6) & 1 | 0x30;
+      vecDamageOrigin.x = v4->m_vecAbsOrigin.z;
+      v46 = 9;
+      *(_WORD *)&damage.iCrit = v19;
+    }
+    else if ( __RTDynamicCast(v16, 0, &CBaseEntity `RTTI Type Descriptor', &CObjectDispenser `RTTI Type Descriptor', 0) )
+    {
+      v18 = v39;
+      v46 = 9;
+      *(_WORD *)&damage.iCrit = 50;
+    }
+    else
+    {
+      if ( v17 && (*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)v17 + 304))(v17) )
+      {
+        if ( v17 == -4340 )
+          v46 = v17 - 12;
+        else
+          v46 = *(_BYTE *)(v17 + 4344);
+        AbsOrigin = CBaseEntity::GetAbsOrigin((CBaseEntity *)v17);
+        v18 = v39;
+        killerOrg_4 = AbsOrigin->x;
+        killerOrg_8 = AbsOrigin->y;
+        v21 = AbsOrigin->z;
+      }
+      else
+      {
+        v18 = v39;
+        x = v39->m_vecAbsOrigin.x;
+        v46 = 0;
+        killerOrg_4 = x;
+        killerOrg_8 = v39->m_vecAbsOrigin.y;
+        v21 = v39->m_vecAbsOrigin.z;
+      }
+      vecDamageOrigin.x = v21;
+      WeaponFromDamage = GetWeaponFromDamage(info);
+      v24 = g_pGameRules[67].__vftable == (CGameRules_vtbl *)4;
+      *(_WORD *)&damage.iCrit = WeaponFromDamage;
+      if ( v24 )
+      {
+        if ( WeaponFromDamage )
+        {
+          m_pCurrentMap = this->m_reportedStats.m_pCurrentMap;
+          if ( m_pCurrentMap )
+          {
+            v26 = WeaponFromDamage;
+            m_pCurrentMap->m_aWeaponStats[v26].iTotalDamage += iDamageTaken;
+            v27 = (int)&m_pCurrentMap->m_aWeaponStats[v26];
+            ++m_pCurrentMap->m_aWeaponStats[v26].iHits;
+            v28 = info->m_vecReportedPosition.y;
+            v29 = info->m_vecReportedPosition.z;
+            vecDamageOrigin.y = info->m_vecReportedPosition.x;
+            vecDamageOrigin.z = v28;
+            v44 = v29;
+            if ( Vector::operator==((Vector *)&vecDamageOrigin.y, &vec3_origin) && CTakeDamageInfo::GetInflictor(info) )
+            {
+              Inflictor = CTakeDamageInfo::GetInflictor(info);
+              v31 = CBaseEntity::GetAbsOrigin(Inflictor);
+              vecDamageOrigin.y = v31->x;
+              vecDamageOrigin.z = v31->y;
+              v44 = v31->z;
+            }
+            if ( Vector::operator!=((Vector *)&vecDamageOrigin.y, &vec3_origin) )
+            {
+              fTime = damage.fTime;
+              ++*(_DWORD *)(v27 + 16);
+              v33 = CBaseEntity::GetAbsOrigin((CBaseEntity *)LODWORD(fTime));
+              *(_QWORD *)(v27 + 24) += (int)Vector::DistTo((Vector *)&vecDamageOrigin.y, v33);
+            }
+          }
+        }
+      }
+    }
+    *(float *)damage.nTargetPosition = gpGlobals->curtime;
+    damage.nAttackerPosition[2] = (int)killerOrg_4;
+    damage.iDamage = (int)killerOrg_8;
+    v34 = v18->__vftable;
+    damage.iWeapon = (int)vecDamageOrigin.x;
+    if ( v34->IsPlayer(v18) && v18 != (CBasePlayer *)-4340 )
+      z_low = LOBYTE(v18[1].m_vecAngVelocity.z);
+    else
+      z_low = 0;
+    v35 = (info->m_bitsDamageType & 0x100000) != 0;
+    v24 = v18->m_iHealth.m_Value == 0;
+    v36 = v18->m_iHealth.m_Value < 0;
+    *(_WORD *)&damage.iAttackClass = (int)info->m_flDamage;
+    v49 = v36 || v24;
+    pszValue = gpGlobals->mapname.pszValue;
+    v48 = v35;
+    if ( !pszValue )
+      pszValue = locale;
+    v38 = TFReportedStats_t::FindOrAddMapStats(&this->m_reportedStats, pszValue);
+    CUtlVector<PanelAnimationMapEntry,CUtlMemory<PanelAnimationMapEntry,int>>::InsertBefore(
+      (CUtlVector<PanelAnimationMapEntry,CUtlMemory<PanelAnimationMapEntry,int> > *)&v38->m_aPlayerDamage,
+      v38->m_aPlayerDamage.m_Size,
+      (const PanelAnimationMapEntry *)damage.nTargetPosition);
+  }
+}

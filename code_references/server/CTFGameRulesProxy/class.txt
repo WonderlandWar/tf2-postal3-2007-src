@@ -1,0 +1,18 @@
+class CTFGameRulesProxy : public CTeamplayRoundBasedRulesProxy
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    public void InputSetRedTeamRespawnWaveTime(struct inputdata_t & );
+    public void InputSetBlueTeamRespawnWaveTime(struct inputdata_t & );
+    public void InputAddRedTeamRespawnWaveTime(struct inputdata_t & );
+    public void InputAddBlueTeamRespawnWaveTime(struct inputdata_t & );
+    public void InputSetRedTeamGoalString(struct inputdata_t & );
+    public void InputSetBlueTeamGoalString(struct inputdata_t & );
+	
+    public void Activate();
+};

@@ -1,0 +1,4 @@
+BOOL __thiscall CTFGameStats::StatTrackingEnabledForMod(CTFGameStats *this)
+{
+  return tf_stats_track.m_pParent->m_nValue != 0;
+}

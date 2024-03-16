@@ -1,0 +1,30 @@
+void __thiscall CTFGameStats::Event_RoundEnd(CTFGameStats *this, int iWinningTeam, bool bFullRound, float flRoundTime)
+{
+  const char *pszValue; // eax
+  TF_Gamestats_LevelStats_t *v5; // esi
+
+  if ( bFullRound )
+  {
+    pszValue = gpGlobals->mapname.pszValue;
+    if ( !pszValue )
+      pszValue = locale;
+    v5 = TFReportedStats_t::FindOrAddMapStats(&this->m_reportedStats, pszValue);
+    ++v5->m_Header.m_iRoundsPlayed;
+    v5->m_Header.m_iTotalTime += (int)flRoundTime;
+    if ( iWinningTeam )
+    {
+      if ( iWinningTeam == 2 )
+      {
+        ++v5->m_Header.m_iRedWins;
+      }
+      else if ( iWinningTeam == 3 )
+      {
+        ++v5->m_Header.m_iBlueWins;
+      }
+    }
+    else
+    {
+      ++v5->m_Header.m_iStalemates;
+    }
+  }
+}

@@ -1,0 +1,130 @@
+void __thiscall CTFStatPanel::UpdateStats(CTFStatPanel *this, int iClass, const RoundStats_t *stats, bool bShowNow)
+{
+  int m_Size; // ecx
+  int v6; // ebp
+  ClassStats_t *m_pMemory; // eax
+  ClassStats_t *v8; // edi
+  unsigned int v9; // ecx
+  int *v10; // eax
+  TFStatType_t *v11; // eax
+  TFStatType_t v12; // ebx
+  int v13; // ebp
+  int v14; // eax
+  RecordBreakType_t m_recordBreakType; // ecx
+  bool v16; // cc
+  vgui::IVGui *v17; // edi
+  vgui::IVGui_vtbl *v18; // ebx
+  int v19; // eax
+  CTFStatsSummaryPanel *v20; // eax
+  int v21; // [esp-14h] [ebp-E0h]
+  C_TFPlayer *pPlayer; // [esp+4h] [ebp-C8h]
+  C_TFPlayer *LocalTFPlayer; // [esp+8h] [ebp-C4h]
+  ClassStats_t src; // [esp+14h] [ebp-B8h] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( !LocalTFPlayer )
+    return;
+  m_Size = this->m_aClassStats.m_Size;
+  v6 = 0;
+  if ( m_Size > 0 )
+  {
+    m_pMemory = this->m_aClassStats.m_Memory.m_pMemory;
+    do
+    {
+      if ( m_pMemory->iPlayerClass == iClass )
+        break;
+      ++v6;
+      ++m_pMemory;
+    }
+    while ( v6 < m_Size );
+  }
+  if ( v6 >= m_Size )
+  {
+    ClassStats_t::ClassStats_t(&src);
+    v21 = this->m_aClassStats.m_Size;
+    src.iPlayerClass = iClass;
+    CUtlVector<ClassStats_t,CUtlMemory<ClassStats_t,int>>::InsertBefore(&this->m_aClassStats, v21, &src);
+  }
+  v8 = &this->m_aClassStats.m_Memory.m_pMemory[v6];
+  ++v8->iNumberOfRounds;
+  v9 = 0;
+  v10 = &v8->accumulated.m_iStat[1];
+  do
+  {
+    *(v10 - 1) += stats->m_iStat[v9];
+    *v10 += *(int *)((char *)v10 + (char *)stats - (char *)&v8->accumulated);
+    v9 += 2;
+    v10 += 2;
+  }
+  while ( v9 < 0x16 );
+  v8->accumulated.m_iStat[20] = 0;
+  this->m_flTimeHide = 0.0;
+  this->m_iCurStatValue = 0;
+  this->m_iCurStatTeam = 0;
+  this->m_statType = TFSTAT_UNDEFINED;
+  this->m_recordBreakType = RECORDBREAK_NONE;
+  this->m_bDisplayAfterSpawn = 0;
+  v11 = &g_statPriority[17];
+  this->m_iCurStatClassIndex = v6;
+  pPlayer = (C_TFPlayer *)&g_statPriority[17];
+  do
+  {
+    v12 = *v11;
+    v13 = stats->m_iStat[*v11];
+    v14 = v8->max.m_iStat[*v11];
+    if ( v13 > v14 )
+    {
+      v8->max.m_iStat[v12] = v13;
+      this->m_recordBreakType = RECORDBREAK_BEST;
+LABEL_20:
+      this->m_iCurStatValue = v13;
+      this->m_statType = v12;
+      goto LABEL_21;
+    }
+    if ( v13 <= 0 )
+      goto LABEL_21;
+    m_recordBreakType = this->m_recordBreakType;
+    if ( m_recordBreakType <= RECORDBREAK_TIE && v13 == v14 )
+    {
+      this->m_recordBreakType = RECORDBREAK_TIE;
+      goto LABEL_20;
+    }
+    if ( m_recordBreakType <= RECORDBREAK_CLOSE && v13 >= (int)((double)v14 * 0.80000001) )
+    {
+      this->m_recordBreakType = RECORDBREAK_CLOSE;
+      goto LABEL_20;
+    }
+LABEL_21:
+    v11 = (TFStatType_t *)(&pPlayer[-1].m_aGibs + 1);
+    pPlayer = (C_TFPlayer *)((char *)pPlayer - 4);
+  }
+  while ( (int)pPlayer >= (int)g_statPriority );
+  v16 = this->m_statType <= TFSTAT_UNDEFINED;
+  this->m_bStatsChanged = 1;
+  if ( !v16 )
+  {
+    this->m_iCurStatTeam = LocalTFPlayer->GetTeamNumber(LocalTFPlayer);
+    if ( bShowNow )
+    {
+      v17 = g_pVGui;
+      v18 = g_pVGui->__vftable;
+      v19 = ((int (__thiscall *)(CTFStatPanel *, int))this->GetVPanel)(this, 1000);
+      ((void (__thiscall *)(vgui::IVGui *, int))v18->AddTickSignal)(v17, v19);
+      CTFStatPanel::ShowStatPanel(
+        this,
+        this->m_iCurStatClassIndex,
+        this->m_iCurStatTeam,
+        this->m_iCurStatValue,
+        this->m_statType,
+        this->m_recordBreakType);
+      this->m_flTimeHide = *(float *)(gpGlobals.m_Index + 12) + 20.0;
+    }
+    else
+    {
+      this->m_bDisplayAfterSpawn = 1;
+    }
+    CTFStatPanel::WriteStats(this);
+  }
+  v20 = GStatsSummaryPanel();
+  CTFStatsSummaryPanel::SetStats(v20, &this->m_aClassStats);
+}

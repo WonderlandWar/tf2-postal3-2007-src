@@ -1,0 +1,5 @@
+void __thiscall CTFStatPanel::OnTick(CTFStatPanel *this)
+{
+  if ( this->m_flTimeHide > 0.0 && this->m_flTimeHide < (double)*(float *)(gpGlobals.m_Index + 12) )
+    CTFStatPanel::Hide(this);
+}

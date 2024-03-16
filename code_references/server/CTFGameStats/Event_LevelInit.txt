@@ -1,0 +1,29 @@
+void __thiscall CTFGameStats::Event_LevelInit(CTFGameStats *this)
+{
+  const char *pszValue; // eax
+  TFReportedStats_t *p_m_reportedStats; // esi
+  int m_nValue; // ebx
+  __int16 v5; // di
+  ConVar *v6; // eax
+  ConVar *v7; // eax
+  const char *v8; // eax
+
+  CBaseGameStats::Event_LevelInit(this);
+  pszValue = gpGlobals->mapname.pszValue;
+  if ( !pszValue )
+    pszValue = locale;
+  p_m_reportedStats = &this->m_reportedStats;
+  p_m_reportedStats->m_pCurrentMap = TFReportedStats_t::FindOrAddMapStats(p_m_reportedStats, pszValue);
+  m_nValue = 0;
+  v5 = 0;
+  v6 = cvar->FindVar(cvar, "hostip");
+  if ( v6 )
+    m_nValue = v6->m_pParent->m_nValue;
+  v7 = cvar->FindVar(cvar, "hostip");
+  if ( v7 )
+    v5 = v7->m_pParent->m_nValue;
+  v8 = gpGlobals->mapname.pszValue;
+  if ( !v8 )
+    v8 = locale;
+  TF_Gamestats_LevelStats_t::Init(p_m_reportedStats->m_pCurrentMap, v8, m_nValue, v5, gpGlobals->curtime);
+}

@@ -1,0 +1,199 @@
+class CTFPlayerResource : public CPlayerResource
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void CTFPlayerResource(class CTFPlayerResource & );
+    public void CTFPlayerResource();
+	
+    public void UpdatePlayerData();
+    public void Spawn();
+	
+    public int GetTotalScore(int );
+	
+    class NetworkVar_m_iTotalScore
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iTotalScore m_iTotalScore;
+    class NetworkVar_m_iCaptures
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iCaptures m_iCaptures;
+    class NetworkVar_m_iDefenses
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iDefenses m_iDefenses;
+    class NetworkVar_m_iDominations
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iDominations m_iDominations;
+    class NetworkVar_m_iRevenge
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iRevenge m_iRevenge;
+    class NetworkVar_m_iBuildingsDestroyed
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iBuildingsDestroyed m_iBuildingsDestroyed;
+    class NetworkVar_m_iHeadshots
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iHeadshots m_iHeadshots;
+    class NetworkVar_m_iBackstabs
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iBackstabs m_iBackstabs;
+    class NetworkVar_m_iHealPoints
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iHealPoints m_iHealPoints;
+    class NetworkVar_m_iInvulns
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iInvulns m_iInvulns;
+    class NetworkVar_m_iTeleports
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iTeleports m_iTeleports;
+    class NetworkVar_m_iResupplyPoints
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iResupplyPoints m_iResupplyPoints;
+    class NetworkVar_m_iKillAssists
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iKillAssists m_iKillAssists;
+    class NetworkVar_m_iMaxHealth
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iMaxHealth m_iMaxHealth;
+    class NetworkVar_m_iPlayerClass
+    {
+        public int & operator[](int );
+        public int & Get(int );
+        public int & GetForModify(int );
+        public void Set(int ,int & );
+        public int * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected int m_Value[33];
+    };
+    protected class CTFPlayerResource::NetworkVar_m_iPlayerClass m_iPlayerClass;
+    public void ~CTFPlayerResource();
+    public class CTFPlayerResource & operator=(class CTFPlayerResource & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};
