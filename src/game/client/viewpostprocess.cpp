@@ -16,9 +16,6 @@
 #include "view_scene.h"
 #include "c_world.h"
 
-//Tony; new
-#include "c_baseplayer.h"
-
 #include "ProxyEntity.h"
 
 //-----------------------------------------------------------------------------
@@ -46,7 +43,7 @@ static ConVar split_postproc( "mat_debug_process_halfscreen", "0", FCVAR_CHEAT )
 static ConVar mat_postprocessing_combine( "mat_postprocessing_combine", "1", FCVAR_NONE, "Combine bloom, software anti-aliasing and color correction into one post-processing pass" );
 static ConVar mat_dynamic_tonemapping( "mat_dynamic_tonemapping", "1", FCVAR_CHEAT );
 static ConVar mat_show_ab_hdr( "mat_show_ab_hdr", "0" );
-static ConVar mat_tonemapping_occlusion_use_stencil( "mat_tonemapping_occlusion_use_stencil", "0" );
+static ConVar mat_tonemapping_occlusion_use_stencil( "mat_tonemapping_occlusion_use_stencil", "1" );
 ConVar mat_debug_autoexposure("mat_debug_autoexposure","0", FCVAR_CHEAT);
 static ConVar mat_autoexposure_max( "mat_autoexposure_max", "2" );
 static ConVar mat_autoexposure_min( "mat_autoexposure_min", "0.5" );
@@ -457,10 +454,7 @@ void CHistogram_entry_t::IssueQuery( int frm_num )
 	if ( mat_tonemapping_occlusion_use_stencil.GetInt() )
 	{
 		pRenderContext->SetStencilWriteMask( 1 );
-
-		// AV - We don't need to clear stencil here because it's already been cleared at the beginning of the frame
-		//pRenderContext->ClearStencilBufferRectangle( scrx_min, scry_min, scrx_max, scry_max, 0 );
-
+		pRenderContext->ClearStencilBufferRectangle( scrx_min, scry_min, scrx_max, scry_max, 0 );
 		pRenderContext->SetStencilEnable( true );
 		pRenderContext->SetStencilPassOperation( STENCILOPERATION_REPLACE );
 		pRenderContext->SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS );
@@ -755,19 +749,7 @@ static float GetCurrentBloomScale( void )
 {
 	// Use the appropriate bloom scale settings.  Mapmakers's overrides the convar settings.
 	float flCurrentBloomScale = 1.0f;
-
-	//Tony; get the local player first..
-	C_BasePlayer *pLocalPlayer = NULL;
-
-	if ( ( gpGlobals->maxClients > 1 ) )
-		pLocalPlayer = (C_BasePlayer*)C_BasePlayer::GetLocalPlayer();
-
-	//Tony; in multiplayer, get the local player etc.
-	if ( (pLocalPlayer != NULL && pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMin > 0.0f) )
-	{
-		flCurrentBloomScale = pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMin;
-	}
-	else if ( g_bUseCustomBloomScale )
+	if ( g_bUseCustomBloomScale )
 	{
 		flCurrentBloomScale = g_flCustomBloomScale;
 	}
@@ -780,19 +762,8 @@ static float GetCurrentBloomScale( void )
 
 static void GetExposureRange( float *flAutoExposureMin, float *flAutoExposureMax )
 {
-	//Tony; get the local player first..
-	C_BasePlayer *pLocalPlayer = NULL;
-
-	if ( ( gpGlobals->maxClients > 1 ) )
-		pLocalPlayer = (C_BasePlayer*)C_BasePlayer::GetLocalPlayer();
-
-	//Tony; in multiplayer, get the local player etc.
-	if ( (pLocalPlayer != NULL && pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMin > 0.0f) )
-	{
-		*flAutoExposureMin = pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMin;
-	}
 	// Get min
-	else if ( ( g_bUseCustomAutoExposureMin ) && ( g_flCustomAutoExposureMin > 0.0f ) )
+	if ( ( g_bUseCustomAutoExposureMin ) && ( g_flCustomAutoExposureMin > 0.0f ) )
 	{
 		*flAutoExposureMin = g_flCustomAutoExposureMin;
 	}
@@ -801,13 +772,8 @@ static void GetExposureRange( float *flAutoExposureMin, float *flAutoExposureMax
 		*flAutoExposureMin = mat_autoexposure_min.GetFloat();
 	}
 
-	//Tony; in multiplayer, get the value from the local player, if it's set.
-	if ( (pLocalPlayer != NULL && pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMax > 0.0f) )
-	{
-		*flAutoExposureMax = pLocalPlayer->m_Local.m_TonemapParams.m_flAutoExposureMax;
-	}
 	// Get max
-	else if ( ( g_bUseCustomAutoExposureMax ) && ( g_flCustomAutoExposureMax > 0.0f ) )
+	if ( ( g_bUseCustomAutoExposureMax ) && ( g_flCustomAutoExposureMax > 0.0f ) )
 	{
 		*flAutoExposureMax = g_flCustomAutoExposureMax;
 	}
