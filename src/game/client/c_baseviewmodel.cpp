@@ -22,8 +22,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-//Tony; modified so that the sdk view models are right handed out of the box.
-#if defined( CSTRIKE_DLL ) || defined( SDK_DLL )
+#ifdef CSTRIKE_DLL
 	ConVar cl_righthand( "cl_righthand", "1", FCVAR_ARCHIVE, "Use right-handed view models." );
 #endif
 
@@ -174,22 +173,13 @@ bool C_BaseViewModel::Interpolate( float currentTime )
 
 inline bool C_BaseViewModel::ShouldFlipViewModel()
 {
-//Tony; changed for SDK so that the CSS models can be flipped out of the box.
-#if defined( CSTRIKE_DLL ) || defined ( SDK_DLL )
-	//Tony; move this up here.
-	if (!cl_righthand.GetBool())
-		return false;
-
+#ifdef CSTRIKE_DLL
 	// If cl_righthand is set, then we want them all right-handed.
 	CBaseCombatWeapon *pWeapon = m_hWeapon.Get();
 	if ( pWeapon )
 	{
 		const FileWeaponInfo_t *pInfo = &pWeapon->GetWpnData();
-		//Tony; if they're already built right handed (default) then we can get out.
-		if (pInfo->m_bBuiltRightHanded)
-			return false;
-
-		return pInfo->m_bAllowFlipping;
+		return pInfo->m_bAllowFlipping && pInfo->m_bBuiltRightHanded != cl_righthand.GetBool();
 	}
 #endif
 	
@@ -280,16 +270,11 @@ int C_BaseViewModel::DrawModel( int flags )
 		pRenderContext->CullMode( MATERIAL_CULLMODE_CW );
 
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
 	int ret;
 	// If the local player's overriding the viewmodel rendering, let him do it
 	if ( pPlayer && pPlayer->IsOverridingViewmodel() )
 	{
 		ret = pPlayer->DrawOverriddenViewmodel( this, flags );
-	}
-	else if ( pWeapon && pWeapon->IsOverridingViewmodel() )
-	{
-		ret = pWeapon->DrawOverriddenViewmodel( this, flags );
 	}
 	else
 	{
@@ -306,6 +291,7 @@ int C_BaseViewModel::DrawModel( int flags )
 			m_nOldAnimationParity = m_nAnimationParity;
 		}
 		// Tell the weapon itself that we've rendered, in case it wants to do something
+		C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
 		if ( pWeapon )
 		{
 			pWeapon->ViewModelDrawn( this );
@@ -337,13 +323,6 @@ int C_BaseViewModel::GetFxBlend( void )
 		return pPlayer->GetFxBlend();
 	}
 
-	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
-	if ( pWeapon && pWeapon->IsOverridingViewmodel() )
-	{
-		pWeapon->ComputeFxBlend();
-		return pWeapon->GetFxBlend();
-	}
-
 	return BaseClass::GetFxBlend();
 }
 
@@ -359,10 +338,6 @@ bool C_BaseViewModel::IsTransparent( void )
 	{
 		return pPlayer->ViewModel_IsTransparent();
 	}
-
-	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
-	if ( pWeapon && pWeapon->IsOverridingViewmodel() )
-		return pWeapon->ViewModel_IsTransparent();
 
 	return BaseClass::IsTransparent();
 }

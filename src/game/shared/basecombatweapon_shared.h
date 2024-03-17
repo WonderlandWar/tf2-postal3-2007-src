@@ -112,20 +112,13 @@ namespace vgui2
 // Purpose: Base weapon class, shared on client and server
 //-----------------------------------------------------------------------------
 
-#if defined USES_PERSISTENT_ITEMS
-#define BASECOMBATWEAPON_DERIVED_FROM		CBaseAttributableItem
-#else 
-#define BASECOMBATWEAPON_DERIVED_FROM		CBaseAnimating
-#endif 
-
 //-----------------------------------------------------------------------------
 // Purpose: Client side rep of CBaseTFCombatWeapon 
 //-----------------------------------------------------------------------------
-// Hacky
-class CBaseCombatWeapon : public BASECOMBATWEAPON_DERIVED_FROM
+class CBaseCombatWeapon : public CBaseAnimating
 {
 public:
-	DECLARE_CLASS( CBaseCombatWeapon, BASECOMBATWEAPON_DERIVED_FROM );
+	DECLARE_CLASS( CBaseCombatWeapon, CBaseAnimating );
 	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
@@ -198,7 +191,6 @@ public:
 	virtual void			SetWeaponVisible( bool visible );
 	virtual bool			IsWeaponVisible( void );
 	virtual bool			ReloadOrSwitchWeapons( void );
-	virtual void			OnActiveStateChanged( int iOldState ) { return; }
 
 	// Weapon behaviour
 	virtual void			ItemPreFrame( void );					// called each frame by the player PreThink
@@ -438,17 +430,6 @@ public:
 
 	virtual void			GetToolRecordingState( KeyValues *msg );
 	void					EnsureCorrectRenderingModel();
-
-#if !defined USES_PERSISTENT_ITEMS
-	// Viewmodel overriding
-	virtual bool			ViewModel_IsTransparent( void ) { return IsTransparent(); }
-	virtual bool			IsOverridingViewmodel( void ) { return false; };
-	virtual int				DrawOverriddenViewmodel( C_BaseViewModel *pViewmodel, int flags ) { return 0; };
-	bool					WantsToOverrideViewmodelAttachments( void ) { return false; }
-#endif
-
-	//Tony; notifications of any third person switches.
-	virtual void			ThirdPersonSwitch( bool bThirdPerson ) {};
 
 #endif // End client-only methods
 

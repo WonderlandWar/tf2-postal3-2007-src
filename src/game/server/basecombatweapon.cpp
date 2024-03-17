@@ -166,14 +166,6 @@ void CBaseCombatWeapon::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComb
 			Operator_ForceNPCFire( pOperator, bSecondary );
 			return;
 		}
-		else if ( pEvent->event == AE_WPN_PLAYWPNSOUND )
-		{
-			int iSnd = GetWeaponSoundFromString(pEvent->options);
-			if ( iSnd != -1 )
-			{
-				WeaponSound( (WeaponSound_t)iSnd );
-			}
-		}
 	}
 
 	DevWarning( 2, "Unhandled animation event %d from %s --> %s\n", pEvent->event, pOperator->GetClassname(), GetClassname() );

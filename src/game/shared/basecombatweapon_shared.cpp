@@ -500,17 +500,6 @@ CBaseCombatCharacter	*CBaseCombatWeapon::GetOwner() const
 //-----------------------------------------------------------------------------
 void CBaseCombatWeapon::SetOwner( CBaseCombatCharacter *owner )
 {
-#ifndef CLIENT_DLL
-	if ( !owner )
-	{ 
-		// Make sure the weapon updates its state when it's removed from the player
-		// We have to force an active state change, because it's being dropped and won't call UpdateClientData()
-		int iOldState = m_iState;
-		m_iState = WEAPON_NOT_CARRIED;
-		OnActiveStateChanged( iOldState );
-	}
-#endif
-
 	m_hOwner = owner;
 	
 #ifndef CLIENT_DLL
@@ -947,7 +936,7 @@ void CBaseCombatWeapon::Equip( CBaseCombatCharacter *pOwner )
 void CBaseCombatWeapon::SetActivity( Activity act, float duration ) 
 { 
 	//Adrian: Oh man...
-#if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ) || defined( SDK_DLL ) )
+#if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ))
 	SetModel( GetWorldModel() );
 #endif
 	
@@ -958,7 +947,7 @@ void CBaseCombatWeapon::SetActivity( Activity act, float duration )
 		sequence = SelectWeightedSequence( ACT_VM_IDLE );
 
 	//Adrian: Oh man again...
-#if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ) || defined( SDK_DLL ) )
+#if !defined( CLIENT_DLL ) && (defined( HL2MP ) || defined( PORTAL ))
 	SetModel( GetViewModel() );
 #endif
 
@@ -1007,9 +996,7 @@ int CBaseCombatWeapon::UpdateClientData( CBasePlayer *pPlayer )
 
 	if ( m_iState != iNewState )
 	{
-		int iOldState = m_iState;
 		m_iState = iNewState;
-		OnActiveStateChanged( iOldState );
 	}
 	return 1;
 }
@@ -1118,10 +1105,6 @@ void CBaseCombatWeapon::SetViewModel()
 //-----------------------------------------------------------------------------
 bool CBaseCombatWeapon::SendWeaponAnim( int iActivity )
 {
-#ifdef USES_PERSISTENT_ITEMS
-	iActivity = TranslateViewmodelHandActivity( (Activity)iActivity );
-#endif
-
 	//For now, just set the ideal activity and be done with it
 	return SetIdealActivity( (Activity) iActivity );
 }
@@ -1730,7 +1713,7 @@ void CBaseCombatWeapon::WeaponSound( WeaponSound_t sound_type, float soundtime /
 		if ( GetOwner() && GetOwner()->IsPlayer() )
 		{
 			CSingleUserRecipientFilter filter( ToBasePlayer( GetOwner() ) );
-			if ( IsPredicted() && CBaseEntity::GetPredictionPlayer() )
+			if ( IsPredicted() )
 			{
 				filter.UsePredictionRules();
 			}
@@ -1743,7 +1726,7 @@ void CBaseCombatWeapon::WeaponSound( WeaponSound_t sound_type, float soundtime /
 		if ( GetOwner() )
 		{
 			CPASAttenuationFilter filter( GetOwner(), params.soundlevel );
-			if ( IsPredicted() && CBaseEntity::GetPredictionPlayer() )
+			if ( IsPredicted() )
 			{
 				filter.UsePredictionRules();
 			}
@@ -1760,7 +1743,7 @@ void CBaseCombatWeapon::WeaponSound( WeaponSound_t sound_type, float soundtime /
 		else
 		{
 			CPASAttenuationFilter filter( this, params.soundlevel );
-			if ( IsPredicted() && CBaseEntity::GetPredictionPlayer() )
+			if ( IsPredicted() )
 			{
 				filter.UsePredictionRules();
 			}
@@ -2348,14 +2331,14 @@ BEGIN_DATADESC( CBaseCombatWeapon )
 //	DEFINE_FIELD( m_bJustRestored, FIELD_BOOLEAN ),
 
 	// Function pointers
-	DEFINE_ENTITYFUNC( DefaultTouch ),
-	DEFINE_THINKFUNC( FallThink ),
-	DEFINE_THINKFUNC( Materialize ),
-	DEFINE_THINKFUNC( AttemptToMaterialize ),
-	DEFINE_THINKFUNC( DestroyItem ),
-	DEFINE_THINKFUNC( SetPickupTouch ),
+	DEFINE_FUNCTION( DefaultTouch ),
+	DEFINE_FUNCTION( FallThink ),
+	DEFINE_FUNCTION( Materialize ),
+	DEFINE_FUNCTION( AttemptToMaterialize ),
+	DEFINE_FUNCTION( DestroyItem ),
+	DEFINE_FUNCTION( SetPickupTouch ),
 
-	DEFINE_THINKFUNC( HideThink ),
+	DEFINE_FUNCTION( HideThink ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "HideWeapon", InputHideWeapon ),
 
 	// Outputs

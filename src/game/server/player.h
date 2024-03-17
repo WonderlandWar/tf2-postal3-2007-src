@@ -529,9 +529,8 @@ public:
 	virtual void			PickupObject( CBaseEntity *pObject, bool bLimitMassAndSize = true ) {}
 	virtual void			ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldindThis = NULL ) {}
 	virtual float			GetHeldObjectMass( IPhysicsObject *pHeldObject );
-	virtual CBaseEntity		*GetHeldObject( void );
 
-	virtual void			CheckSuitUpdate();
+	void					CheckSuitUpdate();
 	void					SetSuitUpdate(char *name, int fgroup, int iNoRepeat);
 	virtual void			UpdateGeigerCounter( void );
 	void					CheckTimeBasedDamage( void );
@@ -566,8 +565,7 @@ public:
 	CUserCmd *				GetCurrentCommand( void )	{ return m_pCurrentCommand; }
 
 	// Team Handling
-	virtual void			ChangeTeam( int iTeamNum ) { ChangeTeam(iTeamNum,false, false); }
-	virtual void			ChangeTeam( int iTeamNum, bool bAutoTeam, bool bSilent );
+	virtual void			ChangeTeam( int iTeamNum );
 
 	// say/sayteam allowed?
 	virtual bool		CanHearAndReadChatFrom( CBasePlayer *pPlayer ) { return true; }
@@ -591,7 +589,7 @@ public:
 
 	virtual void			HandleAnimEvent( animevent_t *pEvent );
 
-	virtual bool			ShouldAnnounceAchievement( void ){ return true; }
+	virtual bool			ShouldAnnouceAchievement( void ){ return true; }
 
 public:
 	// Player Physics Shadow
@@ -633,7 +631,7 @@ public:
 	bool	IsConnected() const		{ return m_iConnected != PlayerDisconnected; }
 	bool	IsDisconnecting() const	{ return m_iConnected == PlayerDisconnecting; }
 	bool	IsSuitEquipped() const	{ return m_Local.m_bWearingSuit; }
-	virtual int		ArmorValue() const		{ return m_ArmorValue; }
+	int		ArmorValue() const		{ return m_ArmorValue; }
 	bool	HUDNeedsRestart() const { return m_fInitHUD; }
 	float	MaxSpeed() const		{ return m_flMaxspeed; }
 	Activity GetActivity( ) const	{ return m_Activity; }
@@ -814,8 +812,6 @@ public:
 	void		SetPreviouslyPredictedOrigin( const Vector &vecAbsOrigin );
 	const Vector &GetPreviouslyPredictedOrigin() const;
 	float		GetFOVTime( void ){ return m_flFOVTime; }
-
-	void		AdjustDrownDmg( int nAmount );
 
 private:
 
@@ -1059,9 +1055,6 @@ protected:
 	friend class CHL2GameMovement;
 	friend class CDODGameMovement;
 	friend class CPortalGameMovement;
-#if defined ( SDK_DLL )
-	friend class CSDKGameMovement;
-#endif
 	
 	// Accessors for gamemovement
 	bool IsDucked( void ) const { return m_Local.m_bDucked; }
@@ -1123,23 +1116,6 @@ private:
 
 	CUtlLinkedList< CPlayerSimInfo >  m_vecPlayerSimInfo;
 	CUtlLinkedList< CPlayerCmdInfo >  m_vecPlayerCmdInfo;
-private:
-	//
-	//Tony; new tonemap controller changes, specifically for multiplayer.
-	//
-	void	ClearTonemapParams();		//Tony; we need to clear our tonemap params every time we spawn to -1, if we trigger an input, the values will be set again.
-public:
-	void	InputSetTonemapScale( inputdata_t &inputdata );			//Set m_Local.
-//	void	InputBlendTonemapScale( inputdata_t &inputdata );		//TODO; this should be calculated on the client, if we use it; perhaps an entity message would suffice? .. hmm..
-	void	InputSetTonemapRate( inputdata_t &inputdata );
-	void	InputSetAutoExposureMin( inputdata_t &inputdata );
-	void	InputSetAutoExposureMax( inputdata_t &inputdata );
-	void	InputSetBloomScale( inputdata_t &inputdata );
-
-	//Tony; restore defaults (set min/max to -1.0 so nothing gets overridden)
-	void	InputUseDefaultAutoExposure( inputdata_t &inputdata );
-	void	InputUseDefaultBloomScale( inputdata_t &inputdata );
-//	void	InputSetBloomScaleRange( inputdata_t &inputdata );
 };
 
 typedef CHandle<CBasePlayer> CBasePlayerHandle;

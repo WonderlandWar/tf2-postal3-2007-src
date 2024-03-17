@@ -19,9 +19,6 @@ class CBaseMultiplayerPlayer : public CAI_ExpresserHost<CBasePlayer>
 public:
 
 	CBaseMultiplayerPlayer();
-	~CBaseMultiplayerPlayer();
-
-	virtual void		Spawn( void );
 
 	virtual void		PostConstructor( const char *szClassname );
 	virtual void		ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet );
@@ -47,8 +44,6 @@ public:
 	virtual bool		ShouldShowVoiceSubtitleToEnemy( void );
 	virtual void		NoteSpokeVoiceCommand( const char *pszScenePlayed ) {}
 
-	virtual void OnAchievementEarned( int iAchievement ) {}
-
 	enum
 	{
 		CHAT_IGNORE_NONE = 0,
@@ -72,29 +67,6 @@ public:
 	virtual int	CalculateTeamBalanceScore( void );
 
 	void AwardAchievement( int iAchievement );
-	int	GetPerLifeCounterKV( const char *name );
-	void SetPerLifeCounterKV( const char *name, int value );
-	void ResetPerLifeCounters( void );
-
-	KeyValues *GetPerLifeCounterKeys( void ) { return m_pAchievementKV; }
-
-	void EscortScoringThink( void );
-	void StartScoringEscortPoints( float flRate );
-	void StopScoringEscortPoints( void );
-	float m_flAreaCaptureScoreAccumulator;
-	float m_flCapPointScoreRate;
-
-	float GetConnectionTime( void ) { return m_flConnectionTime; }
-
-	// Command rate limiting.
-	bool ShouldRunRateLimitedCommand( const CCommand &args );
-
-#if !defined(NO_STEAM)
-	//----------------------------
-	// Steam handling
-	bool		GetSteamID( CSteamID *pID );
-	uint64		GetSteamIDAsUInt64( void );
-#endif
 
 protected:
 	virtual CAI_Expresser *CreateExpresser( void );
@@ -108,11 +80,6 @@ private:
 	float m_flLastForcedChangeTeamTime;
 
 	int m_iBalanceScore;	// a score used to determine which players are switched to balance the teams
-
-	KeyValues	*m_pAchievementKV;
-
-	// This lets us rate limit the commands the players can execute so they don't overflow things like reliable buffers.
-	CUtlDict<float,int>	m_RateLimitLastCommandTimes;
 };
 
 //-----------------------------------------------------------------------------

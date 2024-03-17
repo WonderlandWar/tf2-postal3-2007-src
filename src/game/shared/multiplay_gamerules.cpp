@@ -1235,8 +1235,8 @@ bool CMultiplayRules::Init()
 		}
 		else if ( FStrEq( pcmd, "achievement_earned" ) )
 		{
-			CBaseMultiplayerPlayer *pPlayer = static_cast<CBaseMultiplayerPlayer*>( pEdict );
-			if ( pPlayer && pPlayer->ShouldAnnounceAchievement() )
+			CBasePlayer *pPlayer = static_cast<CBasePlayer*>( pEdict );
+			if ( pPlayer && pPlayer->ShouldAnnouceAchievement() )
 			{
 				// let's check this came from the client .dll and not the console
 				unsigned short mask = UTIL_GetAchievementEventMask();
@@ -1254,8 +1254,6 @@ bool CMultiplayRules::Init()
 						event->SetInt( "achievement", iAchievement );
 						gameeventmanager->FireEvent( event );
 					}
-
-					pPlayer->OnAchievementEarned( iAchievement );
 				}
 			}
 

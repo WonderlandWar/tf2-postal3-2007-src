@@ -60,7 +60,6 @@ CON_COMMAND( hud_reloadscheme, "Reloads hud layout and animation scripts." )
 	mode->ReloadScheme();
 }
 
-#ifdef _DEBUG
 CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 0: read from NULL\n 1: write to NULL\n 2: DmCrashDump() (xbox360 only)", FCVAR_CHEAT )
 {
 	int crashtype = 0;
@@ -88,7 +87,6 @@ CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 
 			break;
 	}
 }
-#endif // _DEBUG
 
 static void __MsgFunc_Rumble( bf_read &msg )
 {
@@ -199,6 +197,7 @@ void ClientModeShared::Init()
 	ListenForGameEvent( "server_cvar" );
 	ListenForGameEvent( "player_changename" );
 	ListenForGameEvent( "teamplay_broadcast_audio" );
+
 	ListenForGameEvent( "achievement_earned" );
 
 #ifndef _XBOX
@@ -745,6 +744,8 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		C_BasePlayer *pPlayer = USERID2PLAYER( event->GetInt("userid") );
 		if ( !hudChat )
 			return;
+		if ( !pPlayer )
+			return;
 
 		bool bDisconnected = event->GetBool("disconnect");
 
@@ -752,49 +753,37 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			return;
 
 		int team = event->GetInt( "team" );
-		bool bAutoTeamed = event->GetInt( "autoteam", false );
-		bool bSilent = event->GetInt( "silent", false );
 
-		const char *pszName = event->GetString( "name" );
-		if ( PlayerNameNotSetYet( pszName ) )
+		const char *pszName = pPlayer->GetPlayerName();
+		if ( PlayerNameNotSetYet(pszName) )
 			return;
 
-		if ( !bSilent )
+		wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszPlayerName, sizeof(wszPlayerName) );
+
+		wchar_t wszTeam[64];
+		C_Team *pTeam = GetGlobalTeam( team );
+		if ( pTeam )
 		{
-			wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-			g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszPlayerName, sizeof(wszPlayerName) );
-
-			wchar_t wszTeam[64];
-			C_Team *pTeam = GetGlobalTeam( team );
-			if ( pTeam )
-			{
-				g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(), wszTeam, sizeof(wszTeam) );
-			}
-			else
-			{
-				_snwprintf ( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d", team );
-			}
-
-			if ( !IsInCommentaryMode() )
-			{
-				wchar_t wszLocalized[100];
-				if ( bAutoTeamed )
-				{
-					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_autoteam" ), 2, wszPlayerName, wszTeam );
-				}
-				else
-				{
-					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_team" ), 2, wszPlayerName, wszTeam );
-				}
-
-				char szLocalized[100];
-				g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
-
-				hudChat->Printf( CHAT_FILTER_TEAMCHANGE, "%s", szLocalized );
-			}
+			g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(), wszTeam, sizeof(wszTeam) );
+		}
+		else
+		{
+			_snwprintf ( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d", team );
 		}
 
-		if ( pPlayer && pPlayer->IsLocalPlayer() )
+		if ( !IsInCommentaryMode() )
+		{
+			wchar_t wszLocalized[100];
+			g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_team" ), 2, wszPlayerName, wszTeam );
+
+			char szLocalized[100];
+			g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
+
+			hudChat->Printf( CHAT_FILTER_TEAMCHANGE, "%s", szLocalized );
+		}
+
+		if ( pPlayer->IsLocalPlayer() )
 		{
 			// that's me
 			pPlayer->TeamChange( team );
@@ -915,8 +904,8 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 						//tagES using the "head" attachment won't work for CS and DoD
 						pPlayer->ParticleProp()->Create( "achieved", PATTACH_POINT_FOLLOW, "head" );
 					}
-
-					pPlayer->OnAchievementAchieved( iAchievement );
+					
+					pPlayer->EmitSound( "Achievement.Earned" );
 				}
 
 				if ( g_PR )
