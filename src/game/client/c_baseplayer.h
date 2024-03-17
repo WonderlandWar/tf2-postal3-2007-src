@@ -76,7 +76,6 @@ public:
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
 
-	virtual void	PreDataUpdate( DataUpdateType_t updateType );
 	virtual void	PostDataUpdate( DataUpdateType_t updateType );
 	
 	virtual void	ReceiveMessage( int classID, bf_read &msg );
@@ -307,9 +306,6 @@ public:
 
 	float					GetDeathTime( void ) { return m_flDeathTime; }
 
-	void		SetPreviouslyPredictedOrigin( const Vector &vecAbsOrigin );
-	const Vector &GetPreviouslyPredictedOrigin() const;
-
 	// CS wants to allow small FOVs for zoomed-in AWPs.
 	virtual float GetMinFOV() const;
 
@@ -344,21 +340,6 @@ public:
 	void 					HintMessage( const char *pMessage ) { if (Hints()) Hints()->HintMessage( pMessage ); }
 
 	virtual	IMaterial *GetHeadLabelMaterial( void );
-
-	// Fog
-	fogparams_t				*GetFogParams( void ) { return &m_CurrentFog; }
-	void					FogControllerChanged( bool bSnap );
-	void					UpdateFogController( void );
-	void					UpdateFogBlend( void );
-
-	void					IncrementEFNoInterpParity();
-	int						GetEFNoInterpParity() const;
-
-	float					GetFOVTime( void ){ return m_flFOVTime; }
-
-protected:
-	fogparams_t				m_CurrentFog;
-	EHANDLE					m_hOldFogController;
 
 public:
 	int m_StuckLast;
@@ -415,7 +396,6 @@ protected:
 
 	// Used by prediction, sets the view angles for the player
 	virtual void SetLocalViewAngles( const QAngle &viewAngles );
-	virtual void SetViewAngles( const QAngle& ang );
 
 	// used by client side player footsteps 
 	surfacedata_t* GetGroundSurface();
@@ -540,8 +520,6 @@ protected:
 	// the errors not be so jerky.
 	Vector m_vecPredictionError;
 	float m_flPredictionErrorTime;
-	
-	Vector m_vecPreviouslyPredictedOrigin; // Used to determine if non-gamemovement game code has teleported, or tweaked the player's origin
 
 	char m_szLastPlaceName[MAX_PLACE_NAME_LENGTH];	// received from the server
 
@@ -553,19 +531,6 @@ protected:
 
 	bool			m_bSentFreezeFrame;
 	float			m_flFreezeZOffset;
-	byte			m_ubEFNoInterpParity;
-	byte			m_ubOldEFNoInterpParity;
-
-private:
-
-	struct StepSoundCache_t
-	{
-		StepSoundCache_t() : m_usSoundNameIndex( 0 ) {}
-		CSoundParameters	m_SoundParameters;
-		unsigned short		m_usSoundNameIndex;
-	};
-	// One for left and one for right side of step
-	StepSoundCache_t		m_StepSoundCache[ 2 ];
 
 public:
 

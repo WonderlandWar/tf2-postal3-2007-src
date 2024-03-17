@@ -516,11 +516,12 @@ float CViewRender::GetZFar()
 		farZ = r_mapextents.GetFloat() * 1.73205080757f;
 		
 		C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-		if( pPlayer && pPlayer->GetFogParams() )
+		if( pPlayer )
 		{
-			if ( pPlayer->GetFogParams()->farz > 0 )
+			CPlayerLocalData *local = &pPlayer->m_Local;
+			if ( local->m_fog.farz > 0 )
 			{
-				farZ = pPlayer->GetFogParams()->farz;
+				farZ = local->m_fog.farz;
 			}
 		}
 	}

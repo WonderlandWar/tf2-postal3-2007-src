@@ -1250,7 +1250,7 @@ void CTFPlayer::HandleCommand_JoinTeam( const char *pTeamName )
 		
 		if ( GetTeamNumber() != TEAM_UNASSIGNED && !IsDead() )
 		{
-			CommitSuicide( false, true );
+			CommitSuicide( false );
 		}
 
 		ChangeTeam( TEAM_SPECTATOR );
@@ -1355,7 +1355,7 @@ void CTFPlayer::ChangeTeam( int iTeamNum )
 		if ( !IsDead() && (iOldTeam == TF_TEAM_RED || iOldTeam == TF_TEAM_BLUE) )
 		{
 			// Kill player if switching teams while alive
-			CommitSuicide( false, true );
+			CommitSuicide( false );
 		}
 
 		// let any spies disguising as me know that I've changed teams
@@ -1375,6 +1375,7 @@ void CTFPlayer::ChangeTeam( int iTeamNum )
 	}
 }
 
+// TFP3: TODO: Finish this function
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -1526,7 +1527,7 @@ void CTFPlayer::HandleCommand_JoinClass( const char *pClassName )
 
 	if ( IsAlive() && ( GetHudClassAutoKill() == true ) && bShouldNotRespawn == false )
 	{
-		CommitSuicide( false, true );
+		CommitSuicide( false );
 	}
 }
 
@@ -2526,14 +2527,14 @@ bool CTFPlayer::IsPlayerClass( int iClass ) const
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFPlayer::CommitSuicide( bool bExplode /* = false */, bool bForce /*= false*/ )
+void CTFPlayer::CommitSuicide( bool bExplode /* = false */ )
 {
 	// Don't suicide if we haven't picked a class for the first time, or we're not in active state
 	if ( IsPlayerClass( TF_CLASS_UNDEFINED ) || !m_Shared.InState( TF_STATE_ACTIVE ) )
 		return;
 
 	// Don't suicide during the "bonus time" if we're not on the winning team
-	if ( !bForce && TFGameRules()->State_Get() == GR_STATE_TEAM_WIN && 
+	if ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN && 
 		 GetTeamNumber() != TFGameRules()->GetWinningTeam() )
 	{
 		return;
@@ -2541,7 +2542,7 @@ void CTFPlayer::CommitSuicide( bool bExplode /* = false */, bool bForce /*= fals
 	
 	m_iSuicideCustomKillFlags = TF_DMG_CUSTOM_SUICIDE;
 
-	BaseClass::CommitSuicide( bExplode, bForce );
+	BaseClass::CommitSuicide( bExplode );
 }
 
 //-----------------------------------------------------------------------------

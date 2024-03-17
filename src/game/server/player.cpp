@@ -289,7 +289,6 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_iSuitPlayNext, FIELD_INTEGER ),
 	DEFINE_AUTO_ARRAY( m_rgiSuitNoRepeat, FIELD_INTEGER ),
 	DEFINE_AUTO_ARRAY( m_rgflSuitNoRepeatTime, FIELD_TIME ),
-	DEFINE_FIELD( m_bPauseBonusProgress, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iBonusProgress, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iBonusChallenge, FIELD_INTEGER ),
 	DEFINE_FIELD( m_lastDamageAmount, FIELD_INTEGER ),
@@ -414,15 +413,12 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_bDuckToggled, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flForwardMove, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flSideMove, FIELD_FLOAT ),
-	DEFINE_FIELD( m_vecPreviouslyPredictedOrigin, FIELD_POSITION_VECTOR ), 
 
 	DEFINE_FIELD( m_nNumCrateHudHints, FIELD_INTEGER ),
 
 	// DEFINE_FIELD( m_nBodyPitchPoseParam, FIELD_INTEGER ),
-	// DEFINE_ARRAY( m_StepSoundCache, StepSoundCache_t,  2  ),
 
 	// DEFINE_UTLVECTOR( m_vecPlayerCmdInfo ),
-	// DEFINE_UTLVECTOR( m_vecPlayerSimInfo ),
 END_DATADESC()
 
 int giPrecacheGrunt = 0;
@@ -581,13 +577,11 @@ CBasePlayer::CBasePlayer( )
 
 	m_nNumCrouches = 0;
 	m_bDuckToggled = false;
-	m_bPhysicsWasFrozen = false;
 
 	// Used to mask off buttons
 	m_afButtonDisabled = 0;
 	m_afButtonForced = 0;
 
-	m_nBodyPitchPoseParam = -1;
 	m_flForwardMove = 0;
 	m_flSideMove = 0;
 }
@@ -714,15 +708,9 @@ bool CBasePlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, cons
 	return true;
 }
 
-void CBasePlayer::PauseBonusProgress( bool bPause )
-{
-	m_bPauseBonusProgress = bPause;
-}
-
 void CBasePlayer::SetBonusProgress( int iBonusProgress )
 {
-	if ( !m_bPauseBonusProgress )
-		m_iBonusProgress = iBonusProgress;
+	m_iBonusProgress = iBonusProgress;
 }
 
 void CBasePlayer::SetBonusChallenge( int iBonusChallenge )
@@ -2927,47 +2915,6 @@ void CBasePlayer::RemoveAllCommandContexts()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Removes all existing contexts, but leaves the last one around ( or creates it if it doesn't exist -- which would be a bug )
-//-----------------------------------------------------------------------------
-CCommandContext *CBasePlayer::RemoveAllCommandContextsExceptNewest( void )
-{
-	int count = m_CommandContext.Count();
-	int toRemove = count - 1;
-	if ( toRemove > 0 )
-	{
-		m_CommandContext.RemoveMultiple( 0, toRemove );
-	}
-
-	if ( !m_CommandContext.Count() )
-	{
-		Assert( 0 );
-		CCommandContext *ctx = AllocCommandContext();
-		Q_memset( ctx, 0, sizeof( *ctx ) );
-	}
-
-	return &m_CommandContext[ 0 ];
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Replaces the first nCommands CUserCmds in the context with the ones passed in -- this is used to help meter out CUserCmds over the number of simulation ticks on the server
-//-----------------------------------------------------------------------------
-void CBasePlayer::ReplaceContextCommands( CCommandContext *ctx, CUserCmd *pCommands, int nCommands )
-{
-	// Blow away all of the commands
-	ctx->cmds.RemoveAll();
-
-	ctx->numcmds			= nCommands;
-	ctx->totalcmds			= nCommands;
-	ctx->dropped_packets	= 0; // meaningless in this context
-
-	// Add them in so the most recent is at slot 0
-	for ( int i = nCommands - 1; i >= 0; --i )
-	{
-		ctx->cmds.AddToTail( pCommands[ i ] );
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Determine how much time we will be running this frame
 // Output : float
 //-----------------------------------------------------------------------------
@@ -2995,8 +2942,10 @@ int CBasePlayer::DetermineSimulationTicks( void )
 }
 
 // 2 ticks ahead or behind current clock means we need to fix clock on client
-static ConVar sv_clockcorrection_msecs( "sv_clockcorrection_msecs", "60", 0, "The server tries to keep each player's m_nTickBase withing this many msecs of the server absolute tickcount" );
-static ConVar sv_playerperfhistorycount( "sv_playerperfhistorycount", "20", 0, "Number of samples to maintain in player perf history", true, 1.0f, true, 128.0 );
+#define TARGET_CLOCK_CORRECTION_TICKS (TIME_TO_TICKS(0.06f))
+
+
+extern ConVar skip;
 
 //-----------------------------------------------------------------------------
 // Purpose: Based upon amount of time in simulation time, adjust m_nTickBase so that
@@ -3010,17 +2959,6 @@ void CBasePlayer::AdjustPlayerTimeBase( int simulation_ticks )
 	if ( simulation_ticks < 0 )
 		return;
 
-	CPlayerSimInfo *pi = NULL;
-	if ( sv_playerperfhistorycount.GetInt() > 0 )
-	{
-		while ( m_vecPlayerSimInfo.Count() > sv_playerperfhistorycount.GetInt() )
-		{
-			m_vecPlayerSimInfo.Remove( m_vecPlayerSimInfo.Head() );
-		}
-
-		pi = &m_vecPlayerSimInfo[ m_vecPlayerSimInfo.AddToTail() ];
-	}
-
 	// Start in the past so that we get to the sv.time that we'll hit at the end of the
 	//  frame, just as we process the final command
 	
@@ -3028,45 +2966,37 @@ void CBasePlayer::AdjustPlayerTimeBase( int simulation_ticks )
 	{
 		// set TickBase so that player simulation tick matches gpGlobals->tickcount after
 		// all commands have been executed
-		m_nTickBase = gpGlobals->tickcount - simulation_ticks + gpGlobals->simTicksThisFrame;
+		m_nTickBase = gpGlobals->tickcount - simulation_ticks + 1;
 	}
 	else // multiplayer
 	{
-		float flCorrectionSeconds = clamp( sv_clockcorrection_msecs.GetFloat() / 1000.0f, 0.0f, 1.0f );
-		int nCorrectionTicks = TIME_TO_TICKS( flCorrectionSeconds );
+		// set the target tick 2 ticks ahead in the future. this way the client can
+		// alternate around this targettick without getting smaller than gpGlobals->tickcount
+		// after running the commands simulation time should never be smaller than the
+		// current gpGlobals->tickcount, otherwise the simulation time drops out of the
+		// clientside view interpolation buffer.
 
-		// Set the target tick flCorrectionSeconds (rounded to ticks) ahead in the future. this way the client can
-		//  alternate around this target tick without getting smaller than gpGlobals->tickcount.
-		// After running the commands simulation time should be equal or after current gpGlobals->tickcount, 
-		//  otherwise the simulation time drops out of the client side interpolated var history window.
+		int	end_of_frame_ticks = gpGlobals->tickcount + TARGET_CLOCK_CORRECTION_TICKS;
 
-		int	nIdealFinalTick = gpGlobals->tickcount + nCorrectionTicks;
-
-		int nEstimatedFinalTick = m_nTickBase + simulation_ticks;
+		int estimated_end_tick = m_nTickBase + simulation_ticks;
 		
 		// If client gets ahead of this, we'll need to correct
-		int	 too_fast_limit = nIdealFinalTick + nCorrectionTicks;
+		int	 too_fast_limit = end_of_frame_ticks + TARGET_CLOCK_CORRECTION_TICKS;
 		// If client falls behind this, we'll also need to correct
-		int	 too_slow_limit = nIdealFinalTick - nCorrectionTicks;
+		int	 too_slow_limit = end_of_frame_ticks - TARGET_CLOCK_CORRECTION_TICKS;
 			
 		// See if we are too fast
-		if ( nEstimatedFinalTick > too_fast_limit ||
-			 nEstimatedFinalTick < too_slow_limit )
+		if ( estimated_end_tick > too_fast_limit )
 		{
-			int nCorrectedTick = nIdealFinalTick - simulation_ticks + gpGlobals->simTicksThisFrame;
-
-			if ( pi )
-			{
-				pi->m_nTicksCorrected = nCorrectionTicks;
-			}
-
-			m_nTickBase = nCorrectedTick;
+			// DevMsg( "client too fast by %i ticks\n", estimated_end_tick - end_of_frame_ticks );
+			m_nTickBase = end_of_frame_ticks - simulation_ticks + 1;
 		}
-	}
-
-	if ( pi )
-	{
-		pi->m_flFinalSimulationTime = TICKS_TO_TIME( m_nTickBase + simulation_ticks + gpGlobals->simTicksThisFrame );
+		// Or to slow
+		else if ( estimated_end_tick < too_slow_limit )
+		{
+			// DevMsg( "client too slow by %i ticks\n", end_of_frame_ticks - estimated_end_tick );
+			m_nTickBase = end_of_frame_ticks - simulation_ticks + 1;
+		}
 	}
 }
 
@@ -3103,7 +3033,6 @@ void CBasePlayer::RunNullCommand( void )
 void CBasePlayer::PhysicsSimulate( void )
 {
 	VPROF_BUDGET( "CBasePlayer::PhysicsSimulate", VPROF_BUDGETGROUP_PLAYER );
-
 	// If we've got a moveparent, we must simulate that first.
 	CBaseEntity *pMoveParent = GetMoveParent();
 	if (pMoveParent)
@@ -3112,14 +3041,14 @@ void CBasePlayer::PhysicsSimulate( void )
 	}
 
 	// Make sure not to simulate this guy twice per frame
-	if ( m_nSimulationTick == gpGlobals->tickcount )
+	if (m_nSimulationTick == gpGlobals->tickcount )
 	{
 		return;
 	}
 	
 	m_nSimulationTick = gpGlobals->tickcount;
 
-	// See how many CUserCmds are queued up for running
+	// See how much time has queued up for running
 	int simulation_ticks = DetermineSimulationTicks();
 
 	// If some time will elapse, make sure our clock (m_nTickBase) starts at the correct time
@@ -3130,8 +3059,8 @@ void CBasePlayer::PhysicsSimulate( void )
 
 	if ( IsHLTV() )
 	{
-		// just run a single, empty command to make sure 
-		// all PreThink/PostThink functions are called as usual
+		// just run a single, empty command to makke sure
+		// all preThink/Postthink functions are called as usual
 		Assert ( GetCommandContextCount() == 0 );
 		RunNullCommand();
 		RemoveAllCommandContexts();
@@ -3143,91 +3072,44 @@ void CBasePlayer::PhysicsSimulate( void )
 	float saveframetime = gpGlobals->frametime;
 
 	int command_context_count = GetCommandContextCount();
-	
-
-	// Build a list of all available commands
-	CUtlVector< CUserCmd >	vecAvailCommands;
-
-	// Contexts go from oldest to newest
 	for ( int context_number = 0; context_number < command_context_count; context_number++ )
 	{
 		// Get oldest ( newer are added to tail )
 		CCommandContext *ctx = GetCommandContext( context_number );
-		if ( !ShouldRunCommandsInContext( ctx ) )
-			continue;
+		Assert( ctx );
 
-		if ( !ctx->cmds.Count() )
-			continue;
-
+		int i;
 		int numbackup = ctx->totalcmds - ctx->numcmds;
 
-		// If we haven't dropped too many packets, then run some commands
-		if ( ctx->dropped_packets < 24 )                
+		// If the server is paused, zero out motion,buttons,view changes
+		if ( ctx->paused )
 		{
-			int droppedcmds = ctx->dropped_packets;
+			bool clear_angles = true;
 
-			// run the last known cmd for each dropped cmd we don't have a backup for
-			while ( droppedcmds > numbackup )
+			// If no clipping and cheats enabled and noclipduring game enabled, then leave
+			//  forwardmove and angles stuff in usercmd
+			if ( GetMoveType() == MOVETYPE_NOCLIP &&
+				 sv_cheats->GetBool() && 
+				 sv_noclipduringpause.GetBool() )
 			{
-				m_LastCmd.tick_count++;
-				vecAvailCommands.AddToTail( m_LastCmd );
-				droppedcmds--;
+				clear_angles = false;
 			}
 
-			// Now run the "history" commands if we still have dropped packets
-			while ( droppedcmds > 0 )
+			for ( i = 0; i < ctx->numcmds; i++ )
 			{
-				int cmdnum = ctx->numcmds + droppedcmds - 1;
-				vecAvailCommands.AddToTail( ctx->cmds[cmdnum] );
-				droppedcmds--;
+				ctx->cmds[ i ].buttons = 0;
+				if ( clear_angles )
+				{
+					ctx->cmds[ i ].forwardmove = 0;
+					ctx->cmds[ i ].sidemove = 0;
+					ctx->cmds[ i ].upmove = 0;
+					VectorCopy ( pl.v_angle, ctx->cmds[ i ].viewangles );
+				}
 			}
+			
+			ctx->dropped_packets = 0;
 		}
-
-		// Now run any new command(s).  Go backward because the most recent command is at index 0.
-		for ( int i = ctx->numcmds - 1; i >= 0; i-- )
-		{
-			vecAvailCommands.AddToTail( ctx->cmds[i] );
-		}
-
-		// Save off the last good command in case we drop > numbackup packets and need to rerun them
-		//  we'll use this to "guess" at what was in the missing packets
-		m_LastCmd = ctx->cmds[ CMD_MOSTRECENT ];
-	}
-
-	// gpGlobals->simTicksThisFrame == number of ticks remaining to be run, so we should take the last N CUserCmds and postpone them until the next frame
-
-	// If we're running multiple ticks this frame, don't peel off all of the commands, spread them out over
-	// the server ticks.  Use blocks of two in alternate ticks
-	int commandLimit = CBaseEntity::IsSimulatingOnAlternateTicks() ? 2 : 1;
-	int commandsToRun = vecAvailCommands.Count();
-	if ( gpGlobals->simTicksThisFrame >= commandLimit && vecAvailCommands.Count() > commandLimit )
-	{
-		int commandsToRollOver = min( vecAvailCommands.Count(), ( gpGlobals->simTicksThisFrame - 1 ) );
-		commandsToRun = vecAvailCommands.Count() - commandsToRollOver;
-		Assert( commandsToRun >= 0 );
-		// Clear all contexts except the last one
-		if ( commandsToRollOver > 0 )
-		{
-			CCommandContext *ctx = RemoveAllCommandContextsExceptNewest();
-			ReplaceContextCommands( ctx, &vecAvailCommands[ commandsToRun ], commandsToRollOver );
-		}
-		else
-		{
-			// Clear all contexts
-			RemoveAllCommandContexts();
-		}
-	}
-	else
-	{
-		// Clear all contexts
-		RemoveAllCommandContexts();
-	}
-
-	float vphysicsArrivalTime = TICK_INTERVAL;
-
-	// Now run the commands
-	if ( commandsToRun > 0 )
-	{
+	
 		MoveHelperServer()->SetHost( this );
 
 		// Suppress predicted events, etc.
@@ -3236,36 +3118,72 @@ void CBasePlayer::PhysicsSimulate( void )
 			IPredictionSystem::SuppressHostEvents( this );
 		}
 
-		for ( int i = 0; i < commandsToRun; ++i )
+		// If we haven't dropped too many packets, then run some commands
+		if ( ctx->dropped_packets < 24 )                
 		{
-			PlayerRunCommand( &vecAvailCommands[ i ], MoveHelperServer() );
+			int droppedcmds = ctx->dropped_packets;
 
-			// Update our vphysics object.
-			if ( m_pPhysicsController )
+			if ( droppedcmds > numbackup )
 			{
-				VPROF( "CBasePlayer::PhysicsSimulate-UpdateVPhysicsPosition" );
-				// If simulating at 2 * TICK_INTERVAL, add an extra TICK_INTERVAL to position arrival computation
-				UpdateVPhysicsPosition( m_vNewVPhysicsPosition, m_vNewVPhysicsVelocity, vphysicsArrivalTime );
-				vphysicsArrivalTime += TICK_INTERVAL;
+				// Msg( "lost %i cmds\n", droppedcmds );
 			}
+
+			// run the last known cmd for each dropped cmd we don't have a backup for
+			while ( droppedcmds > numbackup )
+			{
+				m_LastCmd.tick_count++;
+
+				if ( ShouldRunCommandsInContext( ctx ) )
+				{												 
+					PlayerRunCommand( &m_LastCmd, MoveHelperServer() );
+				}
+				droppedcmds--;
+			}
+
+			// Now run the "history" commands if we still have dropped packets
+			while ( droppedcmds > 0 )
+			{
+				int cmdnum = ctx->numcmds + droppedcmds - 1;
+				if ( ShouldRunCommandsInContext( ctx ) )
+				{
+					PlayerRunCommand( &ctx->cmds[cmdnum], MoveHelperServer() );
+				}
+				droppedcmds--;
+			}
+		}
+
+		// Now run any new command(s).  Go backward because the most recent command is at index 0.
+		for ( i = ctx->numcmds - 1; i >= 0; i-- )
+		{
+			if ( ShouldRunCommandsInContext( ctx ) )
+			{
+				PlayerRunCommand( &ctx->cmds[ i ], MoveHelperServer() );
+			}
+		}
+
+		// Save off the last good command in case we drop > numbackup packets and need to rerun them
+		//  we'll use this to "guess" at what was in the missing packets
+		m_LastCmd = ctx->cmds[ CMD_MOSTRECENT ];
+
+		// Update our vphysics object.
+		if ( m_pPhysicsController )
+		{
+			VPROF( "CBasePlayer::PhysicsSimulate-UpdateVPhysicsPosition" );
+			// If simulating at 2 * TICK_INTERVAL, add an extra TICK_INTERVAL to position arrival computation
+			int additionalTick = CBaseEntity::IsSimulatingOnAlternateTicks() ? 1 : 0;
+
+			float flSecondsToArrival = ( ctx->numcmds + ctx->dropped_packets + additionalTick ) * TICK_INTERVAL;
+			UpdateVPhysicsPosition( m_vNewVPhysicsPosition, m_vNewVPhysicsVelocity, flSecondsToArrival );
 		}
 
 		// Always reset after running commands
 		IPredictionSystem::SuppressHostEvents( NULL );
 
 		MoveHelperServer()->SetHost( NULL );
-
-		// Copy in final origin from simulation
-		CPlayerSimInfo *pi = NULL;
-		if ( m_vecPlayerSimInfo.Count() > 0 )
-		{
-			pi = &m_vecPlayerSimInfo[ m_vecPlayerSimInfo.Tail() ];
-			pi->m_flTime = gpGlobals->realtime;
-			pi->m_vecAbsOrigin = GetAbsOrigin();
-			pi->m_flGameSimulationTime = gpGlobals->curtime;
-			pi->m_nNumCmds = commandsToRun;
-		}
 	}
+
+	// Clear all contexts
+	RemoveAllCommandContexts();
 
 	// Restore the true server clock
 	// FIXME:  Should this occur after simulation of children so
@@ -3348,114 +3266,6 @@ void CBasePlayer::ProcessUsercmds( CUserCmd *cmds, int numcmds, int totalcmds,
 		ForceSimulation();
 		// Just run the commands right away if paused
 		PhysicsSimulate();
-	}
-
-	if ( sv_playerperfhistorycount.GetInt() > 0 )
-	{
-		CPlayerCmdInfo pi;
-		pi.m_flTime = gpGlobals->realtime;
-		pi.m_nDroppedPackets = dropped_packets;
-		pi.m_nNumCmds = numcmds;
-	
-		while ( m_vecPlayerCmdInfo.Count() >= sv_playerperfhistorycount.GetInt() )
-		{
-			m_vecPlayerCmdInfo.Remove( m_vecPlayerCmdInfo.Head() );
-		}
-
-		m_vecPlayerCmdInfo.AddToTail( pi );
-	}
-}
-
-void CBasePlayer::DumpPerfToRecipient( CBasePlayer *pRecipient, int nMaxRecords )
-{
-	if ( !pRecipient )
-		return;
-
-	char buf[ 256 ] = { 0 };
-	int curpos = 0;
-
-	int nDumped = 0;
-	Vector prevo( 0, 0, 0 );
-	float prevt = 0.0f;
-
-	for ( int i = m_vecPlayerSimInfo.Tail(); i != m_vecPlayerSimInfo.InvalidIndex() ; i = m_vecPlayerSimInfo.Previous( i ) )
-	{
-		const CPlayerSimInfo *pi = &m_vecPlayerSimInfo[ i ];
-
-		float vel = 0.0f;
-
-		// Note we're walking from newest backward
-		float dt = prevt - pi->m_flFinalSimulationTime;
-		if ( nDumped > 0 && dt > 0.0f )
-		{
-			Vector d = pi->m_vecAbsOrigin - prevo;
-			vel = d.Length() / dt;
-		}
-
-		char line[ 128 ];
-		int len = Q_snprintf( line, sizeof( line ), "%.3f %d %d %.3f %.3f %.3f [vel %.2f]\n",
-			pi->m_flTime,
-			pi->m_nNumCmds,
-			pi->m_nTicksCorrected,
-			pi->m_flFinalSimulationTime,
-			pi->m_flGameSimulationTime,
-			pi->m_flServerFrameTime, 
-			vel );
-
-		if ( curpos + len > 200 )
-		{
-			ClientPrint( pRecipient, HUD_PRINTCONSOLE, (char const *)buf );
-			buf[ 0 ] = 0;
-			curpos = 0;
-		}
-
-		Q_strncpy( &buf[ curpos ], line, sizeof( buf ) - curpos );
-		curpos += len;
-
-		++nDumped;
-		if ( nMaxRecords != -1 && nDumped >= nMaxRecords )
-			break;
-
-		prevo = pi->m_vecAbsOrigin;
-		prevt = pi->m_flFinalSimulationTime;
-	}
-
-	if ( curpos > 0 )
-	{
-		ClientPrint( pRecipient, HUD_PRINTCONSOLE, buf );
-	}
-
-	nDumped = 0;
-	curpos = 0;
-
-	for ( int i = m_vecPlayerCmdInfo.Tail(); i != m_vecPlayerCmdInfo.InvalidIndex() ; i = m_vecPlayerCmdInfo.Previous( i ) )
-	{
-		const CPlayerCmdInfo *pi = &m_vecPlayerCmdInfo[ i ];
-
-		char line[ 128 ];
-		int len = Q_snprintf( line, sizeof( line ), "%.3f %d %d\n",
-			pi->m_flTime,
-			pi->m_nNumCmds,
-			pi->m_nDroppedPackets );
-
-		if ( curpos + len > 200 )
-		{
-			ClientPrint( pRecipient, HUD_PRINTCONSOLE, (char const *)buf );
-			buf[ 0 ] = 0;
-			curpos = 0;
-		}
-
-		Q_strncpy( &buf[ curpos ], line, sizeof( buf ) - curpos );
-		curpos += len;
-
-		++nDumped;
-		if ( nMaxRecords != -1 && nDumped >= nMaxRecords )
-			break;
-	}
-
-	if ( curpos > 0 )
-	{
-		ClientPrint( pRecipient, HUD_PRINTCONSOLE, buf );
 	}
 }
 
@@ -4514,7 +4324,7 @@ void CBasePlayer::PostThinkVPhysics( void )
 
 	if ( collisionState != m_vphysicsCollisionState )
 	{
-		SetVCollisionState( GetAbsOrigin(), GetAbsVelocity(), collisionState );
+		SetVCollisionState( collisionState );
 	}
 
 	if ( !(TouchedPhysics() || pPhysGround) )
@@ -4871,7 +4681,7 @@ void CBasePlayer::Spawn( void )
 
 	m_flLaggedMovementValue = 1.0f;
 	m_vecSmoothedVelocity = vec3_origin;
-	InitVCollision( GetAbsOrigin(), GetAbsVelocity() );
+	InitVCollision();
 
 	IGameEvent *event = gameeventmanager->CreateEvent( "player_spawn" );
 	
@@ -4988,24 +4798,6 @@ int CBasePlayer::Save( ISave &save )
 	return 1;
 }
 
-
-// Friend class of CBaseEntity to access private member data.
-class CPlayerRestoreHelper
-{
-public:
-
-	const Vector &GetAbsOrigin( CBaseEntity *pent )
-	{
-		return pent->m_vecAbsOrigin;
-	}
-
-	const Vector &GetAbsVelocity( CBaseEntity *pent )
-	{
-		return pent->m_vecAbsVelocity;
-	}
-};
-
-
 int CBasePlayer::Restore( IRestore &restore )
 {
 	int status = BaseClass::Restore(restore);
@@ -5048,11 +4840,7 @@ int CBasePlayer::Restore( IRestore &restore )
 		UTIL_SetSize(this, VEC_HULL_MIN, VEC_HULL_MAX);
 	}
 
-	// We need to get at m_vecAbsOrigin as it was restored but can't let it be
-	// recalculated by a call to GetAbsOrigin because hierarchy isn't fully restored yet,
-	// so we use this backdoor to get at the private data in CBaseEntity.
-	CPlayerRestoreHelper helper;
-	InitVCollision( helper.GetAbsOrigin( this ), helper.GetAbsVelocity( this ) );
+	InitVCollision();
 
 	// success
 	return 1;
@@ -5070,8 +4858,6 @@ void CBasePlayer::OnRestore( void )
 
 	// Calculate this immediately
 	m_nVehicleViewSavedFrame = 0;
-
-	m_nBodyPitchPoseParam = LookupPoseParameter( "body_pitch" );
 }
 
 /* void CBasePlayer::SetTeamName( const char *pTeamName )
@@ -5120,7 +4906,7 @@ void CBasePlayer::AllowImmediateDecalPainting()
 }
 
 // Suicide...
-void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= false*/ )
+void CBasePlayer::CommitSuicide( bool bExplode /*= false*/ )
 {
 	MDLCACHE_CRITICAL_SECTION();
 
@@ -5128,7 +4914,7 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 		return;
 		
 	// prevent suiciding too often
-	if ( m_fNextSuicideTime > gpGlobals->curtime && !bForce )
+	if ( m_fNextSuicideTime > gpGlobals->curtime )
 		return;
 
 	// don't let them suicide for 5 seconds after suiciding
@@ -5144,7 +4930,7 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 }
 
 // Suicide with style...
-void CBasePlayer::CommitSuicide( const Vector &vecForce, bool bExplode /*= false*/, bool bForce /*= false*/ )
+void CBasePlayer::CommitSuicide( const Vector &vecForce, bool bExplode /*= false*/ )
 {
 	MDLCACHE_CRITICAL_SECTION();
 
@@ -5153,7 +4939,7 @@ void CBasePlayer::CommitSuicide( const Vector &vecForce, bool bExplode /*= false
 		return;
 
 	// Prevent suicides for a time.
-	if ( m_fNextSuicideTime > gpGlobals->curtime && !bForce )
+	if ( m_fNextSuicideTime > gpGlobals->curtime )
 		return;
 
 	m_fNextSuicideTime = gpGlobals->curtime + 5;  
@@ -6334,26 +6120,6 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 		
 		return true;
 	}
-	else if ( stricmp( cmd, "playerperf" ) == 0 )
-	{
-		int nRecip = entindex();
-		if ( args.ArgC() >= 2 )
-		{
-			nRecip = clamp( Q_atoi( args.Arg( 1 ) ), 1, gpGlobals->maxClients );
-		}
-		int nRecords = -1; // all
-		if ( args.ArgC() >= 3 )
-		{
-			nRecords = max( Q_atoi( args.Arg( 2 ) ), 1 );
-		}
-
-		CBasePlayer *pl = UTIL_PlayerByIndex( nRecip );
-		if ( pl )
-		{
-			pl->DumpPerfToRecipient( this, nRecords );
-		}
-		return true;
-	}
 
 	return false;
 }
@@ -6801,13 +6567,10 @@ void CBasePlayer::GetAutoaimVector( autoaim_params_t &params )
 // a radius specified by the target. The player then modifies this radius
 // to achieve more or less aggressive aiming assistance
 //-----------------------------------------------------------------------------
-float CBasePlayer::GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale, CBaseCombatWeapon *pActiveWeapon )
+float CBasePlayer::GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale )
 {
 	float radiusSqr;
 	float targetRadius = pTarget->GetAutoAimRadius() * fScale;
-
-	if( pActiveWeapon != NULL )
-		targetRadius *= pActiveWeapon->WeaponAutoAimScale();
 
 	float targetRadiusSqr = Square( targetRadius );
 
@@ -6994,7 +6757,7 @@ QAngle CBasePlayer::AutoaimDeflection( Vector &vecSrc, autoaim_params_t &params 
 				}
 			}
 
-			score = GetAutoaimScore(vecSrc, v_forward, pEntity->GetAutoAimCenter(), pEntity, params.m_fScale, GetActiveWeapon() );
+			score = GetAutoaimScore(vecSrc, v_forward, pEntity->GetAutoAimCenter(), pEntity, params.m_fScale );
 
 			if( score <= bestscore )
 			{
@@ -7716,7 +7479,6 @@ void SendProxy_CropFlagsToPlayerFlagBitsLength( const SendProp *pProp, const voi
 		SendPropEHandle	(SENDINFO(m_hZoomOwner) ),
 		SendPropArray	( SendPropEHandle( SENDINFO_ARRAY( m_hViewModel ) ), m_hViewModel ),
 		SendPropString	(SENDINFO(m_szLastPlaceName) ),
-		SendPropInt		( SENDINFO( m_ubEFNoInterpParity ), NOINTERP_PARITY_MAX_BITS, SPROP_UNSIGNED ),
 
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
@@ -7728,7 +7490,7 @@ void SendProxy_CropFlagsToPlayerFlagBitsLength( const SendProp *pProp, const voi
 // Player Physics Shadow Code
 //
 
-void CBasePlayer::SetupVPhysicsShadow( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, CPhysCollide *pStandModel, const char *pStandHullName, CPhysCollide *pCrouchModel, const char *pCrouchHullName )
+void CBasePlayer::SetupVPhysicsShadow( CPhysCollide *pStandModel, const char *pStandHullName, CPhysCollide *pCrouchModel, const char *pCrouchHullName )
 {
 	solid_t solid;
 	Q_strncpy( solid.surfaceprop, "player", sizeof(solid.surfaceprop) );
@@ -7756,16 +7518,16 @@ void CBasePlayer::SetupVPhysicsShadow( const Vector &vecAbsOrigin, const Vector 
 	m_pPhysicsController->SetPushSpeedLimit( 50.0f );
 	
 	// Give the controller a valid position so it doesn't do anything rash.
-	UpdatePhysicsShadowToPosition( vecAbsOrigin );
+	UpdatePhysicsShadowToCurrentPosition();
 
 	// init state
 	if ( GetFlags() & FL_DUCKING )
 	{
-		SetVCollisionState( vecAbsOrigin, vecAbsVelocity, VPHYS_CROUCH );
+		SetVCollisionState( VPHYS_CROUCH );
 	}
 	else
 	{
-		SetVCollisionState( vecAbsOrigin, vecAbsVelocity, VPHYS_WALK );
+		SetVCollisionState( VPHYS_WALK );
 	}
 }
 
@@ -7889,34 +7651,12 @@ void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
 		maxVelErrorSqr *= 0.25;
 	}
 
-	// player's physics was frozen, try moving to the game's simulated position if possible
-	if ( m_pPhysicsController->WasFrozen() )
-	{
-		m_bPhysicsWasFrozen = true;
-		// check my position (physics object could have simulated into my position
-		// physics is not very far away, check my position
-		trace_t trace;
-		UTIL_TraceEntity( this, GetAbsOrigin(), GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-		if ( !trace.startsolid )
-			return;
-
-		// The physics shadow position is probably not in solid, try to move from there to the desired position
-		UTIL_TraceEntity( this, newPosition, GetAbsOrigin(), MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-		if ( !trace.startsolid )
-		{
-			// found a valid position between the two?  take it.
-			SetAbsOrigin( trace.endpos );
-			UpdateVPhysicsPosition(trace.endpos, vec3_origin, 0);
-			return;
-		}
-
-	}
 	if ( dist >= maxDistErrorSqr || deltaV >= maxVelErrorSqr || (pPhysGround && !m_touchedPhysObject) )
 	{
 		if ( m_touchedPhysObject || pPhysGround )
 		{
 			// BUGBUG: Rewrite this code using fixed timestep
-			if ( deltaV >= maxVelErrorSqr && !m_bPhysicsWasFrozen )
+			if ( deltaV >= maxVelErrorSqr )
 			{
 				Vector dir = GetAbsVelocity();
 				float len = VectorNormalize(dir);
@@ -7995,7 +7735,6 @@ void CBasePlayer::VPhysicsShadowUpdate( IPhysicsObject *pPhysics )
 		}
 	}
 	m_oldOrigin = GetAbsOrigin();
-	m_bPhysicsWasFrozen = false;
 }
 
 // recreate physics on save/load, don't try to save the state!
@@ -8007,7 +7746,7 @@ bool CBasePlayer::ShouldSavePhysics()
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CBasePlayer::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity )
+void CBasePlayer::InitVCollision( void )
 {
 	// Cleanup any old vphysics stuff.
 	VPhysicsDestroyObject();
@@ -8019,7 +7758,7 @@ void CBasePlayer::InitVCollision( const Vector &vecAbsOrigin, const Vector &vecA
 	CPhysCollide *pModel = PhysCreateBbox( VEC_HULL_MIN, VEC_HULL_MAX );
 	CPhysCollide *pCrouchModel = PhysCreateBbox( VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX );
 
-	SetupVPhysicsShadow( vecAbsOrigin, vecAbsVelocity, pModel, "player_stand", pCrouchModel, "player_crouch" );
+	SetupVPhysicsShadow( pModel, "player_stand", pCrouchModel, "player_crouch" );
 }
 
 
@@ -8058,14 +7797,19 @@ void CBasePlayer::VPhysicsDestroyObject()
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CBasePlayer::SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState )
+void CBasePlayer::SetVCollisionState( int collisionState )
 {
+	Vector vel = vec3_origin;
+	Vector pos = vec3_origin;
+	vel = GetAbsVelocity();
+	pos = GetAbsOrigin();
+
 	m_vphysicsCollisionState = collisionState;
 	switch( collisionState )
 	{
 	case VPHYS_WALK:
- 		m_pShadowStand->SetPosition( vecAbsOrigin, vec3_angle, true );
-		m_pShadowStand->SetVelocity( &vecAbsVelocity, NULL );
+ 		m_pShadowStand->SetPosition( pos, vec3_angle, true );
+		m_pShadowStand->SetVelocity( &vel, NULL );
 		m_pShadowCrouch->EnableCollisions( false );
 		m_pPhysicsController->SetObject( m_pShadowStand );
 		VPhysicsSwapObject( m_pShadowStand );
@@ -8073,8 +7817,8 @@ void CBasePlayer::SetVCollisionState( const Vector &vecAbsOrigin, const Vector &
 		break;
 
 	case VPHYS_CROUCH:
-		m_pShadowCrouch->SetPosition( vecAbsOrigin, vec3_angle, true );
-		m_pShadowCrouch->SetVelocity( &vecAbsVelocity, NULL );
+		m_pShadowCrouch->SetPosition( pos, vec3_angle, true );
+		m_pShadowCrouch->SetVelocity( &vel, NULL );
 		m_pShadowStand->EnableCollisions( false );
 		m_pPhysicsController->SetObject( m_pShadowCrouch );
 		VPhysicsSwapObject( m_pShadowCrouch );
@@ -8125,53 +7869,6 @@ int CBasePlayer::GetFOV( void )
 	}
 
 	return fFOV;
-}
-
-
-//-----------------------------------------------------------------------------
-// Get the current FOV used for network computations
-// Choose the smallest FOV, as it will open the largest number of portals
-//-----------------------------------------------------------------------------
-int CBasePlayer::GetFOVForNetworking( void )
-{
-	int nDefaultFOV;
-
-	// The vehicle's FOV wins if we're asking for a default value
-	if ( GetVehicle() )
-	{
-		CacheVehicleView();
-		nDefaultFOV = ( m_flVehicleViewFOV == 0 ) ? GetDefaultFOV() : (int) m_flVehicleViewFOV;
-	}
-	else
-	{
-		nDefaultFOV = GetDefaultFOV();
-	}
-
-	int fFOV = ( m_iFOV == 0 ) ? nDefaultFOV : m_iFOV;
-
-	// If it's immediate, just do it
-	if ( m_Local.m_flFOVRate == 0.0f )
-		return fFOV;
-
-	if ( gpGlobals->curtime - m_flFOVTime < m_Local.m_flFOVRate )
-	{
-		fFOV = min( fFOV, m_iFOVStart );
-	}
-	return fFOV;
-}
-
-
-float CBasePlayer::GetFOVDistanceAdjustFactorForNetworking()
-{
-	float defaultFOV	= (float)GetDefaultFOV();
-	float localFOV		= (float)GetFOVForNetworking();
-
-	if ( localFOV == defaultFOV || defaultFOV < 0.001f )
-		return 1.0f;
-
-	// If FOV is lower, then we're "zoomed" in and this will give a factor < 1 so apparent LOD distances can be
-	//  shorted accordingly
-	return localFOV / defaultFOV;
 }
 
 
@@ -8931,16 +8628,80 @@ void CBasePlayer::Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo
 	}
 }
 
-void CBasePlayer::SetModel( const char *szModelName )
+// TFP3: Copied from the client
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+void CBasePlayer::UpdateFogBlend( void )
 {
-	BaseClass::SetModel( szModelName );
-	m_nBodyPitchPoseParam = LookupPoseParameter( "body_pitch" );
+	// Transition.
+	if ( m_Local.m_PlayerFog.m_flTransitionTime != -1 )
+	{
+		float flTimeDelta = gpGlobals->curtime - m_Local.m_PlayerFog.m_flTransitionTime;
+		if ( flTimeDelta < m_Local.m_fog.duration )
+		{
+			float flScale = flTimeDelta / m_Local.m_fog.duration;
+			m_Local.m_fog.colorPrimary.SetR( ( m_Local.m_PlayerFog.m_NewColor.r * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.r * ( 1.0f - flScale ) ) );
+			m_Local.m_fog.colorPrimary.SetG( ( m_Local.m_PlayerFog.m_NewColor.g * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.g * ( 1.0f - flScale ) ) );
+			m_Local.m_fog.colorPrimary.SetB( ( m_Local.m_PlayerFog.m_NewColor.b * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.b * ( 1.0f - flScale ) ) );
+			m_Local.m_fog.start.Set( ( m_Local.m_PlayerFog.m_flNewStart * flScale ) + ( ( m_Local.m_PlayerFog.m_flOldStart * ( 1.0f - flScale ) ) ) );
+			m_Local.m_fog.end.Set( ( m_Local.m_PlayerFog.m_flNewEnd * flScale ) + ( ( m_Local.m_PlayerFog.m_flOldEnd * ( 1.0f - flScale ) ) ) );
+		}
+		else
+		{
+			// Slam the final fog values.
+			m_Local.m_fog.colorPrimary.SetR( m_Local.m_PlayerFog.m_NewColor.r );
+			m_Local.m_fog.colorPrimary.SetG( m_Local.m_PlayerFog.m_NewColor.g );
+			m_Local.m_fog.colorPrimary.SetB( m_Local.m_PlayerFog.m_NewColor.b );
+			m_Local.m_fog.start.Set( m_Local.m_PlayerFog.m_flNewStart );
+			m_Local.m_fog.end.Set( m_Local.m_PlayerFog.m_flNewEnd );
+			m_Local.m_PlayerFog.m_flTransitionTime = -1;
+
+			/*
+				Msg("Finished transition to (%d,%d,%d) %.0f,%.0f\n", 
+								m_Local.m_fog.colorPrimary.GetR(), m_Local.m_fog.colorPrimary.GetB(), m_Local.m_fog.colorPrimary.GetG(), 
+								m_Local.m_fog.start.Get(), m_Local.m_fog.end.Get() );*/
+				
+		}
+	}
 }
 
-void CBasePlayer::SetBodyPitch( float flPitch )
+// TFP3: Copied from the client
+//-----------------------------------------------------------------------------
+// Purpose: Check to see that the controllers data is up to date.
+//-----------------------------------------------------------------------------
+void CBasePlayer::UpdateFogController( void )
 {
-	if ( m_nBodyPitchPoseParam >= 0 )
+	if ( m_Local.m_PlayerFog.m_hCtrl )
 	{
-		SetPoseParameter( m_nBodyPitchPoseParam, flPitch );
+		// Don't bother copying while we're transitioning, since it'll be stomped in UpdateFogBlend();
+		if ( m_Local.m_PlayerFog.m_flTransitionTime == -1 )
+		{
+			fogparams_t	*pFogParams = &(m_Local.m_PlayerFog.m_hCtrl->m_fog);
+			if ( m_Local.m_fog != *pFogParams )
+			{
+				/*
+					Msg("FORCING UPDATE: (%d,%d,%d) %.0f,%.0f -> (%d,%d,%d) %.0f,%.0f (%.2f seconds)\n", 
+										m_Local.m_fog.colorPrimary.GetR(), m_Local.m_fog.colorPrimary.GetB(), m_Local.m_fog.colorPrimary.GetG(), 
+										m_Local.m_fog.start.Get(), m_Local.m_fog.end.Get(), 
+										pFogParams->colorPrimary.GetR(), pFogParams->colorPrimary.GetB(), pFogParams->colorPrimary.GetG(), 
+										pFogParams->start.Get(), pFogParams->end.Get(), pFogParams->duration.Get() );*/
+					
+
+				m_Local.m_fog = *pFogParams;
+			}
+		}
 	}
+	else
+	{
+		if ( m_Local.m_fog.farz != -1 || m_Local.m_fog.enable != false )
+		{
+			// No fog controller in this level. Use default fog parameters.
+			m_Local.m_fog.farz = -1;
+			m_Local.m_fog.enable = false;
+		}
+	}
+
+	// Update the fog blending state - of necessary.
+	UpdateFogBlend();
 }

@@ -1358,31 +1358,35 @@ void CheckAndTransitionColor( float flPercent, float *pColor, float *pLerpToColo
 	}
 }
 
-static void GetFogColorTransition( fogparams_t *pFogParams, float *pColorPrimary, float *pColorSecondary )
+static void GetFogColorTransition( CPlayerLocalData	*local, float *pColorPrimary, float *pColorSecondary )
 {
-	if ( !pFogParams )
+	if ( local == NULL )
 		return;
 
-	if ( pFogParams->lerptime >= gpGlobals->curtime )
+	if ( local->m_fog.lerptime >= gpGlobals->curtime )
 	{
-		float flPercent = 1.0f - (( pFogParams->lerptime - gpGlobals->curtime ) / pFogParams->duration );
+		float flPercent = 1.0f - (( local->m_fog.lerptime - gpGlobals->curtime ) / local->m_fog.duration );
 
-		float flPrimaryColorLerp[3] = { pFogParams->colorPrimaryLerpTo.GetR(), pFogParams->colorPrimaryLerpTo.GetG(), pFogParams->colorPrimaryLerpTo.GetB() };
-		float flSecondaryColorLerp[3] = { pFogParams->colorSecondaryLerpTo.GetR(), pFogParams->colorSecondaryLerpTo.GetG(), pFogParams->colorSecondaryLerpTo.GetB() };
+		float flPrimaryColorLerp[3] = { local->m_fog.colorPrimaryLerpTo.GetR(), local->m_fog.colorPrimaryLerpTo.GetG(), local->m_fog.colorPrimaryLerpTo.GetB() };
+		float flSecondaryColorLerp[3] = { local->m_fog.colorSecondaryLerpTo.GetR(), local->m_fog.colorSecondaryLerpTo.GetG(), local->m_fog.colorSecondaryLerpTo.GetB() };
 
 		CheckAndTransitionColor( flPercent, pColorPrimary, flPrimaryColorLerp );
 		CheckAndTransitionColor( flPercent, pColorSecondary, flSecondaryColorLerp );
 	}
 }
 
+// TFP3: Note: This was copied from Source 2006, revisit if necessary
 //-----------------------------------------------------------------------------
 // Purpose: Returns the fog color to use in rendering the current frame.
 //-----------------------------------------------------------------------------
-static void GetFogColor( fogparams_t *pFogParams, float *pColor )
+static void GetFogColor( float *pColor )
 {
 	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
-	if ( !pbp || !pFogParams )
+	if( !pbp )
+	{
 		return;
+	}
+	CPlayerLocalData	*local		= &pbp->m_Local;
 
 	const char *fogColorString = fog_color.GetString();
 	if( fog_override.GetInt() && fogColorString )
@@ -1391,25 +1395,25 @@ static void GetFogColor( fogparams_t *pFogParams, float *pColor )
 	}
 	else
 	{
-		float flPrimaryColor[3] = { pFogParams->colorPrimary.GetR(), pFogParams->colorPrimary.GetG(), pFogParams->colorPrimary.GetB() };
-		float flSecondaryColor[3] = { pFogParams->colorSecondary.GetR(), pFogParams->colorSecondary.GetG(), pFogParams->colorSecondary.GetB() };
+		float flPrimaryColor[3] = { local->m_fog.colorPrimary.GetR(), local->m_fog.colorPrimary.GetG(), local->m_fog.colorPrimary.GetB() };
+		float flSecondaryColor[3] = { local->m_fog.colorSecondary.GetR(), local->m_fog.colorSecondary.GetG(), local->m_fog.colorSecondary.GetB() };
 
-		GetFogColorTransition( pFogParams, flPrimaryColor, flSecondaryColor );
+		GetFogColorTransition( local, flPrimaryColor, flSecondaryColor );
 
-		if( pFogParams->blend )
+		if( local->m_fog.blend )
 		{
 			//
 			// Blend between two fog colors based on viewing angle.
 			// The secondary fog color is at 180 degrees to the primary fog color.
 			//
 			Vector forward;
-			pbp->EyeVectors( &forward, NULL, NULL );
+			AngleVectors(pbp->GetAbsAngles(), &forward);
 			
-			Vector vNormalized = pFogParams->dirPrimary;
+			Vector vNormalized = local->m_fog.dirPrimary;
 			VectorNormalize( vNormalized );
-			pFogParams->dirPrimary = vNormalized;
+			local->m_fog.dirPrimary = vNormalized;
 
-			float flBlendFactor = 0.5 * forward.Dot( pFogParams->dirPrimary ) + 0.5;
+			float flBlendFactor = 0.5 * forward.Dot( local->m_fog.dirPrimary ) + 0.5;
 
 			// FIXME: convert to linear colorspace
 			pColor[0] = flPrimaryColor[0] * flBlendFactor + flSecondaryColor[0] * ( 1 - flBlendFactor );
@@ -1427,17 +1431,21 @@ static void GetFogColor( fogparams_t *pFogParams, float *pColor )
 	VectorScale( pColor, 1.0f / 255.0f, pColor );
 }
 
-
-static float GetFogStart( fogparams_t *pFogParams )
+// TFP3: Note: This was copied from Source 2006, revisit if necessary
+static float GetFogStart( void )
 {
-	if( !pFogParams )
+	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
+	if( !pbp )
+	{
 		return 0.0f;
+	}
+	CPlayerLocalData	*local		= &pbp->m_Local;
 
 	if( fog_override.GetInt() )
 	{
 		if( fog_start.GetFloat() == -1.0f )
 		{
-			return pFogParams->start;
+			return local->m_fog.start;
 		}
 		else
 		{
@@ -1446,40 +1454,45 @@ static float GetFogStart( fogparams_t *pFogParams )
 	}
 	else
 	{
-		if ( pFogParams->lerptime > gpGlobals->curtime )
+		if ( local->m_fog.lerptime > gpGlobals->curtime )
 		{
-			if ( pFogParams->start != pFogParams->startLerpTo )
+			if ( local->m_fog.start != local->m_fog.startLerpTo )
 			{
-				if ( pFogParams->lerptime > gpGlobals->curtime )
+				if ( local->m_fog.lerptime > gpGlobals->curtime )
 				{
-					float flPercent = 1.0f - (( pFogParams->lerptime - gpGlobals->curtime ) / pFogParams->duration );
+					float flPercent = 1.0f - (( local->m_fog.lerptime - gpGlobals->curtime ) / local->m_fog.duration );
 
-					return FLerp( pFogParams->start, pFogParams->startLerpTo, flPercent );
+					return FLerp( local->m_fog.start, local->m_fog.startLerpTo, flPercent );
 				}
 				else
 				{
-					if ( pFogParams->start != pFogParams->startLerpTo )
+					if ( local->m_fog.start != local->m_fog.startLerpTo )
 					{
-						pFogParams->start = pFogParams->startLerpTo;
+						local->m_fog.start = local->m_fog.startLerpTo;
 					}
 				}
 			}
 		}
 
-		return pFogParams->start;
+		return local->m_fog.start;
 	}
 }
 
-static float GetFogEnd( fogparams_t *pFogParams )
+// TFP3: Note: This was copied from Source 2006, revisit if necessary
+static float GetFogEnd( void )
 {
-	if( !pFogParams )
+	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
+	if( !pbp )
+	{
 		return 0.0f;
+	}
+	CPlayerLocalData	*local		= &pbp->m_Local;
 
 	if( fog_override.GetInt() )
 	{
 		if( fog_end.GetFloat() == -1.0f )
 		{
-			return pFogParams->end;
+			return local->m_fog.end;
 		}
 		else
 		{
@@ -1488,32 +1501,40 @@ static float GetFogEnd( fogparams_t *pFogParams )
 	}
 	else
 	{
-		if ( pFogParams->lerptime > gpGlobals->curtime )
+		if ( local->m_fog.lerptime > gpGlobals->curtime )
 		{
-			if ( pFogParams->end != pFogParams->endLerpTo )
+			if ( local->m_fog.end != local->m_fog.endLerpTo )
 			{
-				if ( pFogParams->lerptime > gpGlobals->curtime )
+				if ( local->m_fog.lerptime > gpGlobals->curtime )
 				{
-					float flPercent = 1.0f - (( pFogParams->lerptime - gpGlobals->curtime ) / pFogParams->duration );
+					float flPercent = 1.0f - (( local->m_fog.lerptime - gpGlobals->curtime ) / local->m_fog.duration );
 
-					return FLerp( pFogParams->end, pFogParams->endLerpTo, flPercent );
+					return FLerp( local->m_fog.end, local->m_fog.endLerpTo, flPercent );
 				}
 				else
 				{
-					if ( pFogParams->end != pFogParams->endLerpTo )
+					if ( local->m_fog.end != local->m_fog.endLerpTo )
 					{
-						pFogParams->end = pFogParams->endLerpTo;
+						local->m_fog.end = local->m_fog.endLerpTo;
 					}
 				}
 			}
 		}
 
-		return pFogParams->end;
+		return local->m_fog.end;
 	}
 }
 
-static bool GetFogEnable( fogparams_t *pFogParams )
+// TFP3: Note: This was copied from Source 2006, revisit if necessary
+static bool GetFogEnable()
 {
+	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
+	if( !pbp )
+	{
+		return false;
+	}
+	CPlayerLocalData	*local		= &pbp->m_Local;
+
 	if ( cl_leveloverview.GetFloat() > 0 )
 		return false;
 
@@ -1534,17 +1555,15 @@ static bool GetFogEnable( fogparams_t *pFogParams )
 	}
 	else
 	{
-		if( pFogParams )
-			return pFogParams->enable != false;
-
-		return false;
+		return local->m_fog.enable != false;
 	}
 }
 
-
-static float GetFogMaxDensity( fogparams_t *pFogParams )
+// TFP3: Note: This was copied from Source 2006, revisit if necessary
+static float GetFogMaxDensity()
 {
-	if( !pFogParams )
+	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( pLocalPlayer )
 		return 1.0f;
 
 	if ( cl_leveloverview.GetFloat() > 0 )
@@ -1557,12 +1576,12 @@ static float GetFogMaxDensity( fogparams_t *pFogParams )
 	if ( fog_override.GetInt() )
 	{
 		if ( fog_maxdensity.GetFloat() == -1.0f )
-			return pFogParams->maxdensity;
+			return pLocalPlayer->m_Local.m_fog.maxdensity;
 		else
 			return fog_maxdensity.GetFloat();
 	}
 	else
-		return pFogParams->maxdensity;
+		return pLocalPlayer->m_Local.m_fog.maxdensity;
 }
 
 
@@ -4235,22 +4254,15 @@ void CRendering3dView::EnableWorldFog( void )
 	VPROF("CViewRender::EnableWorldFog");
 	CMatRenderContextPtr pRenderContext( materials );
 
-	fogparams_t *pFogParams = NULL;
-	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
-	if ( pbp )
-	{
-		pFogParams = pbp->GetFogParams();
-	}
-
-	if( GetFogEnable( pFogParams ) )
+	if( GetFogEnable() )
 	{
 		float fogColor[3];
-		GetFogColor( pFogParams, fogColor );
+		GetFogColor( fogColor );
 		pRenderContext->FogMode( MATERIAL_FOG_LINEAR );
 		pRenderContext->FogColor3fv( fogColor );
-		pRenderContext->FogStart( GetFogStart( pFogParams ) );
-		pRenderContext->FogEnd( GetFogEnd( pFogParams ) );
-		pRenderContext->FogMaxDensity( GetFogMaxDensity( pFogParams ) );
+		pRenderContext->FogStart( GetFogStart() );
+		pRenderContext->FogEnd( GetFogEnd() );
+		pRenderContext->FogMaxDensity( GetFogMaxDensity() );
 	}
 	else
 	{

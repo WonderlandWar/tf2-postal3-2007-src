@@ -22,19 +22,17 @@
 // Compares a set of integer inputs to the one main input
 // Outputs true if they are all equivalant, false otherwise
 //
-class CFogController : public CBaseEntity
+class CFogController : public CLogicalEntity
 {
 public:
-	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
-	DECLARE_CLASS( CFogController, CBaseEntity );
+	DECLARE_CLASS( CFogController, CLogicalEntity );
 
 	CFogController();
 	~CFogController();
 
 	// Parse data from a map file
 	virtual void Activate();
-	virtual int UpdateTransmitState();
 
 	// Input handlers
 	void InputSetStartDist(inputdata_t &data);
@@ -63,7 +61,7 @@ public:
 
 public:
 
-	CNetworkVarEmbedded( fogparams_t, m_fog );
+	fogparams_t	m_fog;
 	bool					m_bUseAngles;
 	int						m_iChangedVariables;
 };

@@ -608,7 +608,7 @@ void CPrediction::SetupMove( C_BasePlayer *player, CUserCmd *ucmd, IMoveHelper *
 	
 	move->m_nPlayerHandle = player->GetClientHandle();
 	move->m_vecVelocity		= player->GetAbsVelocity();
-	move->SetAbsOrigin( player->GetNetworkOrigin() );
+	move->m_vecAbsOrigin = player->GetNetworkOrigin();
 	move->m_vecOldAngles	= move->m_vecAngles;
 	move->m_nOldButtons		= player->m_Local.m_nOldButtons;
 	move->m_flClientMaxSpeed = player->m_flMaxspeed;
@@ -689,7 +689,7 @@ void CPrediction::FinishMove( C_BasePlayer *player, CUserCmd *ucmd, CMoveData *m
 
 	player->m_vecVelocity = move->m_vecVelocity;
 
-	player->m_vecNetworkOrigin = move->GetAbsOrigin();
+	player->m_vecNetworkOrigin = move->m_vecAbsOrigin;
 	
 	player->m_Local.m_nOldButtons = move->m_nButtons;
 
@@ -698,7 +698,7 @@ void CPrediction::FinishMove( C_BasePlayer *player, CUserCmd *ucmd, CMoveData *m
 	
 	m_hLastGround = player->GetGroundEntity();
  
-	player->SetLocalOrigin( move->GetAbsOrigin() );
+	player->SetLocalOrigin( move->m_vecAbsOrigin );
 
 	IClientVehicle *pVehicle = player->GetVehicle();
 	if (pVehicle)
@@ -1768,7 +1768,10 @@ void CPrediction::SetViewAngles( QAngle& ang )
 	if ( !player )
 		return;
 
-	player->SetViewAngles( ang );
+	player->SetLocalAngles( ang );
+	// player->SetLocalViewAngles( ang );
+	player->m_angNetworkAngles = ang;
+
 	player->m_iv_angRotation.Reset();
 }
 

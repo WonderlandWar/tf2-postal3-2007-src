@@ -153,7 +153,21 @@ BEGIN_RECV_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 	RecvPropFloat( RECVINFO( m_skybox3d.fog.maxdensity ) ),
 
 	// fog data
-	RecvPropEHandle( RECVINFO( m_PlayerFog.m_hCtrl ) ),
+	RecvPropInt( RECVINFO( m_fog.enable ) ),
+	RecvPropInt( RECVINFO( m_fog.blend ) ),
+	RecvPropVector( RECVINFO( m_fog.dirPrimary ) ),
+	RecvPropInt( RECVINFO( m_fog.colorPrimary ) ),
+	RecvPropInt( RECVINFO( m_fog.colorSecondary ) ),
+	RecvPropFloat( RECVINFO( m_fog.start ) ),
+	RecvPropFloat( RECVINFO( m_fog.end ) ),
+	RecvPropFloat( RECVINFO( m_fog.farz ) ),
+
+	RecvPropInt( RECVINFO( m_fog.colorPrimaryLerpTo ) ),
+	RecvPropInt( RECVINFO( m_fog.colorSecondaryLerpTo ) ),
+	RecvPropFloat( RECVINFO( m_fog.startLerpTo ) ),
+	RecvPropFloat( RECVINFO( m_fog.endLerpTo ) ),
+	RecvPropFloat( RECVINFO( m_fog.lerptime ) ),
+	RecvPropFloat( RECVINFO( m_fog.duration ) ),
 
 	// audio data
 	RecvPropVector( RECVINFO( m_audio.localSound[0] ) ),
@@ -247,8 +261,6 @@ END_RECV_TABLE()
 		
 
 		RecvPropString( RECVINFO(m_szLastPlaceName) ),
-
-		RecvPropInt( RECVINFO( m_ubEFNoInterpParity ) ),
 
 	END_RECV_TABLE()
 
@@ -520,16 +532,6 @@ void C_BasePlayer::SetLocalViewAngles( const QAngle &viewAngles )
 	pl.v_angle = viewAngles;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : ang - 
-//-----------------------------------------------------------------------------
-void C_BasePlayer::SetViewAngles( const QAngle& ang )
-{
-	SetLocalAngles( ang );
-	SetNetworkAngles( ang );
-}
-
 
 surfacedata_t* C_BasePlayer::GetGroundSurface()
 {
@@ -603,16 +605,8 @@ void C_BasePlayer::OnPreDataChanged( DataUpdateType_t updateType )
 	}
 
 	m_bWasFreezeFraming = (GetObserverMode() == OBS_MODE_FREEZECAM);
-	m_hOldFogController = m_Local.m_PlayerFog.m_hCtrl;
 
 	BaseClass::OnPreDataChanged( updateType );
-}
-
-void C_BasePlayer::PreDataUpdate( DataUpdateType_t updateType )
-{
-	BaseClass::PreDataUpdate( updateType );
-
-	m_ubOldEFNoInterpParity = m_ubEFNoInterpParity;
 }
 
 //-----------------------------------------------------------------------------
@@ -646,8 +640,6 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 		}
 	}
 
-	bool bForceEFNoInterp = ( m_ubOldEFNoInterpParity != m_ubEFNoInterpParity );
-
 	if ( IsLocalPlayer() )
 	{
 		SetSimulatedEveryTick( true );
@@ -658,7 +650,7 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 
 		// estimate velocity for non local players
 		float flTimeDelta = m_flSimulationTime - m_flOldSimulationTime;
-		if ( flTimeDelta > 0  &&  !( IsEffectActive(EF_NOINTERP) || bForceEFNoInterp ) )
+		if ( flTimeDelta > 0  &&  !IsEffectActive(EF_NOINTERP) )
 		{
 			Vector newVelo = (GetNetworkOrigin() - GetOldOrigin()  ) / flTimeDelta;
 			SetAbsVelocity( newVelo);
@@ -715,7 +707,7 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 
 	// If we are updated while paused, allow the player origin to be snapped by the
 	//  server if we receive a packet from the server
-	if ( engine->IsPaused() || bForceEFNoInterp )
+	if ( engine->IsPaused() )
 	{
 		ResetLatched();
 	}
@@ -809,11 +801,6 @@ void C_BasePlayer::OnDataChanged( DataUpdateType_t updateType )
 		}
 
 		Soundscape_Update( m_Local.m_audio );
-
-		if ( m_hOldFogController != m_Local.m_PlayerFog.m_hCtrl )
-		{
-			FogControllerChanged( updateType == DATA_UPDATE_CREATED );
-		}
 	}
 }
 
@@ -1631,9 +1618,6 @@ void C_BasePlayer::PreThink( void )
 
 	UpdateUnderwaterState();
 
-	// Update the player's fog data if necessary.
-	UpdateFogController();
-
 	if (m_lifeState >= LIFE_DYING)
 		return;
 
@@ -1739,9 +1723,6 @@ void C_BasePlayer::Simulate()
 	{
 		//Update the flashlight
 		Flashlight();
-
-		// Update the player's fog data if necessary.
-		UpdateFogController();
 	}
 	else
 	{
@@ -2288,118 +2269,6 @@ bool IsInFreezeCam( void )
 		return true;
 
 	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Set the fog controller data per player.
-// Input  : &inputdata -
-//-----------------------------------------------------------------------------
-void C_BasePlayer::FogControllerChanged( bool bSnap )
-{
-	if ( m_Local.m_PlayerFog.m_hCtrl )
-	{
-		fogparams_t	*pFogParams = &(m_Local.m_PlayerFog.m_hCtrl->m_fog);
-
-		/*
-		Msg("Updating Fog Target: (%d,%d,%d) %.0f,%.0f -> (%d,%d,%d) %.0f,%.0f (%.2f seconds)\n", 
-					m_CurrentFog.colorPrimary.GetR(), m_CurrentFog.colorPrimary.GetB(), m_CurrentFog.colorPrimary.GetG(), 
-					m_CurrentFog.start.Get(), m_CurrentFog.end.Get(), 
-					pFogParams->colorPrimary.GetR(), pFogParams->colorPrimary.GetB(), pFogParams->colorPrimary.GetG(), 
-					pFogParams->start.Get(), pFogParams->end.Get(), pFogParams->duration.Get() );*/
-		
-
-		// Setup the fog color transition.
-		m_Local.m_PlayerFog.m_OldColor = m_CurrentFog.colorPrimary;
-		m_Local.m_PlayerFog.m_flOldStart = m_CurrentFog.start;
-		m_Local.m_PlayerFog.m_flOldEnd = m_CurrentFog.end;
-
-		m_Local.m_PlayerFog.m_NewColor = pFogParams->colorPrimary;
-		m_Local.m_PlayerFog.m_flNewStart = pFogParams->start;
-		m_Local.m_PlayerFog.m_flNewEnd = pFogParams->end;
-
-		m_Local.m_PlayerFog.m_flTransitionTime = bSnap ? -1 : gpGlobals->curtime;
-
-		m_CurrentFog = *pFogParams;
-
-		// Update the fog player's local fog data with the fog controller's data if need be.
-		UpdateFogController();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Check to see that the controllers data is up to date.
-//-----------------------------------------------------------------------------
-void C_BasePlayer::UpdateFogController( void )
-{
-	if ( m_Local.m_PlayerFog.m_hCtrl )
-	{
-		// Don't bother copying while we're transitioning, since it'll be stomped in UpdateFogBlend();
-		if ( m_Local.m_PlayerFog.m_flTransitionTime == -1 && (m_hOldFogController == m_Local.m_PlayerFog.m_hCtrl) )
-		{
-			fogparams_t	*pFogParams = &(m_Local.m_PlayerFog.m_hCtrl->m_fog);
-			if ( m_CurrentFog != *pFogParams )
-			{
-				/*
-					Msg("FORCING UPDATE: (%d,%d,%d) %.0f,%.0f -> (%d,%d,%d) %.0f,%.0f (%.2f seconds)\n", 
-										m_CurrentFog.colorPrimary.GetR(), m_CurrentFog.colorPrimary.GetB(), m_CurrentFog.colorPrimary.GetG(), 
-										m_CurrentFog.start.Get(), m_CurrentFog.end.Get(), 
-										pFogParams->colorPrimary.GetR(), pFogParams->colorPrimary.GetB(), pFogParams->colorPrimary.GetG(), 
-										pFogParams->start.Get(), pFogParams->end.Get(), pFogParams->duration.Get() );*/
-					
-
-				m_CurrentFog = *pFogParams;
-			}
-		}
-	}
-	else
-	{
-		if ( m_CurrentFog.farz != -1 || m_CurrentFog.enable != false )
-		{
-			// No fog controller in this level. Use default fog parameters.
-			m_CurrentFog.farz = -1;
-			m_CurrentFog.enable = false;
-		}
-	}
-
-	// Update the fog blending state - of necessary.
-	UpdateFogBlend();
-}
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void C_BasePlayer::UpdateFogBlend( void )
-{
-	// Transition.
-	if ( m_Local.m_PlayerFog.m_flTransitionTime != -1 )
-	{
-		float flTimeDelta = gpGlobals->curtime - m_Local.m_PlayerFog.m_flTransitionTime;
-		if ( flTimeDelta < m_CurrentFog.duration )
-		{
-			float flScale = flTimeDelta / m_CurrentFog.duration;
-			m_CurrentFog.colorPrimary.SetR( ( m_Local.m_PlayerFog.m_NewColor.r * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.r * ( 1.0f - flScale ) ) );
-			m_CurrentFog.colorPrimary.SetG( ( m_Local.m_PlayerFog.m_NewColor.g * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.g * ( 1.0f - flScale ) ) );
-			m_CurrentFog.colorPrimary.SetB( ( m_Local.m_PlayerFog.m_NewColor.b * flScale ) + ( m_Local.m_PlayerFog.m_OldColor.b * ( 1.0f - flScale ) ) );
-			m_CurrentFog.start.Set( ( m_Local.m_PlayerFog.m_flNewStart * flScale ) + ( ( m_Local.m_PlayerFog.m_flOldStart * ( 1.0f - flScale ) ) ) );
-			m_CurrentFog.end.Set( ( m_Local.m_PlayerFog.m_flNewEnd * flScale ) + ( ( m_Local.m_PlayerFog.m_flOldEnd * ( 1.0f - flScale ) ) ) );
-		}
-		else
-		{
-			// Slam the final fog values.
-			m_CurrentFog.colorPrimary.SetR( m_Local.m_PlayerFog.m_NewColor.r );
-			m_CurrentFog.colorPrimary.SetG( m_Local.m_PlayerFog.m_NewColor.g );
-			m_CurrentFog.colorPrimary.SetB( m_Local.m_PlayerFog.m_NewColor.b );
-			m_CurrentFog.start.Set( m_Local.m_PlayerFog.m_flNewStart );
-			m_CurrentFog.end.Set( m_Local.m_PlayerFog.m_flNewEnd );
-			m_Local.m_PlayerFog.m_flTransitionTime = -1;
-
-			/*
-				Msg("Finished transition to (%d,%d,%d) %.0f,%.0f\n", 
-								m_CurrentFog.colorPrimary.GetR(), m_CurrentFog.colorPrimary.GetB(), m_CurrentFog.colorPrimary.GetG(), 
-								m_CurrentFog.start.Get(), m_CurrentFog.end.Get() );*/
-				
-		}
-	}
 }
 
 void CC_DumpClientSoundscapeData( const CCommand& args )

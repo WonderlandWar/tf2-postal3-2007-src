@@ -92,7 +92,7 @@ public:
 
 	virtual void		CheatImpulseCommands( int iImpulse );
 
-	virtual void		CommitSuicide( bool bExplode = false, bool bForce = false );
+	virtual void		CommitSuicide( bool bExplode = false );
 
 	// Combats
 	virtual void		TraceAttack(const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr );

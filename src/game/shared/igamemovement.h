@@ -39,7 +39,6 @@ class CMoveData
 {
 public:
 	bool			m_bFirstRunOfFunctions : 1;
-	bool			m_bGameCodeMovedPlayer : 1;
 
 	EntityHandle_t	m_nPlayerHandle;	// edict index on server, client entity handle on client
 
@@ -60,6 +59,7 @@ public:
 	Vector			m_vecVelocity;		// edict::velocity		// Current movement direction.
 	QAngle			m_vecAngles;		// edict::angles
 	QAngle			m_vecOldAngles;
+	Vector			m_vecAbsOrigin;		// edict::origin
 	
 // Output only
 	float			m_outStepHeight;	// how much you climbed this move
@@ -71,18 +71,7 @@ public:
 	float			m_flConstraintRadius;
 	float			m_flConstraintWidth;
 	float			m_flConstraintSpeedFactor;
-
-	void			SetAbsOrigin( const Vector &vec );
-	const Vector	&GetAbsOrigin() const;
-
-private:
-	Vector			m_vecAbsOrigin;		// edict::origin
 };
-
-inline const Vector &CMoveData::GetAbsOrigin() const
-{
-	return m_vecAbsOrigin;
-}
 
 #if !defined( CLIENT_DLL ) && defined( _DEBUG )
 // We only ever want this code path on the server side in a debug build
@@ -92,14 +81,6 @@ inline const Vector &CMoveData::GetAbsOrigin() const
 #endif
 
 #if !defined( PLAYER_GETTING_STUCK_TESTING )
-
-// This is implemented with a more exhaustive test in gamemovement.cpp.  We check if the origin being requested is
-//  inside solid, which it never should be
-inline void CMoveData::SetAbsOrigin( const Vector &vec )
-{
-	m_vecAbsOrigin = vec;
-}
-
 #endif
 
 

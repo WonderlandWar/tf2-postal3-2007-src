@@ -199,7 +199,7 @@ void CObjectDispenser::SetModel( const char *pModel )
 void CObjectDispenser::OnGoActive( void )
 {
 	// TFP3: Disabled for testing
-#if 0
+#if 1
 	CTFPlayer *pBuilder = GetBuilder();
 
 	Assert( pBuilder );

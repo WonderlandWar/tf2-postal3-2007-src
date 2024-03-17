@@ -2595,7 +2595,7 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
 		org = pPlayer->EyePosition();
 		pPlayer->SetupVisibility( pVE, pvs, pvssize );
 		UTIL_SetClientVisibilityPVS( pClient, pvs, pvssize );
-		fovDistanceAdjustFactor = pPlayer->GetFOVDistanceAdjustFactorForNetworking();
+		fovDistanceAdjustFactor = pPlayer->GetFOVDistanceAdjustFactor();
 	}
 
 	unsigned char portalBits[MAX_AREA_PORTAL_STATE_BYTES];

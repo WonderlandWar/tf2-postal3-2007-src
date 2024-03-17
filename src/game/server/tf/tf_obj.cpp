@@ -2404,32 +2404,3 @@ void CBaseObject::SetModel( const char *pModel )
 	m_aGibs.Purge();
 	BuildGibList( m_aGibs, GetModelIndex(), 1.0f, COLLISION_GROUP_NONE );
 }
-
-// TFP3 Debug!!
-//-------------------------------------------------------------
-
-extern CBaseEntity *FindPickerEntity( CBasePlayer *pPlayer );
-
-CON_COMMAND_F( finish_object, "Forces an object to go active", FCVAR_CHEAT )
-{
-	CTFPlayer *pPlayer = static_cast<CTFPlayer*>( UTIL_GetCommandClient() );
-	if ( !pPlayer )
-		return;
-	
-	CBaseEntity *pPickerEnt = FindPickerEntity( pPlayer );
-	if ( !pPickerEnt )
-		return;
-
-	if ( pPickerEnt->IsBaseObject() )
-	{
-		CBaseObject *pObj = static_cast<CBaseObject*>( pPickerEnt );
-		int team;
-		if ( pPlayer->GetTeamNumber() == TF_TEAM_RED )
-			team = TF_TEAM_BLUE;
-		else
-			team = TF_TEAM_RED;
-
-		pObj->ChangeTeam( team );
-		pObj->StartBuilding( NULL );
-	}
-}

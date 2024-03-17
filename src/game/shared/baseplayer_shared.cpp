@@ -607,28 +607,11 @@ void CBasePlayer::PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, flo
 
 	m_Local.m_nStepside = !nSide;
 
+	IPhysicsSurfaceProps *physprops = MoveHelper( )->GetSurfaceProps();
+	const char *pSoundName = physprops->GetString( stepSoundName );
 	CSoundParameters params;
-
-	Assert( nSide == 0 || nSide == 1 );
-
-	if ( m_StepSoundCache[ nSide ].m_usSoundNameIndex == stepSoundName )
-	{
-		params = m_StepSoundCache[ nSide ].m_SoundParameters;
-	}
-	else
-	{
-		IPhysicsSurfaceProps *physprops = MoveHelper()->GetSurfaceProps();
-		const char *pSoundName = physprops->GetString( stepSoundName );
-		if ( !CBaseEntity::GetParametersForSound( pSoundName, params, NULL ) )
-			return;
-
-		// Only cache if there's one option.  Otherwise we'd never here any other sounds
-		if ( params.count == 1 )
-		{
-			m_StepSoundCache[ nSide ].m_usSoundNameIndex = stepSoundName;
-			m_StepSoundCache[ nSide ].m_SoundParameters = params;
-		}
-	}
+	if ( !CBaseEntity::GetParametersForSound( pSoundName, params, NULL ) )
+		return;
 
 	CRecipientFilter filter;
 	filter.AddRecipientsByPAS( vecOrigin );
@@ -1919,17 +1902,6 @@ void CBasePlayer::SetPlayerUnderwater( bool state )
 	}
 }
 
-
-void CBasePlayer::SetPreviouslyPredictedOrigin( const Vector &vecAbsOrigin )
-{
-	m_vecPreviouslyPredictedOrigin = vecAbsOrigin;
-}
-
-const Vector &CBasePlayer::GetPreviouslyPredictedOrigin() const
-{
-	return m_vecPreviouslyPredictedOrigin;
-}
-
 bool fogparams_t::operator !=( const fogparams_t& other ) const
 {
 	if ( this->enable != other.enable ||
@@ -1950,17 +1922,4 @@ bool fogparams_t::operator !=( const fogparams_t& other ) const
 		return true;
 
 	return false;
-}
-
-void CBasePlayer::IncrementEFNoInterpParity()
-{
-	// Only matters in multiplayer
-	if ( gpGlobals->maxClients == 1 )
-		return;
-	m_ubEFNoInterpParity = (m_ubEFNoInterpParity + 1) % NOINTERP_PARITY_MAX;
-}
-
-int CBasePlayer::GetEFNoInterpParity() const
-{
-	return (int)m_ubEFNoInterpParity;
 }

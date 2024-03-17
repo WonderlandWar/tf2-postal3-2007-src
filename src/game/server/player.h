@@ -47,27 +47,6 @@ public:
 	int			m_nDroppedPackets;
 };
 
-class CPlayerSimInfo
-{
-public:
-	CPlayerSimInfo() : 
-	  m_flTime( 0.0f ), m_nNumCmds( 0 ), m_nTicksCorrected( 0 ), m_flFinalSimulationTime( 0.0f ), m_flGameSimulationTime( 0.0f ), m_flServerFrameTime( 0.0f ), m_vecAbsOrigin( 0, 0, 0 )
-	{
-	}
-
-	// realtime of sample
-	float		m_flTime;
-	// # of CUserCmds in this update
-	int			m_nNumCmds;
-	// If clock needed correction, # of ticks added/removed
-	int			m_nTicksCorrected; // +ve or -ve
-	// player's m_flSimulationTime at end of frame
-	float		m_flFinalSimulationTime;
-	float		m_flGameSimulationTime;
-	// estimate of server perf
-	float		m_flServerFrameTime;  
-	Vector		m_vecAbsOrigin;
-};
 //-----------------------------------------------------------------------------
 // Forward declarations: 
 //-----------------------------------------------------------------------------
@@ -243,9 +222,6 @@ public:
 	IPlayerInfo *GetPlayerInfo() { return &m_PlayerInfo; }
 	IBotController *GetBotController() { return &m_PlayerInfo; }
 
-	virtual void			SetModel( const char *szModelName );
-	void					SetBodyPitch( float flPitch );
-
 	virtual void			UpdateOnRemove( void );
 
 	static CBasePlayer		*CreatePlayer( const char *className, edict_t *ed );
@@ -317,7 +293,6 @@ public:
 
 	virtual void			OnDamagedByExplosion( const CTakeDamageInfo &info );
 
-	void					PauseBonusProgress( bool bPause = true );
 	void					SetBonusProgress( int iBonusProgress );
 	void					SetBonusChallenge( int iBonusChallenge );
 
@@ -410,7 +385,7 @@ public:
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void			UpdateClientData( void );
-	void					RumbleEffect( unsigned char index, unsigned char rumbleData, unsigned char rumbleFlags );
+	void					RumbleEffect( unsigned char index, unsigned char rumbleData, unsigned char rumbleFlags ); // TFP3: TODO: Use unsigned int instead
 	
 	// Player is moved across the transition by other means
 	virtual int				ObjectCaps( void ) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
@@ -541,7 +516,7 @@ public:
 	virtual Vector			GetAutoaimVector( float flScale, float flMaxDist );
 	virtual void			GetAutoaimVector( autoaim_params_t &params );
 
-	float					GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale, CBaseCombatWeapon *pActiveWeapon );
+	float					GetAutoaimScore( const Vector &eyePosition, const Vector &viewDir, const Vector &vecTarget, CBaseEntity *pTarget, float fScale ); // TFP3: Changed
 	QAngle					AutoaimDeflection( Vector &vecSrc, autoaim_params_t &params );
 	virtual bool			ShouldAutoaim( void );
 	void					SetTargetInfo( Vector &vecSrc, float flDist );
@@ -589,11 +564,9 @@ public:
 
 	virtual void			HandleAnimEvent( animevent_t *pEvent );
 
-	virtual bool			ShouldAnnouceAchievement( void ){ return true; }
-
 public:
 	// Player Physics Shadow
-	void					SetupVPhysicsShadow( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, CPhysCollide *pStandModel, const char *pStandHullName, CPhysCollide *pCrouchModel, const char *pCrouchHullName );
+	void					SetupVPhysicsShadow( CPhysCollide *pStandModel, const char *pStandHullName, CPhysCollide *pCrouchModel, const char *pCrouchHullName ); // TFP3: Changed
 	IPhysicsPlayerController* GetPhysicsController() { return m_pPhysicsController; }
 	virtual void			VPhysicsCollision( int index, gamevcollisionevent_t *pEvent );
 	void					VPhysicsUpdate( IPhysicsObject *pPhysics );
@@ -607,9 +580,9 @@ public:
 	bool					TouchedPhysics( void );
 	Vector					GetSmoothedVelocity( void );
 
-	virtual void			InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity );
+	virtual void			InitVCollision( void );
 	virtual void			VPhysicsDestroyObject();
-	void					SetVCollisionState( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity, int collisionState );
+	void					SetVCollisionState( int collisionState ); // TFP3: Changed
 	void					PostThinkVPhysics( void );
 	virtual void			UpdatePhysicsShadowToCurrentPosition();
 	void					UpdatePhysicsShadowToPosition( const Vector &vecAbsOrigin );
@@ -683,8 +656,8 @@ public:
 	void	AllowImmediateDecalPainting();
 
 	// Suicide...
-	virtual void CommitSuicide( bool bExplode = false, bool bForce = false );
-	virtual void CommitSuicide( const Vector &vecForce, bool bExplode = false, bool bForce = false );
+	virtual void CommitSuicide( bool bExplode = false ); // TFP3: Changed
+	virtual void CommitSuicide( const Vector &vecForce, bool bExplode = false ); // TFP3: Changed
 
 	// For debugging...
 	void	ForceOrigin( const Vector &vecOrigin );
@@ -702,12 +675,10 @@ public:
 
 	int		GetFOV( void );														// Get the current FOV value
 	int		GetDefaultFOV( void ) const;										// Default FOV if not specified otherwise
-	int		GetFOVForNetworking( void );										// Get the current FOV used for network computations
 	bool	SetFOV( CBaseEntity *pRequester, int FOV, float zoomRate = 0.0f, int iZoomStart = 0 );	// Alters the base FOV of the player (must have a valid requester)
 	void	SetDefaultFOV( int FOV );											// Sets the base FOV if nothing else is affecting it by zooming
 	CBaseEntity *GetFOVOwner( void ) { return m_hZoomOwner; }
 	float	GetFOVDistanceAdjustFactor(); // shared between client and server
-	float	GetFOVDistanceAdjustFactorForNetworking();
 
 	int		GetImpulse( void ) const { return m_nImpulse; }
 
@@ -736,8 +707,6 @@ public:
 	// Here so that derived classes can use the expresser
 	virtual CAI_Expresser *GetExpresser() { return NULL; };
 
-	void					IncrementEFNoInterpParity();
-	int						GetEFNoInterpParity() const;
 
 private:
 	
@@ -747,8 +716,6 @@ private:
 	CCommandContext		*AllocCommandContext( void );
 	void				RemoveCommandContext( int index );
 	void				RemoveAllCommandContexts( void );
-	CCommandContext		*RemoveAllCommandContextsExceptNewest( void );
-	void				ReplaceContextCommands( CCommandContext *ctx, CUserCmd *pCommands, int nCommands );
 
 	int					DetermineSimulationTicks( void );
 	void				AdjustPlayerTimeBase( int simulation_ticks );
@@ -764,6 +731,8 @@ public:
 	//  the player and not to other players.
 	CNetworkVarEmbedded( CPlayerLocalData, m_Local );
 	void InitFogController( void );
+    void UpdateFogController(); // TFP3: New
+    void UpdateFogBlend(); // TFP3: New
 	void InputSetFogController( inputdata_t &inputdata );
 
 	// Used by env_soundscape_triggerable to manage when the player is touching multiple
@@ -809,10 +778,6 @@ public:
 
 	void		ClearZoomOwner( void );
 
-	void		SetPreviouslyPredictedOrigin( const Vector &vecAbsOrigin );
-	const Vector &GetPreviouslyPredictedOrigin() const;
-	float		GetFOVTime( void ){ return m_flFOVTime; }
-
 private:
 
 	Activity				m_Activity;
@@ -847,7 +812,6 @@ protected:
 
 	void					UpdateButtonState( int nUserCmdButtonMask );
 
-	bool	m_bPauseBonusProgress;
 	CNetworkVar( int, m_iBonusProgress );
 	CNetworkVar( int, m_iBonusChallenge );
 
@@ -911,7 +875,6 @@ protected: //used to be private, but need access for portal mod (Dave Kircher)
 	Vector						m_oldOrigin;
 	Vector						m_vecSmoothedVelocity;
 	bool						m_touchedPhysObject;
-	bool						m_bPhysicsWasFrozen;
 
 private:
 
@@ -991,6 +954,7 @@ private:
 	int						m_nImpulse;
 	float					m_flSwimSoundTime;
 	Vector					m_vecLadderNormal;
+	unsigned int			m_fDisabledInputMask; // TFP3: New
 
 	float					m_flFlashTime;
 	int						m_nDrownDmgRate;		// Drowning damage in points per second without air.
@@ -1072,9 +1036,6 @@ protected:
 	float	m_flVehicleViewFOV;			// FOV of the vehicle driver
 	int		m_nVehicleViewSavedFrame;	// Used to mark which frame was the last one the view was calculated for
 
-	Vector m_vecPreviouslyPredictedOrigin; // Used to determine if non-gamemovement game code has teleported, or tweaked the player's origin
-	int		m_nBodyPitchPoseParam;
-
 	// last known navigation area of player - NULL if unknown
 	CNavArea *m_lastNavArea;
 	CNetworkString( m_szLastPlaceName, MAX_PLACE_NAME_LENGTH );
@@ -1091,8 +1052,6 @@ protected:
 
 	bool			m_bSinglePlayerGameEnding;
 
-	CNetworkVar( int, m_ubEFNoInterpParity );
-
 public:
 
 	float  GetLaggedMovementValue( void ){ return m_flLaggedMovementValue;	}
@@ -1101,21 +1060,8 @@ public:
 	inline bool IsAutoKickDisabled( void ) const;
 	inline void DisableAutoKick( bool disabled );
 
-	void	DumpPerfToRecipient( CBasePlayer *pRecipient, int nMaxRecords );
 private:
 	bool m_autoKickDisabled;
-
-	struct StepSoundCache_t
-	{
-		StepSoundCache_t() : m_usSoundNameIndex( 0 ) {}
-		CSoundParameters	m_SoundParameters;
-		unsigned short		m_usSoundNameIndex;
-	};
-	// One for left and one for right side of step
-	StepSoundCache_t		m_StepSoundCache[ 2 ];
-
-	CUtlLinkedList< CPlayerSimInfo >  m_vecPlayerSimInfo;
-	CUtlLinkedList< CPlayerCmdInfo >  m_vecPlayerCmdInfo;
 };
 
 typedef CHandle<CBasePlayer> CBasePlayerHandle;

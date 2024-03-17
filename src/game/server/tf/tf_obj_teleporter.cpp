@@ -260,7 +260,7 @@ bool CObjectTeleporter::IsPlacementPosValid( void )
 void CObjectTeleporter::OnGoActive( void )
 {
 	// TFP3: Disabled for testing
-#if 0
+#if 1
 	CTFPlayer *pBuilder = GetBuilder();
 
 	Assert( pBuilder );

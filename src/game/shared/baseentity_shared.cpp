@@ -183,11 +183,6 @@ void CBaseEntity::SetEffects( int nEffects )
 		}
 #endif
 
-		if ( ( nEffects & EF_NOINTERP ) && IsPlayer() )
-		{
-			((CBasePlayer *)this)->IncrementEFNoInterpParity();
-		}
-
 #ifndef CLIENT_DLL
 		DispatchUpdateTransmitState();
 #else

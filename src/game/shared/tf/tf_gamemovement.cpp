@@ -661,7 +661,7 @@ bool CTFGameMovement::CheckJumpButton()
 
 	// Start jump animation and player sound (specific TF animation and flags).
 	m_pTFPlayer->DoAnimationEvent( PLAYERANIMEVENT_JUMP );
-	player->PlayStepSound( (Vector &)mv->GetAbsOrigin(), player->m_pSurfaceData, 1.0, true );
+	player->PlayStepSound( (Vector &)mv->m_vecAbsOrigin, player->m_pSurfaceData, 1.0, true );
 	m_pTFPlayer->m_Shared.SetJumping( true );
 
 	// Set the player as in the air.
@@ -715,9 +715,9 @@ bool CTFGameMovement::CheckWater( void )
 	Vector vecPlayerMin = GetPlayerMins();
 	Vector vecPlayerMax = GetPlayerMaxs();
 
-	Vector vecPoint( ( mv->GetAbsOrigin().x + ( vecPlayerMin.x + vecPlayerMax.x ) * 0.5f ),
-				     ( mv->GetAbsOrigin().y + ( vecPlayerMin.y + vecPlayerMax.y ) * 0.5f ),
-				     ( mv->GetAbsOrigin().z + vecPlayerMin.z + 1 ) );
+	Vector vecPoint( ( mv->m_vecAbsOrigin.x + ( vecPlayerMin.x + vecPlayerMax.x ) * 0.5f ),
+				     ( mv->m_vecAbsOrigin.y + ( vecPlayerMin.y + vecPlayerMax.y ) * 0.5f ),
+				     ( mv->m_vecAbsOrigin.z + vecPlayerMin.z + 1 ) );
 
 
 	// Assume that we are not in water at all.
@@ -735,10 +735,10 @@ bool CTFGameMovement::CheckWater( void )
 		wt = nContents;
 		wl = WL_Feet;
 
-		float flWaistZ = mv->GetAbsOrigin().z + ( vecPlayerMin.z + vecPlayerMax.z ) * 0.5f + 12.0f;
+		float flWaistZ = mv->m_vecAbsOrigin.z + ( vecPlayerMin.z + vecPlayerMax.z ) * 0.5f + 12.0f;
 
 		// Now check eyes
-		vecPoint.z = mv->GetAbsOrigin().z + player->GetViewOffset()[2];
+		vecPoint.z = mv->m_vecAbsOrigin.z + player->GetViewOffset()[2];
 		nContents = enginetrace->GetPointContents( vecPoint );
 		if ( nContents & MASK_WATER )
 		{
@@ -877,9 +877,9 @@ void CTFGameMovement::WaterMove( void )
 
 	// Now move
 	// assume it is a stair or a slope, so press down from stepheight above
-	VectorMA (mv->GetAbsOrigin(), gpGlobals->frametime, mv->m_vecVelocity, dest);
+	VectorMA (mv->m_vecAbsOrigin, gpGlobals->frametime, mv->m_vecVelocity, dest);
 	
-	TracePlayerBBox( mv->GetAbsOrigin(), dest, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
+	TracePlayerBBox( mv->m_vecAbsOrigin, dest, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm );
 	if ( pm.fraction == 1.0f )
 	{
 		VectorCopy( dest, start );
@@ -893,13 +893,13 @@ void CTFGameMovement::WaterMove( void )
 		if (!pm.startsolid && !pm.allsolid)
 		{	
 #if 0
-			float stepDist = pm.endpos.z - mv->GetAbsOrigin().z;
+			float stepDist = pm.endpos.z - mv->m_vecAbsOrigin.z;
 			mv->m_outStepHeight += stepDist;
 			// walked up the step, so just keep result and exit
 
 			Vector vecNewWaterPoint;
 			VectorCopy( m_vecWaterPoint, vecNewWaterPoint );
-			vecNewWaterPoint.z += ( dest.z - mv->GetAbsOrigin().z );
+			vecNewWaterPoint.z += ( dest.z - mv->m_vecAbsOrigin.z );
 			bool bOutOfWater = !( enginetrace->GetPointContents( vecNewWaterPoint ) & MASK_WATER );
 			if ( bOutOfWater && ( mv->m_vecVelocity.z > 0.0f ) && ( pm.fraction == 1.0f )  )
 			{
@@ -911,14 +911,14 @@ void CTFGameMovement::WaterMove( void )
 					float flFraction = 1.0f - traceWater.fraction;
 
 //					Vector vecSegment;
-//					VectorSubtract( mv->GetAbsOrigin(), dest, vecSegment );
-//					VectorMA( mv->GetAbsOrigin(), flFraction, vecSegment, mv->GetAbsOrigin() );
-					float flZDiff = dest.z - mv->GetAbsOrigin().z;
-					float flSetZ = mv->GetAbsOrigin().z + ( flFraction * flZDiff );
+//					VectorSubtract( mv->m_vecAbsOrigin, dest, vecSegment );
+//					VectorMA( mv->m_vecAbsOrigin, flFraction, vecSegment, mv->m_vecAbsOrigin );
+					float flZDiff = dest.z - mv->m_vecAbsOrigin.z;
+					float flSetZ = mv->m_vecAbsOrigin.z + ( flFraction * flZDiff );
 					flSetZ -= 0.0325f;
 
-					VectorCopy (pm.endpos, mv->GetAbsOrigin());
-					mv->GetAbsOrigin().z = flSetZ;
+					VectorCopy (pm.endpos, mv->m_vecAbsOrigin);
+					mv->m_vecAbsOrigin.z = flSetZ;
 					VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 					mv->m_vecVelocity.z = 0.0f;
 				}
@@ -926,16 +926,16 @@ void CTFGameMovement::WaterMove( void )
 			}
 			else
 			{
-				VectorCopy (pm.endpos, mv->GetAbsOrigin());
+				VectorCopy (pm.endpos, mv->m_vecAbsOrigin);
 				VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 			}
 
 			return;
 #endif
-			float stepDist = pm.endpos.z - mv->GetAbsOrigin().z;
+			float stepDist = pm.endpos.z - mv->m_vecAbsOrigin.z;
 			mv->m_outStepHeight += stepDist;
 			// walked up the step, so just keep result and exit
-			mv->SetAbsOrigin( pm.endpos );
+			mv->m_vecAbsOrigin = pm.endpos;
 			VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 			return;
 		}
@@ -1040,17 +1040,17 @@ void CTFGameMovement::WalkMove( void )
 
 	// Calculate the destination.
 	Vector vecDestination;
-	vecDestination.x = mv->GetAbsOrigin().x + ( mv->m_vecVelocity.x * gpGlobals->frametime );
-	vecDestination.y = mv->GetAbsOrigin().y + ( mv->m_vecVelocity.y * gpGlobals->frametime );	
-	vecDestination.z = mv->GetAbsOrigin().z;
+	vecDestination.x = mv->m_vecAbsOrigin.x + ( mv->m_vecVelocity.x * gpGlobals->frametime );
+	vecDestination.y = mv->m_vecAbsOrigin.y + ( mv->m_vecVelocity.y * gpGlobals->frametime );	
+	vecDestination.z = mv->m_vecAbsOrigin.z;
 
 	// Try moving to the destination.
 	trace_t trace;
-	TracePlayerBBox( mv->GetAbsOrigin(), vecDestination, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
+	TracePlayerBBox( mv->m_vecAbsOrigin, vecDestination, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
 	if ( trace.fraction == 1.0f )
 	{
 		// Made it to the destination (remove the base velocity).
-		mv->SetAbsOrigin( trace.endpos );
+		mv->m_vecAbsOrigin = trace.endpos;
 		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
 
 		// Save the wish velocity.
@@ -1259,8 +1259,8 @@ void CTFGameMovement::CategorizePosition( void )
 	}
 
 	// Calculate the start and end position.
-	Vector vecStartPos = mv->GetAbsOrigin();
-	Vector vecEndPos( mv->GetAbsOrigin().x, mv->GetAbsOrigin().y, ( mv->GetAbsOrigin().z - 2.0f ) );
+	Vector vecStartPos = mv->m_vecAbsOrigin;
+	Vector vecEndPos( mv->m_vecAbsOrigin.x, mv->m_vecAbsOrigin.y, ( mv->m_vecAbsOrigin.z - 2.0f ) );
 
 	trace_t trace;
 	TracePlayerBBox( vecStartPos, vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
@@ -1360,7 +1360,7 @@ void CTFGameMovement::CheckWaterJump( void )
 
 	Vector vecStart;
 	// Start line trace at waist height (using the center of the player for this here)
- 	vecStart= mv->GetAbsOrigin() + (GetPlayerMins() + GetPlayerMaxs() ) * 0.5;
+ 	vecStart= mv->m_vecAbsOrigin + (GetPlayerMins() + GetPlayerMaxs() ) * 0.5;
 
 	Vector vecEnd;
 	VectorMA( vecStart, TF_WATERJUMP_FORWARD/*tf_waterjump_forward.GetFloat()*/, flatforward, vecEnd );
@@ -1376,7 +1376,7 @@ void CTFGameMovement::CheckWaterJump( void )
 				return;
 		}
 
-		vecStart.z = mv->GetAbsOrigin().z + player->GetViewOffset().z + WATERJUMP_HEIGHT; 
+		vecStart.z = mv->m_vecAbsOrigin.z + player->GetViewOffset().z + WATERJUMP_HEIGHT; 
 		VectorMA( vecStart, TF_WATERJUMP_FORWARD/*tf_waterjump_forward.GetFloat()*/, flatforward, vecEnd );
 		VectorMA( vec3_origin, -50.0f, tr.plane.normal, player->m_vecWaterJumpVel );
 
