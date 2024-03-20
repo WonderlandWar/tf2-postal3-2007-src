@@ -46,11 +46,8 @@ struct fogparams_t
 	CNetworkVar( bool, blend );
 };
 
-// Crappy. Needs to be here because it wants to use 
-#ifdef CLIENT_DLL
-#define CFogController C_FogController
-#endif
-
+#ifdef GAME_DLL
+// Crappy. Needs to be here because it wants to use
 class CFogController;
 
 struct fogplayerparams_t
@@ -62,7 +59,7 @@ struct fogplayerparams_t
 	DECLARE_SIMPLE_DATADESC();
 #endif
 
-	CNetworkHandle( CFogController, m_hCtrl );
+	CHandle<CFogController> m_hCtrl;
 	float					m_flTransitionTime;
 
 	color32					m_OldColor;
@@ -85,7 +82,7 @@ struct fogplayerparams_t
 		m_flNewEnd = 0.0f;
 	}
 };
-
+#endif
 struct sky3dparams_t
 {
 	DECLARE_CLASS_NOBASE( sky3dparams_t );

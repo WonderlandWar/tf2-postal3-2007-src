@@ -22,7 +22,6 @@
 #include "fx_water.h"
 #include "hintsystem.h"
 #include "soundemittersystem/isoundemittersystembase.h"
-#include "c_env_fog_controller.h"
 
 class C_BaseCombatWeapon;
 class C_BaseViewModel;

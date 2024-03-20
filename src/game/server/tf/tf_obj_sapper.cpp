@@ -70,8 +70,8 @@ void CObjectSapper::Spawn()
 {
 	SetModel( SAPPER_MODEL_SENTRY_1_PLACEMENT );
 			
-	SetSolid( SOLID_NONE );
-	CollisionProp()->SetSurroundingBoundsType( USE_BEST_COLLISION_BOUNDS, NULL, NULL );
+	SetSolid( SOLID_BBOX );
+	CollisionProp()->SetSurroundingBoundsType( USE_BEST_COLLISION_BOUNDS );
 
 	m_takedamage = DAMAGE_YES;
 	m_iHealth = obj_sapper_health.GetInt();
@@ -86,23 +86,12 @@ void CObjectSapper::Spawn()
 //-----------------------------------------------------------------------------
 void CObjectSapper::Precache()
 {
-	int iModelIndex;
-
-	iModelIndex = PrecacheModel( SAPPER_MODEL_SENTRY_1 );
-	PrecacheGibsForModel( iModelIndex );
-
-	iModelIndex = PrecacheModel( SAPPER_MODEL_SENTRY_2 );
-	PrecacheGibsForModel( iModelIndex );
-
-	iModelIndex = PrecacheModel( SAPPER_MODEL_SENTRY_3 );
-	PrecacheGibsForModel( iModelIndex );
-
-	iModelIndex = PrecacheModel( SAPPER_MODEL_TELEPORTER );
-	PrecacheGibsForModel( iModelIndex );
-
-	iModelIndex = PrecacheModel( SAPPER_MODEL_DISPENSER );
-	PrecacheGibsForModel( iModelIndex );
-
+	PrecacheModel( SAPPER_MODEL_SENTRY_1 );
+	PrecacheModel( SAPPER_MODEL_SENTRY_2 );
+	PrecacheModel( SAPPER_MODEL_SENTRY_3 );
+	PrecacheModel( SAPPER_MODEL_TELEPORTER );
+	PrecacheModel( SAPPER_MODEL_DISPENSER );
+	
 	PrecacheModel( SAPPER_MODEL_SENTRY_1_PLACEMENT );
 	PrecacheModel( SAPPER_MODEL_SENTRY_2_PLACEMENT );
 	PrecacheModel( SAPPER_MODEL_SENTRY_3_PLACEMENT );
