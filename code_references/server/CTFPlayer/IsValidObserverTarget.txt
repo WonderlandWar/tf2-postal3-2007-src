@@ -1,0 +1,24 @@
+bool __thiscall CTFPlayer::IsValidObserverTarget(CTFPlayer *this, CBaseEntity *target)
+{
+  CObserverPoint *v3; // eax
+  int TeamNumber; // esi
+
+  if ( !target || target->IsPlayer(target) )
+    return CBasePlayer::IsValidObserverTarget(this, target);
+  v3 = (CObserverPoint *)__RTDynamicCast(
+                           target,
+                           0,
+                           &CBaseEntity `RTTI Type Descriptor',
+                           &CObserverPoint `RTTI Type Descriptor',
+                           0);
+  if ( v3 && !CObserverPoint::CanUseObserverPoint(v3, this) )
+    return 0;
+  if ( CBaseEntity::GetTeamNumber(this) == 1 )
+    return 1;
+  if ( mp_forcecamera.m_pParent->m_nValue != 1 )
+    return mp_forcecamera.m_pParent->m_nValue != 2;
+  if ( !CBaseEntity::GetTeamNumber(target) )
+    return 1;
+  TeamNumber = CBaseEntity::GetTeamNumber(target);
+  return CBaseEntity::GetTeamNumber(this) == TeamNumber;
+}

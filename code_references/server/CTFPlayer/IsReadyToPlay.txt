@@ -1,0 +1,4 @@
+BOOL __thiscall CTFPlayer::IsReadyToPlay(CTFPlayer *this)
+{
+  return CBaseEntity::GetTeamNumber(this) > 1 && this->m_Shared.m_iDesiredPlayerClass.m_Value > 0;
+}

@@ -1,0 +1,17 @@
+bool __thiscall CTFPlayer::CanAttack(CTFPlayer *this)
+{
+  int v2; // edi
+  bool result; // al
+
+  result = 0;
+  if ( gpGlobals->curtime >= (double)this->m_Shared.m_flStealthNoAttackExpire.m_Value
+    && (this->m_Shared.m_nPlayerCond.m_Value & 0x100) == 0 )
+  {
+    if ( g_pGameRules[67].__vftable != (CGameRules_vtbl *)5 )
+      return 1;
+    v2 = ((int (*)(void))g_pGameRules->__vftable[1].Damage_GetTimeBased)();
+    if ( v2 == CBaseEntity::GetTeamNumber(this) )
+      return 1;
+  }
+  return result;
+}

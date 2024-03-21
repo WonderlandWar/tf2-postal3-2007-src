@@ -1,0 +1,27 @@
+bool __thiscall CTFPlayer::ShouldCollide(CTFPlayer *this, int collisionGroup, int contentsMask)
+{
+  int v5; // eax
+
+  if ( collisionGroup == 8 )
+  {
+    if ( !tf_avoidteammates.m_pParent->m_nValue )
+      return CBaseEntity::ShouldCollide(this, collisionGroup, contentsMask);
+  }
+  else if ( collisionGroup != 24 )
+  {
+    return CBaseEntity::ShouldCollide(this, collisionGroup, contentsMask);
+  }
+  v5 = CBaseEntity::GetTeamNumber(this) - 2;
+  if ( v5 )
+  {
+    if ( v5 != 1 || (contentsMask & 0x1000) != 0 )
+      return CBaseEntity::ShouldCollide(this, collisionGroup, contentsMask);
+    return 0;
+  }
+  else
+  {
+    if ( (contentsMask & 0x800) != 0 )
+      return CBaseEntity::ShouldCollide(this, collisionGroup, contentsMask);
+    return 0;
+  }
+}

@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall CTFPlayer::OwnedObjectDestroyed(CTFPlayer *this, CBaseObject *pObject)
+{
+  CTFPlayer::RemoveObject(this, pObject);
+}

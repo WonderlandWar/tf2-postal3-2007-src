@@ -1,0 +1,4 @@
+void __thiscall CTFPlayer::NoteSpokeVoiceCommand(CTFPlayer *this, const char *pszScenePlayed)
+{
+  this->m_flNextVoiceCommandTime = GetSceneDuration(pszScenePlayed) + gpGlobals->curtime;
+}

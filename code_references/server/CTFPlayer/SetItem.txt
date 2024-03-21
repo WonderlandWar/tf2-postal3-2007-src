@@ -1,0 +1,9 @@
+void __thiscall CTFPlayer::SetItem(CTFPlayer *this, CTFItem *pItem)
+{
+  CNetworkHandleBase<CTFItem,CTFPlayer::NetworkVar_m_hItem>::Set(&this->m_hItem, pItem);
+  if ( pItem )
+  {
+    if ( pItem->GetItemID(pItem) == 1 )
+      CTFPlayer::RemoveInvisibility(this);
+  }
+}

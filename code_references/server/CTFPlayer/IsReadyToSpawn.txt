@@ -1,0 +1,4 @@
+bool __thiscall CTFPlayer::IsReadyToSpawn(CTFPlayer *this)
+{
+  return !this->m_bIsClassMenuOpen && this->m_Shared.m_nPlayerState.m_Value != 3;
+}

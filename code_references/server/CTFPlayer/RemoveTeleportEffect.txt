@@ -1,0 +1,4 @@
+void __thiscall CTFPlayer::RemoveTeleportEffect(CTFPlayer *this)
+{
+  CTFPlayerShared::RemoveCond(&this->m_Shared, 10);
+}

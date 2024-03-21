@@ -1,0 +1,5 @@
+void __thiscall CTFPlayer::FlashlightTurnOn(CTFPlayer *this)
+{
+  if ( flashlight.m_pParent->m_nValue > 0 && this->IsAlive(this) )
+    CBaseEntity::AddEffects(this, 4);
+}

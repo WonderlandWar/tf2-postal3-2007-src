@@ -1,0 +1,36 @@
+void __thiscall CTFPlayer::RemoveObject(CTFPlayer *this, CBaseObject *pObject)
+{
+  int v2; // edi
+  CBaseEntityList *v3; // ebx
+  CHandle<CBaseEntity> *v4; // esi
+  CBaseObject *m_pEntity; // edx
+  int m_Size; // edx
+
+  v2 = this->m_aObjects.m_Size - 1;
+  if ( v2 >= 0 )
+  {
+    v3 = g_pEntityList;
+    do
+    {
+      v4 = &this->m_aObjects.m_Memory.m_pMemory[v2];
+      if ( v4->m_Index == -1
+        || v3->m_EntPtrArray[v4->m_Index & 0xFFF].m_SerialNumber != v4->m_Index >> 12
+        || !v3->m_EntPtrArray[v4->m_Index & 0xFFF].m_pEntity
+        || (v4->m_Index == -1 || v3->m_EntPtrArray[v4->m_Index & 0xFFF].m_SerialNumber != v4->m_Index >> 12
+          ? (m_pEntity = 0)
+          : (m_pEntity = (CBaseObject *)v3->m_EntPtrArray[v4->m_Index & 0xFFF].m_pEntity),
+            m_pEntity == pObject) )
+      {
+        m_Size = this->m_aObjects.m_Size;
+        if ( m_Size > 0 )
+        {
+          this->m_aObjects.m_Memory.m_pMemory[v2].m_Index = this->m_aObjects.m_Memory.m_pMemory[m_Size - 1].m_Index;
+          --this->m_aObjects.m_Size;
+          v3 = g_pEntityList;
+        }
+      }
+      --v2;
+    }
+    while ( v2 >= 0 );
+  }
+}

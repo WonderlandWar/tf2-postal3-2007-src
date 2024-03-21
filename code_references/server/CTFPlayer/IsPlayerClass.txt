@@ -1,0 +1,4 @@
+bool __thiscall CTFPlayer::IsPlayerClass(CTFPlayer *this, int iClass)
+{
+  return this != (CTFPlayer *)-4340 && this->m_PlayerClass.m_iClass.m_Value == iClass;
+}

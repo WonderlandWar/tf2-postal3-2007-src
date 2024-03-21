@@ -1,0 +1,12 @@
+double __thiscall CTFPlayer::PlayScene(
+        CTFPlayer *this,
+        const char *pszScene,
+        float flDelay,
+        AI_Response *response,
+        IRecipientFilter *filter)
+{
+  if ( !this->m_bInitTaunt )
+    return InstancedScriptedScene(this, pszScene, 0, flDelay, 0, response, 1, filter);
+  this->m_bInitTaunt = 0;
+  return InstancedScriptedScene(this, pszScene, &this->m_hTauntScene, flDelay, 0, response, 1, filter);
+}

@@ -1,0 +1,4 @@
+void __thiscall CTFPlayer::CreateRagdollEntity(CTFPlayer *this)
+{
+  CTFPlayer::CreateRagdollEntity(this, 0);
+}

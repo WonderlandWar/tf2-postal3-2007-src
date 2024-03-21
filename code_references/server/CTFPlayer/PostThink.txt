@@ -1,0 +1,22 @@
+void __thiscall CTFPlayer::PostThink(CTFPlayer *this)
+{
+  float y; // ecx
+  float z; // edx
+  const QAngle *v4; // eax
+  QAngle angles; // [esp+Ch] [ebp-10h] BYREF
+  float v6; // [esp+18h] [ebp-4h]
+
+  CBasePlayer::PostThink(this);
+  y = this->m_angRotation.m_Value.y;
+  z = this->m_angRotation.m_Value.z;
+  angles.y = 0.0;
+  angles.z = y;
+  v6 = z;
+  CBaseEntity::SetLocalAngles(this, (QAngle *)&angles.y);
+  v4 = this->EyeAngles(this);
+  CNetworkVarBase<QAngle,CTFPlayer::NetworkVar_m_angEyeAngles>::Set(&this->m_angEyeAngles, v4);
+  ((void (__thiscall *)(_DWORD, _DWORD, _DWORD))this->m_PlayerAnimState->Update)(
+    this->m_PlayerAnimState,
+    this->m_angEyeAngles.m_Value.y,
+    this->m_angEyeAngles.m_Value.x);
+}

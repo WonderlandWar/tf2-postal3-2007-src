@@ -1,0 +1,77 @@
+void __thiscall CTFPlayer::ManageRegularWeapons(CTFPlayer *this, TFPlayerClassData_t *pData)
+{
+  int v2; // ebp
+  int v4; // ebx
+  CBaseCombatWeapon *Weapon; // eax
+  CBaseCombatWeapon *v6; // edi
+  CTFWeaponBase *v7; // eax
+  CTFWeaponBase *v8; // edi
+  void (__thiscall **p_ChangeTeam)(CTFWeaponBase *, int); // ebx
+  int TeamNumber; // eax
+  CBaseEntity *v11; // eax
+  CTFWeaponBase *v12; // eax
+  CTFWeaponBase *v13; // edi
+  CTFPlayer_vtbl *v14; // edi
+  int v15; // eax
+  CTFPlayer_vtbl *v16; // edi
+  CBaseCombatWeapon *v17; // eax
+  const char *v18; // [esp+10h] [ebp-4h]
+  int *pDataa; // [esp+18h] [ebp+4h]
+
+  v2 = 0;
+  pDataa = pData->m_aWeapons;
+  do
+  {
+    v4 = *pDataa;
+    if ( *pDataa )
+    {
+      v18 = WeaponIdToAlias(*pDataa);
+      Weapon = CBaseCombatCharacter::GetWeapon(this, v2);
+      v6 = Weapon;
+      if ( Weapon && ((int (__thiscall *)(CBaseCombatWeapon *))Weapon->__vftable[1].~IHandleEntity)(Weapon) != v4 )
+      {
+        CBaseCombatCharacter::Weapon_Detach(this, v6);
+        UTIL_Remove(v6);
+      }
+      v7 = CTFPlayer::Weapon_OwnsThisID(this, v4);
+      v8 = v7;
+      if ( v7 )
+      {
+        p_ChangeTeam = (void (__thiscall **)(CTFWeaponBase *, int))&v7->ChangeTeam;
+        TeamNumber = CBaseEntity::GetTeamNumber(this);
+        (*p_ChangeTeam)(v8, TeamNumber);
+        CBaseCombatWeapon::GiveDefaultAmmo(v8);
+        if ( !this->m_bRegenerating )
+          v8->WeaponReset(v8);
+      }
+      else
+      {
+        v11 = this->GiveNamedItem(this, v18, 0);
+        if ( v11 )
+          ((void (__thiscall *)(CBaseEntity *, CTFPlayer *))v11->__vftable[1].DrawDebugTextOverlays)(v11, this);
+      }
+    }
+    else
+    {
+      v12 = (CTFWeaponBase *)CBaseCombatCharacter::GetWeapon(this, v2);
+      v13 = v12;
+      if ( v12 && v12->GetWeaponID(v12) != 43 )
+      {
+        CBaseCombatCharacter::Weapon_Detach(this, v13);
+        UTIL_Remove(v13);
+      }
+    }
+    ++pDataa;
+    ++v2;
+  }
+  while ( v2 < 5 );
+  if ( !this->m_bRegenerating )
+  {
+    v14 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    v15 = ((int (__thiscall *)(CTFPlayer *, _DWORD, _DWORD))this->Weapon_GetSlot)(this, 0, 0);
+    ((void (__thiscall *)(CTFPlayer *, int))v14->Weapon_Switch)(this, v15);
+    v16 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    v17 = this->Weapon_GetSlot(this, 1);
+    v16->Weapon_SetLast(this, v17);
+  }
+}

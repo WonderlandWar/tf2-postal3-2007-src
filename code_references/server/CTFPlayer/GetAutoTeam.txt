@@ -1,0 +1,28 @@
+// positive sp value has been detected, the output may be wrong!
+int __thiscall CTFPlayer::GetAutoTeam(CTFPlayer *this)
+{
+  CTFTeamManager *v1; // eax
+  CTFTeam *Team; // esi
+  CTFTeamManager *v3; // eax
+  CTFTeam *v4; // eax
+  CTFTeam *v5; // edi
+  int v6; // ebx
+  int v8; // edi
+  IUniformRandomStream *v9; // ecx
+
+  v1 = TFTeamMgr();
+  Team = CTFTeamManager::GetTeam(v1, 3);
+  v3 = TFTeamMgr();
+  v4 = CTFTeamManager::GetTeam(v3, 2);
+  v5 = v4;
+  if ( !Team || !v4 )
+    return 1;
+  v6 = v4->GetNumPlayers(v4);
+  if ( Team->GetNumPlayers(Team) < v6 )
+    return 3;
+  v8 = v5->GetNumPlayers(v5);
+  if ( v8 >= Team->GetNumPlayers(Team) )
+    return 3 - (_RandomInt(v9, 0, 1) != 0);
+  else
+    return 2;
+}

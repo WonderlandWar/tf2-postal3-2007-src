@@ -1,0 +1,47 @@
+void __thiscall CTFPlayer::CheckForIdle(CTFPlayer *this)
+{
+  double flIdleTime; // st7
+  int m_nValue; // eax
+  double curtime; // st7
+  IVEngineServer_vtbl *v5; // edi
+  int UserID; // eax
+  char *v7; // eax
+
+  if ( this->m_afButtonLast != this->m_nButtons )
+    this->m_flLastAction = gpGlobals->curtime;
+  if ( mp_idledealmethod.m_pParent->m_nValue
+    && !this->pl.hltv
+    && !this->IsFakeClient(this)
+    && (engine->IsDedicatedServer(engine) || engine->IndexOfEdict(engine, this->m_Network.m_pPev) != 1)
+    && (this->m_Shared.m_nPlayerState.m_Value != 2 || this->m_bIsIdle) )
+  {
+    flIdleTime = mp_idlemaxtime.m_pParent->m_fValue * 60.0;
+    if ( g_pGameRules[67].__vftable == (CGameRules_vtbl *)7 )
+      flIdleTime = (double)mp_stalemate_timelimit.m_pParent->m_nValue * 0.5;
+    if ( gpGlobals->curtime - this->m_flLastAction > flIdleTime )
+    {
+      m_nValue = mp_idledealmethod.m_pParent->m_nValue;
+      if ( m_nValue == 1 )
+      {
+        if ( !this->m_bIsIdle )
+        {
+          CTFPlayer::ForceChangeTeam(this, mp_idledealmethod.m_pParent->m_nValue);
+          curtime = gpGlobals->curtime;
+          this->m_bIsIdle = 1;
+          this->m_flLastAction = curtime;
+          return;
+        }
+      }
+      else if ( m_nValue != 2 )
+      {
+        return;
+      }
+      UTIL_ClientPrintAll(2, "#game_idle_kick", this->m_szNetname, 0, 0, 0);
+      v5 = engine->__vftable;
+      UserID = CBasePlayer::GetUserID(this);
+      v7 = UTIL_VarArgs("kickid %d\n", UserID);
+      v5->ServerCommand(engine, v7);
+      this->m_flLastAction = gpGlobals->curtime;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+void __thiscall CTFPlayer::Touch(CTFPlayer *this, CBaseEntity *pOther)
+{
+  if ( pOther
+    && pOther->IsPlayer(pOther)
+    && !CTFPlayerShared::IsAlly(&this->m_Shared, pOther)
+    && CTFPlayerShared::InCond((CTFPlayerShared *)&pOther[4].m_Network.m_PVSInfo.m_pClusters[4], 8) )
+  {
+    CTFPlayerShared::OnSpyTouchedByEnemy((CTFPlayerShared *)&pOther[4].m_Network.m_PVSInfo.m_pClusters[4]);
+  }
+  CBasePlayer::Touch(this, pOther);
+}

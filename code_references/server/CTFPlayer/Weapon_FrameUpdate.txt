@@ -1,0 +1,42 @@
+void __thiscall CTFPlayer::Weapon_FrameUpdate(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  unsigned int v3; // eax
+  CTFWeaponBase *m_pEntity; // ecx
+  unsigned int v5; // eax
+  CEntInfo *v6; // ecx
+
+  CBaseCombatCharacter::Weapon_FrameUpdate(this);
+  m_Index = this->m_hOffHandWeapon.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    v3 = this->m_hOffHandWeapon.m_Value.m_Index;
+    if ( v3 == -1
+      || g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber != v3 >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = (CTFWeaponBase *)g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_pEntity;
+    }
+    if ( m_pEntity->IsWeaponVisible(m_pEntity) )
+    {
+      v5 = this->m_hOffHandWeapon.m_Value.m_Index;
+      if ( v5 == -1
+        || g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber != v5 >> 12 )
+      {
+        (*(void (__stdcall **)(CTFPlayer *))(MEMORY[0] + 1296))(this);
+      }
+      else
+      {
+        v6 = &g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF];
+        ((void (__thiscall *)(CBaseEntity *, CTFPlayer *))v6->m_pEntity->__vftable[1].PhysicsSolidMaskForEntity)(
+          v6->m_pEntity,
+          this);
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+void __thiscall CTFPlayer::SetStepSoundTime(CTFPlayer *this, stepsoundtimes_t iStepSoundTime, bool bWalking)
+{
+  double v4; // st7
+
+  switch ( iStepSoundTime )
+  {
+    case STEPSOUNDTIME_NORMAL:
+    case STEPSOUNDTIME_WATER_FOOT:
+      v4 = RemapValClamped(this->m_flMaxspeed.m_Value, 200.0, 450.0, 400.0, 200.0);
+      this->m_flStepSoundTime = v4;
+      if ( bWalking )
+        this->m_flStepSoundTime = v4 + 100.0;
+      break;
+    case STEPSOUNDTIME_ON_LADDER:
+      this->m_flStepSoundTime = 350.0;
+      break;
+    case STEPSOUNDTIME_WATER_KNEE:
+      this->m_flStepSoundTime = RemapValClamped(this->m_flMaxspeed.m_Value, 200.0, 450.0, 600.0, 400.0);
+      break;
+    default:
+      break;
+  }
+  if ( (this->m_fFlags.m_Value & 2) != 0 || this->m_MoveType.m_Value == 9 )
+    this->m_flStepSoundTime = this->m_flStepSoundTime + 100.0;
+}

@@ -1,0 +1,31 @@
+void __thiscall CTFPlayer::PlayFlinch(CTFPlayer *this, const CTakeDamageInfo *info)
+{
+  PlayerAnimEvent_t v3; // esi
+
+  if ( this->IsAlive(this) && !CTFPlayerShared::InCond(&this->m_Shared, 7) )
+  {
+    switch ( this->m_LastHitGroup )
+    {
+      case 1:
+        v3 = PLAYERANIMEVENT_FLINCH_HEAD;
+        break;
+      case 4:
+        v3 = PLAYERANIMEVENT_FLINCH_LEFTARM;
+        break;
+      case 5:
+        v3 = PLAYERANIMEVENT_FLINCH_RIGHTARM;
+        break;
+      case 6:
+        v3 = PLAYERANIMEVENT_FLINCH_LEFTLEG;
+        break;
+      case 7:
+        v3 = PLAYERANIMEVENT_FLINCH_RIGHTLEG;
+        break;
+      default:
+        v3 = PLAYERANIMEVENT_FLINCH_CHEST;
+        break;
+    }
+    this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, v3, 0);
+    TE_PlayerAnimEvent(this, v3, 0);
+  }
+}

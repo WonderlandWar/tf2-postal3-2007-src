@@ -1,0 +1,22 @@
+int __thiscall CTFPlayer::DrawDebugTextOverlays(CTFPlayer *this)
+{
+  int result; // eax
+  int v3; // edi
+  char tempstr[512]; // [esp+20h] [ebp-208h] BYREF
+
+  result = CBaseAnimating::DrawDebugTextOverlays(this);
+  v3 = result;
+  if ( (this->m_debugOverlays & 1) != 0 )
+  {
+    V_snprintf(
+      &tempstr[4],
+      512,
+      "Health: %d / %d ( %.1f )",
+      this->m_iHealth.m_Value,
+      this->m_iMaxHealth.m_Value,
+      (double)this->m_iHealth.m_Value / (double)this->m_iMaxHealth.m_Value);
+    CBaseEntity::EntityText(this, v3, &tempstr[4], 0.0, 255, 255, 255, 255);
+    return v3 + 1;
+  }
+  return result;
+}

@@ -1,0 +1,8 @@
+void __thiscall CTFPlayer::PhysObjectSleep(CTFPlayer *this)
+{
+  IPhysicsObject *m_pPhysicsObject; // ecx
+
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    m_pPhysicsObject->Sleep(m_pPhysicsObject);
+}

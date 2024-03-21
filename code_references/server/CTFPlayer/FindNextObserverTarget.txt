@@ -1,0 +1,46 @@
+CTFWeaponBase *__thiscall CTFPlayer::FindNextObserverTarget(CTFPlayer *this, int bReverse)
+{
+  char v2; // bl
+  int v4; // eax
+  int v5; // ebp
+  int v6; // esi
+  unsigned int m_Index; // eax
+  CTFWeaponBase *m_pEntity; // ebx
+  int v10; // [esp+10h] [ebp-4h]
+  int startIndex; // [esp+18h] [ebp+4h]
+
+  v2 = bReverse;
+  v4 = this->GetNextObserverSearchStartPoint(this, bReverse);
+  v5 = this->m_hObservableEntities.m_Size - 1;
+  startIndex = v4;
+  v6 = v4;
+  v10 = 2 * (v2 == 0) - 1;
+  if ( v4 > v5 )
+  {
+    startIndex = 1;
+    v6 = 1;
+  }
+  while ( 1 )
+  {
+    m_Index = this->m_hObservableEntities.m_Memory.m_pMemory[v6].m_Index;
+    if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+      m_pEntity = 0;
+    else
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hObservableEntities.m_Memory.m_pMemory[v6].m_Index & 0xFFF].m_pEntity;
+    if ( this->IsValidObserverTarget(this, m_pEntity) )
+      break;
+    v6 += v10;
+    if ( v6 <= v5 )
+    {
+      if ( v6 < 0 )
+        v6 = v5;
+    }
+    else
+    {
+      v6 = 0;
+    }
+    if ( v6 == startIndex )
+      return 0;
+  }
+  return m_pEntity;
+}

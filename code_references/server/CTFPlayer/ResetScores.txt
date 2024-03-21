@@ -1,0 +1,7 @@
+void __thiscall CTFPlayer::ResetScores(CTFPlayer *this)
+{
+  CTFGameStats::ResetPlayerStats(&CTF_GameStats, this);
+  CTFPlayer::RemoveNemesisRelationships(this);
+  CBasePlayer::ResetFragCount(this);
+  CBasePlayer::ResetDeathCount(this);
+}

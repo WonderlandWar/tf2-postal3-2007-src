@@ -1,0 +1,13 @@
+bool __thiscall CTFPlayer::HasItem(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v2; // ecx
+  bool result; // al
+
+  m_Index = this->m_hItem.m_Value.m_Index;
+  result = m_Index != -1
+        && (v2 = &g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF],
+            v2->m_SerialNumber == m_Index >> 12)
+        && v2->m_pEntity != 0;
+  return result;
+}

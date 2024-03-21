@@ -1,0 +1,35 @@
+double __thiscall CTFPlayer::PlayCritReceivedSound(CTFPlayer *this)
+{
+  edict_t *m_pPev; // esi
+  int v3; // eax
+  float v5; // [esp+4h] [ebp-6Ch] BYREF
+  CSingleUserRecipientFilter receiverfilter; // [esp+8h] [ebp-68h] BYREF
+  EmitSound_t params; // [esp+28h] [ebp-48h] BYREF
+  __int16 v8; // [esp+6Ch] [ebp-4h]
+
+  v5 = 0.0;
+  CRecipientFilter::CRecipientFilter((CRecipientFilter *)&receiverfilter.m_bReliable);
+  *(_DWORD *)&receiverfilter.m_bReliable = &CSingleUserRecipientFilter::`vftable';
+  CRecipientFilter::AddRecipient((CRecipientFilter *)&receiverfilter.m_bReliable, this);
+  m_pPev = this->m_Network.m_pPev;
+  *(float *)&params.m_SoundLevel = 1.0;
+  *(float *)&params.m_pflSoundDuration = 0.0;
+  params.m_UtlVecSoundOrigin.m_Memory.m_pMemory = (Vector *)-1;
+  v8 = -1;
+  params.m_pSoundName = 0;
+  params.m_nFlags = 0;
+  params.m_nPitch = 0;
+  params.m_flSoundTime = 0.0;
+  BYTE2(params.m_nSpeakerEntity) = 0;
+  memset(&params.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount, 0, 20);
+  *(_DWORD *)&params.m_bEmitCloseCaption = &v5;
+  params.m_pOrigin = (const Vector *)100;
+  LOWORD(params.m_nSpeakerEntity) = 1;
+  LODWORD(params.m_flVolume) = "TFPlayer.CritPain";
+  v3 = engine->IndexOfEdict(engine, m_pPev);
+  CBaseEntity::EmitSound((IRecipientFilter *)&receiverfilter.m_bReliable, v3, (const EmitSound_t *)&params.m_pSoundName);
+  *(float *)&receiverfilter.__vftable = v5;
+  CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&params.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount);
+  CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&receiverfilter.m_bReliable);
+  return *(float *)&receiverfilter.__vftable;
+}

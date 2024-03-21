@@ -1,0 +1,5 @@
+void __thiscall CTFPlayer::DoAnimationEvent(CTFPlayer *this, PlayerAnimEvent_t event, int nData)
+{
+  this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, event, nData);
+  TE_PlayerAnimEvent(this, event, nData);
+}

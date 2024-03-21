@@ -1,0 +1,4 @@
+int __thiscall CTFPlayer::GetObjectCount(CTFPlayer *this)
+{
+  return this->m_aObjects.m_Size;
+}

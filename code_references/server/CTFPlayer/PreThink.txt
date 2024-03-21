@@ -1,0 +1,11 @@
+void __thiscall CTFPlayer::PreThink(CTFPlayer *this)
+{
+  CTFPlayerShared *p_m_Shared; // edi
+
+  p_m_Shared = &this->m_Shared;
+  CTFPlayerShared::ConditionThink(&this->m_Shared);
+  CTFPlayerShared::InvisibilityThink(p_m_Shared);
+  CBasePlayer::PreThink(this);
+  this->m_vecTotalBulletForce = vec3_origin;
+  CTFPlayer::CheckForIdle(this);
+}

@@ -1,0 +1,28 @@
+char __thiscall CTFPlayer::CanGoInvisible(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  unsigned int v4; // eax
+  CTFItem *m_pEntity; // ecx
+  CHintSystem *v6; // eax
+
+  m_Index = this->m_hItem.m_Value.m_Index;
+  if ( m_Index == -1 )
+    return 1;
+  v3 = &g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF];
+  if ( v3->m_SerialNumber != m_Index >> 12 || !v3->m_pEntity )
+    return 1;
+  v4 = this->m_hItem.m_Value.m_Index;
+  if ( v4 == -1 || g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF].m_SerialNumber != v4 >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = (CTFItem *)g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF].m_pEntity;
+  if ( m_pEntity->GetItemID(m_pEntity) != 1 )
+    return 1;
+  if ( this->Hints(this) )
+  {
+    v6 = this->Hints(this);
+    CHintSystem::HintMessage(v6, 7, 0, 0);
+  }
+  return 0;
+}

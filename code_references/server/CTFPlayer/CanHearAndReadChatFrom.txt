@@ -1,0 +1,11 @@
+bool __thiscall CTFPlayer::CanHearAndReadChatFrom(CTFPlayer *this, CBasePlayer *pPlayer)
+{
+  CGameRules_vtbl *v2; // eax
+  bool result; // al
+
+  result = pPlayer->m_lifeState.m_Value
+        && !this->m_lifeState.m_Value
+        && ((v2 = g_pGameRules[67].__vftable, v2 == (CGameRules_vtbl *)5) || v2 == (CGameRules_vtbl *)8)
+        || CBaseMultiplayerPlayer::CanHearAndReadChatFrom(this, pPlayer);
+  return result;
+}

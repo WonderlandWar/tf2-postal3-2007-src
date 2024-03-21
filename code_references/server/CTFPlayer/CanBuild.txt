@@ -1,0 +1,17 @@
+int __thiscall CTFPlayer::CanBuild(CTFPlayer *this, unsigned int iObjectType)
+{
+  CTFPlayerClass *p_m_PlayerClass; // ecx
+  int NumObjects; // ebx
+  int v6; // esi
+
+  if ( iObjectType > 4 )
+    return 5;
+  p_m_PlayerClass = &this->m_PlayerClass;
+  if ( this != (CTFPlayer *)-4340 && !CTFPlayerClassShared::CanBuildObject(p_m_PlayerClass, iObjectType) )
+    return 1;
+  NumObjects = CTFPlayer::GetNumObjects(this, iObjectType);
+  if ( NumObjects >= GetObjectInfo(iObjectType)->m_nMaxObjects )
+    return 2;
+  v6 = CalculateObjectCost(iObjectType);
+  return CBaseCombatCharacter::GetAmmoCount(this, 3) >= v6 ? 0 : 3;
+}

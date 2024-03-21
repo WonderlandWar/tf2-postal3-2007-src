@@ -1,0 +1,5 @@
+void __thiscall CTFPlayer::AttemptToExitFreezeCam(CTFPlayer *this)
+{
+  if ( this->m_flDeathTime.m_Value + 2.0 + spec_freeze_traveltime.m_pParent->m_fValue + 0.5 <= gpGlobals->curtime )
+    this->m_bAbortFreezeCam = 1;
+}

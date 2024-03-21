@@ -1,0 +1,267 @@
+void __thiscall CTFPlayer::ModifyOrAppendCriteria(CTFPlayer *this, AI_CriteriaSet *criteriaSet)
+{
+  CTFPlayer *v2; // ebx
+  int CriterionIndex; // eax
+  const char *Value; // eax
+  int NumKillsInTime; // eax
+  const char *v6; // eax
+  int v7; // esi
+  PlayerStats_t *PlayerStats; // eax
+  const char *v9; // eax
+  bool v10; // zf
+  const char *v11; // eax
+  const char *v12; // eax
+  const char *v13; // eax
+  const char *v14; // eax
+  CTFWeaponBase *ActiveTFWeapon; // eax
+  CTFWeaponBase *v16; // esi
+  _BYTE *v17; // eax
+  CTFMinigun *v18; // eax
+  double FiringTime; // st7
+  float *v20; // eax
+  Vector *(__thiscall *EyePosition)(CBaseEntity *, Vector *); // edx
+  const Vector *v22; // eax
+  CBaseEntity *v23; // esi
+  CBaseEntity *v24; // eax
+  CBaseEntity *v25; // esi
+  int m_pMemory; // edi
+  int m_iPreviousRoundWinners; // esi
+  bool v28; // al
+  const char *v29; // eax
+  touchlink_t *DataObject; // eax
+  touchlink_t *v31; // ebx
+  int v32; // edx
+  CEntInfo *v33; // ecx
+  CBaseEntity *m_pEntity; // esi
+  _DWORD *v35; // eax
+  unsigned int v36; // eax
+  CTeamControlPoint **v37; // ecx
+  CTeamControlPoint *v38; // edi
+  int Owner; // esi
+  CTFGameRules *v40; // ebx
+  bool (__thiscall **p_TeamMayCapturePoint)(CTeamplayRules *, int, int); // esi
+  int TeamNumber; // eax
+  const char *flTime_4; // [esp+1Ch] [ebp-B8h]
+  int weight; // [esp+20h] [ebp-B4h]
+  touchlink_t *root; // [esp+38h] [ebp-9Ch]
+  touchlink_t *v47; // [esp+3Ch] [ebp-98h]
+  float v48; // [esp+44h] [ebp-90h]
+  Vector forward; // [esp+48h] [ebp-8Ch] BYREF
+  float v50; // [esp+54h] [ebp-80h]
+  unsigned int mask[2]; // [esp+5Ch] [ebp-78h] BYREF
+  Vector v52; // [esp+64h] [ebp-70h] BYREF
+  Vector vecAbsEnd; // [esp+74h] [ebp-60h] BYREF
+  char v54; // [esp+B3h] [ebp-21h]
+  CBaseEntity *v55; // [esp+C8h] [ebp-Ch]
+
+  v2 = this;
+  CBaseMultiplayerPlayer::ModifyOrAppendCriteria(this, criteriaSet);
+  CriterionIndex = AI_CriteriaSet::FindCriterionIndex(criteriaSet, "disguiseclass");
+  if ( CriterionIndex == -1 )
+  {
+    if ( v2 != (CTFPlayer *)-4340 )
+      AI_CriteriaSet::AppendCriteria(
+        criteriaSet,
+        "playerclass",
+        g_aPlayerClassNames_NonLocalized[v2->m_PlayerClass.m_iClass.m_Value],
+        1.0);
+  }
+  else
+  {
+    Value = AI_CriteriaSet::GetValue(criteriaSet, CriterionIndex);
+    AI_CriteriaSet::AppendCriteria(criteriaSet, "playerclass", Value, 1.0);
+  }
+  NumKillsInTime = CTFPlayerShared::GetNumKillsInTime(&v2->m_Shared, 30.0);
+  v6 = UTIL_VarArgs("%d", NumKillsInTime);
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "recentkills", v6, 1.0);
+  v7 = 0;
+  PlayerStats = CTFGameStats::FindPlayerStats(&CTF_GameStats, v2);
+  if ( PlayerStats )
+    v7 = PlayerStats->statsCurrentLife.m_iStat[3]
+       + PlayerStats->statsCurrentLife.m_iStat[11]
+       + PlayerStats->statsCurrentLife.m_iStat[16];
+  v9 = UTIL_VarArgs("%d", v7);
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "killsthislife", v9, 1.0);
+  v10 = !CTFPlayerShared::InCond(&v2->m_Shared, 7);
+  v11 = "1";
+  if ( v10 )
+    v11 = "0";
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "disguised", v11, 1.0);
+  v10 = !CTFPlayerShared::InCond(&v2->m_Shared, 9);
+  v12 = "1";
+  if ( v10 )
+    v12 = "0";
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "invulnerable", v12, 1.0);
+  v10 = !CTFPlayerShared::InCond(&v2->m_Shared, 12);
+  v13 = "1";
+  if ( v10 )
+    v13 = "0";
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "beinghealed", v13, 1.0);
+  if ( g_pGameRules->m_bInWaitingForPlayers.m_Value
+    || (v10 = !CBaseServerVehicle::NPC_HasPrimaryWeapon((vgui::ToggleButton *)g_pGameRules), v14 = "0", !v10) )
+  {
+    v14 = "1";
+  }
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "waitingforplayers", v14, 1.0);
+  ActiveTFWeapon = CTFPlayerShared::GetActiveTFWeapon(&v2->m_Shared);
+  v16 = ActiveTFWeapon;
+  if ( ActiveTFWeapon )
+  {
+    switch ( CTFWeaponBase::GetTFWpnData(ActiveTFWeapon)->m_iWeaponType )
+    {
+      case 1:
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "weaponmode", "secondary", 1.0);
+        break;
+      case 2:
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "weaponmode", "melee", 1.0);
+        break;
+      case 4:
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "weaponmode", "building", 1.0);
+        break;
+      case 5:
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "weaponmode", "pda", 1.0);
+        break;
+      default:
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "weaponmode", "primary", 1.0);
+        break;
+    }
+    if ( v16->GetWeaponID(v16) == 14 )
+    {
+      v17 = __RTDynamicCast(v16, 0, &CTFWeaponBase `RTTI Type Descriptor', &CTFSniperRifle `RTTI Type Descriptor', 0);
+      if ( v17 && v17[1576] )
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "sniperzoomed", "1", 1.0);
+    }
+    else if ( v16->GetWeaponID(v16) == 15 )
+    {
+      v18 = (CTFMinigun *)__RTDynamicCast(
+                            v16,
+                            0,
+                            &CTFWeaponBase `RTTI Type Descriptor',
+                            &CTFMinigun `RTTI Type Descriptor',
+                            0);
+      if ( v18 )
+      {
+        FiringTime = CTFMinigun::GetFiringTime(v18);
+        flTime_4 = UTIL_VarArgs("%.1f", FiringTime);
+        AI_CriteriaSet::AppendCriteria(criteriaSet, "minigunfiretime", flTime_4, 1.0);
+      }
+    }
+  }
+  CBasePlayer::EyeVectors(v2, (Vector *)&forward.y, 0, 0);
+  v48 = forward.z * 56755.84;
+  forward.x = 56755.84 * v50;
+  v20 = (float *)v2->EyePosition(v2, &v52);
+  EyePosition = v2->EyePosition;
+  *(float *)mask = *v20 + v48;
+  *(float *)&mask[1] = v20[1] + forward.x;
+  v52.x = v20[2] + forward.y;
+  v22 = (const Vector *)((int (__thiscall *)(CTFPlayer *))EyePosition)(v2);
+  UTIL_TraceLine(v22, &vecAbsEnd, (unsigned int)mask, (const IHandleEntity *)0x2004081, (int)v2, 0);
+  if ( v54 )
+    goto LABEL_44;
+  if ( !CGameTrace::DidHitNonWorldEntity((CGameTrace *)&vecAbsEnd.z) )
+    goto LABEL_44;
+  v23 = v55;
+  if ( !v55 )
+    goto LABEL_44;
+  if ( !v55->IsPlayer(v55) )
+    goto LABEL_44;
+  v24 = ToBaseMultiplayerPlayer(v23);
+  v25 = v24;
+  if ( !v24 )
+    goto LABEL_44;
+  m_pMemory = (int)v24[5].m_aThinkFunctions.m_Memory.m_pMemory;
+  if ( CBaseEntity::InSameTeam(v2, v24) )
+    goto LABEL_41;
+  if ( !CTFPlayerShared::InCond((CTFPlayerShared *)&v25[4].m_Network.m_PVSInfo.m_pClusters[4], 8) )
+  {
+    v2 = this;
+    if ( CTFPlayerShared::InCond((CTFPlayerShared *)&v25[4].m_Network.m_PVSInfo.m_pClusters[4], 7) )
+      m_pMemory = v25[4].m_Network.m_PVSInfo.m_pClusters[22];
+LABEL_41:
+    if ( m_pMemory > 0 && m_pMemory <= 9 )
+      goto LABEL_43;
+    goto LABEL_44;
+  }
+  v2 = this;
+  if ( gpGlobals->curtime - 3.0 <= *(float *)&v25[4].m_Network.m_TimerEvent.m_pCallback )
+  {
+    m_pMemory = 8;
+LABEL_43:
+    AI_CriteriaSet::AppendCriteria(criteriaSet, "crosshair_on", g_aPlayerClassNames_NonLocalized[m_pMemory], 1.0);
+  }
+LABEL_44:
+  m_iPreviousRoundWinners = g_pGameRules->m_iPreviousRoundWinners;
+  v28 = m_iPreviousRoundWinners && m_iPreviousRoundWinners != CBaseEntity::GetTeamNumber(v2);
+  v29 = UTIL_VarArgs("%d", v28);
+  AI_CriteriaSet::AppendCriteria(criteriaSet, "LostRound", v29, 1.0);
+  DataObject = (touchlink_t *)CBaseEntity::GetDataObject(v2, 1);
+  v31 = DataObject;
+  v47 = DataObject;
+  if ( DataObject )
+  {
+    root = DataObject->nextLink;
+    if ( root != DataObject )
+    {
+      do
+      {
+        if ( root->entityTouched.m_Index != -1 )
+        {
+          v32 = root->entityTouched.m_Index & 0xFFF;
+          v33 = &g_pEntityList->m_EntPtrArray[v32];
+          if ( g_pEntityList->m_EntPtrArray[v32].m_SerialNumber == root->entityTouched.m_Index >> 12 )
+          {
+            m_pEntity = v33->m_pEntity;
+            if ( v33->m_pEntity )
+            {
+              if ( (m_pEntity->m_Collision.m_usSolidFlags.m_Value & 8) != 0 && CBaseEntity::IsBSPModel(v33->m_pEntity) )
+              {
+                v35 = __RTDynamicCast(
+                        m_pEntity,
+                        0,
+                        &CBaseEntity `RTTI Type Descriptor',
+                        &CTriggerAreaCapture `RTTI Type Descriptor',
+                        0);
+                if ( v35 )
+                {
+                  v36 = v35[362];
+                  if ( v36 != -1 )
+                  {
+                    v37 = (CTeamControlPoint **)&g_pEntityList->m_EntPtrArray[v36 & 0xFFF];
+                    if ( g_pEntityList->m_EntPtrArray[v36 & 0xFFF].m_SerialNumber == v36 >> 12 )
+                    {
+                      v38 = *v37;
+                      if ( *v37 )
+                      {
+                        Owner = CTeamControlPoint::GetOwner(*v37);
+                        if ( Owner == CBaseEntity::GetTeamNumber(this) )
+                        {
+                          AI_CriteriaSet::AppendCriteria(criteriaSet, "OnFriendlyControlPoint", "1", 1.0);
+                        }
+                        else
+                        {
+                          v40 = g_pGameRules;
+                          weight = v38->m_iPointIndex;
+                          p_TeamMayCapturePoint = &g_pGameRules->TeamMayCapturePoint;
+                          TeamNumber = CBaseEntity::GetTeamNumber(this);
+                          if ( (*p_TeamMayCapturePoint)(v40, TeamNumber, weight)
+                            && g_pGameRules->PlayerMayCapturePoint(g_pGameRules, this, v38->m_iPointIndex, 0, 0) )
+                          {
+                            AI_CriteriaSet::AppendCriteria(criteriaSet, "OnCappableControlPoint", "1", 1.0);
+                          }
+                          v31 = v47;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        root = root->nextLink;
+      }
+      while ( root != v31 );
+    }
+  }
+}

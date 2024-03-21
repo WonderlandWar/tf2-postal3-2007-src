@@ -1,0 +1,51 @@
+void __thiscall CTFPlayer::StateEnterWELCOME(CTFPlayer *this)
+{
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  void (__thiscall *ChangeTeam)(CBaseEntity *, int); // eax
+  KeyValues *v4; // eax
+  KeyValues *v5; // eax
+  KeyValues *v6; // edi
+  int val; // [esp+8h] [ebp-4h] BYREF
+
+  CTFPlayer::PickWelcomeObserverPoint(this);
+  this->StartObserverMode(this, 3);
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::AddEffects(this, 48);
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    m_pPhysicsObject->Sleep(m_pPhysicsObject);
+  if ( g_pGameRules && CMultiplayRules::IsLoadingBugBaitReport((CMultiplayRules *)g_pGameRules) )
+  {
+    ChangeTeam = this->ChangeTeam;
+    this->m_bSeenRoundInfo = 1;
+    ChangeTeam(this, 3);
+    val = 1;
+    CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDesiredPlayerClass>::Set(
+      &this->m_Shared.m_iDesiredPlayerClass,
+      &val);
+    this->ForceRespawn(this);
+    this->m_bIsIdle = 0;
+  }
+  else
+  {
+    v4 = (KeyValues *)KeyValues::operator new(0x20u);
+    if ( v4 )
+    {
+      KeyValues::KeyValues(v4, "data");
+      v6 = v5;
+    }
+    else
+    {
+      v6 = 0;
+    }
+    KeyValues::SetString(v6, "title", "#TF_Welcome");
+    KeyValues::SetString(v6, "type", "1");
+    KeyValues::SetString(v6, "msg", "motd");
+    KeyValues::SetString(v6, "cmd", "mapinfo");
+    this->ShowViewPortPanel(this, "info", 1, v6);
+    KeyValues::deleteThis(v6);
+    this->m_bSeenRoundInfo = 0;
+    this->m_bIsIdle = 0;
+  }
+}

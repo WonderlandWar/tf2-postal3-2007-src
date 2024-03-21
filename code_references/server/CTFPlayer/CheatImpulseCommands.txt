@@ -1,0 +1,19 @@
+void __thiscall CTFPlayer::CheatImpulseCommands(CTFPlayer *this, int iImpulse)
+{
+  if ( iImpulse == 101 )
+  {
+    if ( sv_cheats->m_pParent->m_nValue )
+    {
+      gEvilImpulse101 = 1;
+      this->GiveAmmo(this, 1000, 1, 0);
+      this->GiveAmmo(this, 1000, 2, 0);
+      this->GiveAmmo(this, 1000, 3, 0);
+      ((void (__thiscall *)(CTFPlayer *, _DWORD, _DWORD))this->TakeHealth)(this, 999.0, 0);
+      gEvilImpulse101 = 0;
+    }
+  }
+  else
+  {
+    CBasePlayer::CheatImpulseCommands(this, iImpulse);
+  }
+}

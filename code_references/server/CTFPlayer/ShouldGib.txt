@@ -1,0 +1,14 @@
+bool __thiscall CTFPlayer::ShouldGib(CTFPlayer *this, const CTakeDamageInfo *info)
+{
+  bool result; // al
+  int m_bitsDamageType; // eax
+
+  result = 0;
+  if ( tf_playergib.m_pParent->m_nValue )
+  {
+    m_bitsDamageType = info->m_bitsDamageType;
+    if ( (m_bitsDamageType & 0x40) != 0 || (m_bitsDamageType & 0x40000) != 0 )
+      return 1;
+  }
+  return result;
+}

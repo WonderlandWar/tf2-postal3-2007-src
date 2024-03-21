@@ -1,0 +1,103 @@
+void __thiscall CTFPlayer::HandleCommand_JoinClass(CTFPlayer *this, const char *pClassName)
+{
+  int v3; // ebx
+  int v4; // edi
+  TFPlayerClassData_t *PlayerClassData; // eax
+  bool v6; // al
+  const Vector *v7; // eax
+  bool v8; // bl
+  bool v9; // al
+  bool v10; // dl
+  CTFGameRules *v11; // edi
+  int TeamNumber; // eax
+  bool v13; // al
+  TFPlayerClassData_t *v14; // [esp-10h] [ebp-2Ch]
+  TFPlayerClassData_t *v15; // [esp-10h] [ebp-2Ch]
+  int szTime[3]; // [esp+Ch] [ebp-10h] BYREF
+
+  this->m_bIsClassMenuOpen = 0;
+  if ( g_pGameRules->m_iRoundState.m_Value == GR_STATE_STALEMATE
+    && this->IsAlive(this)
+    && !CTFGameRules::CanChangeClassInStalemate(g_pGameRules) )
+  {
+    V_snprintf((char *)&szTime[1], 5, "%.0f", tf_stalematechangeclasstime.m_pParent->m_fValue);
+    ClientPrint(this, 4, "#game_stalemate_cant_change_class", (const char *)&szTime[1], 0, 0, 0);
+    return;
+  }
+  v3 = 0;
+  if ( !_stricmp(pClassName, "random") )
+  {
+    v3 = 12;
+  }
+  else
+  {
+    v4 = 0;
+    while ( 1 )
+    {
+      PlayerClassData = GetPlayerClassData(v4);
+      if ( !_stricmp(pClassName, PlayerClassData->m_szClassName) )
+        break;
+      if ( ++v4 >= 11 )
+        goto LABEL_11;
+    }
+    v3 = v4;
+LABEL_11:
+    if ( v4 == 10 )
+      _Warning("HandleCommand_JoinClass( %s ) - invalid class name.\n", pClassName);
+    if ( v3 == this->m_Shared.m_iDesiredPlayerClass.m_Value )
+      goto LABEL_14;
+  }
+  szTime[1] = v3;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDesiredPlayerClass>::Set(
+    &this->m_Shared.m_iDesiredPlayerClass,
+    &szTime[1]);
+  v6 = this->IsAlive(this);
+  if ( v3 == 12 )
+  {
+    if ( v6 )
+      ClientPrint(this, 3, "#game_respawn_asrandom", 0, 0, 0, 0);
+    else
+      ClientPrint(this, 3, "#game_spawn_asrandom", 0, 0, 0, 0);
+  }
+  else if ( v6 )
+  {
+    v14 = GetPlayerClassData(v3);
+    ClientPrint(this, 3, "#game_respawn_as", v14->m_szClassName, 0, 0, 0);
+  }
+  else
+  {
+    v15 = GetPlayerClassData(v3);
+    ClientPrint(this, 3, "#game_spawn_as", v15->m_szClassName, 0, 0, 0);
+  }
+  if ( v3 != this->m_PlayerClass.m_iClass.m_Value )
+  {
+    v7 = this->WorldSpaceCenter(this);
+    v8 = PointInRespawnRoom(this, v7);
+    if ( v8 && !this->IsAlive(this) )
+      v8 = this->GetObserverTarget(this) == this;
+    v9 = this->IsAlive(this);
+    v10 = !v9;
+    if ( !v9 && 0.0 != this->m_flDeathTime.m_Value )
+    {
+      v11 = g_pGameRules;
+      TeamNumber = CBaseEntity::GetTeamNumber(this);
+      v10 = CTeamplayRoundBasedRules::GetNextRespawnWave(v11, TeamNumber, this) < (double)gpGlobals->curtime;
+    }
+    v13 = 0;
+    if ( g_pGameRules->m_iRoundState.m_Value == GR_STATE_STALEMATE )
+    {
+      v13 = CTFGameRules::CanChangeClassInStalemate(g_pGameRules);
+      v10 = 0;
+      v8 = 0;
+    }
+    if ( this->m_bAllowInstantSpawn || v10 || v8 || v13 )
+      goto LABEL_16;
+    if ( this->IsAlive(this) && this->m_bHudClassAutoKill )
+      this->CommitSuicide(this, 0);
+    return;
+  }
+LABEL_14:
+  if ( this->m_bAllowInstantSpawn && !this->IsAlive(this) )
+LABEL_16:
+    this->ForceRespawn(this);
+}

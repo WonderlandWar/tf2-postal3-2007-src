@@ -1,0 +1,163 @@
+void __thiscall CTFPlayer::DropAmmoPack(CTFPlayer *this)
+{
+  int v2; // ebx
+  CTFWeaponBase *ActiveTFWeapon; // eax
+  CTFWeaponBase *v4; // edi
+  int v5; // ebp
+  CTFWeaponBase *Weapon; // eax
+  CTFWeaponBase *v7; // edi
+  int iWeight; // eax
+  const char *v9; // edi
+  int v10; // ebx
+  int AmmoCount; // ebp
+  CTFAmmoPack *v12; // edi
+  const QAngle *v13; // eax
+  double v14; // st7
+  double v15; // st7
+  double v16; // st7
+  bool v17; // zf
+  double v18; // st7
+  double v19; // st6
+  double v20; // st5
+  double v21; // st7
+  double v22; // st7
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  double v24; // st7
+  IPhysicsObject *v25; // ecx
+  CTFWeaponBase_vtbl *v26; // esi
+  int v27; // eax
+  float _X; // [esp+24h] [ebp-64h]
+  CTFWeaponBase *iPrimary; // [esp+38h] [ebp-50h]
+  Vector vecImpulse; // [esp+3Ch] [ebp-4Ch] BYREF
+  Vector vecUp; // [esp+48h] [ebp-40h] BYREF
+  Vector vecRight; // [esp+54h] [ebp-34h] BYREF
+  Vector angImpulse; // [esp+60h] [ebp-28h] BYREF
+  QAngle vecPackAngles; // [esp+6Ch] [ebp-1Ch] BYREF
+  Vector vecPackOrigin; // [esp+78h] [ebp-10h] BYREF
+
+  v2 = 0;
+  iPrimary = 0;
+  ActiveTFWeapon = CTFPlayerShared::GetActiveTFWeapon(&this->m_Shared);
+  v4 = ActiveTFWeapon;
+  if ( !ActiveTFWeapon || CTFWeaponBase::GetTFWpnData(ActiveTFWeapon)->m_bDontDrop )
+  {
+    v5 = -1;
+    if ( CBaseCombatCharacter::WeaponCount(this) <= 0 )
+      return;
+    do
+    {
+      Weapon = (CTFWeaponBase *)CBaseCombatCharacter::GetWeapon(this, v2);
+      v7 = Weapon;
+      if ( Weapon )
+      {
+        if ( !CTFWeaponBase::GetTFWpnData(Weapon)->m_bDontDrop )
+        {
+          iWeight = CTFWeaponBase::GetTFWpnData(v7)->iWeight;
+          if ( iWeight > v5 )
+          {
+            v5 = iWeight;
+            iPrimary = v7;
+          }
+        }
+      }
+      ++v2;
+    }
+    while ( v2 < CBaseCombatCharacter::WeaponCount(this) );
+  }
+  else
+  {
+    iPrimary = v4;
+  }
+  if ( iPrimary )
+  {
+    v9 = iPrimary->GetWorldModel(iPrimary);
+    iPrimary->SetModel(iPrimary, v9);
+    if ( CTFPlayer::CalculateAmmoPackPositionAndAngles(
+           this,
+           iPrimary,
+           (Vector *)&vecPackOrigin.y,
+           (QAngle *)&vecPackAngles.y) )
+    {
+      v10 = 5;
+      if ( CBaseCombatCharacter::GetAmmoCount(this, 1) >= 5 )
+        LODWORD(vecImpulse.x) = CBaseCombatCharacter::GetAmmoCount(this, 1);
+      else
+        LODWORD(vecImpulse.x) = 5;
+      if ( CBaseCombatCharacter::GetAmmoCount(this, 2) >= 5 )
+        AmmoCount = CBaseCombatCharacter::GetAmmoCount(this, 2);
+      else
+        AmmoCount = 5;
+      if ( CBaseCombatCharacter::GetAmmoCount(this, 3) >= 5 )
+        v10 = CBaseCombatCharacter::GetAmmoCount(this, 3);
+      v12 = CTFAmmoPack::Create((Vector *)&vecPackOrigin.y, (QAngle *)&vecPackAngles.y, this, v9);
+      if ( v12 )
+      {
+        CBaseCombatCharacter::RemoveAllAmmo(this);
+        CTFAmmoPack::GiveAmmo(v12, SLODWORD(vecImpulse.x), 1);
+        CTFAmmoPack::GiveAmmo(v12, AmmoCount, 2);
+        CTFAmmoPack::GiveAmmo(v12, v10, 3);
+        v13 = this->EyeAngles(this);
+        AngleVectors(v13, 0, (Vector *)&vecRight.y, (Vector *)&vecUp.y);
+        vecImpulse.y = 0.0;
+        vecImpulse.z = 0.0;
+        vecUp.x = 0.0;
+        v14 = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(random, -0.25, 0.25);
+        vecImpulse.y = vecUp.y * v14 + (float)0.0;
+        vecImpulse.z = vecUp.z * v14 + (float)0.0;
+        vecUp.x = v14 * vecRight.x + (float)0.0;
+        v15 = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(random, -0.25, 0.25);
+        vecImpulse.y = vecRight.y * v15 + vecImpulse.y;
+        vecImpulse.z = vecRight.z * v15 + vecImpulse.z;
+        vecUp.x = v15 * angImpulse.x + vecUp.x;
+        pfVectorNormalize((Vector *)&vecImpulse.y);
+        v16 = ((double (__stdcall *)(_DWORD, _DWORD))random->RandomFloat)(
+                tf_weapon_ragdoll_velocity_min.m_pParent->m_fValue,
+                tf_weapon_ragdoll_velocity_max.m_pParent->m_fValue);
+        v17 = (this->m_iEFlags & 0x1000) == 0;
+        vecImpulse.y = vecImpulse.y * v16;
+        vecImpulse.z = vecImpulse.z * v16;
+        vecUp.x = v16 * vecUp.x;
+        if ( !v17 )
+          CBaseEntity::CalcAbsoluteVelocity(this);
+        v18 = this->m_vecAbsVelocity.x + vecImpulse.y;
+        vecImpulse.y = v18;
+        v19 = this->m_vecAbsVelocity.y + vecImpulse.z;
+        vecImpulse.z = v19;
+        v20 = this->m_vecAbsVelocity.z + vecUp.x;
+        vecUp.x = v20;
+        _X = v18 * v18 + v19 * v19 + v20 * v20;
+        v21 = pfSqrt(_X);
+        if ( v21 > tf_weapon_ragdoll_maxspeed.m_pParent->m_fValue )
+        {
+          v22 = tf_weapon_ragdoll_maxspeed.m_pParent->m_fValue / v21;
+          vecImpulse.y = vecImpulse.y * v22;
+          vecImpulse.z = vecImpulse.z * v22;
+          vecUp.x = v22 * vecUp.x;
+        }
+        m_pPhysicsObject = v12->m_pPhysicsObject;
+        if ( m_pPhysicsObject )
+        {
+          ((void (__stdcall *)(_DWORD))m_pPhysicsObject->SetMass)(25.0);
+          v24 = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(random, 0.0, 100.0);
+          v25 = v12->m_pPhysicsObject;
+          angImpulse.y = 0.0;
+          vecPackAngles.x = 0.0;
+          angImpulse.z = v24;
+          v25->SetVelocityInstantaneous(v25, (Vector *)&vecImpulse.y, (Vector *)&angImpulse.y);
+        }
+        CTFAmmoPack::SetInitialVelocity(v12, (Vector *)&vecImpulse.y);
+        LODWORD(vecImpulse.x) = CBaseEntity::GetTeamNumber(this) != 2;
+        CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+          (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&v12->m_nSkin,
+          (const int *)&vecImpulse);
+        LODWORD(vecImpulse.x) = 1000;
+        CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(&v12->m_iHealth, (const int *)&vecImpulse);
+        CBaseAnimating::SetBodygroup(v12, 1, 1);
+        CTFPlayer::AmmoPackCleanUp(this);
+      }
+      v26 = iPrimary->__vftable;
+      v27 = (int)iPrimary->GetViewModel(iPrimary, 0);
+      v26->SetModel(iPrimary, (const char *)v27);
+    }
+  }
+}

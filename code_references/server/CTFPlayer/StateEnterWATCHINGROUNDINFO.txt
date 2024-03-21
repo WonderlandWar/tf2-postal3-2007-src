@@ -1,0 +1,8 @@
+void __thiscall CTFPlayer::StateEnterWATCHINGROUNDINFO(CTFPlayer *this)
+{
+  g_pGameRules->ShowRoundInfoPanel(g_pGameRules, this);
+  if ( g_pGameRules->m_iRoundState.m_Value == GR_STATE_PREGAME || !this->m_Shared.m_iDesiredPlayerClass.m_Value )
+    CTFPlayer::StateTransition(this, 2);
+  else
+    this->ForceRespawn(this);
+}

@@ -1,0 +1,16 @@
+void __thiscall CTFPlayer::GiveDefaultItems(CTFPlayer *this)
+{
+  TFPlayerClassData_t *PlayerClassData; // ebp
+  int v3; // esi
+  int *m_aAmmoMax; // ebx
+
+  PlayerClassData = GetPlayerClassData(this->m_PlayerClass.m_iClass.m_Value);
+  CBaseCombatCharacter::RemoveAllAmmo(this);
+  v3 = 0;
+  m_aAmmoMax = PlayerClassData->m_aAmmoMax;
+  do
+    this->GiveAmmo(this, *m_aAmmoMax++, v3++, 0);
+  while ( v3 < 6 );
+  CTFPlayer::ManageRegularWeapons(this, PlayerClassData);
+  CTFPlayer::ManageBuilderWeapons(this, PlayerClassData);
+}

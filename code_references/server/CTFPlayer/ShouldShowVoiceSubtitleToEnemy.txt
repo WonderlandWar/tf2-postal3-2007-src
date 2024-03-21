@@ -1,0 +1,14 @@
+BOOL __thiscall CTFPlayer::ShouldShowVoiceSubtitleToEnemy(CTFPlayer *this)
+{
+  int m_Value; // edi
+  BOOL result; // eax
+
+  result = 0;
+  if ( CTFPlayerShared::InCond(&this->m_Shared, 7) )
+  {
+    m_Value = this->m_Shared.m_nDisguiseTeam.m_Value;
+    if ( m_Value != CBaseEntity::GetTeamNumber(this) )
+      return 1;
+  }
+  return result;
+}

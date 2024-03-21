@@ -1,0 +1,75 @@
+void __thiscall CTFPlayer::FireBullet(
+        CTFPlayer *this,
+        const FireBulletsInfo_t *info,
+        bool bDoEffects,
+        int nDamageType,
+        int nCustomDamageType)
+{
+  double m_flDistance; // st7
+  float z; // edx
+  double v7; // st6
+  Vector *p_m_vecDirShooting; // edi
+  double v9; // st5
+  double v11; // st7
+  int TeamNumber; // ebp
+  int m_iAmmoType; // edx
+  float flDamage; // [esp+8h] [ebp-D0h]
+  Vector vecStart; // [esp+1Ch] [ebp-BCh] BYREF
+  Vector vecEnd; // [esp+28h] [ebp-B0h] BYREF
+  CTakeDamageInfo dmgInfo; // [esp+34h] [ebp-A4h] BYREF
+  CGameTrace trace; // [esp+7Ch] [ebp-5Ch] BYREF
+
+  m_flDistance = info->m_flDistance;
+  z = info->m_vecSrc.z;
+  v7 = info->m_vecDirShooting.x * m_flDistance;
+  p_m_vecDirShooting = &info->m_vecDirShooting;
+  v9 = info->m_vecDirShooting.y * m_flDistance;
+  vecStart.y = info->m_vecSrc.x;
+  v11 = m_flDistance * info->m_vecDirShooting.z;
+  vecStart.z = info->m_vecSrc.y;
+  vecEnd.y = v7 + vecStart.y;
+  vecEnd.x = z;
+  vecEnd.z = v9 + vecStart.z;
+  dmgInfo.m_vecDamageForce.x = v11 + z;
+  UTIL_TraceLine((Vector *)&vecStart.y, (Vector *)&vecEnd.y, 0x4200400Bu, this, 0, (CGameTrace *)&trace.startpos.y);
+  if ( tf_debug_bullets.m_pParent->m_nValue )
+    NDebugOverlay::Line((Vector *)&vecStart.y, (const Vector *)&trace.endpos.y, 0, 255, 0, 1, 30.0);
+  if ( *(float *)&trace.contents < 1.0 )
+  {
+    if ( bDoEffects )
+    {
+      if ( (enginetrace->GetPointContents(enginetrace, (const Vector *)&trace.startpos.y, 0) & 0x30) != 0
+        || (enginetrace->GetPointContents(enginetrace, (const Vector *)&trace.endpos.y, 0) & 0x30) == 0 )
+      {
+        TeamNumber = CBaseEntity::GetTeamNumber(this);
+        if ( CBaseEntity::GetTeamNumber((CBaseEntity *)trace.hitbox) != TeamNumber )
+          UTIL_ImpactTrace((CGameTrace *)&trace.startpos.y, nDamageType, 0);
+      }
+      else
+      {
+        CTFPlayer::ImpactWaterTrace(this, (CGameTrace *)&trace.startpos.y, (Vector *)&vecStart.y);
+      }
+    }
+    flDamage = (float)info->m_iDamage;
+    CTakeDamageInfo::CTakeDamageInfo(
+      (CTakeDamageInfo *)&dmgInfo.m_vecDamageForce.y,
+      this,
+      info->m_pAttacker,
+      flDamage,
+      nDamageType,
+      0);
+    m_iAmmoType = info->m_iAmmoType;
+    dmgInfo.m_iDamageStats = nCustomDamageType;
+    CalculateBulletDamageForce(
+      (CTakeDamageInfo *)&dmgInfo.m_vecDamageForce.y,
+      m_iAmmoType,
+      p_m_vecDirShooting,
+      (const Vector *)&trace.endpos.y,
+      1.0);
+    CBaseEntity::DispatchTraceAttack(
+      (CBaseEntity *)trace.hitbox,
+      (CTakeDamageInfo *)&dmgInfo.m_vecDamageForce.y,
+      p_m_vecDirShooting,
+      (CGameTrace *)&trace.startpos.y);
+  }
+}

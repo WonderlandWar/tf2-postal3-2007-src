@@ -1,0 +1,8 @@
+void __thiscall CTFPlayer::NoteWeaponFired(CTFPlayer *this)
+{
+  CUserCmd *m_pCurrentCommand; // eax
+
+  m_pCurrentCommand = this->m_pCurrentCommand;
+  if ( m_pCurrentCommand )
+    this->m_iLastWeaponFireUsercmd = m_pCurrentCommand->command_number;
+}

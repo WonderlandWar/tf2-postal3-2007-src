@@ -1,0 +1,51 @@
+void __thiscall CTFPlayer::AmmoPackCleanUp(CTFPlayer *this)
+{
+  float *v2; // edi
+  int v3; // ebx
+  CBaseEntity *EntityByClassname; // esi
+  unsigned int m_Index; // eax
+  CTFPlayer *m_pEntity; // ecx
+  float *v7; // eax
+
+  v2 = 0;
+  v3 = 0;
+  EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "tf_ammo_pack");
+  if ( EntityByClassname )
+  {
+    do
+    {
+      m_Index = EntityByClassname->m_hOwnerEntity.m_Value.m_Index;
+      if ( m_Index == -1
+        || g_pEntityList->m_EntPtrArray[EntityByClassname->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+      {
+        m_pEntity = 0;
+      }
+      else
+      {
+        m_pEntity = (CTFPlayer *)g_pEntityList->m_EntPtrArray[EntityByClassname->m_hOwnerEntity.m_Value.m_Index & 0xFFF].m_pEntity;
+      }
+      if ( m_pEntity == this )
+      {
+        v7 = (float *)__RTDynamicCast(
+                        EntityByClassname,
+                        0,
+                        &CBaseEntity `RTTI Type Descriptor',
+                        &CTFAmmoPack `RTTI Type Descriptor',
+                        0);
+        if ( v7 )
+        {
+          ++v3;
+          if ( !v2 || v7[341] < (double)v2[341] )
+            v2 = v7;
+        }
+      }
+      EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, EntityByClassname, "tf_ammo_pack");
+    }
+    while ( EntityByClassname );
+    if ( v3 > 3 )
+    {
+      if ( v2 )
+        UTIL_Remove((CBaseEntity *)v2);
+    }
+  }
+}

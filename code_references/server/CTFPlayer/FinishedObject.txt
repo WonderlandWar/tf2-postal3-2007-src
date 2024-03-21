@@ -1,0 +1,5 @@
+void __thiscall CTFPlayer::FinishedObject(CTFPlayer *this, CBaseObject *pObject)
+{
+  CTFPlayer::AddObject(this, pObject);
+  CTFGameStats::Event_PlayerCreatedBuilding(&CTF_GameStats, this, pObject);
+}

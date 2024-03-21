@@ -1,0 +1,4 @@
+void __thiscall CTFPlayer::RemoveBuildResources(CTFPlayer *this, int iAmount)
+{
+  CBaseCombatCharacter::RemoveAmmo(this, iAmount, 3);
+}

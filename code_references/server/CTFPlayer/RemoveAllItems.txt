@@ -1,0 +1,25 @@
+void __thiscall CTFPlayer::RemoveAllItems(CTFPlayer *this, bool removeSuit)
+{
+  CTFItem *Item; // eax
+  unsigned int m_Index; // eax
+  CBaseViewModel *ViewModel; // eax
+
+  if ( CTFPlayer::HasItem(this) )
+  {
+    Item = CTFPlayer::GetItem(this);
+    Item->Drop(Item, this, 1, 0, 1);
+  }
+  m_Index = this->m_hOffHandWeapon.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    CTFPlayer::HolsterOffHandWeapon(this);
+    ViewModel = CBasePlayer::GetViewModel(this, 1);
+    if ( ViewModel )
+      ViewModel->SetWeaponModel(ViewModel, 0, 0);
+    CNetworkHandleBase<CTFWeaponBase,CTFPlayer::NetworkVar_m_hOffHandWeapon>::Set(&this->m_hOffHandWeapon, 0);
+  }
+  this->Weapon_SetLast(this, 0);
+  this->UpdateClientData(this);
+}

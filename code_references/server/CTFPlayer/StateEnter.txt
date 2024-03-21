@@ -1,0 +1,28 @@
+void __thiscall CTFPlayer::StateEnter(CTFPlayer *this, int nState)
+{
+  int v3; // ebx
+  int m_nValue; // edi
+  CPlayerStateInfo *m_pStateInfo; // eax
+  CPlayerStateInfo *v6; // eax
+  void (__thiscall *pfnEnterState)(CTFPlayer *); // edx
+
+  CNetworkVarBase<int,CTFPlayerClassShared::NetworkVar_m_iClass>::Set(&this->m_Shared.m_nPlayerState, &nState);
+  v3 = nState;
+  this->m_pStateInfo = CTFPlayer::StateLookupInfo(this, nState);
+  m_nValue = tf_playerstatetransitions.m_pParent->m_nValue;
+  if ( m_nValue == -1 || m_nValue == engine->IndexOfEdict(engine, this->m_Network.m_pPev) )
+  {
+    m_pStateInfo = this->m_pStateInfo;
+    if ( m_pStateInfo )
+      _Msg("ShowStateTransitions: entering '%s'\n", m_pStateInfo->m_pStateName);
+    else
+      _Msg("ShowStateTransitions: entering #%d\n", v3);
+  }
+  v6 = this->m_pStateInfo;
+  if ( v6 )
+  {
+    pfnEnterState = v6->pfnEnterState;
+    if ( pfnEnterState )
+      pfnEnterState((CTFPlayer *)((char *)this + *(_DWORD *)v6->gapC));
+  }
+}

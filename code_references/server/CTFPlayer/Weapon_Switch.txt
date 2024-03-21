@@ -1,0 +1,5 @@
+bool __thiscall CTFPlayer::Weapon_Switch(CTFPlayer *this, CBaseCombatWeapon *pWeapon, int viewmodelindex)
+{
+  CMultiPlayerAnimState::ResetGestureSlot(this->m_PlayerAnimState, 0);
+  return CBasePlayer::Weapon_Switch(this, pWeapon, viewmodelindex);
+}

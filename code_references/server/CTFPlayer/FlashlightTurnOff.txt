@@ -1,0 +1,15 @@
+void __thiscall CTFPlayer::FlashlightTurnOff(CTFPlayer *this)
+{
+  int m_Value; // eax
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects> *p_m_fEffects; // ecx
+  int val; // [esp+4h] [ebp-4h] BYREF
+
+  m_Value = this->m_fEffects.m_Value;
+  p_m_fEffects = &this->m_fEffects;
+  if ( (m_Value & 4) != 0 )
+  {
+    val = p_m_fEffects->m_Value & 0xFFFFFFFB;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(p_m_fEffects, &val);
+    CBaseEntity::DispatchUpdateTransmitState(this);
+  }
+}

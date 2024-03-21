@@ -1,0 +1,7 @@
+void __thiscall CTFPlayer::StateEnterDYING(CTFPlayer *this)
+{
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  this->m_bPlayedFreezeCamSound = 0;
+  this->m_bAbortFreezeCam = 0;
+}

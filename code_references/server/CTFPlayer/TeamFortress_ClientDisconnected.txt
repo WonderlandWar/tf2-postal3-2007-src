@@ -1,0 +1,6 @@
+void __thiscall CTFPlayer::TeamFortress_ClientDisconnected(CTFPlayer *this)
+{
+  CTFPlayer::TeamFortress_RemoveEverythingFromWorld(this);
+  CTFPlayer::RemoveNemesisRelationships(this);
+  CBaseCombatCharacter::RemoveAllWeapons(this);
+}

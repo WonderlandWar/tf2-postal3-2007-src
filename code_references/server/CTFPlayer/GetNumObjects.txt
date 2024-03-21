@@ -1,0 +1,18 @@
+int __thiscall CTFPlayer::GetNumObjects(CTFPlayer *this, int iObjectType)
+{
+  int v3; // ebp
+  int i; // esi
+  CBaseObject *Object; // eax
+
+  v3 = 0;
+  for ( i = 0; i < CTFPlayer::GetObjectCount(this); ++i )
+  {
+    if ( CTFPlayer::GetObject(this, i) )
+    {
+      Object = (CBaseObject *)CTFPlayer::GetObject(this, i);
+      if ( Object->GetType(Object) == iObjectType )
+        ++v3;
+    }
+  }
+  return v3;
+}

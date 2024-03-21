@@ -1,0 +1,30 @@
+char __thiscall CTFPlayer::SelectSpawnSpot(CTFPlayer *this, const char *pEntClassName, CBaseEntity **pSpot)
+{
+  CBaseEntity *EntityByClassname; // eax
+  CBaseEntity *v4; // eax
+  CBaseEntity *v5; // ebp
+  CBaseEntity *v6; // edi
+
+  EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, *pSpot, pEntClassName);
+  *pSpot = EntityByClassname;
+  if ( !EntityByClassname )
+    *pSpot = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, pEntClassName);
+  v4 = *pSpot;
+  v5 = *pSpot;
+  while ( 1 )
+  {
+    if ( v4 && g_pGameRules->IsSpawnPointValid(g_pGameRules, v4, this) )
+    {
+      v6 = *pSpot;
+      if ( ((*pSpot)->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(*pSpot);
+      if ( 0.0 != v6->m_vecAbsOrigin.x || v6->m_vecAbsOrigin.y != 0.0 || v6->m_vecAbsOrigin.z != 0.0 )
+        break;
+    }
+    v4 = CGlobalEntityList::FindEntityByClassname(&gEntList, *pSpot, pEntClassName);
+    *pSpot = v4;
+    if ( v4 == v5 )
+      return 0;
+  }
+  return 1;
+}

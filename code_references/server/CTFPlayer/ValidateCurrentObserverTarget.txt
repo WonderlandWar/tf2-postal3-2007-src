@@ -6,7 +6,7 @@ void __thiscall CTFPlayer::ValidateCurrentObserverTarget(CTFPlayer *this)
   CBaseEntity *m_pEntity; // ecx
   unsigned int v6; // eax
   CEntInfo *v7; // ecx
-  CBasePlayer *v8; // esi
+  CTFPlayer *v8; // esi
   char m_Value; // al
 
   m_Index = this->m_hObserverTarget.m_Value.m_Index;
@@ -31,7 +31,7 @@ void __thiscall CTFPlayer::ValidateCurrentObserverTarget(CTFPlayer *this)
   if ( v6 == -1
     || (v7 = &g_pEntityList->m_EntPtrArray[this->m_hObserverTarget.m_Value.m_Index & 0xFFF],
         g_pEntityList->m_EntPtrArray[this->m_hObserverTarget.m_Value.m_Index & 0xFFF].m_SerialNumber != v6 >> 12)
-    || (v8 = (CBasePlayer *)v7->m_pEntity) == 0
+    || (v8 = (CTFPlayer *)v7->m_pEntity) == 0
     || !v8->IsPlayer(v7->m_pEntity) )
   {
     v8 = 0;

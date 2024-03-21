@@ -1,0 +1,40 @@
+void __thiscall CTFPlayer::TFPlayerThink(CTFPlayer *this)
+{
+  CPlayerStateInfo *m_pStateInfo; // eax
+  void (__thiscall *pfnThink)(CTFPlayer *); // edx
+  unsigned int m_Index; // eax
+
+  m_pStateInfo = this->m_pStateInfo;
+  if ( m_pStateInfo )
+  {
+    pfnThink = m_pStateInfo->pfnThink;
+    if ( pfnThink )
+      pfnThink((CTFPlayer *)((char *)this + *(_DWORD *)m_pStateInfo->gap2C));
+  }
+  if ( this->IsAlive(this) && this->m_flNextRandomExpressionTime < (double)gpGlobals->curtime )
+  {
+    CTFPlayer::ClearExpression(this);
+    this->m_iszExpressionScene.pszValue = 0;
+    CTFPlayer::UpdateExpression(this);
+  }
+  if ( !CBaseEntity::GetGroundEntity(this) )
+  {
+    if ( CTFPlayerShared::InCond(&this->m_Shared, 11) )
+    {
+      m_Index = this->m_hTauntScene.m_Index;
+      if ( m_Index != -1
+        && g_pEntityList->m_EntPtrArray[this->m_hTauntScene.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+        && g_pEntityList->m_EntPtrArray[this->m_hTauntScene.m_Index & 0xFFF].m_pEntity )
+      {
+        StopScriptedScene(this, this->m_hTauntScene);
+        this->m_Shared.m_flTauntRemoveTime = 0.0;
+        this->m_hTauntScene.m_Index = -1;
+      }
+    }
+  }
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CTFPlayer::TFPlayerThink,
+    gpGlobals->curtime,
+    "TFPlayerThink");
+}

@@ -1,0 +1,60 @@
+CBaseEntity *__thiscall CTFPlayer::EntSelectSpawnPoint(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CTFWeaponBase *m_pEntity; // eax
+  const char *v4; // ebp
+  char v5; // al
+  CBaseEntity *v6; // edi
+  CHandle<CBaseEntity> *v7; // ebx
+  edict_t *v8; // eax
+  IServerUnknown *m_pUnk; // eax
+  int v10; // eax
+  edict_t *v11; // eax
+  IServerUnknown *v12; // eax
+  CBaseEntity *v14; // [esp+Ch] [ebp-4h] BYREF
+
+  m_Index = g_pLastSpawnPoints[CBaseEntity::GetTeamNumber(this)].m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_pEntity;
+  v14 = m_pEntity;
+  v4 = locale;
+  if ( (unsigned int)(CBaseEntity::GetTeamNumber(this) - 2) > 1 )
+  {
+    v8 = engine->PEntityOfEntIndex(engine, 0);
+    if ( (v8 || (v8 = engine->PEntityOfEntIndex(engine, 0)) != 0) && (m_pUnk = v8->m_pUnk) != 0 )
+      v10 = (int)m_pUnk->GetBaseEntity(m_pUnk);
+    else
+      v10 = 0;
+    v6 = (CBaseEntity *)v10;
+  }
+  else
+  {
+    v4 = "info_player_teamspawn";
+    v5 = CTFPlayer::SelectSpawnSpot(this, "info_player_teamspawn", &v14);
+    v6 = v14;
+    if ( v5 )
+    {
+      v7 = &g_pLastSpawnPoints[CBaseEntity::GetTeamNumber(this)];
+      if ( v6 )
+        v7->m_Index = v6->GetRefEHandle(v6)->m_Index;
+      else
+        v7->m_Index = -1;
+    }
+    this->m_pSpawnPoint = (CTFTeamSpawn *)__RTDynamicCast(
+                                            v6,
+                                            0,
+                                            &CBaseEntity `RTTI Type Descriptor',
+                                            &CTFTeamSpawn `RTTI Type Descriptor',
+                                            0);
+  }
+  if ( v6 )
+    return v6;
+  _Warning("PutClientInServer: no %s on level\n", v4);
+  v11 = engine->PEntityOfEntIndex(engine, 0);
+  if ( (v11 || (v11 = engine->PEntityOfEntIndex(engine, 0)) != 0) && (v12 = v11->m_pUnk) != 0 )
+    return v12->GetBaseEntity(v12);
+  else
+    return 0;
+}

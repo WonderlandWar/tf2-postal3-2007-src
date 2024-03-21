@@ -1,0 +1,12 @@
+void __thiscall CTFPlayer::SaveMe(CTFPlayer *this)
+{
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  if ( this->IsAlive(this)
+    && (this == (CTFPlayer *)-4340 || this->m_PlayerClass.m_iClass.m_Value)
+    && CBaseEntity::GetTeamNumber(this) >= 2 )
+  {
+    val = !this->m_bSaveMeParity.m_Value;
+    CNetworkVarBase<bool,CTFPlayer::NetworkVar_m_bSaveMeParity>::Set(&this->m_bSaveMeParity, &val);
+  }
+}

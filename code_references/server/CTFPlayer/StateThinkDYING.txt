@@ -1,0 +1,97 @@
+void __thiscall CTFPlayer::StateThinkDYING(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  char m_Value; // al
+  edict_t *m_pPev; // eax
+  bool v5; // zf
+  edict_t *v6; // eax
+  int v7; // eax
+  CTFPlayer_vtbl *v8; // edi
+  int v9; // eax
+  CSingleUserRecipientFilter filter; // [esp+1Ch] [ebp-68h] BYREF
+  EmitSound_t params; // [esp+3Ch] [ebp-48h] BYREF
+
+  if ( !this->m_bAbortFreezeCam )
+  {
+    m_Index = this->m_hRagdoll.m_Value.m_Index;
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+    {
+      if ( g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF].m_pEntity )
+      {
+        m_Value = this->m_lifeState.m_Value;
+        if ( (m_Value == 1 || m_Value == 2) && this->GetObserverMode(this) != 2 )
+        {
+          this->StartObserverMode(this, 1);
+          filter.__vftable = (CSingleUserRecipientFilter_vtbl *)(this->m_fEffects.m_Value & 0xFFFFFFCF);
+          CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(&this->m_fEffects, (const int *)&filter);
+          m_pPev = this->m_Network.m_pPev;
+          this->m_iEFlags |= 0x10000u;
+          if ( m_pPev )
+            m_pPev->m_fStateFlags |= 0x80u;
+          CBaseEntity::DispatchUpdateTransmitState(this);
+        }
+      }
+    }
+  }
+  v5 = !this->m_bPlayedFreezeCamSound;
+  *(float *)&filter.__vftable = spec_freeze_time.m_pParent->m_fValue
+                              + spec_freeze_traveltime.m_pParent->m_fValue
+                              + this->m_flDeathTime.m_Value
+                              + 2.0;
+  if ( v5
+    && this->GetObserverTarget(this)
+    && this->GetObserverTarget(this) != this
+    && this->m_flDeathTime.m_Value + 2.0 + spec_freeze_traveltime.m_pParent->m_fValue - 0.30000001 <= gpGlobals->curtime )
+  {
+    CSingleUserRecipientFilter::CSingleUserRecipientFilter((CSingleUserRecipientFilter *)&filter.m_bReliable, this);
+    EmitSound_t::EmitSound_t((EmitSound_t *)&params.m_pSoundName);
+    v6 = this->m_Network.m_pPev;
+    *(float *)&params.m_pflSoundDuration = 0.0;
+    LODWORD(params.m_flVolume) = "TFPlayer.FreezeCam";
+    v7 = engine->IndexOfEdict(engine, v6);
+    CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v7, (const EmitSound_t *)&params.m_pSoundName);
+    this->m_bPlayedFreezeCamSound = 1;
+    CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&params.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount);
+    CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+  }
+  if ( this->m_flDeathTime.m_Value + 2.0 <= gpGlobals->curtime )
+  {
+    if ( !this->GetObserverTarget(this)
+      || this->GetObserverTarget(this) == this
+      || this->m_bAbortFreezeCam
+      || *(float *)&filter.__vftable <= (double)gpGlobals->curtime )
+    {
+      if ( this->GetObserverMode(this) == 2 && this->m_bAbortFreezeCam )
+      {
+        if ( CHandle<CBaseEntity>::operator==((CHandle<CBaseEntity> *)&this->m_hObserverTarget, 0) )
+          this->CheckObserverSettings(this);
+        CTFPlayer::FindInitialObserverTarget(this);
+        this->SetObserverMode(this, 5);
+        v8 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+        v9 = ((int (__thiscall *)(CTFPlayer *, int, _DWORD))this->ModeWantsSpectatorGUI)(this, 5, 0);
+        ((void (__thiscall *)(CTFPlayer *, const char *, int))v8->ShowViewPortPanel)(this, "specgui", v9);
+      }
+      if ( *(float *)&filter.__vftable <= (double)gpGlobals->curtime )
+      {
+        filter.__vftable = (CSingleUserRecipientFilter_vtbl *)3;
+        CNetworkVarBase<char,CBaseEntity::NetworkVar_m_lifeState>::operator=<int>(
+          &this->m_lifeState,
+          (const int *)&filter);
+        *(float *)&filter.__vftable = 0.0;
+        CNetworkVarBase<float,CSprite::NetworkVar_m_flGlowProxySize>::Set(
+          &this->m_flPlaybackRate,
+          (const float *)&filter);
+        CBaseEntity::AddEffects(this, 8);
+        if ( this->m_MoveType.m_Value && (this->m_fFlags.m_Value & 1) != 0 )
+          CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+        CTFPlayer::StateTransition(this, 2);
+      }
+    }
+    else if ( this->GetObserverMode(this) != 2 )
+    {
+      this->StartObserverMode(this, 2);
+      CTFPlayer::PhysObjectSleep(this);
+    }
+  }
+}

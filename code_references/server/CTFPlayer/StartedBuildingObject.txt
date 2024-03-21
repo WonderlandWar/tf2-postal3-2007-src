@@ -1,0 +1,14 @@
+int __thiscall CTFPlayer::StartedBuildingObject(CTFPlayer *this, int iObjectType)
+{
+  int v3; // esi
+  int result; // eax
+
+  v3 = CalculateObjectCost(iObjectType);
+  if ( v3 > CTFPlayer::GetBuildResources(this) )
+    return 0;
+  CBaseCombatCharacter::RemoveAmmo(this, v3, 3);
+  result = 1;
+  if ( v3 )
+    return v3;
+  return result;
+}

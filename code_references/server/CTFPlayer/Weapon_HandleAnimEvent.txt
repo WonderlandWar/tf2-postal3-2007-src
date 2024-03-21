@@ -1,0 +1,25 @@
+void __thiscall CTFPlayer::Weapon_HandleAnimEvent(CTFPlayer *this, animevent_t *pEvent)
+{
+  unsigned int m_Index; // eax
+  unsigned int v4; // eax
+  CEntInfo *v5; // ecx
+
+  CBaseCombatCharacter::Weapon_HandleAnimEvent(this, pEvent);
+  m_Index = this->m_hOffHandWeapon.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    v4 = this->m_hOffHandWeapon.m_Value.m_Index;
+    if ( v4 == -1
+      || g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber != v4 >> 12 )
+    {
+      (*(void (__stdcall **)(animevent_t *, CTFPlayer *))(MEMORY[0] + 1300))(pEvent, this);
+    }
+    else
+    {
+      v5 = &g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF];
+      v5->m_pEntity->__vftable[1].ResolveFlyCollisionCustom(v5->m_pEntity, (CGameTrace *)pEvent, (Vector *)this);
+    }
+  }
+}

@@ -1,0 +1,39 @@
+void __thiscall CTFPlayer::AddDamagerToHistory(CTFPlayer *this, CHandle<CBaseEntity> hDamager)
+{
+  int v3; // esi
+  CTFWeaponBase *m_pEntity; // edi
+  CTeam *Team; // edi
+  CTFWeaponBase *v6; // esi
+  float flTimeDamage; // ecx
+
+  if ( hDamager.m_Index != -1 )
+  {
+    v3 = hDamager.m_Index & 0xFFF;
+    if ( g_pEntityList->m_EntPtrArray[v3].m_SerialNumber == hDamager.m_Index >> 12 )
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[v3].m_pEntity;
+      if ( m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer(m_pEntity) )
+        {
+          Team = CBaseEntity::GetTeam(m_pEntity);
+          if ( Team != CBaseEntity::GetTeam(this) )
+          {
+            if ( g_pEntityList->m_EntPtrArray[v3].m_SerialNumber == hDamager.m_Index >> 12 )
+              v6 = g_pEntityList->m_EntPtrArray[v3].m_pEntity;
+            else
+              v6 = 0;
+            if ( CHandle<CBaseEntity>::operator!=(&this->m_DamagerHistory[0].hDamager, v6) )
+            {
+              flTimeDamage = this->m_DamagerHistory[0].flTimeDamage;
+              this->m_DamagerHistory[1].hDamager.m_Index = this->m_DamagerHistory[0].hDamager.m_Index;
+              this->m_DamagerHistory[1].flTimeDamage = flTimeDamage;
+            }
+            this->m_DamagerHistory[0].hDamager = hDamager;
+            this->m_DamagerHistory[0].flTimeDamage = gpGlobals->curtime;
+          }
+        }
+      }
+    }
+  }
+}

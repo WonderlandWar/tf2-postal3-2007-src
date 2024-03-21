@@ -1,0 +1,46 @@
+void __thiscall CTFPlayer::ImpactWaterTrace(CTFPlayer *this, CGameTrace *trace, const Vector *vecStart)
+{
+  const char *v4; // edi
+  CBaseCombatWeapon *ActiveWeapon; // eax
+  CEffectData data; // [esp+Ch] [ebp-BCh] BYREF
+  CGameTrace traceWater; // [esp+6Ch] [ebp-5Ch] BYREF
+
+  UTIL_TraceLine(vecStart, &trace->endpos, 0x46004033u, this, 0, (CGameTrace *)&traceWater.startpos.y);
+  if ( *(float *)&traceWater.contents < 1.0 )
+  {
+    data.m_vStart.y = 0.0;
+    data.m_vStart.z = 0.0;
+    data.m_nEntIndex = 0;
+    data.m_vNormal.x = 0.0;
+    data.m_flScale = 0.0;
+    data.m_vAngles.y = 0.0;
+    *(_DWORD *)&data.m_nSurfaceProp = 0;
+    data.m_vAngles.z = 0.0;
+    LOWORD(data.m_nMaterial) = 0;
+    *(float *)&data.m_fFlags = 0.0;
+    memset(&data.m_nDamageType, 0, 13);
+    data.m_flMagnitude = 1.0;
+    data.m_flRadius = 0.0;
+    *(float *)&data.m_nAttachmentIndex = 0.0;
+    data.m_vOrigin.y = traceWater.endpos.y;
+    data.m_vOrigin.z = traceWater.endpos.z;
+    data.m_vStart.x = traceWater.plane.normal.x;
+    data.m_vNormal.y = traceWater.plane.normal.y;
+    data.m_vNormal.z = traceWater.plane.normal.z;
+    data.m_vAngles.x = traceWater.plane.dist;
+    data.m_flMagnitude = ((double (__thiscall *)(IUniformRandomStream *, _DWORD, _DWORD))random->RandomFloat)(
+                           random,
+                           8.0,
+                           12.0);
+    if ( (traceWater.dispFlags & 0x10) != 0 )
+      data.m_nEntIndex |= 1u;
+    v4 = "tf_gunshotsplash";
+    ActiveWeapon = CBaseCombatCharacter::GetActiveWeapon(this);
+    if ( ActiveWeapon )
+    {
+      if ( ((int (__thiscall *)(CBaseCombatWeapon *))ActiveWeapon->__vftable[1].~IHandleEntity)(ActiveWeapon) == 15 )
+        v4 = "tf_gunshotsplash_minigun";
+    }
+    DispatchEffect(v4, (CEffectData *)&data.m_vOrigin.y);
+  }
+}

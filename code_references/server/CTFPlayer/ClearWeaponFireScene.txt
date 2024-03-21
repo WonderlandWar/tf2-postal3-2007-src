@@ -1,0 +1,28 @@
+void __thiscall CTFPlayer::ClearWeaponFireScene(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+
+  m_Index = this->m_hWeaponFireSceneEnt.m_Index;
+  if ( m_Index == -1 )
+  {
+    this->m_flNextSpeakWeaponFire = gpGlobals->curtime;
+  }
+  else
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hWeaponFireSceneEnt.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber != m_Index >> 12 )
+    {
+LABEL_5:
+      this->m_flNextSpeakWeaponFire = gpGlobals->curtime;
+      return;
+    }
+    if ( v3->m_pEntity )
+    {
+      StopScriptedScene(this, this->m_hWeaponFireSceneEnt);
+      this->m_hWeaponFireSceneEnt.m_Index = -1;
+      goto LABEL_5;
+    }
+    this->m_flNextSpeakWeaponFire = gpGlobals->curtime;
+  }
+}

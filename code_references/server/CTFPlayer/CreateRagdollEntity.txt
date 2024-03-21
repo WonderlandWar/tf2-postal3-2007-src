@@ -1,0 +1,72 @@
+void __thiscall CTFPlayer::CreateRagdollEntity(CTFPlayer *this, char bGib)
+{
+  unsigned int m_Index; // eax
+  CNetworkHandleBase<CBaseEntity,CTFPlayer::NetworkVar_m_hRagdoll> *p_m_hRagdoll; // ebx
+  CEntInfo *v5; // ecx
+  CTFWeaponBase *m_pEntity; // eax
+  CBaseEntity *v7; // eax
+  CBaseEntity *EntityByName; // eax
+  CNetworkHandleBase<CBaseEntity,CTFRagdoll::NetworkVar_m_hPlayer> *v9; // eax
+  CNetworkHandleBase<CBaseEntity,CTFRagdoll::NetworkVar_m_hPlayer> *v10; // edi
+
+  m_Index = this->m_hRagdoll.m_Value.m_Index;
+  p_m_hRagdoll = &this->m_hRagdoll;
+  if ( m_Index == -1
+    || (v5 = &g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF], v5->m_SerialNumber != m_Index >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v5->m_pEntity;
+  }
+  v7 = (CBaseEntity *)__RTDynamicCast(
+                        m_pEntity,
+                        0,
+                        &CBaseEntity `RTTI Type Descriptor',
+                        &CTFRagdoll `RTTI Type Descriptor',
+                        0);
+  if ( v7 )
+    UTIL_Remove(v7);
+  EntityByName = CreateEntityByName("tf_ragdoll", -1);
+  v9 = (CNetworkHandleBase<CBaseEntity,CTFRagdoll::NetworkVar_m_hPlayer> *)__RTDynamicCast(
+                                                                             EntityByName,
+                                                                             0,
+                                                                             &CBaseEntity `RTTI Type Descriptor',
+                                                                             &CTFRagdoll `RTTI Type Descriptor',
+                                                                             0);
+  v10 = v9;
+  if ( v9 )
+  {
+    CNetworkHandleBase<CBaseEntity,CTFRagdoll::NetworkVar_m_hPlayer>::Set(v9 + 293, this);
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    CNetworkVarBase<Vector,CTFRagdoll::NetworkVar_m_vecRagdollOrigin>::Set(
+      (CNetworkVarBase<Vector,CTFRagdoll::NetworkVar_m_vecRagdollOrigin> *)&v10[297],
+      &this->m_vecAbsOrigin);
+    if ( (this->m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(this);
+    CNetworkVarBase<Vector,CTFRagdoll::NetworkVar_m_vecRagdollVelocity>::Set(
+      (CNetworkVarBase<Vector,CTFRagdoll::NetworkVar_m_vecRagdollVelocity> *)&v10[294],
+      &this->m_vecAbsVelocity);
+    HIWORD(v10[8].m_Value.m_Index) = this->m_nModelIndex.m_Value;
+    v10[216].m_Value.m_Index = this->m_nForceBone.m_Value;
+    CNetworkVarBase<Vector,CBaseAnimating::NetworkVar_m_vecForce>::Set(
+      (CNetworkVarBase<Vector,CBaseAnimating::NetworkVar_m_vecForce> *)&v10[217],
+      &this->m_vecTotalBulletForce);
+    CNetworkVarBase<bool,CTFRagdoll::NetworkVar_m_bGib>::Set(
+      (CNetworkVarBase<bool,CTFRagdoll::NetworkVar_m_bGib> *)&v10[300],
+      (const bool *)&bGib);
+  }
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  CBaseEntity::AddEffects(this, 48);
+  CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+  if ( bGib )
+  {
+    bGib = 23;
+    CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_nRenderFX>::Set(
+      &this->m_nRenderFX,
+      (const unsigned __int8 *)&bGib);
+  }
+  CNetworkHandleBase<CBaseEntity,CTFPlayer::NetworkVar_m_hRagdoll>::Set(p_m_hRagdoll, (const CBaseEntity *)v10);
+}

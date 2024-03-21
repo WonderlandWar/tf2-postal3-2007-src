@@ -1,0 +1,53 @@
+void __thiscall CTFPlayer::ManageBuilderWeapons(CTFPlayer *this, TFPlayerClassData_t *pData)
+{
+  TFPlayerClassData_t *v2; // ebx
+  CTFWeaponBase *v4; // eax
+  int v5; // ebx
+  CTFWeaponBase *v6; // esi
+  CTFWeaponBase_vtbl *v7; // ebx
+  int TeamNumber; // eax
+  CTFWeaponBase *v9; // eax
+  CTFWeaponBase *v10; // eax
+  CBaseEntity *v11; // esi
+
+  v2 = pData;
+  if ( pData->m_aBuildable[0] == 5 )
+  {
+    v10 = CTFPlayer::Weapon_OwnsThisID(this, 43);
+    v11 = v10;
+    if ( v10 )
+    {
+      CBaseCombatCharacter::Weapon_Detach(this, v10);
+      UTIL_Remove(v11);
+    }
+  }
+  else
+  {
+    v4 = CTFPlayer::Weapon_OwnsThisID(this, 43);
+    v5 = v2->m_aBuildable[0];
+    v6 = v4;
+    if ( v4 )
+    {
+      v4->SetSubType(v4, v5);
+      CBaseCombatWeapon::GiveDefaultAmmo(v6);
+      v7 = v6->__vftable;
+      TeamNumber = CBaseEntity::GetTeamNumber(this);
+      v7->ChangeTeam(v6, TeamNumber);
+      if ( !this->m_bRegenerating )
+        v6->WeaponReset(v6);
+    }
+    else
+    {
+      v9 = (CTFWeaponBase *)this->GiveNamedItem(this, "tf_weapon_builder", 0);
+      v6 = v9;
+      if ( !v9 )
+        return;
+      v9->SetSubType(v9, v5);
+      v6->DefaultTouch(v6, this);
+    }
+    pData = (TFPlayerClassData_t *)(CBaseEntity::GetTeamNumber(this) - 2);
+    CNetworkVarBase<int,CSteamJet::NetworkVar_m_bEmit>::Set(
+      (CNetworkVarBase<int,CBeam::NetworkVar_m_nBeamType> *)&v6->m_nSkin,
+      (const int *)&pData);
+  }
+}

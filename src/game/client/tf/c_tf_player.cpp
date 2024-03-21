@@ -990,6 +990,9 @@ IMPLEMENT_CLIENTCLASS_DT( C_TFPlayer, DT_TFPlayer, CTFPlayer )
 	RecvPropInt( RECVINFO( m_iSpawnCounter ) ),
 	
 	RecvPropInt( RECVINFO( m_iActivePipebombs ) ),
+	
+	RecvPropInt( RECVINFO( m_nPlayerModelIndex ) ),
+	RecvPropInt( RECVINFO( m_nDisguiseModelIndex ) ),
 
 END_RECV_TABLE()
 
@@ -2748,7 +2751,7 @@ Vector C_TFPlayer::GetChaseCamViewOffset( CBaseEntity *target )
 
 	return BaseClass::GetChaseCamViewOffset( target );
 }
-#if 0
+
 //-----------------------------------------------------------------------------
 // Purpose: Called from PostDataUpdate to update the model index
 //-----------------------------------------------------------------------------
@@ -2770,34 +2773,6 @@ void C_TFPlayer::ValidateModelIndex( void )
 
 	BaseClass::ValidateModelIndex();
 }
-#else
-//-----------------------------------------------------------------------------
-// Purpose: Called from PostDataUpdate to update the model index
-//-----------------------------------------------------------------------------
-void C_TFPlayer::ValidateModelIndex( void )
-{
-	if ( m_Shared.InCond( TF_COND_DISGUISED ) && IsEnemyPlayer() )
-	{
-		TFPlayerClassData_t *pData = GetPlayerClassData( m_Shared.GetDisguiseClass() );
-		m_nModelIndex = modelinfo->GetModelIndex( pData->m_szModelName );
-	}
-	else
-	{
-		C_TFPlayerClass *pClass = GetPlayerClass();
-		if ( pClass )
-		{
-			m_nModelIndex = modelinfo->GetModelIndex( pClass->GetModelName() );
-		}
-	}
-
-	if ( m_iSpyMaskBodygroup > -1 && GetModelPtr() != NULL )
-	{
-		SetBodygroup( m_iSpyMaskBodygroup, ( m_Shared.InCond( TF_COND_DISGUISED ) && !IsEnemyPlayer() ) );
-	}
-
-	BaseClass::ValidateModelIndex();
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Simulate the player for this frame

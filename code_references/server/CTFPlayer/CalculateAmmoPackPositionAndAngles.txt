@@ -1,0 +1,21 @@
+char __thiscall CTFPlayer::CalculateAmmoPackPositionAndAngles(
+        CTFPlayer *this,
+        CTFWeaponBase *pWeapon,
+        Vector *vecOrigin,
+        QAngle *vecAngles)
+{
+  int v5; // edi
+  int v6; // eax
+  Vector vecDebugUp2; // [esp+4h] [ebp-28h] BYREF
+  Vector vecDebugRight2; // [esp+10h] [ebp-1Ch] BYREF
+  Vector vecDebugForward2; // [esp+1Ch] [ebp-10h] BYREF
+
+  v5 = CBaseAnimating::LookupBone(this, "weapon_bone");
+  v6 = CBaseAnimating::LookupBone(pWeapon, "weapon_bone");
+  if ( v5 == -1 || v6 == -1 )
+    return 0;
+  CBaseAnimating::GetBonePosition(this, v5, vecOrigin, vecAngles);
+  AngleVectors(vecAngles, (Vector *)&vecDebugForward2.y, (Vector *)&vecDebugRight2.y, (Vector *)&vecDebugUp2.y);
+  VectorAngles((Vector *)&vecDebugUp2.y, vecAngles);
+  return 1;
+}

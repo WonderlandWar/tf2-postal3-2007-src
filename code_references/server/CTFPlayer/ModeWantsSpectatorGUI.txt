@@ -1,0 +1,4 @@
+BOOL __thiscall CTFPlayer::ModeWantsSpectatorGUI(CTFPlayer *this, int iMode)
+{
+  return iMode != 2 && iMode != 1;
+}

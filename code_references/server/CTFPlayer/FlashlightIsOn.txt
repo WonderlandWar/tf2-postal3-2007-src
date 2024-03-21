@@ -1,0 +1,4 @@
+unsigned int __thiscall CTFPlayer::FlashlightIsOn(CTFPlayer *this)
+{
+  return ((unsigned int)this->m_fEffects.m_Value >> 2) & 1;
+}

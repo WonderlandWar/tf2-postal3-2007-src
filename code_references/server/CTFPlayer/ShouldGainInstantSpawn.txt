@@ -1,0 +1,4 @@
+BOOL __thiscall CTFPlayer::ShouldGainInstantSpawn(CTFPlayer *this)
+{
+  return !this->m_PlayerClass.m_iClass.m_Value || this->m_bIsClassMenuOpen;
+}

@@ -1,0 +1,33 @@
+void __thiscall CTFPlayer::StateEnterACTIVE(CTFPlayer *this)
+{
+  edict_t *m_pPev; // eax
+  IPhysicsObject *m_pPhysicsObject; // ecx
+  float thinkTime; // [esp+0h] [ebp-10h]
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  CBaseEntity::SetMoveType(this, MOVETYPE_WALK, MOVECOLLIDE_DEFAULT);
+  val = this->m_fEffects.m_Value & 0xFFFFFFCF;
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_fEffects>::Set(&this->m_fEffects, &val);
+  m_pPev = this->m_Network.m_pPev;
+  this->m_iEFlags |= 0x10000u;
+  if ( m_pPev )
+    m_pPev->m_fStateFlags |= 0x80u;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value & 0xFFFB);
+  val = 0;
+  CNetworkVarBase<int,CPlayerLocalData::NetworkVar_m_iHideHUD>::Set(&this->m_Local.m_iHideHUD, &val);
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+    m_pPhysicsObject->Wake(m_pPhysicsObject);
+  this->m_flLastAction = gpGlobals->curtime;
+  this->m_bIsIdle = 0;
+  if ( this != (CTFPlayer *)-4340 && this->m_PlayerClass.m_iClass.m_Value == 5 )
+  {
+    thinkTime = gpGlobals->curtime + 1.0;
+    CBaseEntity::ThinkSet(
+      this,
+      (void (__thiscall *)(CBaseEntity *))CTFPlayer::MedicRegenThink,
+      thinkTime,
+      "MedicRegenThink");
+  }
+}

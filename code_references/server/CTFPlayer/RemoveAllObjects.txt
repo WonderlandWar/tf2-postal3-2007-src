@@ -1,0 +1,18 @@
+void __thiscall CTFPlayer::RemoveAllObjects(CTFPlayer *this)
+{
+  int i; // esi
+  unsigned int m_Index; // eax
+  CBaseObject *m_pEntity; // ecx
+
+  for ( i = this->m_aObjects.m_Size - 1; i >= 0; --i )
+  {
+    m_Index = this->m_aObjects.m_Memory.m_pMemory[i].m_Index;
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[this->m_aObjects.m_Memory.m_pMemory[i].m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (CBaseObject *)g_pEntityList->m_EntPtrArray[this->m_aObjects.m_Memory.m_pMemory[i].m_Index & 0xFFF].m_pEntity;
+      if ( m_pEntity )
+        UTIL_Remove(m_pEntity);
+    }
+  }
+}

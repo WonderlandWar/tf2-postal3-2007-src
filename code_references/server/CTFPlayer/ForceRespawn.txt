@@ -1,0 +1,40 @@
+void __thiscall CTFPlayer::ForceRespawn(CTFPlayer *this)
+{
+  int m_Value; // edi
+  CPlayerStateInfo *m_pStateInfo; // eax
+  void (__thiscall *pfnLeaveState)(CTFPlayer *); // edx
+
+  CTFGameStats::Event_PlayerForceRespawn(&CTF_GameStats, this);
+  m_Value = this->m_Shared.m_iDesiredPlayerClass.m_Value;
+  this->m_flSpawnTime = gpGlobals->curtime;
+  if ( m_Value )
+  {
+    if ( m_Value == 12 )
+    {
+      do
+        m_Value = random->RandomInt(random, 1, 9);
+      while ( m_Value == this->m_PlayerClass.m_iClass.m_Value );
+    }
+    if ( this->m_PlayerClass.m_iClass.m_Value != m_Value )
+    {
+      CTFPlayer::TeamFortress_RemoveEverythingFromWorld(this);
+      CTFPlayerClassShared::Init(&this->m_PlayerClass, m_Value);
+      CTeamplayRoundBasedRules::InternalHandleTeamWin((vgui::TreeView *)&CTF_GameStats, (int)this);
+    }
+    CTFPlayerShared::RemoveAllCond(&this->m_Shared, 0);
+    this->RemoveAllItems(this, 1);
+    CBaseEntity::SetGroundEntity(this, 0);
+    CTFPlayerShared::RemoveCond(&this->m_Shared, 10);
+    CTFPlayerShared::FadeInvis(&this->m_Shared, 0.1);
+    m_pStateInfo = this->m_pStateInfo;
+    this->m_nButtons = 0;
+    if ( m_pStateInfo )
+    {
+      pfnLeaveState = m_pStateInfo->pfnLeaveState;
+      if ( pfnLeaveState )
+        pfnLeaveState((CTFPlayer *)((char *)this + *(_DWORD *)m_pStateInfo->gap1C));
+    }
+    CTFPlayer::StateEnter(this, 0);
+    this->Spawn(this);
+  }
+}

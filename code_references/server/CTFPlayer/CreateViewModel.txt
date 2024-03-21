@@ -1,0 +1,23 @@
+void __thiscall CTFPlayer::CreateViewModel(CTFPlayer *this, unsigned int iViewModel)
+{
+  int v2; // ebx
+  CBaseViewModel *EntityByName; // esi
+
+  v2 = iViewModel;
+  if ( !CBasePlayer::GetViewModel(this, iViewModel) )
+  {
+    EntityByName = (CBaseViewModel *)CreateEntityByName("tf_viewmodel", -1);
+    if ( EntityByName )
+    {
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      CBaseEntity::SetAbsOrigin(EntityByName, &this->m_vecAbsOrigin);
+      CBaseViewModel::SetOwner(EntityByName, this);
+      CBaseViewModel::SetIndex(EntityByName, v2);
+      DispatchSpawn(EntityByName);
+      CBaseEntity::FollowEntity(EntityByName, this, 0);
+      iViewModel = EntityByName->GetRefEHandle(EntityByName)->m_Index;
+      CBasePlayer::NetworkVar_m_hViewModel::Set(&this->m_hViewModel, v2, (const CHandle<CBaseViewModel> *)&iViewModel);
+    }
+  }
+}

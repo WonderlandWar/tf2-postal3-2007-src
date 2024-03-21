@@ -1,0 +1,98 @@
+void __thiscall CTFPlayer::TeamFortress_SetSpeed(CTFPlayer *this)
+{
+  int m_Value; // edi
+  double m_flMaxSpeed; // st7
+  int v4; // eax
+  CTFItem *Item; // eax
+  CTFItem *v6; // eax
+  CCaptureFlag *v7; // eax
+  int v8; // eax
+  int v9; // ecx
+  double v10; // st6
+  int v11; // edi
+  double v12; // st7
+  float val; // [esp+8h] [ebp-4h] BYREF
+
+  m_Value = this->m_PlayerClass.m_iClass.m_Value;
+  if ( (this->m_afPhysicsFlags & 8) != 0 )
+  {
+    if ( this->GetObserverMode(this) != 6 )
+    {
+      val = 0.0;
+      CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flMaxspeed>::Set(&this->m_flMaxspeed, &val);
+      return;
+    }
+    m_flMaxSpeed = GetPlayerClassData(1)->m_flMaxSpeed;
+    goto LABEL_38;
+  }
+  if ( (this->m_Shared.m_nPlayerCond.m_Value & 4) != 0 || !m_Value || g_pGameRules->InRoundRestart(g_pGameRules) )
+  {
+    CBaseEntity::SetAbsVelocity(this, &vec3_origin);
+    m_flMaxSpeed = 1.0;
+LABEL_38:
+    val = m_flMaxSpeed;
+    CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flMaxspeed>::Set(&this->m_flMaxspeed, &val);
+    return;
+  }
+  m_flMaxSpeed = GetPlayerClassData(m_Value)->m_flMaxSpeed;
+  v4 = this->m_Shared.m_nPlayerCond.m_Value;
+  val = m_flMaxSpeed;
+  if ( (v4 & 0x80) != 0 && (v4 & 0x100) == 0 )
+  {
+    m_flMaxSpeed = GetPlayerClassData(this->m_Shared.m_nDisguiseClass.m_Value)->m_flMaxSpeed;
+    if ( val <= m_flMaxSpeed )
+      m_flMaxSpeed = val;
+    else
+      val = m_flMaxSpeed;
+  }
+  if ( CTFPlayer::HasItem(this) )
+  {
+    Item = CTFPlayer::GetItem(this);
+    if ( Item->GetItemID(Item) == 1
+      && (v6 = CTFPlayer::GetItem(this),
+          (v7 = (CCaptureFlag *)__RTDynamicCast(
+                                  v6,
+                                  0,
+                                  &CTFItem `RTTI Type Descriptor',
+                                  &CCaptureFlag `RTTI Type Descriptor',
+                                  0)) != 0)
+      && ((v8 = v7->m_nGameType.m_Value, v8 == 1) || v8 == 2) )
+    {
+      m_flMaxSpeed = val * 0.5;
+      val = m_flMaxSpeed;
+    }
+    else
+    {
+      m_flMaxSpeed = val;
+    }
+  }
+  v9 = this->m_Shared.m_nPlayerCond.m_Value;
+  if ( (v9 & 8) != 0 )
+  {
+    v10 = m_Value == 7 ? 200.0 : 80.0;
+    if ( v10 < m_flMaxSpeed )
+    {
+      m_flMaxSpeed = v10;
+      val = v10;
+    }
+  }
+  if ( (v9 & 0x100) != 0 && m_flMaxSpeed > tf_spy_max_cloaked_speed.m_pParent->m_fValue )
+  {
+    m_flMaxSpeed = tf_spy_max_cloaked_speed.m_pParent->m_fValue;
+    val = tf_spy_max_cloaked_speed.m_pParent->m_fValue;
+  }
+  if ( g_pGameRules->m_iRoundState.m_Value != GR_STATE_TEAM_WIN )
+    goto LABEL_38;
+  v11 = g_pGameRules->GetWinningTeam(g_pGameRules);
+  if ( !v11 )
+  {
+    m_flMaxSpeed = val;
+    goto LABEL_38;
+  }
+  v12 = val;
+  if ( v11 == CBaseEntity::GetTeamNumber(this) )
+    val = v12 * 1.1;
+  else
+    val = v12 * 0.89999998;
+  CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flMaxspeed>::Set(&this->m_flMaxspeed, &val);
+}

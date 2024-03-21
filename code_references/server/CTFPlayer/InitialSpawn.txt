@@ -1,0 +1,6 @@
+void __thiscall CTFPlayer::InitialSpawn(CTFPlayer *this)
+{
+  CBasePlayer::InitialSpawn(this);
+  this->m_hWeaponBuilder.m_Index = -1;
+  CTFPlayer::StateEnter(this, 1);
+}

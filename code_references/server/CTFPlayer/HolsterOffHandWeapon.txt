@@ -1,0 +1,22 @@
+void __thiscall CTFPlayer::HolsterOffHandWeapon(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v2; // ecx
+
+  if ( this->m_hOffHandWeapon.m_Value.m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_SerialNumber == this->m_hOffHandWeapon.m_Value.m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    m_Index = this->m_hOffHandWeapon.m_Value.m_Index;
+    if ( m_Index == -1
+      || (v2 = &g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF],
+          v2->m_SerialNumber != m_Index >> 12) )
+    {
+      (*(void (__stdcall **)(_DWORD))(MEMORY[0] + 920))(0);
+    }
+    else
+    {
+      v2->m_pEntity->Holster(v2->m_pEntity, 0);
+    }
+  }
+}

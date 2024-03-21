@@ -1,0 +1,4 @@
+int __thiscall CTFPlayer::GetBuildResources(CTFPlayer *this)
+{
+  return CBaseCombatCharacter::GetAmmoCount(this, 3);
+}

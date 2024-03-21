@@ -1,0 +1,59 @@
+char __thiscall CTFPlayer::PlayGesture(CTFPlayer *this, int pGestureName)
+{
+  const char *v2; // ebx
+  int v4; // edi
+  Vector *(__thiscall *EyePosition)(CBaseEntity *, Vector *); // edx
+  const Vector *v6; // edi
+  int v8; // edi
+  Vector *(__thiscall *v9)(CBaseEntity *, Vector *); // edx
+  const Vector *v10; // edi
+  int val; // [esp+1Ch] [ebp-30h] BYREF
+  Vector v12; // [esp+20h] [ebp-2Ch] BYREF
+  CRecipientFilter v13; // [esp+2Ch] [ebp-20h] BYREF
+
+  v2 = (const char *)pGestureName;
+  v4 = CBaseAnimating::LookupActivity(this, (const char *)pGestureName);
+  if ( v4 != -1 )
+  {
+    this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, PLAYERANIMEVENT_CUSTOM_GESTURE, v4);
+    EyePosition = this->EyePosition;
+    val = v4;
+    v6 = EyePosition(this, &v12);
+    CRecipientFilter::CRecipientFilter(&v13);
+    v13.__vftable = (CRecipientFilter_vtbl *)&CPVSFilter::`vftable';
+    CRecipientFilter::AddRecipientsByPVS(&v13, v6);
+    ToolsEnabled();
+    CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner>::Set(
+      (CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner> *)&g_TEPlayerAnimEvent.m_hPlayer,
+      this);
+    pGestureName = 20;
+LABEL_3:
+    CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+      (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_iEvent,
+      &pGestureName);
+    CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+      (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_nData,
+      &val);
+    CBaseTempEntity::Create(&g_TEPlayerAnimEvent, &v13, 0.0);
+    CRecipientFilter::~CRecipientFilter(&v13);
+    return 1;
+  }
+  v8 = CBaseAnimating::LookupSequence(this, v2);
+  if ( v8 != -1 )
+  {
+    this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, PLAYERANIMEVENT_CUSTOM_GESTURE_SEQUENCE, v8);
+    v9 = this->EyePosition;
+    val = v8;
+    v10 = v9(this, &v12);
+    CRecipientFilter::CRecipientFilter(&v13);
+    v13.__vftable = (CRecipientFilter_vtbl *)&CPVSFilter::`vftable';
+    CRecipientFilter::AddRecipientsByPVS(&v13, v10);
+    ToolsEnabled();
+    CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner>::Set(
+      (CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner> *)&g_TEPlayerAnimEvent.m_hPlayer,
+      this);
+    pGestureName = 22;
+    goto LABEL_3;
+  }
+  return 0;
+}

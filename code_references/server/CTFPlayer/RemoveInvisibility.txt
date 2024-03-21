@@ -1,0 +1,8 @@
+void __thiscall CTFPlayer::RemoveInvisibility(CTFPlayer *this)
+{
+  CTFPlayerShared *p_m_Shared; // esi
+
+  p_m_Shared = &this->m_Shared;
+  if ( CTFPlayerShared::InCond(&this->m_Shared, 8) )
+    CTFPlayerShared::FadeInvis(p_m_Shared, 0.5);
+}

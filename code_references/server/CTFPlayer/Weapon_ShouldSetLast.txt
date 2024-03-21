@@ -1,0 +1,15 @@
+bool __thiscall CTFPlayer::Weapon_ShouldSetLast(
+        CTFPlayer *this,
+        CBaseCombatWeapon *pOldWeapon,
+        CBaseCombatWeapon *pNewWeapon)
+{
+  CTFWeaponBase *v3; // eax
+
+  v3 = (CTFWeaponBase *)__RTDynamicCast(
+                          pOldWeapon,
+                          0,
+                          &CBaseCombatWeapon `RTTI Type Descriptor',
+                          &CTFWeaponBase `RTTI Type Descriptor',
+                          0);
+  return v3->AllowsAutoSwitchTo(v3);
+}

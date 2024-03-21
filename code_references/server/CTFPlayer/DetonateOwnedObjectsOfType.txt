@@ -1,0 +1,39 @@
+void __thiscall CTFPlayer::DetonateOwnedObjectsOfType(CTFPlayer *this, int iType)
+{
+  int m_Size; // ebp
+  int v4; // edi
+  unsigned int m_Index; // eax
+  CEntInfo *v6; // ecx
+  CBaseObject *m_pEntity; // esi
+  bool (__thiscall **p_SpeakConceptIfAllowed)(CBaseMultiplayerPlayer *, int, const char *, char *, unsigned int, IRecipientFilter *); // edi
+  const char *ResponseRulesModifier; // eax
+
+  m_Size = this->m_aObjects.m_Size;
+  v4 = 0;
+  if ( m_Size > 0 )
+  {
+    while ( 1 )
+    {
+      m_Index = this->m_aObjects.m_Memory.m_pMemory[v4].m_Index;
+      if ( m_Index != -1 )
+      {
+        v6 = &g_pEntityList->m_EntPtrArray[this->m_aObjects.m_Memory.m_pMemory[v4].m_Index & 0xFFF];
+        if ( g_pEntityList->m_EntPtrArray[this->m_aObjects.m_Memory.m_pMemory[v4].m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+        {
+          m_pEntity = (CBaseObject *)v6->m_pEntity;
+          if ( v6->m_pEntity )
+          {
+            if ( m_pEntity->GetType((CBaseObject *)v6->m_pEntity) == iType )
+              break;
+          }
+        }
+      }
+      if ( ++v4 >= m_Size )
+        return;
+    }
+    p_SpeakConceptIfAllowed = &this->SpeakConceptIfAllowed;
+    ResponseRulesModifier = CBaseObject::GetResponseRulesModifier(m_pEntity);
+    (*p_SpeakConceptIfAllowed)(this, 6, ResponseRulesModifier, 0, 0, 0);
+    m_pEntity->DetonateObject(m_pEntity);
+  }
+}

@@ -1,0 +1,23 @@
+void __thiscall CTFPlayer::ForceChangeTeam(CTFPlayer *this, int iTeamNum)
+{
+  unsigned int iNewTeam; // esi
+
+  iNewTeam = iTeamNum;
+  if ( iTeamNum == 5 )
+    iNewTeam = CTFPlayer::GetAutoTeam(this);
+  if ( GetGlobalTeam(iNewTeam) )
+  {
+    if ( iNewTeam != CBaseEntity::GetTeamNumber(this) )
+    {
+      CTFPlayer::RemoveAllObjects(this);
+      CTFPlayer::RemoveNemesisRelationships(this);
+      CBasePlayer::ChangeTeam(this, iNewTeam);
+      if ( iNewTeam <= 1 )
+        CTFPlayer::StateTransition(this, 2);
+    }
+  }
+  else
+  {
+    _Warning("CTFPlayer::ForceChangeTeam( %d ) - invalid team index.\n", iNewTeam);
+  }
+}

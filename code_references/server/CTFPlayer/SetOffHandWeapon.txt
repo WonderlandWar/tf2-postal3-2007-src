@@ -1,0 +1,23 @@
+void __thiscall CTFPlayer::SetOffHandWeapon(CTFPlayer *this, CTFWeaponBase *pWeapon)
+{
+  CNetworkHandleBase<CTFWeaponBase,CTFPlayer::NetworkVar_m_hOffHandWeapon> *p_m_hOffHandWeapon; // esi
+  CTFWeaponBase *m_pEntity; // ecx
+
+  p_m_hOffHandWeapon = &this->m_hOffHandWeapon;
+  CNetworkHandleBase<CTFWeaponBase,CTFPlayer::NetworkVar_m_hOffHandWeapon>::Set(&this->m_hOffHandWeapon, pWeapon);
+  if ( p_m_hOffHandWeapon->m_Value.m_Index != -1
+    && g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Value.m_Index & 0xFFF].m_SerialNumber == p_m_hOffHandWeapon->m_Value.m_Index >> 12
+    && g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Value.m_Index & 0xFFF].m_pEntity )
+  {
+    if ( p_m_hOffHandWeapon->m_Value.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Value.m_Index & 0xFFF].m_SerialNumber != p_m_hOffHandWeapon->m_Value.m_Index >> 12 )
+    {
+      (*(void (**)(void))(MEMORY[0] + 916))();
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Value.m_Index & 0xFFF].m_pEntity;
+      m_pEntity->Deploy(m_pEntity);
+    }
+  }
+}

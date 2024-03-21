@@ -1,0 +1,39 @@
+int __thiscall CTFPlayer::TakeHealth(CTFPlayer *this, float flHealth, float bitsDamageType)
+{
+  int v3; // ebx
+  int v5; // eax
+  double v6; // st7
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth> *p_m_iHealth; // esi
+  double flHealthToAdd; // st7
+  float v10; // [esp+0h] [ebp-10h]
+  int m_Value; // [esp+4h] [ebp-Ch]
+
+  v3 = LODWORD(bitsDamageType);
+  if ( (LOBYTE(bitsDamageType) & 2) != 0 )
+  {
+    v5 = g_pGameRules->Damage_GetTimeBased(g_pGameRules);
+    v6 = flHealth;
+    this->m_bitsDamageType &= ~(v3 & ~v5);
+    p_m_iHealth = &this->m_iHealth;
+    LODWORD(flHealth) = p_m_iHealth->m_Value + (int)v6;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(p_m_iHealth, (const int *)&flHealth);
+    return 1;
+  }
+  else
+  {
+    m_Value = this->m_PlayerClass.m_iClass.m_Value;
+    bitsDamageType = flHealth;
+    flHealthToAdd = (double)GetPlayerClassData(m_Value)->m_nMaxHealth - (double)this->m_iHealth.m_Value;
+    if ( flHealthToAdd >= flHealth )
+      flHealthToAdd = bitsDamageType;
+    if ( flHealthToAdd > 0.0 )
+    {
+      v10 = flHealthToAdd;
+      return CBasePlayer::TakeHealth(this, v10, v3);
+    }
+    else
+    {
+      return 0;
+    }
+  }
+}

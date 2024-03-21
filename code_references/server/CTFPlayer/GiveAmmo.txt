@@ -1,0 +1,21 @@
+int __thiscall CTFPlayer::GiveAmmo(CTFPlayer *this, int iCount, unsigned int iAmmoIndex, bool bSuppressSound)
+{
+  int v6; // edi
+  int v7; // edi
+
+  if ( iCount <= 0 )
+    return 0;
+  if ( !g_pGameRules->CanHaveAmmo(g_pGameRules, this, iAmmoIndex) || iAmmoIndex > 0x1F )
+    return 0;
+  v6 = GetPlayerClassData(this->m_PlayerClass.m_iClass.m_Value)->m_aAmmoMax[iAmmoIndex];
+  if ( iCount >= v6 - CBaseCombatCharacter::GetAmmoCount(this, iAmmoIndex) )
+    v7 = v6 - CBaseCombatCharacter::GetAmmoCount(this, iAmmoIndex);
+  else
+    v7 = iCount;
+  if ( v7 < 1 )
+    return 0;
+  if ( !bSuppressSound )
+    CBaseEntity::EmitSound(this, "BaseCombatCharacter.AmmoPickup", 0.0, 0);
+  CBaseCombatCharacter::GiveAmmo(this, v7, iAmmoIndex, 0);
+  return v7;
+}

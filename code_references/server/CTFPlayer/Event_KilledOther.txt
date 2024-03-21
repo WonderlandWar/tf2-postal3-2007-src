@@ -1,0 +1,120 @@
+void __userpurge CTFPlayer::Event_KilledOther(
+        CTFPlayer *this@<ecx>,
+        int a2@<ebp>,
+        CBaseEntity *pVictim,
+        const CTakeDamageInfo *info)
+{
+  bool v5; // zf
+  CBaseEntity_vtbl *v6; // eax
+  CBaseEntity *v7; // ebp
+  unsigned int m_Index; // eax
+  const char *v9; // esi
+  CBaseEntityList *v10; // edx
+  unsigned int v11; // eax
+  CTFWeaponBase *m_pEntity; // ecx
+  unsigned int v13; // eax
+  unsigned int v14; // eax
+  CTFWeaponBase *v15; // ecx
+  int m_iDamageCustom; // edi
+  int m_Value; // ecx
+  const char *v18; // eax
+  CBaseObject *v19; // eax
+  CTFPlayer_vtbl *v20; // esi
+  const char *ResponseRulesModifier; // eax
+  CFmtStrN<128> modifiers; // [esp+8h] [ebp-88h] BYREF
+
+  CBasePlayer::Event_KilledOther(this, pVictim, info);
+  v5 = !pVictim->IsPlayer(pVictim);
+  v6 = pVictim->__vftable;
+  if ( !v5 )
+  {
+    v7 = ((unsigned __int8 (__thiscall *)(CBaseEntity *, int))v6->IsPlayer)(pVictim, a2) != 0 ? pVictim : 0;
+    m_Index = info->m_hAttacker.m_Index;
+    v9 = "customdeath:none";
+    if ( m_Index != -1 )
+    {
+      v10 = g_pEntityList;
+      if ( g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+        || !g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity )
+      {
+        goto LABEL_12;
+      }
+      v11 = info->m_hAttacker.m_Index;
+      if ( v11 == -1 || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v11 >> 12 )
+        m_pEntity = 0;
+      else
+        m_pEntity = g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+      if ( m_pEntity->IsBaseObject(m_pEntity) )
+      {
+        v9 = "customdeath:sentrygun";
+LABEL_27:
+        m_Value = v7[5].m_fEffects.m_Value;
+        v18 = "domination:none";
+        if ( (m_Value & 6) != 0 )
+        {
+          v18 = "domination:revenge";
+        }
+        else if ( (m_Value & 1) != 0 )
+        {
+          v18 = "domination:dominated";
+        }
+        CFmtStrN<128>::CFmtStrN<128>(
+          (CFmtStrN<128> *)&modifiers.m_szBuf[8],
+          "%s,%s,victimclass:%s",
+          v9,
+          v18,
+          g_aPlayerClassNames_NonLocalized[(int)v7[5].m_aThinkFunctions.m_Memory.m_pMemory]);
+        ((void (__thiscall *)(CTFPlayer *, int, char *, _DWORD, _DWORD))this->SpeakConceptIfAllowed)(
+          this,
+          7,
+          &modifiers.m_szBuf[8],
+          0,
+          0);
+        return;
+      }
+    }
+    v10 = g_pEntityList;
+LABEL_12:
+    v13 = info->m_hInflictor.m_Index;
+    if ( v13 != -1
+      && v10->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber == v13 >> 12
+      && v10->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity
+      && ((v14 = info->m_hInflictor.m_Index, v14 == -1)
+       || v10->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber != v14 >> 12
+        ? (v15 = 0)
+        : (v15 = v10->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity),
+          v15->IsBaseObject(v15)) )
+    {
+      v9 = "customdeath:sentrygun";
+    }
+    else
+    {
+      m_iDamageCustom = info->m_iDamageCustom;
+      switch ( m_iDamageCustom )
+      {
+        case 1:
+          v9 = "customdeath:headshot";
+          break;
+        case 2:
+          v9 = "customdeath:backstab";
+          break;
+        case 3:
+          v9 = "customdeath:burning";
+          break;
+      }
+    }
+    goto LABEL_27;
+  }
+  if ( v6->IsBaseObject(pVictim) )
+  {
+    v19 = (CBaseObject *)__RTDynamicCast(
+                           pVictim,
+                           0,
+                           &CBaseEntity `RTTI Type Descriptor',
+                           &CBaseObject `RTTI Type Descriptor',
+                           0);
+    v20 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    ResponseRulesModifier = CBaseObject::GetResponseRulesModifier(v19);
+    v20->SpeakConceptIfAllowed(this, 8, ResponseRulesModifier, 0, 0, 0);
+  }
+}

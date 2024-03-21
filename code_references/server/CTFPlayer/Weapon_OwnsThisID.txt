@@ -1,0 +1,21 @@
+CTFWeaponBase *__thiscall CTFPlayer::Weapon_OwnsThisID(CTFPlayer *this, int iWeaponID)
+{
+  int v3; // edi
+  CBaseCombatWeapon *Weapon; // esi
+
+  v3 = 0;
+  if ( CBaseCombatCharacter::WeaponCount(this) <= 0 )
+    return 0;
+  while ( 1 )
+  {
+    Weapon = CBaseCombatCharacter::GetWeapon(this, v3);
+    if ( Weapon )
+    {
+      if ( ((int (__thiscall *)(CBaseCombatWeapon *))Weapon->__vftable[1].~IHandleEntity)(Weapon) == iWeaponID )
+        break;
+    }
+    if ( ++v3 >= CBaseCombatCharacter::WeaponCount(this) )
+      return 0;
+  }
+  return (CTFWeaponBase *)Weapon;
+}

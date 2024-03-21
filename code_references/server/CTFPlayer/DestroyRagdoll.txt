@@ -1,0 +1,26 @@
+void __thiscall CTFPlayer::DestroyRagdoll(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v2; // ecx
+  CTFWeaponBase *m_pEntity; // eax
+  CTFRagdoll *v4; // eax
+
+  m_Index = this->m_hRagdoll.m_Value.m_Index;
+  if ( m_Index == -1
+    || (v2 = &g_pEntityList->m_EntPtrArray[this->m_hRagdoll.m_Value.m_Index & 0xFFF], v2->m_SerialNumber != m_Index >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v2->m_pEntity;
+  }
+  v4 = (CTFRagdoll *)__RTDynamicCast(
+                       m_pEntity,
+                       0,
+                       &CBaseEntity `RTTI Type Descriptor',
+                       &CTFRagdoll `RTTI Type Descriptor',
+                       0);
+  if ( v4 )
+    UTIL_Remove(v4);
+}

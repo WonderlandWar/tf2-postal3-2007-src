@@ -1,0 +1,23 @@
+bool __thiscall CTFPlayer::HasTheFlag(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  unsigned int v2; // eax
+  CEntInfo *v3; // ecx
+  CTFItem *m_pEntity; // ecx
+  int v5; // eax
+
+  m_Index = this->m_hItem.m_Value.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+    || !g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF].m_pEntity
+    || ((v2 = this->m_hItem.m_Value.m_Index, v2 == -1)
+     || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hItem.m_Value.m_Index & 0xFFF], v3->m_SerialNumber != v2 >> 12)
+      ? (m_pEntity = 0)
+      : (m_pEntity = (CTFItem *)v3->m_pEntity),
+        v5 = m_pEntity->GetItemID(m_pEntity),
+        v5 != 1) )
+  {
+    LOBYTE(v5) = 0;
+  }
+  return v5;
+}

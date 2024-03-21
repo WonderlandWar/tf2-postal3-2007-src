@@ -1,0 +1,14 @@
+void __thiscall CTFPlayer::PickWelcomeObserverPoint(CTFPlayer *this)
+{
+  CBaseEntity *i; // esi
+
+  for ( i = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "info_observer_point");
+        i;
+        i = CGlobalEntityList::FindEntityByClassname(&gEntList, i, "info_observer_point") )
+  {
+    if ( this->IsValidObserverTarget(this, i) )
+      this->SetObserverTarget(this, i);
+    if ( BYTE1(i[1].__vftable) )
+      break;
+  }
+}

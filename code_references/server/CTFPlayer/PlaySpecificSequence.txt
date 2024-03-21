@@ -1,0 +1,52 @@
+char __thiscall CTFPlayer::PlaySpecificSequence(CTFPlayer *this, const char *pAnimationName)
+{
+  const char *v2; // ebx
+  int v4; // edi
+  int v6; // edi
+  Vector *(__thiscall *EyePosition)(CBaseEntity *, Vector *); // edx
+  const Vector *v8; // edi
+  int val; // [esp+1Ch] [ebp-30h] BYREF
+  Vector v10; // [esp+20h] [ebp-2Ch] BYREF
+  CRecipientFilter v11; // [esp+2Ch] [ebp-20h] BYREF
+
+  v2 = pAnimationName;
+  v4 = CBaseAnimating::LookupActivity(this, pAnimationName);
+  if ( v4 == -1 )
+  {
+    v6 = CBaseAnimating::LookupSequence(this, v2);
+    if ( v6 == -1 )
+    {
+      return 0;
+    }
+    else
+    {
+      this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, PLAYERANIMEVENT_CUSTOM_SEQUENCE, v6);
+      EyePosition = this->EyePosition;
+      val = v6;
+      v8 = EyePosition(this, &v10);
+      CRecipientFilter::CRecipientFilter(&v11);
+      v11.__vftable = (CRecipientFilter_vtbl *)&CPVSFilter::`vftable';
+      CRecipientFilter::AddRecipientsByPVS(&v11, v8);
+      ToolsEnabled();
+      CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner>::Set(
+        (CNetworkHandleBase<CBaseEntity,CTEClientProjectile::NetworkVar_m_hOwner> *)&g_TEPlayerAnimEvent.m_hPlayer,
+        this);
+      pAnimationName = (const char *)21;
+      CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+        (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_iEvent,
+        (const int *)&pAnimationName);
+      CNetworkVarBase<int,CTESpriteSpray::NetworkVar_m_nSpeed>::Set(
+        (CNetworkVarBase<int,CTEBaseBeam::NetworkVar_m_nFlags> *)&g_TEPlayerAnimEvent.m_nData,
+        &val);
+      CBaseTempEntity::Create(&g_TEPlayerAnimEvent, &v11, 0.0);
+      CRecipientFilter::~CRecipientFilter(&v11);
+      return 1;
+    }
+  }
+  else
+  {
+    this->m_PlayerAnimState->DoAnimationEvent(this->m_PlayerAnimState, PLAYERANIMEVENT_CUSTOM, v4);
+    TE_PlayerAnimEvent(this, PLAYERANIMEVENT_CUSTOM, v4);
+    return 1;
+  }
+}

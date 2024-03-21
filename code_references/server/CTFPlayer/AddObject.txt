@@ -1,0 +1,29 @@
+void __thiscall CTFPlayer::AddObject(CTFPlayer *this, CBaseObject *pObject)
+{
+  CBaseObject *v2; // esi
+  unsigned int m_Index; // edi
+  int m_Size; // [esp-8h] [ebp-14h]
+
+  v2 = pObject;
+  if ( pObject )
+  {
+    m_Index = pObject->GetRefEHandle(pObject)->m_Index;
+    pObject = (CBaseObject *)v2->GetRefEHandle(v2)->m_Index;
+  }
+  else
+  {
+    m_Index = -1;
+    pObject = (CBaseObject *)-1;
+  }
+  if ( CUtlVector<CHandle<CBaseObject>,CUtlMemory<CHandle<CBaseObject>,int>>::Find(
+         &this->m_aObjects,
+         (const CHandle<CBaseEntity> *)&pObject) == -1 )
+  {
+    m_Size = this->m_aObjects.m_Size;
+    pObject = (CBaseObject *)m_Index;
+    CUtlVector<CGameWeaponManager *,CUtlMemory<CGameWeaponManager *,int>>::InsertBefore(
+      (CUtlVector<vgui::TreeNode *,CUtlMemory<vgui::TreeNode *,int> > *)&this->m_aObjects,
+      m_Size,
+      (vgui::TreeNode *const *)&pObject);
+  }
+}

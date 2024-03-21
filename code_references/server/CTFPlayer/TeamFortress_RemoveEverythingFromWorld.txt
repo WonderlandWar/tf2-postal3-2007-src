@@ -1,0 +1,13 @@
+void __thiscall CTFPlayer::TeamFortress_RemoveEverythingFromWorld(CTFPlayer *this)
+{
+  CTFPlayerClass *p_m_PlayerClass; // edi
+
+  p_m_PlayerClass = &this->m_PlayerClass;
+  if ( this != (CTFPlayer *)-4340 && this->m_PlayerClass.m_iClass.m_Value == 9 )
+    CBaseTempEntity::Precache((vgui::Panel *)&this->m_PlayerClass);
+  CTFPlayer::RemoveOwnedEnt(this, "tf_weapon_rocket", 0);
+  CTFPlayer::RemoveOwnedEnt(this, "tf_weapon_flamerocket", 0);
+  if ( p_m_PlayerClass && p_m_PlayerClass->m_iClass.m_Value == 4 )
+    CTFPlayer::RemoveOwnedEnt(this, "tf_projectile_pipe", 1);
+  CTFPlayer::RemoveAllObjects(this);
+}

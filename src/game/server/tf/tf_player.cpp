@@ -290,6 +290,9 @@ IMPLEMENT_SERVERCLASS_ST( CTFPlayer, DT_TFPlayer )
 
 	SendPropInt( SENDINFO( m_iActivePipebombs ) ),
 
+	SendPropInt( SENDINFO( m_nPlayerModelIndex ) ),
+	SendPropInt( SENDINFO( m_nDisguiseModelIndex ) ),
+
 END_SEND_TABLE()
 
 

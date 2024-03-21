@@ -1,0 +1,18 @@
+void __thiscall CTFPlayer::DropFlag(CTFPlayer *this)
+{
+  CTFWeaponBase *Item; // eax
+  CCaptureFlag *v3; // eax
+
+  if ( CTFPlayer::HasItem(this) )
+  {
+    Item = CTFPlayer::GetItem(this);
+    v3 = (CCaptureFlag *)__RTDynamicCast(
+                           Item,
+                           0,
+                           &CTFItem `RTTI Type Descriptor',
+                           &CCaptureFlag `RTTI Type Descriptor',
+                           0);
+    if ( v3 )
+      v3->Drop(v3, this, 1, 1, 1);
+  }
+}

@@ -1,0 +1,5 @@
+// attributes: thunk
+CTFWeaponBase *__thiscall CTFPlayer::GetActiveTFWeapon(CTFPlayer *this)
+{
+  return (CTFWeaponBase *)CBaseCombatCharacter::GetActiveWeapon(this);
+}

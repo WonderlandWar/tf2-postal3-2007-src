@@ -1,0 +1,14 @@
+void __thiscall CTFPlayer::CommitSuicide(CTFPlayer *this, bool bExplode)
+{
+  int v3; // edi
+
+  if ( (this == (CTFPlayer *)-4340 || this->m_PlayerClass.m_iClass.m_Value) && !this->m_Shared.m_nPlayerState.m_Value )
+  {
+    if ( g_pGameRules->m_iRoundState.m_Value != GR_STATE_TEAM_WIN
+      || (v3 = g_pGameRules->GetWinningTeam(g_pGameRules), CBaseEntity::GetTeamNumber(this) == v3) )
+    {
+      this->m_iSuicideCustomKillFlags = 6;
+      CBasePlayer::CommitSuicide(this, bExplode);
+    }
+  }
+}

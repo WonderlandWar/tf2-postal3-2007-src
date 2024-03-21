@@ -1,0 +1,4 @@
+CHintSystem *__thiscall CTFPlayer::Hints(CTFPlayer *this)
+{
+  return &this->m_Hints;
+}

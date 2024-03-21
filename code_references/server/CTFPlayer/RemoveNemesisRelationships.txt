@@ -1,0 +1,20 @@
+void __thiscall CTFPlayer::RemoveNemesisRelationships(CTFPlayer *this)
+{
+  int i; // edi
+  CBasePlayer *v3; // eax
+  CTFPlayer *v4; // esi
+  int v5; // eax
+
+  for ( i = 1; i <= gpGlobals->maxClients; ++i )
+  {
+    CTFPlayerShared::SetPlayerDominated(&this->m_Shared, i, 0);
+    v3 = UTIL_PlayerByIndex(i);
+    v4 = (CTFPlayer *)v3;
+    if ( v3 && v3->IsPlayer(v3) && v4 != this )
+    {
+      v5 = engine->IndexOfEdict(engine, this->m_Network.m_pPev);
+      CTFPlayerShared::SetPlayerDominated(&v4->m_Shared, v5, 0);
+    }
+  }
+  CTFGameStats::ResetKillHistory(&CTF_GameStats, this);
+}

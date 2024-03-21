@@ -7,7 +7,7 @@ void __thiscall CTFPlayer::TraceAttack(CTFPlayer *this, CTakeDamageInfo *info, c
   CBaseCombatCharacter *v8; // esi
   unsigned int v9; // eax
   CBaseCombatCharacter *v10; // ebp
-  IHandleEntity *m_pEntity; // ecx
+  CBaseEntity *m_pEntity; // ecx
   CGameRules *v12; // esi
   CGameRules_vtbl *v13; // ebx
   CBaseEntity *Attacker; // eax
@@ -29,7 +29,7 @@ void __thiscall CTFPlayer::TraceAttack(CTFPlayer *this, CTakeDamageInfo *info, c
       && (v7 = &g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF],
           g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12)
       && (v8 = (CBaseCombatCharacter *)v7->m_pEntity) != 0
-      && v8->IsPlayer((CBaseEntity *)v7->m_pEntity) )
+      && v8->IsPlayer(v7->m_pEntity) )
     {
       v9 = v5->m_hAttacker.m_Index;
       v10 = v8;
@@ -37,7 +37,7 @@ void __thiscall CTFPlayer::TraceAttack(CTFPlayer *this, CTakeDamageInfo *info, c
         m_pEntity = 0;
       else
         m_pEntity = g_pEntityList->m_EntPtrArray[v5->m_hAttacker.m_Index & 0xFFF].m_pEntity;
-      if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[25].SetRefEHandle)(m_pEntity) )
+      if ( m_pEntity->IsPlayer(m_pEntity) )
       {
         v12 = g_pGameRules;
         v13 = g_pGameRules->__vftable;

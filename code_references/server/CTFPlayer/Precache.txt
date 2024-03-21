@@ -1,0 +1,32 @@
+void __thiscall CTFPlayer::Precache(CTFPlayer *this)
+{
+  CTFPlayer::PrecachePlayerModels(this);
+  CBaseEntity::PrecacheScriptSound("Player.Spawn");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.Pain");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.CritHit");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.CritPain");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.CritDeath");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.FreezeCam");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.Drown");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.AttackerPain");
+  CBaseEntity::PrecacheScriptSound("TFPlayer.SaveMe");
+  CBaseEntity::PrecacheScriptSound("Camera.SnapShot");
+  PrecacheParticleSystem("crit_text");
+  PrecacheParticleSystem("cig_smoke");
+  PrecacheParticleSystem("speech_mediccall");
+  PrecacheParticleSystem("player_recent_teleport_blue");
+  PrecacheParticleSystem("player_recent_teleport_red");
+  PrecacheParticleSystem("particle_nemesis_red");
+  PrecacheParticleSystem("particle_nemesis_blue");
+  PrecacheParticleSystem("spy_start_disguise_red");
+  PrecacheParticleSystem("spy_start_disguise_blue");
+  PrecacheParticleSystem("burningplayer_red");
+  PrecacheParticleSystem("burningplayer_blue");
+  PrecacheParticleSystem("blood_spray_red_01");
+  PrecacheParticleSystem("blood_spray_red_01_far");
+  PrecacheParticleSystem("water_blood_impact_red_01");
+  PrecacheParticleSystem("blood_impact_red_01");
+  PrecacheParticleSystem("water_playerdive");
+  PrecacheParticleSystem("water_playeremerge");
+  CBasePlayer::Precache(this);
+}

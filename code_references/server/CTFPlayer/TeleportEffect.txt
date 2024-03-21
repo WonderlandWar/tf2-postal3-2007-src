@@ -1,0 +1,12 @@
+void __thiscall CTFPlayer::TeleportEffect(CTFPlayer *this)
+{
+  float thinkTime; // [esp+0h] [ebp-Ch]
+
+  CTFPlayerShared::AddCond(&this->m_Shared, 10, -1.0);
+  thinkTime = gpGlobals->curtime + 12.0;
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CTFPlayer::RemoveTeleportEffect,
+    thinkTime,
+    "TFPlayer_TeleportEffect");
+}

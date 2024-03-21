@@ -1,0 +1,39 @@
+void __thiscall CTFPlayer::ItemPostFrame(CTFPlayer *this)
+{
+  unsigned int m_Index; // eax
+  CHandle<CBaseEntity> *p_m_hOffHandWeapon; // esi
+  CEntInfo *v4; // ecx
+  CTFWeaponBase *v5; // ecx
+  CTFWeaponBase *v6; // eax
+  CTFWeaponBase *v7; // eax
+
+  m_Index = this->m_hOffHandWeapon.m_Value.m_Index;
+  p_m_hOffHandWeapon = (CHandle<CBaseEntity> *)&this->m_hOffHandWeapon;
+  if ( m_Index != -1 )
+  {
+    v4 = &g_pEntityList->m_EntPtrArray[this->m_hOffHandWeapon.m_Value.m_Index & 0xFFF];
+    if ( v4->m_SerialNumber == m_Index >> 12 )
+    {
+      if ( v4->m_pEntity )
+      {
+        v5 = p_m_hOffHandWeapon->m_Index == -1
+          || g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Index & 0xFFF].m_SerialNumber != p_m_hOffHandWeapon->m_Index >> 12
+           ? 0
+           : g_pEntityList->m_EntPtrArray[p_m_hOffHandWeapon->m_Index & 0xFFF].m_pEntity;
+        if ( v5->IsWeaponVisible(v5) )
+        {
+          if ( this->m_flNextAttack.m_Value > (double)gpGlobals->curtime )
+          {
+            v6 = (CTFWeaponBase *)CHandle<CBaseAnimating>::operator CBaseAnimating *(p_m_hOffHandWeapon);
+            v6->ItemBusyFrame(v6);
+            CBasePlayer::ItemPostFrame(this);
+            return;
+          }
+          v7 = (CTFWeaponBase *)CHandle<CBaseAnimating>::operator CBaseAnimating *(p_m_hOffHandWeapon);
+          v7->ItemPostFrame(v7);
+        }
+      }
+    }
+  }
+  CBasePlayer::ItemPostFrame(this);
+}

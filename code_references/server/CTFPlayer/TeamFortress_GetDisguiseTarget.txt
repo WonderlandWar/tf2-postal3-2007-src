@@ -1,0 +1,85 @@
+CHandle<CBaseEntity> *__thiscall CTFPlayer::TeamFortress_GetDisguiseTarget(
+        CTFPlayer *this,
+        CHandle<CBaseEntity> *result,
+        int nTeam,
+        thinkfunc_t *nClass)
+{
+  CBaseEntity *m_pEntity; // ebx
+  CGlobalVars *v6; // eax
+  int v7; // edi
+  CBaseEntity *v8; // esi
+  int v9; // edi
+  CBasePlayer *v10; // esi
+  CHandle<CBaseEntity> *v11; // eax
+
+  if ( nTeam == CBaseEntity::GetTeamNumber(this) || !nTeam )
+  {
+    v11 = result;
+    result->m_Index = -1;
+  }
+  else
+  {
+    if ( this->m_Shared.m_hDisguiseTarget.m_Value.m_Index == -1
+      || g_pEntityList->m_EntPtrArray[this->m_Shared.m_hDisguiseTarget.m_Value.m_Index & 0xFFF].m_SerialNumber != this->m_Shared.m_hDisguiseTarget.m_Value.m_Index >> 12 )
+    {
+      m_pEntity = 0;
+    }
+    else
+    {
+      m_pEntity = g_pEntityList->m_EntPtrArray[this->m_Shared.m_hDisguiseTarget.m_Value.m_Index & 0xFFF].m_pEntity;
+    }
+    v6 = gpGlobals;
+    v7 = 1;
+    if ( gpGlobals->maxClients < 1 )
+    {
+LABEL_14:
+      v9 = 1;
+      if ( v6->maxClients < 1 )
+      {
+LABEL_19:
+        v11 = result;
+        result->m_Index = -1;
+      }
+      else
+      {
+        while ( 1 )
+        {
+          v10 = UTIL_PlayerByIndex(v9);
+          if ( v10 )
+          {
+            if ( v10->IsPlayer(v10) && CBaseEntity::GetTeamNumber(v10) == nTeam )
+              break;
+          }
+          if ( ++v9 > gpGlobals->maxClients )
+            goto LABEL_19;
+        }
+        result->m_Index = -1;
+        result->m_Index = v10->GetRefEHandle(v10)->m_Index;
+        return result;
+      }
+    }
+    else
+    {
+      while ( 1 )
+      {
+        v8 = UTIL_PlayerByIndex(v7);
+        if ( v8 )
+        {
+          if ( v8->IsPlayer(v8)
+            && v8 != m_pEntity
+            && CBaseEntity::GetTeamNumber(v8) == nTeam
+            && v8[5].m_aThinkFunctions.m_Memory.m_pMemory == nClass )
+          {
+            break;
+          }
+        }
+        v6 = gpGlobals;
+        if ( ++v7 > gpGlobals->maxClients )
+          goto LABEL_14;
+      }
+      CHandle<CAI_BaseNPC>::CHandle<CAI_BaseNPC>(result, v8);
+      return result;
+    }
+  }
+  return v11;
+}

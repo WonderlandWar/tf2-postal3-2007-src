@@ -1,0 +1,16 @@
+void __thiscall CTFPlayer::GetStepSoundVelocities(CTFPlayer *this, float *velwalk, float *velrun)
+{
+  double m_Value; // st7
+
+  m_Value = this->m_flMaxspeed.m_Value;
+  if ( (this->m_fFlags.m_Value & 2) != 0 || this->m_MoveType.m_Value == 9 )
+  {
+    *velwalk = 0.25 * m_Value;
+    *velrun = m_Value * 0.3;
+  }
+  else
+  {
+    *velwalk = 0.3 * m_Value;
+    *velrun = m_Value * 0.8;
+  }
+}

@@ -1,0 +1,38 @@
+void __thiscall CTFPlayer::PrecachePlayerModels(CTFPlayer *this)
+{
+  int i; // esi
+  char *m_szModelName; // eax
+  int v3; // eax
+  int j; // esi
+  const char *v5; // eax
+  int k; // edi
+  TFPlayerClassData_t *PlayerClassData; // esi
+
+  for ( i = 0; i < 11; ++i )
+  {
+    m_szModelName = GetPlayerClassData(i)->m_szModelName;
+    if ( m_szModelName && *m_szModelName )
+    {
+      v3 = CBaseEntity::PrecacheModel(m_szModelName);
+      PrecacheGibsForModel(v3);
+    }
+  }
+  CBaseEntity::PrecacheModel("models/effects/medicyell.mdl");
+  if ( g_pGameRules && CTFGameRules::IsBirthday((CTFGameRules *)g_pGameRules) )
+  {
+    for ( j = 1; j <= 4; ++j )
+    {
+      v5 = UTIL_VarArgs("models/effects/bday_gib0%d.mdl", j);
+      CBaseEntity::PrecacheModel(v5);
+    }
+    CBaseEntity::PrecacheModel("models/effects/bday_hat.mdl");
+  }
+  for ( k = 0; k < 11; ++k )
+  {
+    PlayerClassData = GetPlayerClassData(k);
+    CBaseEntity::PrecacheScriptSound(PlayerClassData->m_szDeathSound);
+    CBaseEntity::PrecacheScriptSound(PlayerClassData->m_szCritDeathSound);
+    CBaseEntity::PrecacheScriptSound(PlayerClassData->m_szMeleeDeathSound);
+    CBaseEntity::PrecacheScriptSound(PlayerClassData->m_szExplosionDeathSound);
+  }
+}

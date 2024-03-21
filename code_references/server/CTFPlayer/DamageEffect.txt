@@ -1,0 +1,32 @@
+void __thiscall CTFPlayer::DamageEffect(CTFPlayer *this, float flDamage, color32_s fDamageType)
+{
+  bool v4; // al
+  Vector *v5; // edi
+  int v6; // eax
+  char v7[12]; // [esp+14h] [ebp-Ch] BYREF
+
+  v4 = CTFPlayerShared::InCond(&this->m_Shared, 7);
+  if ( (fDamageType.r & 1) != 0 )
+  {
+    fDamageType = (color32_s)-2147483520;
+    UTIL_ScreenFade(this, &fDamageType, 1.0, 0.1, 1);
+  }
+  else if ( (*(_WORD *)&fDamageType.r & 0x4000) != 0 )
+  {
+    fDamageType = (color32_s)-2139095040;
+    UTIL_ScreenFade(this, &fDamageType, 1.0, 0.1, 1);
+  }
+  else if ( (fDamageType.r & 4) != 0 )
+  {
+    if ( !v4 )
+    {
+      v5 = this->EyePosition(this, v7);
+      v6 = this->BloodColor(this);
+      SpawnBlood(*v5, &g_vecAttackDir, v6, flDamage);
+    }
+  }
+  else if ( (fDamageType.r & 2) != 0 && !v4 )
+  {
+    CBaseEntity::EmitSound(this, "Flesh.BulletImpact", 0.0, 0);
+  }
+}

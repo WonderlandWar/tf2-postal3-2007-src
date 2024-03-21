@@ -1,0 +1,49 @@
+char __thiscall CTFPlayer::SetObserverMode(CTFPlayer *this, unsigned int mode)
+{
+  unsigned int v2; // edi
+  int m_Value; // eax
+  CTFPlayer_vtbl *v5; // edi
+  CBaseEntity *v6; // eax
+  CTFPlayer_vtbl *v7; // edi
+  CBaseEntity *v8; // eax
+
+  v2 = mode;
+  if ( mode > 6 )
+    return 0;
+  if ( CBaseEntity::GetTeamNumber(this) > 1 && v2 == 6 )
+    mode = 4;
+  m_Value = this->m_iObserverMode.m_Value;
+  if ( m_Value > 1 )
+    this->m_iObserverLastMode = m_Value;
+  CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iObserverMode>::Set(&this->m_iObserverMode, (const int *)&mode);
+  switch ( mode )
+  {
+    case 0u:
+    case 1u:
+    case 3u:
+      CBasePlayer::SetFOV(this, this, 0, 0.0, 0);
+      CBaseEntity::SetViewOffset(this, &vec3_origin);
+      CBaseEntity::SetMoveType(this, MOVETYPE_NONE, MOVECOLLIDE_DEFAULT);
+      break;
+    case 2u:
+    case 6u:
+      CBasePlayer::SetFOV(this, this, 0, 0.0, 0);
+      v7 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+      v8 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hObserverTarget);
+      v7->SetObserverTarget(this, v8);
+      CBaseEntity::SetViewOffset(this, &vec3_origin);
+      goto LABEL_11;
+    case 4u:
+    case 5u:
+      v5 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+      v6 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->m_hObserverTarget);
+      v5->SetObserverTarget(this, v6);
+LABEL_11:
+      CBaseEntity::SetMoveType(this, MOVETYPE_OBSERVER, MOVECOLLIDE_DEFAULT);
+      break;
+    default:
+      break;
+  }
+  this->CheckObserverSettings(this);
+  return 1;
+}

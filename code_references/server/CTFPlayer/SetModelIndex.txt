@@ -1,0 +1,13 @@
+void __thiscall CTFPlayer::SetModelIndex(CTFPlayer *this, int index)
+{
+  unsigned __int16 v2; // di
+
+  v2 = index;
+  index = (unsigned __int16)index;
+  CNetworkVarBase<short,CTFPlayer::NetworkVar_m_nPlayerModelIndex>::Set(
+    &this->m_nPlayerModelIndex,
+    (const __int16 *)&index);
+  index = v2;
+  CNetworkVarBase<short,CBaseEntity::NetworkVar_m_nModelIndex>::Set(&this->m_nModelIndex, (const __int16 *)&index);
+  CBaseEntity::DispatchUpdateTransmitState(this);
+}

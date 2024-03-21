@@ -1,0 +1,23 @@
+void __thiscall CTFPlayer::Regenerate(CTFPlayer *this)
+{
+  int m_Value; // ebx
+  CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth> *p_m_iHealth; // edi
+  bool v4; // cc
+  CTFPlayerShared *p_m_Shared; // esi
+  int val; // [esp+Ch] [ebp-4h] BYREF
+
+  m_Value = this->m_iHealth.m_Value;
+  p_m_iHealth = &this->m_iHealth;
+  this->m_bRegenerating = 1;
+  CTFPlayer::InitClass(this);
+  v4 = m_Value <= p_m_iHealth->m_Value;
+  this->m_bRegenerating = 0;
+  if ( !v4 )
+  {
+    val = m_Value;
+    CNetworkVarBase<int,CBaseEntity::NetworkVar_m_iHealth>::Set(p_m_iHealth, &val);
+  }
+  p_m_Shared = &this->m_Shared;
+  if ( CTFPlayerShared::InCond(p_m_Shared, 13) )
+    CTFPlayerShared::RemoveCond(p_m_Shared, 13);
+}

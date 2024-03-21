@@ -1,0 +1,9 @@
+void __thiscall CTFPlayer::StateTransition(CTFPlayer *this, int nState)
+{
+  CPlayerStateInfo *m_pStateInfo; // eax
+
+  m_pStateInfo = this->m_pStateInfo;
+  if ( m_pStateInfo && m_pStateInfo->pfnLeaveState )
+    m_pStateInfo->pfnLeaveState((CTFPlayer *)((char *)this + *(_DWORD *)m_pStateInfo->gap1C));
+  CTFPlayer::StateEnter(this, nState);
+}

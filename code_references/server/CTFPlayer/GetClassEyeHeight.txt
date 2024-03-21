@@ -1,0 +1,12 @@
+const CViewVectors *__thiscall CTFPlayer::GetClassEyeHeight(CTFPlayer *this)
+{
+  int m_Value; // eax
+
+  if ( this == (CTFPlayer *)-4340 )
+    return g_pGameRules->GetViewVectors(g_pGameRules);
+  m_Value = this->m_PlayerClass.m_iClass.m_Value;
+  if ( (unsigned int)(m_Value - 1) > 8 )
+    return g_pGameRules->GetViewVectors(g_pGameRules);
+  else
+    return (const CViewVectors *)&g_TFClassViewVectors[m_Value];
+}

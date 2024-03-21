@@ -1,0 +1,90 @@
+void __userpurge CTFPlayer::PainSound(CTFPlayer *this@<ecx>, int a2@<ebx>, int a3@<ebp>, CTakeDamageInfo *info)
+{
+  int m_bitsDamageType; // eax
+  CBaseEntity *Attacker; // eax
+  bool v7; // bl
+  CMultiplayer_Expresser *v8; // ebp
+  const Vector *AbsOrigin; // eax
+  CBaseEntity *v10; // eax
+  CBasePlayer *v11; // eax
+  CBaseEntity *v12; // eax
+  CBasePlayer *v13; // eax
+  int soundtime; // [esp+18h] [ebp-98h]
+  int v15; // [esp+1Ch] [ebp-94h]
+  CPASFilter filter; // [esp+28h] [ebp-88h] BYREF
+  CSingleUserRecipientFilter attackerFilter; // [esp+48h] [ebp-68h] BYREF
+  char szResponse[64]; // [esp+68h] [ebp-48h] BYREF
+
+  if ( this->IsAlive(this)
+    && !CTFPlayerShared::InCond(&this->m_Shared, 7)
+    && gpGlobals->curtime >= (double)this->m_flNextPainSoundTime )
+  {
+    m_bitsDamageType = info->m_bitsDamageType;
+    if ( (m_bitsDamageType & 0x20) == 0 )
+    {
+      if ( (m_bitsDamageType & 0x4000) != 0 )
+      {
+        CBaseEntity::EmitSound(this, "TFPlayer.Drown", 0.0, 0);
+      }
+      else if ( (m_bitsDamageType & 8) == 0 )
+      {
+        v15 = a2;
+        soundtime = a3;
+        *(float *)&filter.__vftable = 0.0;
+        v7 = 0;
+        if ( CTakeDamageInfo::GetAttacker(info) )
+        {
+          Attacker = CTakeDamageInfo::GetAttacker(info);
+          if ( ((unsigned __int8 (__thiscall *)(CBaseEntity *, int, int))Attacker->IsPlayer)(Attacker, a3, a2) )
+            v7 = 1;
+        }
+        v8 = (CMultiplayer_Expresser *)((int (__thiscall *)(CTFPlayer *, int, int))this->GetMultiplayerExpresser)(
+                                         this,
+                                         soundtime,
+                                         v15);
+        CMultiplayer_Expresser::AllowMultipleScenes(v8);
+        AbsOrigin = CBaseEntity::GetAbsOrigin(this);
+        CPASFilter::CPASFilter((CPASFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount, AbsOrigin);
+        if ( v7 )
+        {
+          v10 = CTakeDamageInfo::GetAttacker(info);
+          v11 = ToBaseMultiplayerPlayer(v10);
+          CRecipientFilter::RemoveRecipient((CRecipientFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount, v11);
+        }
+        if ( (info->m_bitsDamageType & 0x100000) != 0 )
+        {
+          *(float *)&filter.m_Recipients.m_Memory.m_pMemory = CTFPlayer::PlayCritReceivedSound(this);
+          CRecipientFilter::RemoveRecipient((CRecipientFilter *)&filter.m_Recipients.m_Memory.m_nAllocationCount, this);
+        }
+        if ( ((unsigned __int8 (__thiscall *)(CTFPlayer *, int, const char *, char *))this->SpeakConceptIfAllowed)(
+               this,
+               9,
+               "damagecritical:1",
+               &szResponse[12])
+          && GetSceneDuration(&szResponse[4]) > (double)*(float *)&filter.__vftable )
+        {
+          *(float *)&filter.__vftable = GetSceneDuration(&szResponse[4]);
+        }
+        if ( v7 )
+        {
+          v12 = CTakeDamageInfo::GetAttacker(info);
+          v13 = ToBaseMultiplayerPlayer(v12);
+          CSingleUserRecipientFilter::CSingleUserRecipientFilter(
+            (CSingleUserRecipientFilter *)&attackerFilter.m_bReliable,
+            v13);
+          this->SpeakConceptIfAllowed(
+            this,
+            10,
+            "damagecritical:1",
+            &szResponse[4],
+            64u,
+            (IRecipientFilter *)&attackerFilter.m_bReliable);
+          CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&attackerFilter.m_bReliable);
+        }
+        CGlobalState::LevelShutdownPostEntity(v8);
+        this->m_flNextPainSoundTime = gpGlobals->curtime + *(float *)&filter.__vftable;
+        CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+      }
+    }
+  }
+}

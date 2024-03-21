@@ -1,0 +1,20 @@
+void __thiscall CTFPlayer::MedicRegenThink(CTFPlayer *this)
+{
+  double v2; // st7
+  float val; // [esp+0h] [ebp-1Ch]
+  float C; // [esp+Ch] [ebp-10h]
+  float Ca; // [esp+Ch] [ebp-10h]
+
+  if ( this != (CTFPlayer *)-4340 && this->m_PlayerClass.m_iClass.m_Value == 5 )
+  {
+    if ( this->IsAlive(this) )
+    {
+      val = gpGlobals->curtime - this->m_flLastDamageTime;
+      v2 = RemapValClamped(val, 5.0, 10.0, 1.0, 3.0);
+      C = (float)(int)ceil(v2);
+      ((void (__thiscall *)(CTFPlayer *, _DWORD, _DWORD))this->TakeHealth)(this, LODWORD(C), 0);
+    }
+    Ca = gpGlobals->curtime + 1.0;
+    CBaseEntity::ThinkSet(this, (void (__thiscall *)(CBaseEntity *))CTFPlayer::MedicRegenThink, Ca, "MedicRegenThink");
+  }
+}

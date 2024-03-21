@@ -1,0 +1,35 @@
+void __thiscall CTFPlayer::DeathSound(CTFPlayer *this, const CTakeDamageInfo *info)
+{
+  TFPlayerClassData_t *PlayerClassData; // eax
+  int m_LastDamageType; // ecx
+
+  if ( this == (CTFPlayer *)-4340 || this->m_PlayerClass.m_iClass.m_Value )
+  {
+    PlayerClassData = GetPlayerClassData(this->m_PlayerClass.m_iClass.m_Value);
+    if ( PlayerClassData )
+    {
+      m_LastDamageType = this->m_LastDamageType;
+      if ( (m_LastDamageType & 0x20) != 0 )
+      {
+        CBaseEntity::EmitSound(this, "Player.FallGib", 0.0, 0);
+      }
+      else if ( (m_LastDamageType & 0x100000) != 0 )
+      {
+        CBaseEntity::EmitSound(this, PlayerClassData->m_szCritDeathSound, 0.0, 0);
+        CTFPlayer::PlayCritReceivedSound(this);
+      }
+      else if ( (m_LastDamageType & 0x40) != 0 )
+      {
+        CBaseEntity::EmitSound(this, PlayerClassData->m_szExplosionDeathSound, 0.0, 0);
+      }
+      else if ( (m_LastDamageType & 0x80u) == 0 )
+      {
+        CBaseEntity::EmitSound(this, PlayerClassData->m_szDeathSound, 0.0, 0);
+      }
+      else
+      {
+        CBaseEntity::EmitSound(this, PlayerClassData->m_szMeleeDeathSound, 0.0, 0);
+      }
+    }
+  }
+}

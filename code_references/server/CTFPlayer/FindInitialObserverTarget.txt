@@ -1,0 +1,82 @@
+void __thiscall CTFPlayer::FindInitialObserverTarget(CTFPlayer *this)
+{
+  CBaseEntity *EntityByClassname; // eax
+  CTeamControlPointMaster *v3; // ebp
+  CTFGameRules *v4; // esi
+  int TeamNumber; // eax
+  int FarthestOwnedControlPoint; // eax
+  int v7; // ebx
+  double v8; // st7
+  CBaseEntity *v9; // esi
+  CTeamControlPoint *v10; // eax
+  CBaseTeamObjectiveResource *v11; // esi
+  unsigned int v12; // ebx
+  double ContestedAt; // st7
+  CTeamControlPoint *ControlPoint; // eax
+  CTFPlayer *NearestObservablePlayer; // eax
+  Vector v16; // [esp-Ch] [ebp-20h]
+
+  if ( CBaseEntity::GetTeamNumber(this) < 2
+    || (EntityByClassname = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "team_control_point_master"),
+        (v3 = (CTeamControlPointMaster *)__RTDynamicCast(
+                                           EntityByClassname,
+                                           0,
+                                           &CBaseEntity `RTTI Type Descriptor',
+                                           &CTeamControlPointMaster `RTTI Type Descriptor',
+                                           0)) == 0) )
+  {
+LABEL_17:
+    if ( (this->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(this);
+    NearestObservablePlayer = CTFPlayer::FindNearestObservablePlayer(this, this->m_vecAbsOrigin, 3.4028235e38);
+    if ( !NearestObservablePlayer )
+      return;
+LABEL_20:
+    CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget>::Set(
+      &this->m_hObserverTarget,
+      NearestObservablePlayer);
+    return;
+  }
+  v4 = (CTFGameRules *)g_pGameRules;
+  TeamNumber = CBaseEntity::GetTeamNumber(this);
+  FarthestOwnedControlPoint = CTFGameRules::GetFarthestOwnedControlPoint(v4, TeamNumber, 0);
+  v7 = FarthestOwnedControlPoint;
+  if ( FarthestOwnedControlPoint == -1
+    || (v8 = CTeamControlPointMaster::PointLastContestedAt(v3, FarthestOwnedControlPoint), -1.0 == v8)
+    || gpGlobals->curtime - 30.0 >= v8
+    || (v9 = CGlobalEntityList::FindEntityByClassname(&gEntList, 0, "info_observer_point")) == 0 )
+  {
+LABEL_12:
+    v11 = g_pObjectiveResource;
+    v12 = 2 * (v11->m_iBaseControlPoints.m_Value[CBaseEntity::GetTeamNumber(this)] == 0) - 1 + v7;
+    if ( v12 <= 7 )
+    {
+      ContestedAt = CTeamControlPointMaster::PointLastContestedAt(v3, v12);
+      if ( -1.0 != ContestedAt && gpGlobals->curtime - 30.0 < ContestedAt )
+      {
+        ControlPoint = CTeamControlPointMaster::GetControlPoint(v3, v12);
+        if ( ControlPoint )
+        {
+          v16 = *CBaseEntity::GetAbsOrigin(ControlPoint);
+          NearestObservablePlayer = CTFPlayer::FindNearestObservablePlayer(this, v16, 1500.0);
+          if ( NearestObservablePlayer )
+            goto LABEL_20;
+        }
+      }
+    }
+    goto LABEL_17;
+  }
+  while ( 1 )
+  {
+    v10 = CTeamControlPointMaster::GetControlPoint(v3, v7);
+    if ( CHandle<CBaseEntity>::operator==((CHandle<CBaseEntity> *)&v9[1].m_pfnMoveDone, v10)
+      && this->IsValidObserverTarget(this, v9) )
+    {
+      break;
+    }
+    v9 = CGlobalEntityList::FindEntityByClassname(&gEntList, v9, "info_observer_point");
+    if ( !v9 )
+      goto LABEL_12;
+  }
+  CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget>::Set(&this->m_hObserverTarget, v9);
+}

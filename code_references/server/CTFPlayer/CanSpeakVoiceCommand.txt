@@ -1,0 +1,4 @@
+BOOL __thiscall CTFPlayer::CanSpeakVoiceCommand(CTFPlayer *this)
+{
+  return this->m_flNextVoiceCommandTime < (double)gpGlobals->curtime;
+}

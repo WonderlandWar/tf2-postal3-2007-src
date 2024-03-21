@@ -1,0 +1,32 @@
+bool __thiscall CTFPlayer::SetObserverTarget(CTFPlayer *this, CBaseEntity *target)
+{
+  bool result; // al
+  CObserverPoint *pObsPoint; // ebx
+  CTFPlayer_vtbl *v5; // ebp
+  const QAngle *v6; // eax
+
+  CBasePlayer::ClearZoomOwner(this);
+  CBasePlayer::SetFOV(this, this, 0, 0.0, 0);
+  result = CBasePlayer::SetObserverTarget(this, target);
+  if ( result )
+  {
+    pObsPoint = (CObserverPoint *)__RTDynamicCast(
+                                    target,
+                                    0,
+                                    &CBaseEntity `RTTI Type Descriptor',
+                                    &CObserverPoint `RTTI Type Descriptor',
+                                    0);
+    if ( pObsPoint )
+    {
+      CBaseEntity::SetViewOffset(this, &vec3_origin);
+      if ( (target->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(target);
+      v5 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+      v6 = target->EyeAngles(target);
+      v5->JumptoPosition(this, &target->m_vecAbsOrigin, v6);
+      CBasePlayer::SetFOV(this, pObsPoint, (int)pObsPoint->m_flFOV, 0.0, 0);
+    }
+    return 1;
+  }
+  return result;
+}

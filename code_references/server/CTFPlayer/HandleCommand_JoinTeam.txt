@@ -1,0 +1,72 @@
+void __thiscall CTFPlayer::HandleCommand_JoinTeam(CTFPlayer *this, const char *pTeamName)
+{
+  const char *v2; // ebx
+  int AutoTeam; // ebp
+  int v5; // edi
+  CTeamplayRoundBasedRules *v6; // edi
+  int TeamNumber; // eax
+  bool v8; // zf
+  CTFPlayer_vtbl *v9; // eax
+  const char *v10; // eax
+
+  v2 = pTeamName;
+  AutoTeam = 2;
+  if ( !_stricmp(pTeamName, "auto") )
+  {
+    AutoTeam = CTFPlayer::GetAutoTeam(this);
+  }
+  else
+  {
+    if ( !_stricmp(v2, "spectate") )
+    {
+LABEL_12:
+      if ( mp_allowspectators.m_pParent->m_nValue || this->pl.hltv )
+      {
+        if ( CBaseEntity::GetTeamNumber(this) && !CBasePlayer::IsDead(this) )
+          this->CommitSuicide(this, 0);
+        this->ChangeTeam(this, 1);
+        if ( mp_fadetoblack.m_pParent->m_nValue )
+        {
+          LOWORD(pTeamName) = 0;
+          BYTE2(pTeamName) = 0;
+          HIBYTE(pTeamName) = 0;
+          UTIL_ScreenFade(this, (const color32_s *)&pTeamName, 0.001, 0.0, 1);
+        }
+      }
+      else
+      {
+        ClientPrint(this, 4, "#Cannot_Be_Spectator", 0, 0, 0, 0);
+      }
+      return;
+    }
+    v5 = 0;
+    while ( _stricmp(v2, g_aTeamNames[v5]) )
+    {
+      if ( ++v5 >= 4 )
+        goto LABEL_7;
+    }
+    AutoTeam = v5;
+  }
+  if ( AutoTeam == 1 )
+    goto LABEL_12;
+LABEL_7:
+  if ( AutoTeam != CBaseEntity::GetTeamNumber(this) )
+  {
+    v6 = (CTeamplayRoundBasedRules *)g_pGameRules;
+    TeamNumber = CBaseEntity::GetTeamNumber(this);
+    v8 = CTeamplayRoundBasedRules::WouldChangeUnbalanceTeams(v6, AutoTeam, TeamNumber) == 0;
+    v9 = this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    if ( v8 )
+    {
+      v9->ChangeTeam(this, AutoTeam);
+      v10 = "class_red";
+      if ( AutoTeam != 2 )
+        v10 = "class_blue";
+      this->ShowViewPortPanel(this, v10, 1, 0);
+    }
+    else
+    {
+      v9->ShowViewPortPanel(this, "team", 1, 0);
+    }
+  }
+}

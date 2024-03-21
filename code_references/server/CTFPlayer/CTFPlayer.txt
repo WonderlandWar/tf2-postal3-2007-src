@@ -1,0 +1,92 @@
+void __thiscall CTFPlayer::CTFPlayer(CTFPlayer *this)
+{
+  int v2; // ecx
+  int curtime; // eax
+  double v4; // st7
+  int val; // [esp+1Ch] [ebp-10h] BYREF
+  Vector vecOffset; // [esp+20h] [ebp-Ch] BYREF
+
+  CBaseMultiplayerPlayer::CBaseMultiplayerPlayer(this);
+  this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CBasePlayer::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable = (CTFPlayer_vtbl *)&CTFPlayer::`vftable'{for `CBasePlayer'};
+  this->CBaseMultiplayerPlayer::CAI_ExpresserHost<CBasePlayer>::CAI_ExpresserSink::__vftable = (CAI_ExpresserSink_vtbl *)&CTFPlayer::`vftable'{for `CAI_ExpresserSink'};
+  this->m_hRagdoll.m_Value.m_Index = -1;
+  CTFPlayerShared::CTFPlayerShared(&this->m_Shared);
+  this->m_hTauntScene.m_Index = -1;
+  this->m_hIntroView.m_Index = -1;
+  this->m_hItem.m_Value.m_Index = -1;
+  this->m_hOffHandWeapon.m_Value.m_Index = -1;
+  CTFPlayerClass::CTFPlayerClass(&this->m_PlayerClass);
+  this->m_hWeaponBuilder.m_Index = -1;
+  this->m_aObjects.m_Memory.m_pMemory = 0;
+  this->m_aObjects.m_Memory.m_nAllocationCount = 0;
+  this->m_aObjects.m_Memory.m_nGrowSize = 0;
+  this->m_aObjects.m_Size = 0;
+  this->m_aObjects.m_pElements = 0;
+  CHintSystem::CHintSystem(&this->m_Hints);
+  this->m_hObservableEntities.m_Memory.m_pMemory = 0;
+  this->m_hObservableEntities.m_Memory.m_nAllocationCount = 0;
+  this->m_hObservableEntities.m_Memory.m_nGrowSize = 0;
+  this->m_hObservableEntities.m_Size = 0;
+  this->m_hObservableEntities.m_pElements = 0;
+  this->m_DamagerHistory[0].flTimeDamage = 0.0;
+  this->m_DamagerHistory[1].flTimeDamage = 0.0;
+  this->m_DamagerHistory[0].hDamager.m_Index = -1;
+  this->m_DamagerHistory[1].hDamager.m_Index = -1;
+  this->m_hExpressionSceneEnt.m_Index = -1;
+  this->m_hWeaponFireSceneEnt.m_Index = -1;
+  this->m_PlayerAnimState = CreateTFPlayerAnimState(this);
+  this->item_list = 0;
+  CBasePlayer::SetArmorValue(this, 10);
+  CNetworkHandleBase<CTFItem,CTFPlayer::NetworkVar_m_hItem>::Set(&this->m_hItem, 0);
+  this->m_hTauntScene.m_Index = -1;
+  CBaseAnimating::UseClientSideAnimation(this);
+  CNetworkVectorBase<QAngle,CTFPlayer::NetworkVar_m_angEyeAngles>::Init(&this->m_angEyeAngles, 0.0, 0.0, 0.0);
+  this->m_pStateInfo = 0;
+  if ( this->m_lifeState.m_Value == 2 )
+  {
+    v2 = 0;
+  }
+  else
+  {
+    v2 = 1;
+    if ( (unsigned __int8)this->m_lifeState.m_Value - 2 <= 0 )
+      v2 = -1;
+  }
+  if ( v2 )
+  {
+    this->NetworkStateChanged_m_lifeState(this, &this->m_lifeState);
+    this->m_lifeState.m_Value = 2;
+  }
+  this->m_iMaxSentryKills = 0;
+  this->m_flNextNameChangeTime = 0.0;
+  curtime = (int)gpGlobals->curtime;
+  this->m_flSpawnTime = 0.0;
+  vecOffset.x = 0.0;
+  vecOffset.y = 0.0;
+  vecOffset.z = 64.0;
+  this->m_flNextTimeCheck = curtime;
+  CBaseEntity::SetViewOffset(this, &vecOffset);
+  CTFPlayerShared::Init(&this->m_Shared, this);
+  this->m_iLastSkin = -1;
+  this->m_bHudClassAutoKill = 0;
+  this->m_vecLastDeathPosition.x = 3.4028235e38;
+  this->m_vecLastDeathPosition.y = 3.4028235e38;
+  this->m_vecLastDeathPosition.z = 3.4028235e38;
+  val = 0;
+  CNetworkVarBase<int,CTFPlayerShared::NetworkVar_m_iDesiredPlayerClass>::Set(
+    &this->m_Shared.m_iDesiredPlayerClass,
+    &val);
+  CHintSystem::Init(&this->m_Hints, this, 40, g_pszHintMessages);
+  CBaseEntity::ThinkSet(
+    this,
+    (void (__thiscall *)(CBaseEntity *))CTFPlayer::TFPlayerThink,
+    gpGlobals->curtime,
+    "TFPlayerThink");
+  CTFGameStats::ResetPlayerStats(&CTF_GameStats, this);
+  CTFPlayer::RemoveNemesisRelationships(this);
+  CBasePlayer::ResetFragCount(this);
+  CBasePlayer::ResetDeathCount(this);
+  v4 = gpGlobals->curtime;
+  this->m_bInitTaunt = 0;
+  this->m_flLastAction = v4;
+}

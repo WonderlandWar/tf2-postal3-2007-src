@@ -1,0 +1,8 @@
+void __thiscall CTFPlayer::RemoveDisguise(CTFPlayer *this)
+{
+  CTFPlayerShared *p_m_Shared; // esi
+
+  p_m_Shared = &this->m_Shared;
+  if ( CTFPlayerShared::InCond(&this->m_Shared, 7) )
+    CTFPlayerShared::RemoveDisguise(p_m_Shared);
+}

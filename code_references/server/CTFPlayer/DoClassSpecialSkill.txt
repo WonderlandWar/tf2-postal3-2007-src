@@ -1,0 +1,15 @@
+char __thiscall CTFPlayer::DoClassSpecialSkill(CTFPlayer *this)
+{
+  if ( this->m_PlayerClass.m_iClass.m_Value != 8 )
+    return 0;
+  if ( CTFPlayer::CanGoInvisible(this) )
+  {
+    if ( (this->m_Shared.m_nPlayerCond.m_Value & 0x100) != 0 )
+    {
+      CTFPlayerShared::FadeInvis(&this->m_Shared, tf_spy_invis_unstealth_time.m_pParent->m_fValue);
+      return 1;
+    }
+    CTFPlayerShared::AddCond(&this->m_Shared, 8, -1.0);
+  }
+  return 1;
+}
