@@ -313,7 +313,7 @@ void CTFPipebombLauncher::SecondaryAttack( void )
 	{
 		// Get a valid player.
 		CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
-		if ( !pPlayer || !pPlayer->m_iActivePipebombs )
+		if ( !pPlayer )
 			return;
 
 		if ( gpGlobals->curtime - m_flLastGrenadeLaunchTime >= tf_grenadelauncher_livetime.GetFloat() )
@@ -393,6 +393,8 @@ void CTFPipebombLauncher::DetonateRemotePipebombs( bool bFizzle )
 			pTemp->SetNextThink( gpGlobals->curtime );
 		}
 	}
+	
+	m_Pipebombs.Purge();
 
 	m_iPipebombCount = m_Pipebombs.Size();
 }
