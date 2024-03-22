@@ -105,25 +105,42 @@ void CTFMedicCallerPanel::OnTick( void )
 		return;
 	}
 
-	// If the local player has started healing this guy, remove it too.
-	//Also don't draw it if we're dead.
-	C_TFPlayer *pLocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( pLocalTFPlayer )
+	// Reposition the callout based on our target's position
+	int iX, iY;
+	Vector vecTarget = (m_hPlayer->GetAbsOrigin() + m_vecOffset);
+	Vector vecDelta = vecTarget - MainViewOrigin();
+	bool bOnscreen = GetVectorInScreenSpace( vecTarget, iX, iY );
+
+	int halfWidth = GetWide() / 2;
+	if( !bOnscreen || iX < halfWidth || iX > ScreenWidth()-halfWidth )
 	{
-		CBaseEntity *pHealTarget = pLocalTFPlayer->MedicGetHealTarget();
-		if ( (pHealTarget && pHealTarget == m_hPlayer) || pLocalTFPlayer->IsAlive() == false )
+		// It's off the screen. Position the callout.
+		VectorNormalize(vecDelta);
+		float xpos, ypos;
+		float flRotation;
+		float flRadius = YRES(100);
+		GetCallerPosition( vecDelta, flRadius, &xpos, &ypos, &flRotation );
+
+		iX = xpos;
+		iY = ypos;
+
+		Vector vCenter = m_hPlayer->WorldSpaceCenter( );
+		if( MainViewRight().Dot( vCenter - MainViewOrigin() ) > 0 )
 		{
-			MarkForDeletion();
-			return;
+			m_bDrawLeftArrow = false;
+		}
+		else
+		{
+			m_bDrawLeftArrow = true;
 		}
 
-		// If we're pointing to an enemy spy and they are no longer disguised, remove ourselves
-		if ( m_hPlayer->IsPlayerClass( TF_CLASS_SPY ) && 
-			!( m_hPlayer->m_Shared.InCond( TF_COND_DISGUISED ) && m_hPlayer->m_Shared.GetDisguiseTeam() == pLocalTFPlayer->GetTeamNumber() ) )
-		{
-			MarkForDeletion();
-			return;
-		}
+		// Move the icon there
+		SetPos( iX - halfWidth, iY - (GetTall() / 2) );
+		SetAlpha( 255 );
+	}
+	else
+	{
+		SetVisible( false );
 	}
 }
 
