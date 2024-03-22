@@ -65,8 +65,6 @@ public:
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_BUILDER; }
 
-	virtual void	WeaponReset( void );
-
 public:
 	CNetworkVar( int, m_iBuildState );
 	CNetworkVar( unsigned int, m_iObjectType );

@@ -14,7 +14,7 @@
 #include "c_tf_weapon_builder.h"
 #include "c_weapon__stubs.h"
 #include "iinput.h"
-#include <vgui/IVGui.h>
+#include <vgui/IVGUI.h>
 #include "c_tf_player.h"
 #include "c_vguiscreen.h"
 #include "ienginevgui.h"
@@ -79,9 +79,6 @@ const char *C_TFWeaponBuilder::GetCurrentSelectionObjectName( void )
 //-----------------------------------------------------------------------------
 bool C_TFWeaponBuilder::Deploy( void )
 {
-	m_iViewModelIndex = modelinfo->GetModelIndex( GetViewModel( 0 ) );
-	m_iWorldModelIndex = modelinfo->GetModelIndex( GetWorldModel() );
-
 	bool bDeploy = BaseClass::Deploy();
 
 	if ( bDeploy )
@@ -94,29 +91,11 @@ bool C_TFWeaponBuilder::Deploy( void )
 			return false;
 
 		pPlayer->SetNextAttack( gpGlobals->curtime );
+
+		m_iWorldModelIndex = modelinfo->GetModelIndex( GetWorldModel() );
 	}
 
 	return bDeploy;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_TFWeaponBuilder::SecondaryAttack( void )
-{
-	if ( m_bInAttack2 )
-		return;
-
-	// require a re-press
-	m_bInAttack2 = true;
-
-	CTFPlayer *pOwner = ToTFPlayer( GetOwner() );
-	if ( !pOwner )
-		return;
-
-	pOwner->DoClassSpecialSkill();
-
-	m_flNextSecondaryAttack = gpGlobals->curtime + 0.2f;
 }
 
 //-----------------------------------------------------------------------------
@@ -333,9 +312,10 @@ const char *C_TFWeaponBuilder::GetWorldModel( void ) const
 
 Activity C_TFWeaponBuilder::GetDrawActivity( void )
 {
-	// sapper used to call different draw animations , one when invis and one when not.
-	// now you can go invis *while* deploying, so let's always use the one-handed deploy.
-	if ( GetSubType() == OBJ_ATTACHMENT_SAPPER )
+	CTFPlayer *pOwner = ToTFPlayer( GetOwner() );
+
+	// hax alert! use the one handed sapper deploy if we're invis
+	if ( pOwner && pOwner->m_Shared.InCond( TF_COND_STEALTHED ) && GetSubType() == OBJ_ATTACHMENT_SAPPER )
 	{
 		return ACT_VM_DRAW_DEPLOYED;
 	}

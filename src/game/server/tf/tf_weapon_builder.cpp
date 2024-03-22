@@ -102,7 +102,7 @@ bool CTFWeaponBuilder::CanDeploy( void )
 		return false;
 	}
 
-	return BaseClass::CanDeploy();
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -456,17 +456,6 @@ void CTFWeaponBuilder::StopPlacement( void )
 		m_hObjectBeingBuilt = NULL;
 	}
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFWeaponBuilder::WeaponReset( void )
-{
-	BaseClass::WeaponReset();
-
-	StopPlacement();
-}
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Move the placement model to the current position. Return false if it's an invalid position

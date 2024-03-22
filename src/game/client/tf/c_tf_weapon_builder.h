@@ -32,8 +32,6 @@ public:
 
 	virtual void Redraw();
 
-	virtual void SecondaryAttack();
-
 	virtual bool	IsPlacingObject( void );
 
 	virtual const char *GetCurrentSelectionObjectName( void );
