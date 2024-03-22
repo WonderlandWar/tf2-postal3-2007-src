@@ -1,0 +1,65 @@
+// local variable allocation has failed, the output may be wrong!
+void __thiscall C_TFRagdoll::CreateTFGibs(C_TFRagdoll *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // ecx
+  C_TFPlayer *v5; // eax
+  C_TFPlayer *v6; // edi
+  unsigned int v7; // eax
+  Vector *v8; // eax
+  float _X; // [esp+4h] [ebp-18h]
+  float _Xa; // [esp+4h] [ebp-18h]
+  Vector vecVelocity_4; // [esp+10h] [ebp-Ch] OVERLAPPED BYREF
+
+  m_Index = this->m_hPlayer.m_Index;
+  if ( m_Index == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hPlayer.m_Index & 0xFFF], v3->m_SerialNumber != m_Index >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v3->m_pEntity;
+  }
+  v5 = (C_TFPlayer *)__RTDynamicCast(
+                       m_pEntity,
+                       0,
+                       &C_BaseEntity `RTTI Type Descriptor',
+                       &C_TFPlayer `RTTI Type Descriptor',
+                       0);
+  v6 = v5;
+  if ( v5 )
+  {
+    v7 = v5->m_hFirstGib.m_Index;
+    if ( v7 == -1
+      || g_pEntityList->m_EntPtrArray[v6->m_hFirstGib.m_Index & 0xFFF].m_SerialNumber != v7 >> 12
+      || !g_pEntityList->m_EntPtrArray[v6->m_hFirstGib.m_Index & 0xFFF].m_pEntity )
+    {
+      vecVelocity_4.x = this->m_vecRagdollVelocity.m_Value.x + this->m_vecForce.x;
+      vecVelocity_4.y = this->m_vecRagdollVelocity.m_Value.y + this->m_vecForce.y;
+      vecVelocity_4.z = this->m_vecRagdollVelocity.m_Value.z + this->m_vecForce.z;
+      pfVectorNormalize(&vecVelocity_4);
+      _X = this->m_vecForce.z * this->m_vecForce.z
+         + this->m_vecForce.y * this->m_vecForce.y
+         + this->m_vecForce.x * this->m_vecForce.x;
+      _Xa = pfSqrt(_X);
+      C_TFPlayer::CreatePlayerGibs(
+        v6,
+        (int)this,
+        &this->m_vecRagdollOrigin.m_Value,
+        &vecVelocity_4,
+        (float *)LODWORD(_Xa));
+    }
+    if ( g_pGameRules && C_TFGameRules::IsBirthday(g_pGameRules) )
+    {
+      v8 = (Vector *)v6->GetAbsOrigin(v6);
+      vecVelocity_4.x = v8->x;
+      vecVelocity_4.y = v8->y;
+      vecVelocity_4.z = v8->z + 32.0;
+      DispatchParticleEffect("bday_confetti", vecVelocity_4, vec3_angle, 0);
+      C_BaseEntity::EmitSound(this, "Game.HappyBirthday", 0.0, 0);
+    }
+  }
+  this->Release(&this->IClientNetworkable);
+}

@@ -1,0 +1,43 @@
+class C_TFRagdoll : public C_BaseAnimatingOverlay
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+	
+    private void C_TFRagdoll(class C_TFRagdoll & );
+    public void C_TFRagdoll();
+    public void ~C_TFRagdoll();
+	
+    public void OnDataChanged(enum DataUpdateType_t );
+	
+    public int GetPlayerEntIndex();	
+    public class IRagdoll * GetIRagdoll();
+	
+    public void ImpactTrace(class CGameTrace * ,int ,char * );
+	
+    public void ClientThink();
+    public void StartFadeOut(float );
+	
+    public bool IsRagdollVisible();	
+    public float GetBurnStartTime();
+	
+    private void Interp_Copy(class C_BaseAnimatingOverlay * );
+    private void CreateLowViolenceRagdoll();
+    private void CreateTFRagdoll();
+    private void CreateTFGibs();
+    private class CHandle<C_BaseEntity> m_hPlayer;
+    class NetworkVar_m_vecRagdollVelocity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<Vector,C_TFRagdoll::NetworkVar_m_vecRagdollVelocity> m_vecRagdollVelocity;
+    class NetworkVar_m_vecRagdollOrigin
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<Vector,C_TFRagdoll::NetworkVar_m_vecRagdollOrigin> m_vecRagdollOrigin;
+    private float m_fDeathTime;
+    private bool m_bFadingOut;
+    private bool m_bGib;
+    private float m_flBurnEffectStartTime;
+};

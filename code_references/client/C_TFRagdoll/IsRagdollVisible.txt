@@ -1,0 +1,42 @@
+bool __thiscall C_TFRagdoll::IsRagdollVisible(C_TFRagdoll *this)
+{
+  const Vector *v1; // eax
+  float y; // edx
+  double x; // st7
+  float v5; // [esp+8h] [ebp-30h]
+  float v6; // [esp+Ch] [ebp-2Ch]
+  float v7; // [esp+10h] [ebp-28h]
+  float v8; // [esp+14h] [ebp-24h]
+  float v9; // [esp+18h] [ebp-20h]
+  Vector origin; // [esp+1Ch] [ebp-1Ch] BYREF
+  float z; // [esp+28h] [ebp-10h]
+  float v12; // [esp+2Ch] [ebp-Ch] BYREF
+  float v13; // [esp+30h] [ebp-8h]
+  float v14; // [esp+34h] [ebp-4h]
+
+  v1 = this->GetAbsOrigin(this);
+  y = v1->y;
+  x = v1->x;
+  z = v1->z;
+  v5 = x + 1.0;
+  v12 = v5;
+  v6 = y + 1.0;
+  v13 = v6;
+  v7 = z + 1.0;
+  v14 = v7;
+  origin.y = x - 1.0;
+  v9 = y - 1.0;
+  origin.z = v9;
+  origin.x = z - 1.0;
+  z = origin.x;
+  if ( !engine->IsBoxInViewCluster(engine, (Vector *)&origin.y, (const Vector *)&v12) )
+    return 0;
+  v12 = x + 1.0;
+  v13 = v6;
+  v14 = v7;
+  v8 = x - 1.0;
+  origin.y = v8;
+  origin.z = v9;
+  z = origin.x;
+  return !engine->CullBox(engine, (Vector *)&origin.y, (const Vector *)&v12);
+}

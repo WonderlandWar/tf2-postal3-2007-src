@@ -1,0 +1,41 @@
+class CFogController : public CLogicalEntity
+{
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public void CFogController(class CFogController & );
+    public void CFogController();
+    public void ~CFogController();
+    public void Activate();
+	
+    public void InputSetStartDist(struct inputdata_t & );
+    public void InputSetEndDist(struct inputdata_t & );
+    public void InputTurnOn(struct inputdata_t & );
+    public void InputTurnOff(struct inputdata_t & );
+    public void InputSetColor(struct inputdata_t & );
+    public void InputSetColorSecondary(struct inputdata_t & );
+    public void InputSetFarZ(struct inputdata_t & );
+    public void InputSetAngles(struct inputdata_t & );
+    public void InputSetMaxDensity(struct inputdata_t & );
+	
+    public void InputSetColorLerpTo(struct inputdata_t & );
+    public void InputSetColorSecondaryLerpTo(struct inputdata_t & );
+    public void InputSetStartDistLerpTo(struct inputdata_t & );
+    public void InputSetEndDistLerpTo(struct inputdata_t & );
+	
+    public void InputStartFogTransition(struct inputdata_t & );
+	
+    public int DrawDebugTextOverlays();
+	
+    public void SetLerpValues();
+    public void Spawn();
+	
+    public bool IsMaster();
+	
+    public struct fogparams_t m_fog;
+    public bool m_bUseAngles;
+    public int m_iChangedVariables;
+    public class CFogController & operator=(class CFogController & );
+    public void __local_vftable_ctor_closure();
+    public void * __vecDelDtor(unsigned int );
+};

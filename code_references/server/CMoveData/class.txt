@@ -1,0 +1,33 @@
+class CMoveData
+{
+    public bool m_bFirstRunOfFunctions;
+	
+    public class CBaseHandle m_nPlayerHandle;
+	
+    public int m_nImpulseCommand;
+	public class QAngle m_vecViewAngles;
+    public class QAngle m_vecAbsViewAngles;
+	public int m_nButtons;
+    public int m_nOldButtons;
+    public float m_flForwardMove;
+    public float m_flSideMove;
+    public float m_flUpMove;
+	
+    public float m_flMaxSpeed;
+    public float m_flClientMaxSpeed;
+	
+    public class Vector m_vecVelocity;
+    public class QAngle m_vecAngles;
+    public class QAngle m_vecOldAngles;	
+    public class Vector m_vecAbsOrigin;
+	
+    public float m_outStepHeight;
+    public class Vector m_outWishVel;
+    public class Vector m_outJumpVel;
+	
+    public class Vector m_vecConstraintCenter;
+    public float m_flConstraintRadius;
+    public float m_flConstraintWidth;
+    public float m_flConstraintSpeedFactor;
+	
+};

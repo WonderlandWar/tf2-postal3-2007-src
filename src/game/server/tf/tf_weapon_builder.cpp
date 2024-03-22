@@ -110,9 +110,6 @@ bool CTFWeaponBuilder::CanDeploy( void )
 //-----------------------------------------------------------------------------
 bool CTFWeaponBuilder::Deploy( void )
 {
-	m_iViewModelIndex = modelinfo->GetModelIndex( GetViewModel( 0 ) );
-	m_iWorldModelIndex = modelinfo->GetModelIndex( GetWorldModel() );
-
 	bool bDeploy = BaseClass::Deploy();
 
 	if ( bDeploy )
@@ -127,6 +124,8 @@ bool CTFWeaponBuilder::Deploy( void )
 			return false;
 
 		pPlayer->SetNextAttack( gpGlobals->curtime );
+
+		m_iWorldModelIndex = modelinfo->GetModelIndex( GetWorldModel() );
 
 		m_flNextDenySound = 0;
 
@@ -145,9 +144,10 @@ bool CTFWeaponBuilder::Deploy( void )
 
 Activity CTFWeaponBuilder::GetDrawActivity( void )
 {
-	// sapper used to call different draw animations , one when invis and one when not.
-	// now you can go invis *while* deploying, so let's always use the one-handed deploy.
-	if ( GetType() == OBJ_ATTACHMENT_SAPPER )
+	CTFPlayer *pOwner = ToTFPlayer( GetOwner() );
+
+	// hax alert! use the one handed sapper deploy if we're invis
+	if ( pOwner && pOwner->m_Shared.InCond( TF_COND_STEALTHED ) && GetType() == OBJ_ATTACHMENT_SAPPER )
 	{
 		return ACT_VM_DRAW_DEPLOYED;
 	}
@@ -310,13 +310,11 @@ void CTFWeaponBuilder::SecondaryAttack( void )
 	if ( !pOwner )
 		return;
 
-	if ( !CanAttack() )
-		return;
-
 	if ( pOwner->DoClassSpecialSkill() )
-		return;
-	
-	if ( m_iBuildState == BS_PLACING )
+	{
+		// intentionally blank
+	}
+	else if ( m_iBuildState == BS_PLACING )
 	{
 		if ( m_hObjectBeingBuilt )
 		{

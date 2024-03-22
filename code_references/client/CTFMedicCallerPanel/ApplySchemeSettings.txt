@@ -1,0 +1,14 @@
+void __thiscall CTFMedicCallerPanel::ApplySchemeSettings(CTFMedicCallerPanel *this, vgui::IScheme *pScheme)
+{
+  IMaterial *m_pArrowMaterial; // ecx
+  IMaterial *v4; // eax
+
+  vgui::Panel::ApplySchemeSettings(this, pScheme);
+  this->LoadControlSettings(this, "resource/UI/MedicCallerPanel.res", 0, 0);
+  m_pArrowMaterial = this->m_pArrowMaterial;
+  if ( m_pArrowMaterial )
+    m_pArrowMaterial->DecrementReferenceCount(m_pArrowMaterial);
+  v4 = materials->FindMaterial(materials, "HUD/medic_arrow", "VGUI textures", 1, 0);
+  this->m_pArrowMaterial = v4;
+  v4->IncrementReferenceCount(v4);
+}

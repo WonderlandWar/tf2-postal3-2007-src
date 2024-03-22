@@ -1,0 +1,63 @@
+void __thiscall CBasePlayer::PlayStepSound(
+        CBasePlayer *this,
+        Vector *vecOrigin,
+        surfacedata_t *psurface,
+        float fvol,
+        bool force)
+{
+  int m_nStepside; // eax
+  int v7; // esi
+  IPhysicsSurfaceProps *v8; // eax
+  const char *v9; // eax
+  edict_t *m_pPev; // eax
+  int v11; // eax
+  CRecipientFilter filter; // [esp+4h] [ebp-110h] BYREF
+  EmitSound_t ep; // [esp+24h] [ebp-F0h] BYREF
+  CSoundParameters params; // [esp+68h] [ebp-ACh] BYREF
+  int v15; // [esp+10Ch] [ebp-8h]
+
+  if ( gpGlobals->maxClients <= 1 || 0.0 != sv_footsteps.m_pParent->m_fValue )
+  {
+    if ( psurface )
+    {
+      m_nStepside = this->m_Local.m_nStepside;
+      v7 = m_nStepside ? psurface->sounds.stepleft : psurface->sounds.stepright;
+      this->m_Local.m_nStepside = m_nStepside == 0;
+      if ( (_WORD)v7 )
+      {
+        v8 = IMoveHelper::sm_pSingleton->GetSurfaceProps(IMoveHelper::sm_pSingleton);
+        v9 = v8->GetString(v8, v7);
+        *(float *)&params.pitch = 1.0;
+        params.pitchlow = 100;
+        params.pitchhigh = 100;
+        params.soundlevel = SNDLVL_100dB;
+        params.volume = 0.0;
+        *(_DWORD *)&params.play_to_owner_only = 75;
+        params.soundname[4] = 0;
+        LOBYTE(params.count) = 0;
+        *(_DWORD *)params.soundname = 0;
+        v15 = 0;
+        if ( CBaseEntity::GetParametersForSound(v9, (CSoundParameters *)&params.volume, 0) )
+        {
+          CRecipientFilter::CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+          CRecipientFilter::AddRecipientsByPAS((CRecipientFilter *)&filter.m_bReliable, vecOrigin);
+          if ( gpGlobals->maxClients > 1 )
+            CRecipientFilter::RemoveRecipientsByPVS((CRecipientFilter *)&filter.m_bReliable, vecOrigin);
+          EmitSound_t::EmitSound_t((EmitSound_t *)&ep.m_pSoundName);
+          *(float *)&ep.m_SoundLevel = fvol;
+          ep.m_nFlags = *(_DWORD *)&params.play_to_owner_only;
+          LODWORD(ep.m_flVolume) = &params.soundname[4];
+          m_pPev = this->m_Network.m_pPev;
+          ep.m_pSoundName = (const char *)4;
+          ep.m_nPitch = 0;
+          ep.m_pOrigin = (const Vector *)params.pitchlow;
+          LODWORD(ep.m_flSoundTime) = vecOrigin;
+          v11 = engine->IndexOfEdict(engine, m_pPev);
+          CBaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, v11, (const EmitSound_t *)&ep.m_pSoundName);
+          CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)&ep.m_UtlVecSoundOrigin.m_Memory.m_nAllocationCount);
+          CRecipientFilter::~CRecipientFilter((CRecipientFilter *)&filter.m_bReliable);
+        }
+      }
+    }
+  }
+}

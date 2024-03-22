@@ -1,0 +1,36 @@
+void __thiscall CTFMedicCallerPanel::CTFMedicCallerPanel(
+        CTFMedicCallerPanel *this,
+        vgui::Panel *parent,
+        const char *name)
+{
+  vgui::PanelMessageMap *v4; // edi
+  PanelAnimationMap *v5; // edi
+  vgui::PanelKeyBindingMap *v6; // edi
+
+  vgui::EditablePanel::EditablePanel(this, parent, name);
+  this->__vftable = (CTFMedicCallerPanel_vtbl *)&CTFMedicCallerPanel::`vftable';
+  if ( !`CTFMedicCallerPanel::ChainToMap'::`2'::chained )
+  {
+    `CTFMedicCallerPanel::ChainToMap'::`2'::chained = 1;
+    v4 = vgui::FindOrAddPanelMessageMap("CTFMedicCallerPanel");
+    v4->pfnClassName = CTFMedicCallerPanel::GetPanelClassName;
+    v4->baseMap = vgui::FindOrAddPanelMessageMap("vgui::EditablePanel");
+  }
+  if ( !`CTFMedicCallerPanel::ChainToAnimationMap'::`2'::chained )
+  {
+    `CTFMedicCallerPanel::ChainToAnimationMap'::`2'::chained = 1;
+    v5 = FindOrAddPanelAnimationMap("CTFMedicCallerPanel");
+    v5->pfnClassName = CTFMedicCallerPanel::GetPanelClassName;
+    v5->baseMap = FindOrAddPanelAnimationMap("vgui::EditablePanel");
+  }
+  if ( !`CTFMedicCallerPanel::KB_ChainToMap'::`2'::chained )
+  {
+    `CTFMedicCallerPanel::KB_ChainToMap'::`2'::chained = 1;
+    v6 = vgui::FindOrAddPanelKeyBindingMap("CTFMedicCallerPanel");
+    v6->pfnClassName = CTFMedicCallerPanel::GetPanelClassName;
+    v6->baseMap = vgui::FindOrAddPanelKeyBindingMap("vgui::EditablePanel");
+  }
+  this->m_hPlayer.m_Index = -1;
+  this->m_pArrowMaterial = 0;
+  this->m_bDrawLeftArrow = 0;
+}

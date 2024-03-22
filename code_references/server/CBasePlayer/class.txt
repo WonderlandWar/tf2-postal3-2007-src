@@ -1,0 +1,874 @@
+class CBasePlayer : public CBaseCombatCharacter
+{
+    protected struct edict_t * s_PlayerEdict;
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CBasePlayer(class CBasePlayer & );
+    public void CBasePlayer();
+    public void ~CBasePlayer();
+	
+    public class IPlayerInfo * GetPlayerInfo();
+    public class IBotController * GetBotController();
+	
+    public void UpdateOnRemove();
+	
+    public class CBasePlayer * CreatePlayer(char * ,struct edict_t * );
+	
+    public void CreateViewModel(int );
+    public class CBaseViewModel * GetViewModel(int );
+    public void HideViewModels();
+    public void DestroyViewModels();
+	
+    public class CPlayerState * PlayerData();
+	
+    public int RequiredEdictIndex();
+	
+    public void LockPlayerInPlace();
+    public void UnlockPlayer();
+	
+    public void DrawDebugGeometryOverlays();
+	
+    public void SetupVisibility(class CBaseEntity * ,unsigned int * ,int );
+    public int UpdateTransmitState();
+    public int ShouldTransmit(class CCheckTransmitInfo * );
+	
+    public bool WantsLagCompensationOnEntity(class CBasePlayer * ,class CUserCmd * ,class CBitVec<2048> * );
+	
+    public void Spawn();
+    public void Activate();
+    public void SharedSpawn();
+    public void ForceRespawn();
+	
+    public void InitialSpawn();
+    public void InitHUD();
+    public void ShowViewPortPanel(char * ,bool ,class KeyValues * );
+	
+    public void PlayerDeathThink();
+	
+    public void Jump();
+    public void Duck();
+	
+    public char * GetTracerType();
+    public void MakeTracer(class Vector & ,class CGameTrace & ,int );
+    public void DoImpactEffect(class CGameTrace & ,int );
+	
+    public void AddToPlayerSimulationList(class CBaseEntity * );
+    public void RemoveFromPlayerSimulationList(class CBaseEntity * );
+    public void SimulatePlayerSimulatedEntities();
+    public void ClearPlayerSimulationList();
+	
+    public void PhysicsSimulate();
+	
+    public void ForceSimulation();
+	
+    public unsigned int PhysicsSolidMaskForEntity();
+	
+    public void PreThink();
+    public void PostThink();
+    public int TakeHealth(float ,int );
+    public void TraceAttack(class CTakeDamageInfo & ,class Vector & ,class CGameTrace * );
+    public bool ShouldTakeDamageInCommentaryMode(class CTakeDamageInfo & );
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    public void DamageEffect(float ,int );
+	
+    public void OnDamagedByExplosion(class CTakeDamageInfo & );
+	
+    public void SetBonusProgress(int );
+    public void SetBonusChallenge(int );
+	
+    public int GetBonusProgress();
+    public int GetBonusChallenge();
+	
+    public class Vector EyePosition();
+    public class QAngle & EyeAngles();
+    public void EyePositionAndVectors(class Vector * ,class Vector * ,class Vector * ,class Vector * );
+    public class QAngle & LocalEyeAngles();
+    public void EyeVectors(class Vector * ,class Vector * ,class Vector * );
+    public void CacheVehicleView();
+	
+    public void SnapEyeAngles(class QAngle & );
+	
+    public class QAngle BodyAngles();
+    public class Vector BodyTarget(class Vector & ,bool );
+    public bool ShouldFadeOnDeath();
+	
+    public struct impactdamagetable_t & GetPhysicsImpactDamageTable();
+    public int OnTakeDamage_Alive(class CTakeDamageInfo & );
+    public void Event_Killed(class CTakeDamageInfo & );
+    public void Event_KilledOther(class CBaseEntity * ,class CTakeDamageInfo & );
+	
+    public void Event_Dying();
+	
+    public bool IsHLTV();
+    public bool IsPlayer();
+    public bool IsNetClient();
+	
+    public bool IsFakeClient();
+	
+    public int GetClientIndex();
+	
+    public char * GetPlayerName();
+    public void SetPlayerName(char * );
+	
+    public int GetUserID();
+    public char * GetNetworkIDString();
+    public const class Vector GetPlayerMins();
+    public const class Vector GetPlayerMaxs();
+	
+    public void VelocityPunch(class Vector & );
+    public void ViewPunch(class QAngle & );
+    public void ViewPunchReset(float );
+    public void ShowViewModel(bool );
+    public void ShowCrosshair(bool );
+	
+    public void CalcView(class Vector & ,class QAngle & ,float & ,float & ,float & );
+	
+    public void SmoothViewOnStairs(class Vector & );
+    public float CalcRoll(class QAngle & ,class Vector & ,float ,float );
+    public void CalcViewRoll(class QAngle & );
+	
+    public int Save(class ISave & );
+    public int Restore(class IRestore & );
+    public bool ShouldSavePhysics();
+    public void OnRestore();
+	
+    public void PackDeadPlayerItems();
+    public void RemoveAllItems(bool );
+    public bool IsDead();
+	
+    public bool HasPhysicsFlag(unsigned int );
+	
+    public class Vector Weapon_ShootPosition();
+    public bool Weapon_CanUse(class CBaseCombatWeapon * );
+    public void Weapon_Equip(class CBaseCombatWeapon * );
+    public void Weapon_Drop(class CBaseCombatWeapon * ,class Vector * ,class Vector * );
+    public bool Weapon_Switch(class CBaseCombatWeapon * ,int );
+    public void Weapon_SetLast(class CBaseCombatWeapon * );
+    public bool Weapon_ShouldSetLast(class CBaseCombatWeapon * ,class CBaseCombatWeapon * );
+    public bool Weapon_ShouldSelectItem(class CBaseCombatWeapon * );
+    public void Weapon_DropSlot(int );
+    public class CBaseCombatWeapon * Weapon_GetLast();
+	
+    public bool HasAnyAmmoOfType(int );
+	
+    public void UpdateClientData();
+    public void RumbleEffect(unsigned int ,unsigned int ,unsigned int );
+	
+    public int ObjectCaps();
+    public void Precache();
+    public bool IsOnLadder();
+    public void ExitLadder();
+    public struct surfacedata_t * GetLadderSurface(class Vector & );
+	
+    public void SetFlashlightEnabled(bool );
+    public int FlashlightIsOn();
+    public void FlashlightTurnOn();
+    public void FlashlightTurnOff();
+    public bool IsIlluminatedByFlashlight(class CBaseEntity * ,float * );
+	
+    public void UpdatePlayerSound();
+    public void UpdateStepSound(struct surfacedata_t * ,class Vector & ,class Vector & );
+    public void PlayStepSound(class Vector & ,struct surfacedata_t * ,float ,bool );
+    public void GetStepSoundVelocities(float * ,float * );
+    public void SetStepSoundTime(enum stepsoundtimes_t ,bool );
+    public void DeathSound(class CTakeDamageInfo & );
+	
+    public enum Class_T Classify();
+    public void SetAnimation(enum PLAYER_ANIM );
+    public void SetWeaponAnimType(char * );
+	
+    public void ImpulseCommands();
+    public void CheatImpulseCommands(int );
+    public bool ClientCommand(class CCommand & );
+	
+    public void NotifySinglePlayerGameEnding();
+    public bool IsSinglePlayerGameEnding();
+	
+    public bool StartObserverMode(int );
+    public void StopObserverMode();
+    public bool ModeWantsSpectatorGUI(int );
+    public bool SetObserverMode(int );
+    public int GetObserverMode();
+    public int GetObserverMode();
+    public bool SetObserverTarget(class CBaseEntity * );
+    public void ObserverUse(bool );
+    public class CBaseEntity * GetObserverTarget();
+    public class CBaseEntity * GetObserverTarget();
+    public class CBaseEntity * FindNextObserverTarget(bool );
+    public int GetNextObserverSearchStartPoint(bool );
+    public bool IsValidObserverTarget(class CBaseEntity * );
+    public void CheckObserverSettings();
+    public void JumptoPosition(class Vector & ,class QAngle & );
+    public void ForceObserverMode(int );
+    public void ResetObserverMode();
+    public void ValidateCurrentObserverTarget();
+    public void AttemptToExitFreezeCam();
+	
+    public bool StartReplayMode(float ,float ,int );
+    public void StopReplayMode();
+    public int GetDelayTicks();
+    public int GetReplayEntity();
+	
+    public void CreateCorpse();
+    public class CBaseEntity * EntSelectSpawnPoint();
+	
+    public bool IsInAVehicle();
+    public bool CanEnterVehicle(class IServerVehicle * ,int );
+    public bool GetInVehicle(class IServerVehicle * ,int );
+    public void LeaveVehicle(class Vector & ,class QAngle & );
+    public int GetVehicleAnalogControlBias();
+    public void SetVehicleAnalogControlBias(int );
+	
+    public void OnVehicleStart();
+    public void OnVehicleEnd(class Vector & );
+    public class IServerVehicle * GetVehicle();
+    public class CBaseEntity * GetVehicleEntity();
+    public bool UsingStandardWeaponsInVehicle();
+	
+    public void AddPoints(int ,bool );
+    public void AddPointsToTeam(int ,bool );
+    public bool BumpWeapon(class CBaseCombatWeapon * );
+    public bool RemovePlayerItem(class CBaseCombatWeapon * );
+    public class CBaseEntity * HasNamedPlayerItem(char * );
+    public bool HasWeapons();
+    public void SelectLastItem();
+    public void SelectItem(char * ,int );
+    public void ItemPreFrame();
+    public void ItemPostFrame();
+    public class CBaseEntity * GiveNamedItem(char * ,int );
+    public void EnableControl(bool );
+    public void CheckTrainUpdate();
+    public void AbortReload();
+	
+    public void SendAmmoUpdate();
+	
+    public void WaterMove();
+    public float GetWaterJumpTime();
+    public void SetWaterJumpTime(float );
+    public float GetSwimSoundTime();
+    public void SetSwimSoundTime(float );
+	
+    public void SetPlayerUnderwater(bool );
+    public void UpdateUnderwaterState();
+    public bool IsPlayerUnderwater();
+	
+    public bool CanBreatheUnderwater();
+    public void PlayerUse();
+    public void PlayUseDenySound();
+	
+    public class CBaseEntity * FindUseEntity();
+    public bool IsUseableEntity(class CBaseEntity * ,unsigned int );
+    public bool ClearUseEntity();
+    public class CBaseEntity * DoubleCheckUseNPC(class CBaseEntity * ,class Vector & ,class Vector & );
+	
+    public bool CanPickupObject(class CBaseEntity * ,float ,float );
+    public void PickupObject(class CBaseEntity * ,bool );
+    public void ForceDropOfCarriedPhysObjects(class CBaseEntity * );
+    public float GetHeldObjectMass(class IPhysicsObject * );
+	
+    public void CheckSuitUpdate();
+    public void SetSuitUpdate(char * ,int ,int );
+    public void UpdateGeigerCounter();
+    public void CheckTimeBasedDamage();
+	
+    public void ResetAutoaim();
+	
+    public void GetAutoaimVector(struct autoaim_params_t & );
+    public class Vector GetAutoaimVector(float ,float );
+    public class Vector GetAutoaimVector(float );
+	
+    public float GetAutoaimScore(class Vector & ,class Vector & ,class Vector & ,class CBaseEntity * ,float );
+    public class QAngle AutoaimDeflection(class Vector & ,struct autoaim_params_t & );
+    public bool ShouldAutoaim();
+    public void SetTargetInfo(class Vector & ,float );
+	
+    public void SetViewEntity(class CBaseEntity * );
+    public class CBaseEntity * GetViewEntity();
+	
+    public void ForceClientDllUpdate();
+	
+    public void DeathMessage(class CBaseEntity * );
+	
+    public void ProcessUsercmds(class CUserCmd * ,int ,int ,int ,bool );
+	
+    public void AvoidPhysicsProps(class CUserCmd * );
+	
+    public void PlayerRunCommand(class CUserCmd * ,class IMoveHelper * );
+    public void RunNullCommand();
+    public class CUserCmd * GetCurrentCommand();
+	
+    public void ChangeTeam(int );
+	
+    public bool CanHearAndReadChatFrom(class CBasePlayer * );
+    public bool CanSpeak();
+	
+    public struct audioparams_t & GetAudioParams();
+	
+    public void ModifyOrAppendPlayerCriteria(class AI_CriteriaSet & );
+	
+    public class QAngle & GetPunchAngle();
+    public void SetPunchAngle(class QAngle & );
+	
+    public void DoMuzzleFlash();
+	
+    public class CNavArea * GetLastKnownArea();
+    public char * GetLastKnownPlaceName();
+	
+    public void CheckChatText(char * ,int );
+	
+    public void CreateRagdollEntity();
+	
+    public void HandleAnimEvent(struct animevent_t * );
+	
+    public void SetupVPhysicsShadow(class CPhysCollide * ,char * ,class CPhysCollide * ,char * );
+    public class IPhysicsPlayerController * GetPhysicsController();
+    public void VPhysicsCollision(int ,struct gamevcollisionevent_t * );
+    public void VPhysicsUpdate(class IPhysicsObject * );
+    public void VPhysicsShadowUpdate(class IPhysicsObject * );
+    public bool IsFollowingPhysics();
+    public bool IsRideablePhysics(class IPhysicsObject * );
+    public class IPhysicsObject * GetGroundVPhysics();
+	
+    public void Touch(class CBaseEntity * );
+    public void SetTouchedPhysics(bool );
+    public bool TouchedPhysics();
+    public class Vector GetSmoothedVelocity();
+	
+    public void InitVCollision();
+    public void VPhysicsDestroyObject();
+    public void SetVCollisionState(int );
+    public void PostThinkVPhysics();
+    public void UpdatePhysicsShadowToCurrentPosition();
+    public void UpdateVPhysicsPosition(class Vector & ,class Vector & ,float );
+	
+    public class CHintSystem * Hints();
+    public bool ShouldShowHints();
+    public void SetShowHints(bool );
+    public void HintMessage(char * );
+    public bool HintMessage(int ,bool );
+    public void StartHintTimer(int );
+    public void StopHintTimer(int );
+    public void RemoveHintTimer(int );
+	
+    public int FragCount();
+    public int DeathCount();
+    public bool IsConnected();
+    public bool IsDisconnecting();
+    public bool IsSuitEquipped();
+    public int ArmorValue();
+    public bool HUDNeedsRestart();
+    public float MaxSpeed();
+    public enum Activity GetActivity();
+    public void SetActivity(enum Activity );
+    public bool IsPlayerLockedInPlace();
+    public bool IsObserver();
+    public bool IsOnTarget();
+    public float MuzzleFlashTime();
+    public float PlayerDrownTime();
+	
+    public bool IsReadyToPlay();
+    public bool IsReadyToSpawn();
+    public bool ShouldGainInstantSpawn();
+    public void ResetPerRoundStats();
+    public void AllowInstantSpawn();
+	
+    public void ResetScores();
+    public void ResetFragCount();
+    public void IncrementFragCount(int );
+	
+    public void ResetDeathCount();
+    public void IncrementDeathCount(int );
+	
+    public void SetArmorValue(int );
+    public void IncrementArmorValue(int ,int );
+	
+    public void SetConnected(enum PlayerConnectedState );
+    public void EquipSuit(bool );
+    public void RemoveSuit();
+    public void SetMaxSpeed(float );
+	
+    public void NotifyNearbyRadiationSource(float );
+	
+    public void SetAnimationExtension(char * );
+	
+    public void SetAdditionalPVSOrigin(class Vector & );
+    public void SetCameraPVSOrigin(class Vector & );
+    public void SetMuzzleFlashTime(float );
+    public void SetUseEntity(class CBaseEntity * );
+    public class CBaseEntity * GetUseEntity();
+	
+    public void SetPhysicsFlag(int ,bool );
+	
+    public void AllowImmediateDecalPainting();
+	
+    public void CommitSuicide(class Vector & ,bool );
+    public void CommitSuicide(bool );
+	
+    public void ForceOrigin(class Vector & );
+	
+    public void SetTimeBase(float );
+    public float GetTimeBase();
+    public void SetLastUserCommand(class CUserCmd & );
+    public class CUserCmd * GetLastUserCommand();
+    public bool IsBot();
+	
+    public bool IsPredictingWeapons();
+    public int CurrentCommandNumber();
+    public class CUserCmd * GetCurrentUserCommand();
+	
+    public int GetFOV();
+    public int GetDefaultFOV();
+    public bool SetFOV(class CBaseEntity * ,int ,float ,int );
+    public void SetDefaultFOV(int );
+    public class CBaseEntity * GetFOVOwner();
+    public float GetFOVDistanceAdjustFactor();
+	
+    public int GetImpulse();
+	
+    public void ActivateMovementConstraint(class CBaseEntity * ,class Vector & ,float ,float ,float );
+    public void DeactivateMovementConstraint();
+	
+    public void NotePlayerTalked();
+    public float LastTimePlayerTalked();
+	
+    public void DisableButtons(int );
+    public void EnableButtons(int );
+    public void ForceButtons(int );
+    public void UnforceButtons(int );
+	
+    public void InputSetHealth(struct inputdata_t & );
+    public void InputSetHUDVisibility(struct inputdata_t & );
+	
+    public struct surfacedata_t * GetSurfaceData();
+    public void SetLadderNormal(class Vector );
+	
+    public class CAI_Expresser * GetExpresser();
+	
+    private int GetCommandContextCount();
+    private class CCommandContext * GetCommandContext(int );
+    private class CCommandContext * AllocCommandContext();
+    private void RemoveCommandContext(int );
+    private void RemoveAllCommandContexts();
+	
+    private int DetermineSimulationTicks();
+    private void AdjustPlayerTimeBase(int );
+	
+	
+    public int m_StuckLast;
+	
+    class NetworkVar_m_Local : public CPlayerLocalData
+    {
+        public class CBasePlayer::NetworkVar_m_Local & operator=(class CBasePlayer::NetworkVar_m_Local & );
+        public void CopyFrom(class CPlayerLocalData & );
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged();
+        public void NetworkVar_m_Local(class CBasePlayer::NetworkVar_m_Local & );
+        public void NetworkVar_m_Local();
+    };
+    public int GetOffset_m_Local();
+    public class CBasePlayer::NetworkVar_m_Local m_Local;
+    public void InitFogController();
+    public void UpdateFogController();
+    public void UpdateFogBlend();
+    public void InputSetFogController(struct inputdata_t & );
+	
+    public class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_hTriggerSoundscapeList;
+	
+    class NetworkVar_pl : public CPlayerState
+    {
+        public class CBasePlayer::NetworkVar_pl & operator=(class CBasePlayer::NetworkVar_pl & );
+        public void CopyFrom(class CPlayerState & );
+        public void NetworkStateChanged(void * );
+        public void NetworkStateChanged();
+        public void NetworkVar_pl(class CBasePlayer::NetworkVar_pl & );
+        public void NetworkVar_pl();
+        public void ~NetworkVar_pl();
+        public void __local_vftable_ctor_closure();
+        public void * __vecDelDtor(unsigned int );
+    };
+    public int GetOffset_pl();
+    public class CBasePlayer::NetworkVar_pl pl;
+	
+    public void NetworkStateChanged_m_fFlags(void * );
+    public void NetworkStateChanged_m_fFlags();
+	
+    public void NetworkStateChanged_m_vecViewOffset(void * );
+    public void NetworkStateChanged_m_vecViewOffset();
+    public void NetworkStateChanged_m_flFriction(void * );
+    public void NetworkStateChanged_m_flFriction();
+    public void NetworkStateChanged_m_iAmmo(void * );
+    public void NetworkStateChanged_m_iAmmo();
+	
+    public void NetworkStateChanged_m_hGroundEntity(void * );
+    public void NetworkStateChanged_m_hGroundEntity();
+	
+    public void NetworkStateChanged_m_lifeState(void * );
+    public void NetworkStateChanged_m_lifeState();
+    public void NetworkStateChanged_m_iHealth(void * );
+    public void NetworkStateChanged_m_iHealth();
+    public void NetworkStateChanged_m_vecBaseVelocity(void * );
+    public void NetworkStateChanged_m_vecBaseVelocity();
+    public void NetworkStateChanged_m_nNextThinkTick(void * );
+    public void NetworkStateChanged_m_nNextThinkTick();
+    public void NetworkStateChanged_m_vecVelocity(void * );
+    public void NetworkStateChanged_m_vecVelocity();
+    public void NetworkStateChanged_m_nWaterLevel(void * );
+    public void NetworkStateChanged_m_nWaterLevel();
+	
+    public int m_nButtons;
+    public int m_afButtonPressed;
+    public int m_afButtonReleased;
+    public int m_afButtonLast;
+    public int m_afButtonDisabled;
+    public int m_afButtonForced;
+	
+    class NetworkVar_m_fOnTarget
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<bool,CBasePlayer::NetworkVar_m_fOnTarget> m_fOnTarget;
+	
+    public char m_szAnimExtension[32];
+	
+    public int m_nUpdateRate;
+    public float m_fLerpTime;
+    public bool m_bLagCompensation;
+    public bool m_bPredictWeapons;
+	
+    public float GetDeathTime();
+	
+    public void ClearZoomOwner();
+	
+    private enum Activity m_Activity;
+	
+    protected void CalcPlayerView(class Vector & ,class QAngle & ,float & );
+    protected void CalcVehicleView(class IServerVehicle * ,class Vector & ,class QAngle & ,float & ,float & ,float & );
+    protected void CalcObserverView(class Vector & ,class QAngle & ,float & );
+    protected void CalcViewModelView(class Vector & ,class QAngle & );
+	
+    protected class Vector m_vecAdditionalPVSOrigin;
+	
+    protected class Vector m_vecCameraPVSOrigin;
+	
+    class NetworkVar_m_hUseEntity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hUseEntity> m_hUseEntity;
+	
+    protected int m_iTrain;
+	
+    protected float m_iRespawnFrames;
+    protected unsigned int m_afPhysicsFlags;
+	
+    class NetworkVar_m_hVehicle
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hVehicle> m_hVehicle;
+	
+    protected int m_iVehicleAnalogBias;
+	
+    protected void UpdateButtonState(int );
+	
+    class NetworkVar_m_iBonusProgress
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iBonusProgress> m_iBonusProgress;
+    class NetworkVar_m_iBonusChallenge
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iBonusChallenge> m_iBonusChallenge;
+	
+    protected int m_lastDamageAmount;
+	
+    protected class Vector m_DmgOrigin;
+    protected float m_DmgTake;
+    protected float m_DmgSave;
+    protected int m_bitsDamageType;
+    protected int m_bitsHUDDamage;
+	
+    class NetworkVar_m_flDeathTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flDeathTime> m_flDeathTime;
+    protected float m_flDeathAnimTime;
+	
+    class NetworkVar_m_iObserverMode
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iObserverMode> m_iObserverMode;
+    class NetworkVar_m_iFOV
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iFOV> m_iFOV;
+    class NetworkVar_m_iDefaultFOV
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iDefaultFOV> m_iDefaultFOV;
+    class NetworkVar_m_iFOVStart
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_iFOVStart> m_iFOVStart;
+    class NetworkVar_m_flFOVTime
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flFOVTime> m_flFOVTime;
+	
+    protected int m_iObserverLastMode;
+    class NetworkVar_m_hObserverTarget
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hObserverTarget> m_hObserverTarget;
+    protected bool m_bForcedObserverMode;
+	
+    class NetworkVar_m_hZoomOwner
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hZoomOwner> m_hZoomOwner;
+	
+    protected float m_tbdPrev;
+    protected int m_idrowndmg;
+    protected int m_idrownrestored;
+    protected int m_nPoisonDmg;
+    protected int m_nPoisonRestored;
+	
+    protected unsigned int m_rgbTimeBasedDamage[8];
+	
+    protected int m_vphysicsCollisionState;
+	
+    protected int SpawnArmorValue();
+	
+    protected float m_fNextSuicideTime;
+    protected int m_iSuicideCustomKillFlags;
+	
+    protected float m_fDelay;
+    protected float m_fReplayEnd;
+    protected int m_iReplayEntity;
+	
+    private void HandleFuncTrain();
+	
+    private class CUtlVector<CCommandContext,CUtlMemory<CCommandContext,int> > m_CommandContext;
+	
+    protected class IPhysicsPlayerController * m_pPhysicsController;
+    protected class IPhysicsObject * m_pShadowStand;
+    protected class IPhysicsObject * m_pShadowCrouch;
+    protected class Vector m_oldOrigin;
+    protected class Vector m_vecSmoothedVelocity;
+    protected bool m_touchedPhysObject;
+	
+    private int m_iPlayerSound;
+    private int m_iTargetVolume;
+	
+    private int m_rgItems[5];
+	
+    private float m_flSwimTime;
+    private float m_flDuckTime;
+    private float m_flDuckJumpTime;
+	
+    private float m_flSuitUpdate;
+    private int m_rgSuitPlayList[4];
+    private int m_iSuitPlayNext;
+    private int m_rgiSuitNoRepeat[32];
+    private float m_rgflSuitNoRepeatTime[32];
+	
+    private float m_flgeigerRange;
+    private float m_flgeigerDelay;
+    private int m_igeigerRangePrev;
+	
+    private bool m_fInitHUD;
+    private bool m_fGameHUDInitialized;
+    private bool m_fWeapon;
+	
+    private int m_iUpdateTime;
+    private int m_iClientBattery;
+	
+    private class QAngle m_vecAutoAim;
+    private int m_lastx;
+    private int m_lasty;
+	
+    private int m_iFrags;
+    private int m_iDeaths;
+	
+    private float m_flNextDecalTime;
+	
+    private enum PlayerConnectedState m_iConnected;
+	
+    private void NetworkStateChanged_m_ArmorValue(void * );
+    private void NetworkStateChanged_m_ArmorValue();
+    class NetworkVar_m_ArmorValue
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_ArmorValue> m_ArmorValue;
+    private float m_AirFinished;
+    private float m_PainFinished;
+	
+    private int m_iPlayerLocked;
+	
+    class NetworkVar_m_hViewModel
+    {
+        public class CHandle<CBaseViewModel> & operator[](int );
+        public class CHandle<CBaseViewModel> & Get(int );
+        public class CHandle<CBaseViewModel> & GetForModify(int );
+        public void Set(int ,class CHandle<CBaseViewModel> & );
+        public class CHandle<CBaseViewModel> * Base();
+        public int Count();
+        protected void NetworkStateChanged(int );
+        protected class CHandle<CBaseViewModel> m_Value[2];
+        public void NetworkVar_m_hViewModel(class CBasePlayer::NetworkVar_m_hViewModel & );
+        public void NetworkVar_m_hViewModel();
+    };
+    protected class CBasePlayer::NetworkVar_m_hViewModel m_hViewModel;
+	
+    protected class CUserCmd m_LastCmd;
+    protected class CUserCmd * m_pCurrentCommand;
+	
+    protected float m_flStepSoundTime;
+	
+    protected bool m_bAllowInstantSpawn;
+	
+    class NetworkVar_m_flMaxspeed
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flMaxspeed> m_flMaxspeed;
+	
+    private float m_flWaterJumpTime;
+    private class Vector m_vecWaterJumpVel;
+    private int m_nImpulse;
+    private float m_flSwimSoundTime;
+    private class Vector m_vecLadderNormal;
+    private unsigned int m_fDisabledInputMask;
+	
+    private float m_flFlashTime;
+    private int m_nDrownDmgRate;
+	
+    private int m_nNumCrouches;
+    private bool m_bDuckToggled;
+	
+    public bool GetToggledDuckState();
+    public void ToggleDuck();
+    public float GetStickDist();
+	
+    public float m_flForwardMove;
+    public float m_flSideMove;
+    public int m_nNumCrateHudHints;
+	
+    private class Vector m_vForcedOrigin;
+    private bool m_bForceOrigin;
+	
+    class NetworkVar_m_nTickBase
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,CBasePlayer::NetworkVar_m_nTickBase> m_nTickBase;
+	
+    private bool m_bGamePaused;
+    private float m_fLastPlayerTalkTime;
+	
+    class NetworkVar_m_hLastWeapon
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<CHandle<CBaseCombatWeapon>,CBasePlayer::NetworkVar_m_hLastWeapon> m_hLastWeapon;
+	
+    private class CUtlVector<CHandle<CBaseEntity>,CUtlMemory<CHandle<CBaseEntity>,int> > m_SimulatedByThisPlayer;
+	
+    private float m_flOldPlayerZ;
+    private float m_flOldPlayerViewOffsetZ;
+	
+    private bool m_bPlayerUnderwater;
+	
+    private class CHandle<CBaseEntity> m_hViewEntity;
+	
+    class NetworkVar_m_hConstraintEntity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkHandleBase<CBaseEntity,CBasePlayer::NetworkVar_m_hConstraintEntity> m_hConstraintEntity;
+    class NetworkVar_m_vecConstraintCenter
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<Vector,CBasePlayer::NetworkVar_m_vecConstraintCenter> m_vecConstraintCenter;
+    class NetworkVar_m_flConstraintRadius
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flConstraintRadius> m_flConstraintRadius;
+    class NetworkVar_m_flConstraintWidth
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flConstraintWidth> m_flConstraintWidth;
+    class NetworkVar_m_flConstraintSpeedFactor
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flConstraintSpeedFactor> m_flConstraintSpeedFactor;
+	
+    private char m_szNetname[32];
+	
+    protected bool IsDucked();
+    protected bool IsDucking();
+    protected float GetStepSize();
+	
+    class NetworkVar_m_flLaggedMovementValue
+    {
+        public void NetworkStateChanged(void * );
+    };
+    protected class CNetworkVarBase<float,CBasePlayer::NetworkVar_m_flLaggedMovementValue> m_flLaggedMovementValue;
+	
+    protected class Vector m_vNewVPhysicsPosition;
+    protected class Vector m_vNewVPhysicsVelocity;
+	
+    protected class Vector m_vecVehicleViewOrigin;
+    protected class QAngle m_vecVehicleViewAngles;
+    protected float m_flVehicleViewFOV;
+    protected int m_nVehicleViewSavedFrame;
+	
+    protected class CNavArea * m_lastNavArea;
+    class NetworkVar_m_szLastPlaceName
+    {
+        public char * operator const char *();
+        public char * Get();
+        public char * GetForModify();
+        protected void NetworkStateChanged();
+        private char m_Value[18];
+    };
+    protected class CBasePlayer::NetworkVar_m_szLastPlaceName m_szLastPlaceName;
+	
+    protected char m_szNetworkIDString[64];
+    protected class CPlayerInfo m_PlayerInfo;
+	
+    protected int m_surfaceProps;
+    protected struct surfacedata_t * m_pSurfaceData;
+    protected float m_surfaceFriction;
+    protected char m_chTextureType;
+    protected char m_chPreviousTextureType;
+	
+    protected bool m_bSinglePlayerGameEnding;
+	
+    public float GetLaggedMovementValue();
+    public void SetLaggedMovementValue(float );
+	
+    public bool IsAutoKickDisabled();
+    public void DisableAutoKick(bool );
+	
+    private bool m_autoKickDisabled;
+};

@@ -1,0 +1,262 @@
+// local variable allocation has failed, the output may be wrong!
+void __thiscall CBasePlayer::VPhysicsShadowUpdate(CBasePlayer *this, IPhysicsObject *pPhysics)
+{
+  int i; // edi
+  int v4; // eax
+  CAI_BaseNPC *v5; // eax
+  unsigned int m_afPhysicsFlags; // eax
+  IPhysicsObject *GroundVPhysics; // edi
+  CBaseEntity::NetworkVar_m_Collision *p_m_Collision; // edi
+  const Vector *v9; // ebp
+  const Vector *v10; // ebx
+  const Vector *v11; // eax
+  double v12; // st7
+  double v13; // st6
+  double v14; // st5
+  bool v15; // zf
+  double v16; // st5
+  double v17; // st4
+  double v18; // st6
+  double v19; // st5
+  double v20; // st7
+  double x; // st6
+  double v22; // rt1
+  double v23; // st6
+  double v24; // st7
+  const Vector *v25; // eax
+  double v26; // st7
+  double v27; // st6
+  double v28; // rt2
+  double v29; // st6
+  double v30; // st6
+  double z; // st7
+  const Vector *v32; // [esp+8h] [ebp-D0h]
+  const Vector *AbsOrigin; // [esp+Ch] [ebp-CCh]
+  float scale; // [esp+14h] [ebp-C4h]
+  float scalea; // [esp+14h] [ebp-C4h]
+  char dot_3; // [esp+33h] [ebp-A5h]
+  IPhysicsObject *v37; // [esp+34h] [ebp-A4h]
+  float v38; // [esp+34h] [ebp-A4h]
+  float v39; // [esp+34h] [ebp-A4h]
+  Vector newVelocity; // [esp+38h] [ebp-A0h] BYREF
+  Vector newPosition; // [esp+44h] [ebp-94h] BYREF
+  float len; // [esp+50h] [ebp-88h]
+  __int128 dir; // [esp+54h] [ebp-84h] OVERLAPPED BYREF
+  float v44; // [esp+64h] [ebp-74h]
+  Vector lastValidPosition; // [esp+68h] [ebp-70h] BYREF
+  float maxDistErrorSqr; // [esp+74h] [ebp-64h]
+  float maxVelErrorSqr; // [esp+78h] [ebp-60h]
+  CGameTrace trace; // [esp+7Ch] [ebp-5Ch] BYREF
+
+  if ( !sv_turbophysics.m_pParent->m_nValue )
+  {
+    HIBYTE(newVelocity.x) = this->m_pPhysicsController->GetShadowPosition(
+                              this->m_pPhysicsController,
+                              (Vector *)&newPosition.y,
+                              0) > 0;
+    if ( (((int (__thiscall *)(IPhysicsObject *))pPhysics->GetGameFlags)(pPhysics) & 0x40) != 0 )
+    {
+      *(_QWORD *)((char *)&dir + 4) = 0i64;
+      HIDWORD(dir) = 0;
+      v44 = 0.0;
+      lastValidPosition.x = 0.0;
+      PhysGetListOfPenetratingEntities(
+        this,
+        (CUtlVector<CBaseEntity *,CUtlMemory<CBaseEntity *,int> > *)((char *)&dir + 4));
+      for ( i = LODWORD(v44) - 1; i >= 0; --i )
+      {
+        v4 = DWORD1(dir);
+        if ( *(_BYTE *)(*(_DWORD *)(DWORD1(dir) + 4 * i) + 226) == 6 )
+          this->m_touchedPhysObject = 1;
+        v5 = CBaseEntity::MyNPCPointer(*(CBaseEntity **)(v4 + 4 * i));
+        if ( v5 )
+          v5->PlayerPenetratingVPhysics(v5);
+      }
+      CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>::~CUtlVector<CHandle<CAI_DynamicLink>,CUtlMemory<CHandle<CAI_DynamicLink>,int>>((CUtlVector<vgui::CTreeViewListControl::CColumnInfo,CUtlMemory<vgui::CTreeViewListControl::CColumnInfo,int> > *)((char *)&dir + 4));
+    }
+    m_afPhysicsFlags = this->m_afPhysicsFlags;
+    dot_3 = 0;
+    if ( (m_afPhysicsFlags & 0x20) != 0 )
+    {
+      dot_3 = 1;
+      this->m_afPhysicsFlags = m_afPhysicsFlags & 0xFFFFFFDF;
+    }
+    if ( this->m_pPhysicsController->IsInContact(this->m_pPhysicsController) || (this->m_afPhysicsFlags & 0x10) != 0 )
+      this->m_touchedPhysObject = 1;
+    if ( this->IsFollowingPhysics(this) )
+      this->m_touchedPhysObject = 1;
+    if ( this->m_MoveType.m_Value == 8 || this->pl.deadflag.m_Value )
+    {
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      this->m_oldOrigin.x = this->m_vecAbsOrigin.x;
+      this->m_oldOrigin.y = this->m_vecAbsOrigin.y;
+      z = this->m_vecAbsOrigin.z;
+      goto LABEL_71;
+    }
+    if ( 0.0 != phys_timescale.m_pParent->m_fValue && HIBYTE(newVelocity.x) )
+    {
+      GroundVPhysics = CBasePlayer::GetGroundVPhysics(this);
+      v37 = GroundVPhysics;
+      pPhysics->GetPosition(pPhysics, (Vector *)&newPosition.y, 0);
+      this->m_pPhysicsController->GetShadowVelocity(this->m_pPhysicsController, (Vector *)&newVelocity.y);
+      lastValidPosition.y = newPosition.y;
+      lastValidPosition.z = newPosition.z;
+      maxDistErrorSqr = len;
+      if ( physicsshadowupdate_render.m_pParent->m_nValue )
+      {
+        p_m_Collision = &this->m_Collision;
+        v9 = this->m_Collision.OBBMaxs(&this->m_Collision);
+        v10 = this->m_Collision.OBBMins(&this->m_Collision);
+        if ( (this->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        NDebugOverlay::Box(&this->m_vecAbsOrigin, v10, v9, 255, 0, 0, 24, 15.0);
+        v32 = p_m_Collision->OBBMaxs(&this->m_Collision);
+        v11 = p_m_Collision->OBBMins(&this->m_Collision);
+        NDebugOverlay::Box((Vector *)&newPosition.y, v11, v32, 0, 0, 255, 24, 15.0);
+        GroundVPhysics = v37;
+      }
+      if ( (this->m_iEFlags & 0x800) != 0 )
+        CBaseEntity::CalcAbsolutePosition(this);
+      v14 = this->m_vecAbsOrigin.z - len;
+      if ( !this->m_touchedPhysObject && (this->m_fFlags.m_Value & 1) == 0 )
+        v14 = v14 * 0.5;
+      v15 = (this->m_iEFlags & 0x1000) == 0;
+      v13 = this->m_vecAbsOrigin.y - newPosition.z;
+      v12 = this->m_vecAbsOrigin.x - newPosition.y;
+      *(float *)&dir = v12 * v12 + v13 * v13 + v14 * v14;
+      if ( !v15 )
+        CBaseEntity::CalcAbsoluteVelocity(this);
+      v16 = newPosition.x - this->m_vecAbsVelocity.z;
+      v17 = newVelocity.z - this->m_vecAbsVelocity.y;
+      v18 = v17 * v17 + v16 * v16;
+      v19 = newVelocity.y - this->m_vecAbsVelocity.x;
+      v38 = v19 * v19 + v18;
+      maxVelErrorSqr = 4.0;
+      trace.startpos.x = 100.0;
+      if ( CBasePlayer::IsRideablePhysics(this, GroundVPhysics) )
+      {
+        v20 = 1.0;
+        x = 25.0;
+      }
+      else
+      {
+        v20 = maxVelErrorSqr;
+        x = trace.startpos.x;
+      }
+      v22 = x;
+      v23 = v20;
+      v24 = v22;
+      if ( v23 <= *(float *)&dir || v24 <= v38 )
+      {
+        if ( this->m_touchedPhysObject )
+        {
+LABEL_44:
+          if ( v24 <= v38 )
+          {
+            *(Vector *)((char *)&dir + 4) = *CBaseEntity::GetAbsVelocity(this);
+            v26 = pfVectorNormalize((Vector *)((char *)&dir + 4));
+            *(float *)&dir = v26;
+            v27 = *((float *)&dir + 3) * newPosition.x
+                + *((float *)&dir + 2) * newVelocity.z
+                + newVelocity.y * *((float *)&dir + 1);
+            v39 = v27;
+            if ( v27 <= v26 )
+            {
+              v28 = v27;
+              v29 = v26;
+              v26 = v28;
+              v30 = -v29;
+              if ( v30 > v28 )
+              {
+                v26 = v30;
+                v39 = v30;
+              }
+            }
+            else
+            {
+              v39 = v26;
+            }
+            scale = -v26;
+            VectorMA((Vector *)&newVelocity.y, scale, (const Vector *)((char *)&dir + 4), (Vector *)&newVelocity.y);
+            if ( (this->m_afPhysicsFlags & 0x10) != 0 )
+            {
+              scalea = (v39 - *(float *)&dir) * 0.1 + *(float *)&dir - *(float *)&dir;
+              VectorMA((Vector *)&newVelocity.y, scalea, (const Vector *)((char *)&dir + 4), (Vector *)&newVelocity.y);
+            }
+            if ( !CBasePlayer::IsRideablePhysics(this, GroundVPhysics) )
+            {
+              if ( (this->m_afPhysicsFlags & 0x10) == 0 && CBaseEntity::IsSimulatingOnAlternateTicks() )
+              {
+                newVelocity.y = newVelocity.y * 0.5;
+                newVelocity.z = newVelocity.z * 0.5;
+                newPosition.x = 0.5 * newPosition.x;
+              }
+              CBaseEntity::ApplyAbsVelocityImpulse(this, (Vector *)&newVelocity.y);
+            }
+          }
+          UTIL_TraceEntity(
+            this,
+            (Vector *)&newPosition.y,
+            (Vector *)&newPosition.y,
+            0x201400Bu,
+            this,
+            8,
+            (CGameTrace *)&trace.startpos.y);
+          if ( !HIWORD(trace.fractionleftsolid) )
+            CBaseEntity::SetAbsOrigin(this, (Vector *)&newPosition.y);
+          goto LABEL_58;
+        }
+      }
+      else if ( !GroundVPhysics || this->m_touchedPhysObject )
+      {
+        if ( this->m_touchedPhysObject )
+        {
+          AbsOrigin = CBaseEntity::GetAbsOrigin(this);
+          v25 = CBaseEntity::GetAbsOrigin(this);
+          UTIL_TraceEntity(this, v25, AbsOrigin, 0x201400Bu, this, 8, (CGameTrace *)&trace.startpos.y);
+          if ( HIWORD(trace.fractionleftsolid) )
+          {
+            lastValidPosition.y = this->m_oldOrigin.x;
+            lastValidPosition.z = this->m_oldOrigin.y;
+            maxDistErrorSqr = this->m_oldOrigin.z;
+            CBaseEntity::SetAbsOrigin(this, (Vector *)&newPosition.y);
+            goto LABEL_59;
+          }
+        }
+LABEL_58:
+        if ( !dot_3 )
+        {
+LABEL_65:
+          if ( (this->m_iEFlags & 0x800) != 0 )
+            CBaseEntity::CalcAbsolutePosition(this);
+          this->m_oldOrigin.x = this->m_vecAbsOrigin.x;
+          this->m_oldOrigin.y = this->m_vecAbsOrigin.y;
+          z = this->m_vecAbsOrigin.z;
+LABEL_71:
+          this->m_oldOrigin.z = z;
+          return;
+        }
+LABEL_59:
+        if ( (this->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        if ( (this->m_iEFlags & 0x800) != 0 )
+          CBaseEntity::CalcAbsolutePosition(this);
+        UTIL_TraceEntity(
+          this,
+          &this->m_vecAbsOrigin,
+          &this->m_vecAbsOrigin,
+          0x201400Bu,
+          this,
+          8,
+          (CGameTrace *)&trace.startpos.y);
+        if ( HIWORD(trace.fractionleftsolid) )
+          CBaseEntity::SetAbsOrigin(this, (Vector *)&lastValidPosition.y);
+        goto LABEL_65;
+      }
+      if ( !GroundVPhysics )
+        goto LABEL_59;
+      goto LABEL_44;
+    }
+  }
+}

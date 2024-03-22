@@ -1,0 +1,55 @@
+class CPlayerLocalData
+{
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+    public void NetworkStateChanged(void * );
+    public void NetworkStateChanged();
+    public void CPlayerLocalData(class CPlayerLocalData & );
+    public void CPlayerLocalData();
+	
+    public unsigned int m_chAreaBits[32];
+    public unsigned int m_chAreaPortalBits[24];
+	
+    public int m_iHideHUD;
+	
+    public float m_flFOVRate;
+	
+    public bool m_bDucked;
+    public bool m_bDucking;
+    public bool m_bInDuckJump;
+    public float m_flDucktime;
+    public float m_flDuckJumpTime;
+    public float m_flJumpTime;
+    public int m_nStepside;
+    public float m_flFallVelocity;
+    public int m_nOldButtons;
+	
+    public class Vector m_vecClientBaseVelocity;
+    class NetworkVar_m_vecPunchAngle
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVectorBase<QAngle,CPlayerLocalData::NetworkVar_m_vecPunchAngle> m_vecPunchAngle;	
+    public class CInterpolatedVar<QAngle> m_iv_vecPunchAngle;
+	
+    class NetworkVar_m_vecPunchAngleVel
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVectorBase<QAngle,CPlayerLocalData::NetworkVar_m_vecPunchAngleVel> m_vecPunchAngleVel;
+    public class CInterpolatedVar<QAngle> m_iv_vecPunchAngleVel;
+    public bool m_bDrawViewmodel;
+    public bool m_bWearingSuit;
+    public bool m_bPoisoned;
+    public float m_flStepSize;
+    public bool m_bAllowAutoMovement;
+	
+    public struct sky3dparams_t m_skybox3d;
+	
+    public struct fogparams_t m_fog;
+	
+    public struct audioparams_t m_audio;
+	
+    public bool m_bSlowMovement;
+};

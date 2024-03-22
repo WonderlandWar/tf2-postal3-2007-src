@@ -1,0 +1,39 @@
+class CTFWeaponInfo : public FileWeaponInfo_t
+{
+    public void CTFWeaponInfo(class CTFWeaponInfo & );
+    public void CTFWeaponInfo();
+    public void ~CTFWeaponInfo();
+	
+    public void Parse(class KeyValues * ,char * );
+	
+    public struct WeaponData_t & GetWeaponData(int );
+	
+    public struct WeaponData_t m_WeaponData[2];
+	
+    public int m_iWeaponType;
+	
+    public bool m_bGrenade;
+    public float m_flDamageRadius;
+    public float m_flPrimerTime;
+    public bool m_bLowerWeapon;
+    public bool m_bSuppressGrenTimer;
+	
+    public bool m_bHasTeamSkins_Viewmodel;
+    public bool m_bHasTeamSkins_Worldmodel;
+	
+    public char m_szMuzzleFlashModel[128];
+    public float m_flMuzzleFlashModelDuration;
+    public char m_szMuzzleFlashParticleEffect[128];
+	
+    public char m_szTracerEffect[128];
+	
+    public bool m_bDoInstantEjectBrass;
+    public char m_szBrassModel[128];
+	
+    public char m_szExplosionSound[128];
+    public char m_szExplosionEffect[128];
+	
+    public class KeyValues * m_pClassViewModelKV;
+	
+    public bool m_bDontDrop;
+};

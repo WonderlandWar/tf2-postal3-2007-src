@@ -1,0 +1,93 @@
+void __thiscall CGameMovement::PlayerMove(CGameMovement *this)
+{
+  float *p_m_bFirstRunOfFunctions; // eax
+  float *v3; // eax
+  CBasePlayer *v4; // ecx
+  unsigned __int8 m_Value; // al
+  CBasePlayer *player; // ecx
+  CBasePlayer *v7; // ecx
+  CBasePlayer *v8; // eax
+  CBasePlayer *v9; // ecx
+  CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide> *p_m_MoveCollide; // ecx
+  CBasePlayer *v11; // ecx
+  unsigned __int8 v12; // [esp+1Bh] [ebp-5h] BYREF
+  float val; // [esp+1Ch] [ebp-4h] BYREF
+
+  this->CheckParameters(this);
+  p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+  p_m_bFirstRunOfFunctions[29] = 0.0;
+  p_m_bFirstRunOfFunctions += 29;
+  p_m_bFirstRunOfFunctions[1] = 0.0;
+  p_m_bFirstRunOfFunctions[2] = 0.0;
+  v3 = (float *)&this->mv->m_bFirstRunOfFunctions;
+  v3[32] = 0.0;
+  v3 += 32;
+  v3[1] = 0.0;
+  v3[2] = 0.0;
+  IMoveHelper::sm_pSingleton->ResetTouchList(IMoveHelper::sm_pSingleton);
+  this->ReduceTimers(this);
+  AngleVectors(&this->mv->m_vecViewAngles, &this->m_vecForward, &this->m_vecRight, &this->m_vecUp);
+  if ( !CGameMovement::CheckInterval(this, STUCK)
+    || (v4 = this->player, m_Value = v4->m_MoveType.m_Value, m_Value == 8)
+    || m_Value < 2u
+    || m_Value == 10
+    || v4->pl.deadflag.m_Value
+    || !CGameMovement::CheckStuck(this) )
+  {
+    this->CategorizePosition(this);
+    player = this->player;
+    this->m_nOldWaterLevel = player->m_nWaterLevel.m_Value;
+    if ( !CBaseEntity::GetGroundEntity(player) )
+    {
+      v7 = this->player;
+      val = -this->mv->m_vecVelocity.z;
+      CNetworkVarBase<float,CPlayerLocalData::NetworkVar_m_flFallVelocity>::Set(&v7->m_Local.m_flFallVelocity, &val);
+    }
+    this->m_nOnLadder = 0;
+    CGameMovement::CategorizeGroundSurface(this);
+    ((void (__stdcall *)(surfacedata_t *, Vector *, Vector *))this->player->UpdateStepSound)(
+      this->player->m_pSurfaceData,
+      &this->mv->m_vecAbsOrigin,
+      &this->mv->m_vecVelocity);
+    CGameMovement::UpdateDuckJumpEyeOffset(this);
+    this->Duck(this);
+    v8 = this->player;
+    if ( !v8->pl.deadflag.m_Value && (v8->m_fFlags.m_Value & 8) == 0 && !this->LadderMove(this) )
+    {
+      v9 = this->player;
+      if ( v9->m_MoveType.m_Value == 9 )
+      {
+        CBaseEntity::SetMoveType(v9, MOVETYPE_WALK, MOVECOLLIDE_DEFAULT);
+        p_m_MoveCollide = &this->player->m_MoveCollide;
+        v12 = 0;
+        CNetworkVarBase<unsigned char,CBaseEntity::NetworkVar_m_MoveCollide>::Set(p_m_MoveCollide, &v12);
+      }
+    }
+    v11 = this->player;
+    switch ( v11->m_MoveType.m_Value )
+    {
+      case 0u:
+        return;
+      case 1u:
+      case 2u:
+        this->FullWalkMove(this);
+        break;
+      case 4u:
+      case 5u:
+        this->FullTossMove(this);
+        break;
+      case 8u:
+        CGameMovement::FullNoClipMove(this, sv_noclipspeed.m_pParent->m_fValue, sv_noclipaccelerate.m_pParent->m_fValue);
+        break;
+      case 9u:
+        this->FullLadderMove(this);
+        break;
+      case 0xAu:
+        CGameMovement::FullObserverMove(this);
+        break;
+      default:
+        _DevMsg(1, "Bogus pmove player movetype %i on (%i) 0=cl 1=sv\n", v11->m_MoveType.m_Value, 1);
+        break;
+    }
+  }
+}

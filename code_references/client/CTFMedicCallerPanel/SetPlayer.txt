@@ -1,0 +1,13 @@
+void __thiscall CTFMedicCallerPanel::SetPlayer(
+        CTFMedicCallerPanel *this,
+        C_TFPlayer *pPlayer,
+        float flDuration,
+        Vector *vecOffset)
+{
+  if ( pPlayer )
+    this->m_hPlayer.m_Index = pPlayer->GetRefEHandle(pPlayer)->m_Index;
+  else
+    this->m_hPlayer.m_Index = -1;
+  this->m_flRemoveAt = *(float *)(gpGlobals.m_Index + 12) + flDuration;
+  this->m_vecOffset = *vecOffset;
+}

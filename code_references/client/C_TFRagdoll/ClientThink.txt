@@ -1,0 +1,38 @@
+void __thiscall C_TFRagdoll::ClientThink(C_TFRagdoll *this)
+{
+  C_TFRagdoll *this_2; // esi
+  double v3; // st7
+  CNetworkColor32Base<color32_s,C_BaseEntity::NetworkVar_m_clrRender> v4; // eax
+  void (__thiscall *v5)(C_BaseEntity *, float); // eax
+  int val; // [esp+10h] [ebp-4h] BYREF
+
+  this_2 = (C_TFRagdoll *)((char *)this - 12);
+  (*(void (__thiscall **)(float *, _DWORD))(LODWORD(this[-1].m_fDeathTime) + 392))(&this[-1].m_fDeathTime, -1293.0);
+  if ( LOBYTE(this->m_vecRagdollOrigin.m_Value.y) == 1 )
+  {
+    val = HIBYTE(*(_DWORD *)&this->gap44[8]);
+    v3 = (double)val - *(float *)(gpGlobals.m_Index + 16) * 600.0;
+    if ( v3 <= 0.0 )
+      v3 = 0.0;
+    C_BaseEntity::SetRenderMode(this_2, kRenderTransAlpha, 0);
+    v4 = this_2->m_clrRender;
+    LOWORD(val) = *(_WORD *)&v4.m_Value.r;
+    BYTE2(val) = v4.m_Value.b;
+    HIBYTE(val) = (int)v3;
+    CNetworkVarBase<int,C_TFFlameThrower::NetworkVar_m_iWeaponState>::Set(
+      (CNetworkVarBase<int,C_BaseCombatWeapon::NetworkVar_m_iClip2> *)&this_2->m_clrRender,
+      &val);
+    if ( !(int)v3 )
+      (*(void (__thiscall **)(float *))(LODWORD(this[-1].m_flBurnEffectStartTime) + 4))(&this[-1].m_flBurnEffectStartTime);
+  }
+  else if ( C_TFRagdoll::IsRagdollVisible(this_2) )
+  {
+    v5 = this_2->SetNextClientThink;
+    this_2->m_fDeathTime = *(float *)(gpGlobals.m_Index + 12) + 5.0;
+    ((void (__thiscall *)(C_TFRagdoll *, _DWORD))v5)(this_2, -1293.0);
+  }
+  else if ( *(float *)(gpGlobals.m_Index + 12) >= (double)this->m_vecRagdollOrigin.m_Value.x )
+  {
+    (*(void (__thiscall **)(float *))(LODWORD(this[-1].m_flBurnEffectStartTime) + 4))(&this[-1].m_flBurnEffectStartTime);
+  }
+}

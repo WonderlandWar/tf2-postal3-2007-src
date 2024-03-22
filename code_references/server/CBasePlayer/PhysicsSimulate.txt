@@ -1,0 +1,218 @@
+void __usercall CBasePlayer::PhysicsSimulate(CBasePlayer *this@<ecx>, int a2@<edi>)
+{
+  unsigned int m_Index; // eax
+  CTFWeaponBase *m_pEntity; // ecx
+  int tickcount; // eax
+  int v6; // eax
+  CBasePlayer *v7; // ecx
+  int v8; // eax
+  CCommandContext *v9; // edi
+  int numcmds; // eax
+  int v11; // ebp
+  char v12; // dl
+  int v13; // ecx
+  float *p_z; // eax
+  IMoveHelperServer *v15; // eax
+  IPredictionSystem *i; // eax
+  int dropped_packets; // eax
+  int v18; // ebx
+  CBasePlayer_vtbl *v19; // ebp
+  IMoveHelperServer *v20; // eax
+  int v21; // ebp
+  void (__thiscall **p_PlayerRunCommand)(CBasePlayer *, CUserCmd *, IMoveHelper *); // ebx
+  IMoveHelperServer *v23; // eax
+  int v24; // ebx
+  void (__thiscall **v25)(CBasePlayer *, CUserCmd *, IMoveHelper *); // ebp
+  IMoveHelperServer *v26; // eax
+  IPredictionSystem *j; // eax
+  IMoveHelperServer *v28; // eax
+  float secondsToArrivala; // [esp+34h] [ebp-28h]
+  int v31; // [esp+48h] [ebp-14h]
+  int command_context_count; // [esp+4Ch] [ebp-10h]
+  int savetime; // [esp+50h] [ebp-Ch]
+  float saveframetime; // [esp+54h] [ebp-8h]
+  float frametime; // [esp+58h] [ebp-4h]
+
+  CVProfile::EnterScope(
+    *(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled,
+    "CBasePlayer::PhysicsSimulate",
+    0,
+    "Player",
+    0,
+    4);
+  m_Index = this->m_hMoveParent.m_Value.m_Index;
+  if ( m_Index != -1
+    && g_pEntityList->m_EntPtrArray[this->m_hMoveParent.m_Value.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12 )
+  {
+    m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hMoveParent.m_Value.m_Index & 0xFFF].m_pEntity;
+    if ( m_pEntity )
+      m_pEntity->PhysicsSimulate(m_pEntity);
+  }
+  tickcount = gpGlobals->tickcount;
+  if ( this->m_nSimulationTick == tickcount )
+  {
+    CVProfile::ExitScope(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+  }
+  else
+  {
+    this->m_nSimulationTick = tickcount;
+    v6 = CBasePlayer::DetermineSimulationTicks(this);
+    if ( v6 > 0 )
+      CBasePlayer::AdjustPlayerTimeBase(v7, v6);
+    if ( this->pl.hltv )
+    {
+      CBasePlayer::RunNullCommand(this);
+      CUtlVector<CCommandContext,CUtlMemory<CCommandContext,int>>::RemoveAll(&this->m_CommandContext);
+      CVProfile::ExitScope(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+    }
+    else
+    {
+      saveframetime = gpGlobals->curtime;
+      savetime = this->m_CommandContext.m_Size;
+      v8 = 0;
+      frametime = gpGlobals->frametime;
+      v31 = 0;
+      if ( savetime > 0 )
+      {
+        command_context_count = 0;
+        while ( 1 )
+        {
+          if ( v8 < 0 || v8 >= this->m_CommandContext.m_Size )
+            v9 = 0;
+          else
+            v9 = &this->m_CommandContext.m_Memory.m_pMemory[command_context_count];
+          numcmds = v9->numcmds;
+          v11 = v9->totalcmds - numcmds;
+          if ( v9->paused )
+          {
+            v12 = 1;
+            if ( this->m_MoveType.m_Value == 8
+              && sv_cheats->m_pParent->m_nValue
+              && sv_noclipduringpause.m_pParent->m_nValue )
+            {
+              v12 = 0;
+            }
+            v13 = 0;
+            if ( numcmds > 0 )
+            {
+              p_z = &v9->cmds[0].viewangles.z;
+              do
+              {
+                p_z[4] = 0.0;
+                if ( v12 )
+                {
+                  p_z[1] = 0.0;
+                  p_z[2] = 0.0;
+                  p_z[3] = 0.0;
+                  *(p_z - 2) = this->pl.v_angle.x;
+                  *(p_z - 1) = this->pl.v_angle.y;
+                  *p_z = this->pl.v_angle.z;
+                }
+                ++v13;
+                p_z += 16;
+              }
+              while ( v13 < v9->numcmds );
+            }
+            v9->dropped_packets = 0;
+          }
+          v15 = MoveHelperServer();
+          ((void (__thiscall *)(IMoveHelperServer *, CBasePlayer *, int))v15->SetHost)(v15, this, a2);
+          if ( this->m_bPredictWeapons )
+          {
+            for ( i = IPredictionSystem::g_pPredictionSystems; i; i = i->m_pNextSystem )
+              i->m_pSuppressHost = this;
+          }
+          dropped_packets = v9->dropped_packets;
+          if ( dropped_packets < 24 )
+          {
+            v31 = v9->dropped_packets;
+            if ( dropped_packets > v11 )
+            {
+              v18 = dropped_packets - v11;
+              v31 = v11;
+              do
+              {
+                v19 = this->__vftable;
+                ++this->m_LastCmd.tick_count;
+                v20 = MoveHelperServer();
+                v19->PlayerRunCommand(this, &this->m_LastCmd, v20);
+                --v18;
+              }
+              while ( v18 );
+              dropped_packets = v31;
+            }
+            if ( dropped_packets > 0 )
+            {
+              while ( 1 )
+              {
+                v21 = v9->numcmds + dropped_packets - 1;
+                p_PlayerRunCommand = &this->PlayerRunCommand;
+                v23 = MoveHelperServer();
+                (*p_PlayerRunCommand)(this, &v9->cmds[v21], v23);
+                if ( --v31 <= 0 )
+                  break;
+                dropped_packets = v31;
+              }
+            }
+          }
+          v24 = v9->numcmds - 1;
+          if ( v24 >= 0 )
+          {
+            v31 = (int)&v9->cmds[v24];
+            do
+            {
+              v25 = &this->PlayerRunCommand;
+              v26 = MoveHelperServer();
+              (*v25)(this, (CUserCmd *)v31, v26);
+              v31 -= 64;
+              --v24;
+            }
+            while ( v24 >= 0 );
+          }
+          if ( &this->m_LastCmd != (CUserCmd *)v9 )
+          {
+            this->m_LastCmd.command_number = v9->cmds[0].command_number;
+            this->m_LastCmd.tick_count = v9->cmds[0].tick_count;
+            this->m_LastCmd.viewangles.x = v9->cmds[0].viewangles.x;
+            this->m_LastCmd.viewangles.y = v9->cmds[0].viewangles.y;
+            this->m_LastCmd.viewangles.z = v9->cmds[0].viewangles.z;
+            this->m_LastCmd.forwardmove = v9->cmds[0].forwardmove;
+            this->m_LastCmd.sidemove = v9->cmds[0].sidemove;
+            this->m_LastCmd.upmove = v9->cmds[0].upmove;
+            this->m_LastCmd.buttons = v9->cmds[0].buttons;
+            this->m_LastCmd.impulse = v9->cmds[0].impulse;
+            this->m_LastCmd.weaponselect = v9->cmds[0].weaponselect;
+            this->m_LastCmd.weaponsubtype = v9->cmds[0].weaponsubtype;
+            this->m_LastCmd.random_seed = v9->cmds[0].random_seed;
+            this->m_LastCmd.mousedx = v9->cmds[0].mousedx;
+            this->m_LastCmd.mousedy = v9->cmds[0].mousedy;
+            this->m_LastCmd.hasbeenpredicted = v9->cmds[0].hasbeenpredicted;
+          }
+          if ( this->m_pPhysicsController )
+          {
+            v31 = CBaseEntity::IsSimulatingOnAlternateTicks() + v9->numcmds + v9->dropped_packets;
+            secondsToArrivala = (double)v31 * gpGlobals->interval_per_tick;
+            CBasePlayer::UpdateVPhysicsPosition(
+              this,
+              &this->m_vNewVPhysicsPosition,
+              &this->m_vNewVPhysicsVelocity,
+              secondsToArrivala);
+          }
+          for ( j = IPredictionSystem::g_pPredictionSystems; j; j = j->m_pNextSystem )
+            j->m_pSuppressHost = 0;
+          v28 = MoveHelperServer();
+          a2 = 0;
+          ((void (__thiscall *)(IMoveHelperServer *))v28->SetHost)(v28);
+          ++command_context_count;
+          if ( ++v31 >= savetime )
+            break;
+          v8 = v31;
+        }
+      }
+      CUtlVector<CCommandContext,CUtlMemory<CCommandContext,int>>::RemoveAll(&this->m_CommandContext);
+      gpGlobals->curtime = saveframetime;
+      gpGlobals->frametime = frametime;
+      CVProfile::ExitScope(*(CVProfile **)&_g_VProfCurrentProfile.m_bVTuneGroupEnabled);
+    }
+  }
+}

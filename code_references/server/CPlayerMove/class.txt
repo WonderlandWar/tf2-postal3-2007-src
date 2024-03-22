@@ -1,0 +1,21 @@
+class CPlayerMove
+{
+    public void CPlayerMove(class CPlayerMove & );
+    public void CPlayerMove();
+    public void ~CPlayerMove();
+	
+    public void RunCommand(class CBasePlayer * ,class CUserCmd * ,class IMoveHelper * );
+	
+    protected void SetupMove(class CBasePlayer * ,class CUserCmd * ,class IMoveHelper * ,class CMoveData *
+	);
+    protected void FinishMove(class CBasePlayer * ,class CUserCmd * ,class CMoveData * );
+	
+    protected void StartCommand(class CBasePlayer * ,class CUserCmd * );
+    protected void FinishCommand(class CBasePlayer * );
+	
+    protected void CheckMovingGround(class CBasePlayer * ,float );
+	
+    protected void RunPreThink(class CBasePlayer * );
+    protected void RunThink(class CBasePlayer * ,float );
+    protected void RunPostThink(class CBasePlayer * );
+};

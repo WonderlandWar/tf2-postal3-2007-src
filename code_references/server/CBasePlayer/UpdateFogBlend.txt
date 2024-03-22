@@ -1,0 +1,85 @@
+void __thiscall CBasePlayer::UpdateFogBlend(CBasePlayer *this)
+{
+  double v2; // st7
+  CNetworkColor32Base<color32_s,fogparams_t::NetworkVar_colorPrimary> *p_colorPrimary; // edi
+  double v4; // st7
+  double v5; // st6
+  unsigned __int8 r; // bl
+  unsigned __int8 g; // bl
+  unsigned __int8 b; // bl
+  float flScale; // [esp+Ch] [ebp-Ch]
+  float v10; // [esp+10h] [ebp-8h]
+  float val; // [esp+14h] [ebp-4h] BYREF
+
+  if ( -1.0 != this->m_Local.m_PlayerFog.m_flTransitionTime )
+  {
+    v2 = gpGlobals->curtime - this->m_Local.m_PlayerFog.m_flTransitionTime;
+    p_colorPrimary = &this->m_Local.m_fog.colorPrimary;
+    if ( v2 >= this->m_Local.m_fog.duration.m_Value )
+    {
+      r = this->m_Local.m_PlayerFog.m_NewColor.r;
+      if ( p_colorPrimary->m_Value.r != r )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        p_colorPrimary->m_Value.r = r;
+      }
+      g = this->m_Local.m_PlayerFog.m_NewColor.g;
+      if ( this->m_Local.m_fog.colorPrimary.m_Value.g != g )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        this->m_Local.m_fog.colorPrimary.m_Value.g = g;
+      }
+      b = this->m_Local.m_PlayerFog.m_NewColor.b;
+      if ( this->m_Local.m_fog.colorPrimary.m_Value.b != b )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        this->m_Local.m_fog.colorPrimary.m_Value.b = b;
+      }
+      CNetworkVarBase<float,fogparams_t::NetworkVar_start>::Set(
+        &this->m_Local.m_fog.start,
+        &this->m_Local.m_PlayerFog.m_flNewStart);
+      CNetworkVarBase<float,fogparams_t::NetworkVar_end>::Set(
+        &this->m_Local.m_fog.end,
+        &this->m_Local.m_PlayerFog.m_flNewEnd);
+      this->m_Local.m_PlayerFog.m_flTransitionTime = -1.0;
+    }
+    else
+    {
+      v4 = v2 / this->m_Local.m_fog.duration.m_Value;
+      v10 = v4;
+      v5 = 1.0 - v4;
+      flScale = 1.0 - v4;
+      LODWORD(val) = (int)((double)this->m_Local.m_PlayerFog.m_OldColor.r * (1.0 - v4)
+                         + (double)this->m_Local.m_PlayerFog.m_NewColor.r * v4);
+      if ( p_colorPrimary->m_Value.r != LOBYTE(val) )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        v4 = v10;
+        v5 = flScale;
+        p_colorPrimary->m_Value.r = LOBYTE(val);
+      }
+      LODWORD(val) = (int)((double)this->m_Local.m_PlayerFog.m_OldColor.g * v5
+                         + (double)this->m_Local.m_PlayerFog.m_NewColor.g * v4);
+      if ( this->m_Local.m_fog.colorPrimary.m_Value.g != LOBYTE(val) )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        v4 = v10;
+        v5 = flScale;
+        this->m_Local.m_fog.colorPrimary.m_Value.g = LOBYTE(val);
+      }
+      LODWORD(val) = (int)((double)this->m_Local.m_PlayerFog.m_OldColor.b * v5
+                         + (double)this->m_Local.m_PlayerFog.m_NewColor.b * v4);
+      if ( this->m_Local.m_fog.colorPrimary.m_Value.b != LOBYTE(val) )
+      {
+        this->m_Local.m_fog.NetworkStateChanged(&this->m_Local.m_fog, &this->m_Local.m_fog.colorPrimary);
+        v4 = v10;
+        v5 = flScale;
+        this->m_Local.m_fog.colorPrimary.m_Value.b = LOBYTE(val);
+      }
+      val = v4 * this->m_Local.m_PlayerFog.m_flNewStart + v5 * this->m_Local.m_PlayerFog.m_flOldStart;
+      CNetworkVarBase<float,fogparams_t::NetworkVar_start>::Set(&this->m_Local.m_fog.start, &val);
+      val = this->m_Local.m_PlayerFog.m_flOldEnd * flScale + this->m_Local.m_PlayerFog.m_flNewEnd * v10;
+      CNetworkVarBase<float,fogparams_t::NetworkVar_end>::Set(&this->m_Local.m_fog.end, &val);
+    }
+  }
+}

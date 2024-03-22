@@ -1,0 +1,34 @@
+void __cdecl CTFMedicCallerPanel::AddMedicCaller(C_TFPlayer *pPlayer, float flDuration, Vector *vecOffset)
+{
+  CTFMedicCallerPanel *v3; // esi
+  vgui::Panel *v4; // eax
+  CTFMedicCallerPanel *v5; // eax
+  CTFMedicCallerPanel *v6; // esi
+  double v7; // st7
+  vgui::IVGui *v8; // edi
+  vgui::IVGui_vtbl *v9; // ebx
+  int v10; // eax
+  int v11; // [esp+8h] [ebp-14h]
+
+  v3 = (CTFMedicCallerPanel *)operator new(0x108u);
+  if ( v3 )
+  {
+    v4 = g_pClientMode->GetViewport(g_pClientMode);
+    CTFMedicCallerPanel::CTFMedicCallerPanel(v3, v4, "MedicCallerPanel");
+    v6 = v5;
+  }
+  else
+  {
+    v6 = 0;
+  }
+  vgui::Panel::MakeReadyForUse(v6);
+  v6->SetVisible(v6, 0);
+  v11 = (int)((double)ScreenHeight() * 0.002083333333333333 * 30.0);
+  v7 = (double)ScreenWidth() * 0.0015625 * 39.0;
+  vgui::Panel::SetBounds(v6, 0, 0, (int)v7, v11);
+  CTFMedicCallerPanel::SetPlayer(v6, pPlayer, flDuration, vecOffset);
+  v8 = g_pVGui;
+  v9 = g_pVGui->__vftable;
+  v10 = ((int (__thiscall *)(CTFMedicCallerPanel *, _DWORD))v6->GetVPanel)(v6, 0);
+  ((void (__thiscall *)(vgui::IVGui *, int))v9->AddTickSignal)(v8, v10);
+}

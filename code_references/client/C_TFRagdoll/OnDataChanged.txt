@@ -1,0 +1,19 @@
+void __thiscall C_TFRagdoll::OnDataChanged(C_TFRagdoll *this, DataUpdateType_t type)
+{
+  C_TFRagdoll *v3; // ecx
+
+  C_BaseAnimating::OnDataChanged(this, type);
+  if ( type )
+  {
+    if ( !cl_ragdoll_physics_enable.m_pParent->m_nValue )
+      this->gap44[8] = 0;
+  }
+  else if ( !cl_low_violence.m_pParent->m_nValue )
+  {
+    v3 = (C_TFRagdoll *)((char *)this - 8);
+    if ( BYTE1(this->m_vecRagdollOrigin.m_Value.z) )
+      C_TFRagdoll::CreateTFGibs(v3);
+    else
+      C_TFRagdoll::CreateTFRagdoll(v3);
+  }
+}

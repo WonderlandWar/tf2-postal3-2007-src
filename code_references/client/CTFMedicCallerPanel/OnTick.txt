@@ -1,0 +1,99 @@
+void __thiscall CTFMedicCallerPanel::OnTick(CTFMedicCallerPanel *this)
+{
+  unsigned int m_Index; // eax
+  CHandle<C_BaseCombatWeapon> *p_m_hPlayer; // ebp
+  CEntInfo *v4; // ecx
+  IHandleEntity *m_pEntity; // ecx
+  C_BaseCombatWeapon *v6; // eax
+  float *v7; // eax
+  const Vector *v8; // eax
+  bool VectorInScreenSpace; // bl
+  int v10; // edi
+  C_BaseCombatWeapon *v11; // eax
+  int v12; // eax
+  float v13; // ecx
+  float v14; // edx
+  unsigned int v15; // eax
+  const Vector *v16; // eax
+  const Vector *v17; // eax
+  int Tall; // eax
+  Vector v19; // [esp-8h] [ebp-60h]
+  float flRadius; // [esp+0h] [ebp-58h]
+  int iY; // [esp+20h] [ebp-38h] BYREF
+  float xpos; // [esp+24h] [ebp-34h] BYREF
+  float ypos; // [esp+28h] [ebp-30h] BYREF
+  float flRotation; // [esp+2Ch] [ebp-2Ch] BYREF
+  Vector vCenter; // [esp+30h] [ebp-28h] BYREF
+  unsigned int v26; // [esp+3Ch] [ebp-1Ch]
+  float v27; // [esp+40h] [ebp-18h]
+  float v28; // [esp+44h] [ebp-14h]
+  Vector vecDelta; // [esp+48h] [ebp-10h] BYREF
+  float v30; // [esp+54h] [ebp-4h]
+
+  m_Index = this->m_hPlayer.m_Index;
+  p_m_hPlayer = (CHandle<C_BaseCombatWeapon> *)&this->m_hPlayer;
+  if ( m_Index != -1
+    && (v4 = &g_pEntityList->m_EntPtrArray[this->m_hPlayer.m_Index & 0xFFF], v4->m_SerialNumber == m_Index >> 12)
+    && v4->m_pEntity
+    && (p_m_hPlayer->m_Index == -1
+     || g_pEntityList->m_EntPtrArray[p_m_hPlayer->m_Index & 0xFFF].m_SerialNumber != p_m_hPlayer->m_Index >> 12
+      ? (m_pEntity = 0)
+      : (m_pEntity = g_pEntityList->m_EntPtrArray[p_m_hPlayer->m_Index & 0xFFF].m_pEntity),
+        ((unsigned __int8 (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[40].SetRefEHandle)(m_pEntity)
+     && this->m_flRemoveAt >= (double)*(float *)(gpGlobals.m_Index + 12)) )
+  {
+    v6 = CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *(p_m_hPlayer);
+    v7 = (float *)v6->GetAbsOrigin(v6);
+    vCenter.y = this->m_vecOffset.x + *v7;
+    vCenter.z = this->m_vecOffset.y + v7[1];
+    *(float *)&v26 = this->m_vecOffset.z + v7[2];
+    v8 = MainViewOrigin();
+    vecDelta.y = vCenter.y - v8->x;
+    vecDelta.z = vCenter.z - v8->y;
+    v19.x = vCenter.y;
+    *(_QWORD *)&v19.y = __PAIR64__(v26, LODWORD(vCenter.z));
+    v30 = *(float *)&v26 - v8->z;
+    VectorInScreenSpace = GetVectorInScreenSpace(v19, &iY, (int *)&xpos, 0);
+    v10 = vgui::Panel::GetWide(this) / 2;
+    if ( VectorInScreenSpace && iY >= v10 && iY <= ScreenWidth() - v10 )
+    {
+      this->SetVisible(this, 0);
+    }
+    else
+    {
+      pfVectorNormalize((Vector *)&vecDelta.y);
+      ypos = COERCE_FLOAT(ScreenHeight());
+      flRadius = (double)SLODWORD(ypos) * 0.002083333333333333 * 100.0;
+      CTFMedicCallerPanel::GetCallerPosition(
+        (CHudDamageIndicator *)this,
+        (Vector *)&vecDelta.y,
+        flRadius,
+        &ypos,
+        &flRotation,
+        &vCenter.x);
+      iY = (int)ypos;
+      LODWORD(xpos) = (int)flRotation;
+      v11 = CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *(p_m_hPlayer);
+      v12 = (int)v11->WorldSpaceCenter(v11);
+      v13 = *(float *)v12;
+      v14 = *(float *)(v12 + 4);
+      v15 = *(_DWORD *)(v12 + 8);
+      vCenter.y = v13;
+      vCenter.z = v14;
+      v26 = v15;
+      v16 = MainViewOrigin();
+      v27 = vCenter.y - v16->x;
+      v28 = vCenter.z - v16->y;
+      vecDelta.x = *(float *)&v26 - v16->z;
+      v17 = MainViewRight();
+      this->m_bDrawLeftArrow = v17->z * vecDelta.x + v17->y * v28 + v17->x * v27 <= 0.0;
+      Tall = vgui::Panel::GetTall(this);
+      vgui::Panel::SetPos(this, iY - v10, LODWORD(xpos) - Tall / 2);
+      this->SetVisible(this, 1);
+    }
+  }
+  else
+  {
+    this->MarkForDeletion(this);
+  }
+}

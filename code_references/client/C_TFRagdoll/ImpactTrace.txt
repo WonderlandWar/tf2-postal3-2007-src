@@ -1,0 +1,41 @@
+void __thiscall C_TFRagdoll::ImpactTrace(
+        C_TFRagdoll *this,
+        CGameTrace *pTrace,
+        int iDamageType,
+        char *pCustomImpactName)
+{
+  IPhysicsObject *m_pPhysicsObject; // esi
+  double v6; // st7
+  double v7; // st6
+  double v8; // st5
+  Vector vecDir; // [esp+10h] [ebp-1Ch] BYREF
+  Vector vecHitPos; // [esp+1Ch] [ebp-10h] BYREF
+
+  m_pPhysicsObject = this->m_pPhysicsObject;
+  if ( m_pPhysicsObject )
+  {
+    v6 = pTrace->endpos.x - pTrace->startpos.x;
+    vecDir.y = v6;
+    v7 = pTrace->endpos.y - pTrace->startpos.y;
+    vecDir.z = v7;
+    v8 = pTrace->endpos.z - pTrace->startpos.z;
+    vecHitPos.x = v8;
+    if ( iDamageType == 64 )
+    {
+      vecDir.y = v6 * 4000.0;
+      vecDir.z = v7 * 4000.0;
+      vecHitPos.x = 4000.0 * v8;
+      m_pPhysicsObject->ApplyForceCenter(m_pPhysicsObject, (Vector *)&vecDir.y);
+    }
+    else
+    {
+      VectorMA(&pTrace->startpos, pTrace->fraction, (Vector *)&vecDir.y, (Vector *)&vecHitPos.y);
+      pfVectorNormalize((Vector *)&vecDir.y);
+      vecDir.y = vecDir.y * 4000.0;
+      vecDir.z = vecDir.z * 4000.0;
+      vecHitPos.x = 4000.0 * vecHitPos.x;
+      m_pPhysicsObject->ApplyForceOffset(m_pPhysicsObject, (Vector *)&vecDir.y, (Vector *)&vecHitPos.y);
+    }
+    CRagdoll::ResetRagdollSleepAfterTime(this->m_pRagdoll);
+  }
+}

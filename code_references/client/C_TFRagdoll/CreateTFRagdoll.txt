@@ -1,0 +1,159 @@
+// bad sp value at call has been detected, the output may be wrong!
+void __thiscall C_TFRagdoll::CreateTFRagdoll(C_TFRagdoll *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // eax
+  C_TFPlayer *v5; // eax
+  C_TFPlayer *v6; // edi
+  const QAngle *v7; // eax
+  CInterpolatedVar<QAngle> *RotationInterpolator; // eax
+  const Vector *v9; // eax
+  const QAngle *v10; // eax
+  int v11; // eax
+  bool v12; // zf
+  CStudioHdr *m_pStudioHdr; // ebp
+  CStudioHdr *v14; // eax
+  bool v15; // bl
+  void (__thiscall *SetNextClientThink)(C_BaseEntity *, float); // eax
+  IUniformRandomStream *v17; // ecx
+  IUniformRandomStream *v18; // ecx
+  double v19; // st7
+  IClientRenderable_vtbl *v20; // eax
+  const QAngle *(__thiscall *GetRenderAngles)(IClientRenderable *); // edx
+  const QAngle *v22; // eax
+  float v23; // [esp+8h] [ebp-4854h]
+  float v24; // [esp+28h] [ebp-4834h]
+  float v25[3]; // [esp+2Ch] [ebp-4830h] BYREF
+  breakablepropparams_t breakParams; // [esp+38h] [ebp-4824h] BYREF
+  _BYTE v27[6128]; // [esp+5Ch] [ebp-4800h] BYREF
+  matrix3x4_t pCurrentBonePosition; // [esp+184Ch] [ebp-3010h] BYREF
+  matrix3x4_t pDeltaBones0; // [esp+304Ch] [ebp-1810h] BYREF
+
+  m_Index = this->m_hPlayer.m_Index;
+  if ( m_Index == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_hPlayer.m_Index & 0xFFF], v3->m_SerialNumber != m_Index >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v3->m_pEntity;
+  }
+  v5 = (C_TFPlayer *)__RTDynamicCast(
+                       m_pEntity,
+                       0,
+                       &C_BaseEntity `RTTI Type Descriptor',
+                       &C_TFPlayer `RTTI Type Descriptor',
+                       0);
+  v6 = v5;
+  if ( !v5 || v5->IsDormant(&v5->IClientNetworkable) )
+  {
+    C_BaseEntity::SetNetworkOrigin(this, &this->m_vecRagdollOrigin.m_Value);
+    C_BaseEntity::SetAbsOrigin(this, &this->m_vecRagdollOrigin.m_Value);
+    C_BaseEntity::SetAbsVelocity(this, &this->m_vecRagdollVelocity.m_Value);
+    C_BaseEntity::Interp_Reset(this, &this->m_VarMap);
+  }
+  else
+  {
+    C_BaseEntity::SnatchModelInstance(v6, this);
+    if ( C_BasePlayer::IsLocalPlayer(v6) || !C_BaseEntity::s_bInterpolate )
+    {
+      v9 = v6->GetRenderOrigin(&v6->IClientRenderable);
+      C_BaseEntity::SetAbsOrigin(this, v9);
+      v10 = v6->GetRenderAngles(&v6->IClientRenderable);
+      C_BaseEntity::SetAbsAngles(this, v10);
+      C_BaseEntity::SetAbsVelocity(this, &this->m_vecRagdollVelocity.m_Value);
+      v11 = C_BaseAnimating::LookupSequence(this, "RagdollSpawn");
+      if ( v11 == -1 )
+        v11 = 0;
+      C_BaseAnimating::SetSequence(this, v11);
+      C_BaseAnimating::SetCycle(this, 0.0);
+      C_BaseEntity::Interp_Reset(this, &this->m_VarMap);
+      this->m_nBody = v6->GetBody(&v6->IClientRenderable);
+    }
+    else
+    {
+      C_TFRagdoll::Interp_Copy(this, v6);
+      v7 = v6->GetRenderAngles(&v6->IClientRenderable);
+      C_BaseEntity::SetAbsAngles(this, v7);
+      RotationInterpolator = C_BaseEntity::GetRotationInterpolator(this);
+      RotationInterpolator->Reset(RotationInterpolator);
+      this->m_flAnimTime = v6->m_flAnimTime;
+      C_BaseAnimating::SetSequence(this, v6->m_nSequence);
+      this->m_flPlaybackRate = v6->m_flPlaybackRate;
+      this->m_nBody = v6->GetBody(&v6->IClientRenderable);
+    }
+  }
+  C_BaseEntity::SetModelIndex(this, this->m_nModelIndex);
+  if ( cl_ragdoll_physics_enable.m_pParent->m_nValue )
+  {
+    v12 = this->m_pStudioHdr == 0;
+    this->m_nRenderFX = 23;
+    if ( v12 && this->GetModel(&this->IClientRenderable) )
+      C_BaseAnimating::LockStudioHdr(this);
+    m_pStudioHdr = this->m_pStudioHdr;
+    v14 = 0;
+    if ( v6 )
+    {
+      if ( !v6->m_pStudioHdr && v6->GetModel(&v6->IClientRenderable) )
+        C_BaseAnimating::LockStudioHdr(v6);
+      v14 = v6->m_pStudioHdr;
+    }
+    v15 = 0;
+    if ( m_pStudioHdr && v14 )
+      v15 = m_pStudioHdr->m_pVModel != v14->m_pVModel;
+    if ( !v6 || v6->IsDormant(&v6->IClientNetworkable) || v15 )
+      ((void (__thiscall *)(C_TFRagdoll *, float *, _BYTE *, float *, _DWORD))this->GetRagdollInitBoneArrays)(
+        this,
+        pDeltaBones0.m_flMatVal[1],
+        v27,
+        pCurrentBonePosition.m_flMatVal[1],
+        0.050000001);
+    else
+      ((void (__thiscall *)(C_TFPlayer *, float *, _BYTE *, float *, _DWORD))v6->GetRagdollInitBoneArrays)(
+        v6,
+        pDeltaBones0.m_flMatVal[1],
+        v27,
+        pCurrentBonePosition.m_flMatVal[1],
+        0.050000001);
+    C_BaseAnimating::InitAsClientRagdoll(
+      this,
+      &pDeltaBones0,
+      (const matrix3x4_t *)&breakParams.defBurstScale,
+      &pCurrentBonePosition,
+      0.050000001);
+    if ( v6 )
+      this->m_nSkin = v6->GetTeamNumber(v6) - 2;
+  }
+  else
+  {
+    g_pClientLeafSystem->SetRenderGroup(g_pClientLeafSystem, this->m_hRender, RENDER_GROUP_TRANSLUCENT_ENTITY);
+  }
+  if ( this->m_flBurnEffectStartTime > 0.0 )
+    CParticleProperty::Create(&this->m_Particles, "burningplayer_corpse", PATTACH_ABSORIGIN_FOLLOW, -1, vec3_origin);
+  SetNextClientThink = this->SetNextClientThink;
+  this->m_fDeathTime = cl_ragdoll_fade_time.m_pParent->m_fValue + *(float *)(gpGlobals.m_Index + 12);
+  ((void (__thiscall *)(C_TFRagdoll *, _DWORD))SetNextClientThink)(this, -1293.0);
+  v23 = *(float *)(gpGlobals.m_Index + 12) + 5.0;
+  ((void (__thiscall *)(C_TFRagdoll *, _DWORD))this->SetNextClientThink)(this, LODWORD(v23));
+  if ( v6 )
+  {
+    _RandomFloat(v17, 0.0, 120.0);
+    v19 = _RandomFloat(v18, 0.0, 120.0);
+    v20 = this->C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable;
+    v25[0] = v24;
+    GetRenderAngles = v20->GetRenderAngles;
+    v25[1] = v19;
+    v25[2] = 0.0;
+    v22 = GetRenderAngles(&this->IClientRenderable);
+    breakParams.defBurstScale = 0.0;
+    breakParams.angles = v22;
+    breakParams.impactEnergyScale = 1.0;
+    breakParams.origin = &this->m_vecRagdollOrigin.m_Value;
+    breakParams.velocity = &this->m_vecRagdollVelocity.m_Value;
+    breakParams.angularVelocity = (const Vector *)v25;
+    breakParams.defCollisionGroup = 0;
+    C_TFPlayer::DropPartyHat(v6, &breakParams, &this->m_vecRagdollVelocity.m_Value);
+  }
+}

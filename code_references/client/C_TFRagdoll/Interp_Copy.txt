@@ -1,0 +1,47 @@
+void __thiscall C_TFRagdoll::Interp_Copy(C_TFRagdoll *this, C_BaseAnimatingOverlay *pSourceEntity)
+{
+  int v2; // ebp
+  VarMapEntry_t *v3; // ebx
+  VarMapEntry_t *v4; // esi
+  const char *v5; // edi
+  int j; // [esp+4h] [ebp-10h]
+  int v7; // [esp+8h] [ebp-Ch]
+  C_TFRagdoll *i; // [esp+Ch] [ebp-8h]
+  int v9; // [esp+10h] [ebp-4h]
+
+  v2 = 0;
+  i = this;
+  if ( pSourceEntity )
+  {
+    v9 = 0;
+    if ( this->m_VarMap.m_Entries.m_Size > 0 )
+    {
+      j = 0;
+      while ( 1 )
+      {
+        v3 = &this->m_VarMap.m_Entries.m_Memory.m_pMemory[j];
+        v7 = 0;
+        if ( pSourceEntity->m_VarMap.m_Entries.m_Size > 0 )
+        {
+          while ( 1 )
+          {
+            v4 = &pSourceEntity->m_VarMap.m_Entries.m_Memory.m_pMemory[v2];
+            v5 = v3->watcher->GetDebugName(v3->watcher);
+            if ( !strcmp(v4->watcher->GetDebugName(v4->watcher), v5) )
+              break;
+            ++v2;
+            if ( ++v7 >= pSourceEntity->m_VarMap.m_Entries.m_Size )
+              goto LABEL_10;
+          }
+          v3->watcher->Copy(v3->watcher, v4->watcher);
+LABEL_10:
+          this = i;
+        }
+        ++j;
+        if ( ++v9 >= this->m_VarMap.m_Entries.m_Size )
+          break;
+        v2 = 0;
+      }
+    }
+  }
+}

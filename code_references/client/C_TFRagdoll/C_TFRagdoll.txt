@@ -1,0 +1,13 @@
+void __thiscall C_TFRagdoll::C_TFRagdoll(C_TFRagdoll *this)
+{
+  C_BaseAnimatingOverlay::C_BaseAnimatingOverlay(this);
+  this->C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_TFRagdoll_vtbl *)&C_TFRagdoll::`vftable'{for `IClientUnknown'};
+  this->C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_TFRagdoll::`vftable'{for `IClientRenderable'};
+  this->C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_TFRagdoll::`vftable'{for `IClientNetworkable'};
+  this->C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_TFRagdoll::`vftable'{for `IClientThinkable'};
+  this->m_hPlayer.m_Index = -1;
+  this->m_fDeathTime = -1.0;
+  this->m_bFadingOut = 0;
+  this->m_flBurnEffectStartTime = 0.0;
+  this->m_bGib = 0;
+}
