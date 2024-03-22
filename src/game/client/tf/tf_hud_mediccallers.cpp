@@ -29,9 +29,9 @@
 //-----------------------------------------------------------------------------
 CTFMedicCallerPanel::CTFMedicCallerPanel( Panel *parent, const char *name ) : EditablePanel(parent,name)
 {
+	m_hPlayer = NULL;
 	m_pArrowMaterial = NULL;
-	m_iDrawArrow = DRAW_ARROW_UP;
-	m_bOnscreen = false;
+	m_bDrawLeftArrow = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -60,20 +60,6 @@ void CTFMedicCallerPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 	}
 	m_pArrowMaterial = materials->FindMaterial( "HUD/medic_arrow", TEXTURE_GROUP_VGUI );
 	m_pArrowMaterial->IncrementReferenceCount();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFMedicCallerPanel::PerformLayout( void )
-{
-	BaseClass::PerformLayout();
-
-	vgui::Panel *pPanel = FindChildByName( "CallerBG" );
-	if ( pPanel )
-	{
-		pPanel->SetPos( (GetWide() - pPanel->GetWide()) * 0.5, (GetTall() - pPanel->GetTall()) * 0.5 );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -144,93 +130,14 @@ void CTFMedicCallerPanel::OnTick( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFMedicCallerPanel::PaintBackground( void )
-{
-	// If the local player has started healing this guy, remove it too.
-	//Also don't draw it if we're dead.
-	C_TFPlayer *pLocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( !pLocalTFPlayer )
-		return;
-
-	if ( !m_hPlayer || m_hPlayer->IsDormant() )
-	{
-		SetAlpha(0);
-		return;
-	}
-
-	// Reposition the callout based on our target's position
-	int iX, iY;
-	Vector vecTarget = (m_hPlayer->GetAbsOrigin() + m_vecOffset);
-	Vector vecDelta = vecTarget - MainViewOrigin();
-	bool bOnscreen = GetVectorInScreenSpace( vecTarget, iX, iY );
-
-	int halfWidth = GetWide() / 2;
-	if( !bOnscreen || iX < halfWidth || iX > ScreenWidth()-halfWidth )
-	{
-		// It's off the screen. Position the callout.
-		VectorNormalize(vecDelta);
-		float xpos, ypos;
-		float flRotation;
-		float flRadius = YRES(100);
-		GetCallerPosition( vecDelta, flRadius, &xpos, &ypos, &flRotation );
-
-		iX = xpos;
-		iY = ypos;
-
-		Vector vCenter = m_hPlayer->WorldSpaceCenter( );
-		if( MainViewRight().Dot( vCenter - MainViewOrigin() ) > 0 )
-		{
-			m_iDrawArrow = DRAW_ARROW_RIGHT;
-		}
-		else
-		{
-			m_iDrawArrow = DRAW_ARROW_LEFT;
-		}
-
-		// Move the icon there
-		SetPos( iX - halfWidth, iY - (GetTall() / 2) );
-		SetAlpha( 255 );
-	}
-	else
-	{
-		// On screen
-		// If our target isn't visible, we draw transparently
-		trace_t	tr;
-		UTIL_TraceLine( vecTarget, MainViewOrigin(), MASK_OPAQUE, NULL, COLLISION_GROUP_NONE, &tr );
-		if ( tr.fraction >= 1.0f )
-		{
-			m_bOnscreen = true;
-			SetAlpha( 0 );
-			return;
-		}
-
-		m_iDrawArrow = DRAW_ARROW_UP;
-		SetAlpha( 92 );
-		SetPos( iX - halfWidth, iY - (GetTall() / 2) );
-	}
-
-	m_bOnscreen = false;
-	BaseClass::PaintBackground();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void CTFMedicCallerPanel::Paint( void )
 {
-	// Don't draw if our target is visible. The particle effect will be doing it for us.
-	if ( m_bOnscreen )
-		return;
-
 	BaseClass::Paint();
-
-	if ( m_iDrawArrow == DRAW_ARROW_UP )
-		return;
 
 	float uA,uB,yA,yB;
 	int x,y;
 	GetPos( x,y );
-	if ( m_iDrawArrow == DRAW_ARROW_LEFT )
+	if ( m_bDrawLeftArrow )
 	{
 		uA = 1.0;
 		uB = 0.0;

@@ -114,18 +114,9 @@ void CTFTeamMenu::ShowPanel( bool bShow )
 		{
 			SetVisible( false );
 			SetMouseInputEnabled( false );
-
-			CHudNotificationPanel *pNotifyPanel = GET_HUDELEMENT( CHudNotificationPanel );
-			if ( pNotifyPanel )
-			{
-				pNotifyPanel->SetupNotifyCustom( "#TF_CantChangeTeamNow", "ico_notify_flag_moving", C_TFPlayer::GetLocalTFPlayer()->GetTeamNumber() );
-			}
-
+			internalCenterPrint->Print( "#TF_CantChangeTeamNow" );
 			return;
 		}
-
-		gViewPortInterface->ShowPanel( PANEL_CLASS_RED, false );
-		gViewPortInterface->ShowPanel( PANEL_CLASS_BLUE, false );
 
 		engine->CheckPoint( "TeamMenu" );
 
@@ -135,33 +126,6 @@ void CTFTeamMenu::ShowPanel( bool bShow )
 		// get key bindings if shown
 		m_iTeamMenuKey = gameuifuncs->GetButtonCodeForBind( "changeteam" );
 		m_iScoreBoardKey = gameuifuncs->GetButtonCodeForBind( "showscores" );
-
-		switch ( C_TFPlayer::GetLocalTFPlayer()->GetTeamNumber() )
-		{
-		case TF_TEAM_BLUE:
-			if ( IsConsole() )
-			{
-				m_pBlueTeamButton->OnCursorEntered();
-			}
-			GetFocusNavGroup().SetCurrentFocus( m_pBlueTeamButton->GetVPanel(), m_pBlueTeamButton->GetVPanel() );
-			break;
-
-		case TF_TEAM_RED:
-			if ( IsConsole() )
-			{
-				m_pRedTeamButton->OnCursorEntered();
-			}
-			GetFocusNavGroup().SetCurrentFocus( m_pRedTeamButton->GetVPanel(), m_pRedTeamButton->GetVPanel() );
-			break;
-
-		default:
-			if ( IsConsole() )
-			{
-				m_pAutoTeamButton->OnCursorEntered();
-			}
-			GetFocusNavGroup().SetCurrentFocus( m_pAutoTeamButton->GetVPanel(), m_pAutoTeamButton->GetVPanel() );
-			break;
-		}
 	}
 	else
 	{
@@ -217,6 +181,11 @@ void CTFTeamMenu::Update( void )
 		}
 #endif
 	}
+	
+	CTFTeamButton *pButton = (CTFTeamButton*)FindChildByName( "teambutton2" );
+	if ( pButton )
+		pButton->RequestFocus( 0 );
+
 }
 
 //-----------------------------------------------------------------------------

@@ -135,12 +135,7 @@ void CTFClassMenu::ShowPanel( bool bShow )
 			SetVisible( false );
 			SetMouseInputEnabled( false );
 
-			CHudNotificationPanel *pNotifyPanel = GET_HUDELEMENT( CHudNotificationPanel );
-			if ( pNotifyPanel )
-			{
-				pNotifyPanel->SetupNotifyCustom( "#TF_CantChangeClassNow", "ico_notify_flag_moving", C_TFPlayer::GetLocalTFPlayer()->GetTeamNumber() );
-			}
-
+			internalCenterPrint->Print( "#TF_CantChangeClassNow" );
 			return;
 		}
 

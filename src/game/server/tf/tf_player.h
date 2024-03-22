@@ -509,9 +509,6 @@ private:
 	EHANDLE				m_hExpressionSceneEnt;
 	float				m_flNextRandomExpressionTime;
 	EHANDLE				m_hWeaponFireSceneEnt;
-
-	// TFP3: Hack????
-	friend class CTFPipebombLauncher;
 };
 
 //-----------------------------------------------------------------------------

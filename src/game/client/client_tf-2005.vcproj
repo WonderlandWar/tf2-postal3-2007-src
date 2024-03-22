@@ -2778,10 +2778,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tf\tf_hud_stalemate.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\tf\tf_hud_statpanel.cpp"
 					>
 				</File>

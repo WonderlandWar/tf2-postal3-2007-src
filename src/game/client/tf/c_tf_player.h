@@ -334,9 +334,6 @@ public:
 	bool			m_bUpdatePartyHat;
 	CHandle<C_PlayerAttachedModel>	m_hPartyHat;
 
-	// TFP3: Hack????
-	friend class C_TFPipebombLauncher;
-
 private:
 
 	// Gibs.

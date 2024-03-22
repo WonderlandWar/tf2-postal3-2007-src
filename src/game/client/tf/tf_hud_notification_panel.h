@@ -37,8 +37,6 @@ public:
 	void	MsgFunc_HudNotify( bf_read &msg );
 	void	MsgFunc_HudNotifyCustom( bf_read &msg );
 
-	void	SetupNotifyCustom( const char *pszText, const char *pszIcon, int iBackgroundTeam );
-
 	virtual void LevelInit( void ) { m_flFadeTime = 0; };
 
 private:

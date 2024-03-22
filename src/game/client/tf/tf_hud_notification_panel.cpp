@@ -117,16 +117,8 @@ void CHudNotificationPanel::MsgFunc_HudNotifyCustom( bf_read &msg )
 	msg.ReadString( szIcon, sizeof(szIcon) );
 	int iBackgroundTeam = msg.ReadByte();
 
-	SetupNotifyCustom( szText, szIcon, iBackgroundTeam );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CHudNotificationPanel::SetupNotifyCustom( const char *pszText, const char *pszIcon, int iBackgroundTeam )
-{
-	m_pIcon->SetIcon( pszIcon );
-	m_pText->SetText( pszText );
+	m_pIcon->SetIcon( szIcon );
+	m_pText->SetText( szText );
 
 	if ( iBackgroundTeam == TF_TEAM_RED )
 	{

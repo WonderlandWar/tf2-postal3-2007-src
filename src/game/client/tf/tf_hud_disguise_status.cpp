@@ -31,7 +31,7 @@ public:
 	virtual void	Paint( void );
 
 private:
-	CPanelAnimationVar( vgui::HFont, m_hFont, "TextFont", "TargetID" );
+	vgui::HFont m_hFont;
 };
 
 DECLARE_HUDELEMENT( CDisguiseStatus );
@@ -46,6 +46,8 @@ CDisguiseStatus::CDisguiseStatus( const char *pElementName ) :
 {
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
+	
+	m_hFont = g_hFontTrebuchet24;
 
 	SetHiddenBits( HIDEHUD_MISCSTATUS );
 }
@@ -60,6 +62,8 @@ void CDisguiseStatus::Init( void )
 void CDisguiseStatus::ApplySchemeSettings( vgui::IScheme *scheme )
 {
 	BaseClass::ApplySchemeSettings( scheme );
+
+	m_hFont = scheme->GetFont( "TargetID" );
 
 	SetPaintBackgroundEnabled( false );
 }
