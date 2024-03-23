@@ -457,11 +457,6 @@ void CTFGrenadePipebombProjectile::VPhysicsCollision( int index, gamevcollisione
 	{
 		m_bTouched = true;
 		VPhysicsGetObject()->EnableMotion( false );
-
-		// Save impact data for explosions.
-		m_bUseImpactNormal = true;
-		pEvent->pInternalData->GetSurfaceNormal( m_vecImpactNormal );
-		m_vecImpactNormal.Negate();
 	}
 }
 
@@ -518,10 +513,6 @@ int CTFGrenadePipebombProjectile::OnTakeDamage( const CTakeDamageInfo &info )
 			// The pipebomb will re-stick to the ground after this time expires
 			m_flMinSleepTime = gpGlobals->curtime + tf_grenade_force_sleeptime.GetFloat();
 			m_bTouched = false;
-
-			// It has moved the data is no longer valid.
-			m_bUseImpactNormal = false;
-			m_vecImpactNormal.Init();
 
 			return 1;
 		}

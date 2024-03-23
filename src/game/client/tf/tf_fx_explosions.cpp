@@ -36,8 +36,10 @@ CTFWeaponInfo *GetTFWeaponInfo( int iWeapon )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int iWeaponID, ClientEntityHandle_t hEntity )
+void TF_ExplosionCallback( const CEffectData &data )
 {
+	int iWeaponID = data.m_fFlags;
+
 	// Get the weapon information.
 	CTFWeaponInfo *pWeaponInfo = NULL;
 	switch( iWeaponID )
@@ -46,32 +48,12 @@ void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int 
 	case TF_WEAPON_GRENADE_DEMOMAN:
 		pWeaponInfo = GetTFWeaponInfo( TF_WEAPON_PIPEBOMBLAUNCHER );
 		break;
+	case TF_WEAPON_GRENADE_MIRVBOMB:
+		pWeaponInfo = GetTFWeaponInfo( TF_WEAPON_GRENADE_NORMAL );
+		break;
 	default:
 		pWeaponInfo = GetTFWeaponInfo( iWeaponID );
 		break;
-	}
-
-	bool bIsPlayer = false;
-	if ( hEntity.Get() )
-	{
-		C_BaseEntity *pEntity = C_BaseEntity::Instance( hEntity );
-		if ( pEntity && pEntity->IsPlayer() )
-		{
-			bIsPlayer = true;
-		}
-	}
-
-	// Calculate the angles, given the normal.
-	QAngle angExplosion( 0.0f, 0.0f, 0.0f );
-
-	// Cannot use zeros here because we are sending the normal at a smaller bit size.
-	if ( fabs( vecNormal.x ) < 0.05f && fabs( vecNormal.y ) < 0.05f && fabs( vecNormal.z ) < 0.05f )
-	{
-		angExplosion.Init();
-	}
-	else
-	{
-		VectorAngles( vecNormal, angExplosion );
 	}
 
 	// Base explosion effect and sound.
@@ -92,67 +74,13 @@ void TFExplosionCallback( const Vector &vecOrigin, const Vector &vecNormal, int 
 		}
 	}
 	
+	if ( (enginetrace->GetPointContents( data.m_vOrigin ) & CONTENTS_WATER) )
+		pszEffect = "ExplosionCore_underwater";
+
 	CLocalPlayerFilter filter;
-	C_BaseEntity::EmitSound( filter, SOUND_FROM_WORLD, pszSound, &vecOrigin );
+	C_BaseEntity::EmitSound( filter, SOUND_FROM_WORLD, pszSound, &data.m_vOrigin );
 
-	DispatchParticleEffect( pszEffect, vecOrigin, angExplosion );
+	DispatchParticleEffect( pszEffect, data.m_vOrigin, data.m_vAngles );
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-class C_TETFExplosion : public C_BaseTempEntity
-{
-public:
-
-	DECLARE_CLASS( C_TETFExplosion, C_BaseTempEntity );
-	DECLARE_CLIENTCLASS();
-
-	C_TETFExplosion( void );
-
-	virtual void	PostDataUpdate( DataUpdateType_t updateType );
-
-public:
-
-	Vector		m_vecOrigin;
-	Vector		m_vecNormal;
-	int			m_iWeaponID;
-	ClientEntityHandle_t m_hEntity;
-};
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-C_TETFExplosion::C_TETFExplosion( void )
-{
-	m_vecOrigin.Init();
-	m_vecNormal.Init();
-	m_iWeaponID = TF_WEAPON_NONE;
-	m_hEntity = INVALID_EHANDLE_INDEX;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_TETFExplosion::PostDataUpdate( DataUpdateType_t updateType )
-{
-	VPROF( "C_TETFExplosion::PostDataUpdate" );
-
-	TFExplosionCallback( m_vecOrigin, m_vecNormal, m_iWeaponID, m_hEntity );
-}
-
-static void RecvProxy_ExplosionEntIndex( const CRecvProxyData *pData, void *pStruct, void *pOut )
-{
-	int nEntIndex = pData->m_Value.m_Int;
-	((C_TETFExplosion*)pStruct)->m_hEntity = (nEntIndex < 0) ? INVALID_EHANDLE_INDEX : ClientEntityList().EntIndexToHandle( nEntIndex );
-}
-
-IMPLEMENT_CLIENTCLASS_EVENT_DT( C_TETFExplosion, DT_TETFExplosion, CTETFExplosion )
-	RecvPropFloat( RECVINFO( m_vecOrigin[0] ) ),
-	RecvPropFloat( RECVINFO( m_vecOrigin[1] ) ),
-	RecvPropFloat( RECVINFO( m_vecOrigin[2] ) ),
-	RecvPropVector( RECVINFO( m_vecNormal ) ),
-	RecvPropInt( RECVINFO( m_iWeaponID ) ),
-	RecvPropInt( "entindex", 0, SIZEOF_IGNORE, 0, RecvProxy_ExplosionEntIndex ),
-END_RECV_TABLE()
-
+DECLARE_CLIENT_EFFECT( "TF_Explosion", TF_ExplosionCallback );

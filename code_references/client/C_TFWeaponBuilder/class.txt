@@ -1,0 +1,62 @@
+class C_TFWeaponBuilder : public C_TFWeaponBase
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    public struct typedescription_t m_PredDesc[0];
+    public struct datamap_t m_PredMap;
+    public struct datamap_t * GetPredDescMap();
+	
+    private void C_TFWeaponBuilder(class C_TFWeaponBuilder & );
+    public void C_TFWeaponBuilder();
+    public void ~C_TFWeaponBuilder();
+    public void Redraw();
+	
+    public bool IsPlacingObject();
+	
+    public char * GetCurrentSelectionObjectName();
+	
+    public char * GetViewModel(int );
+    public char * GetWorldModel();
+	
+    public bool Deploy();
+	
+    public class C_BaseObject * GetPlacementModel();
+	
+    public int GetSlot();
+    public int GetPosition();
+	
+    public void SetupObjectSelectionSprite();
+	
+    public class CHudTexture * GetSpriteActive();
+    public class CHudTexture * GetSpriteInactive();
+	
+    public char * GetPrintName();
+	
+    public int GetSubType();
+	
+    public bool CanBeSelected();
+    public bool VisibleInWeaponSelection();
+	
+    public bool HasAmmo();
+	
+    public int GetWeaponID();
+	
+    public int GetObjectType();
+	
+    public enum Activity GetDrawActivity();
+	
+    public class CStudioHdr * OnNewModel();
+	
+    public int m_iBuildState;
+    public unsigned int m_iObjectType;
+    public float m_flStartTime;
+    public float m_flTotalTime;
+	
+    public class CHudTexture * m_pSelectionTextureActive;
+    public class CHudTexture * m_pSelectionTextureInactive;
+	
+    public class CHandle<C_BaseObject> m_hObjectBeingBuilt;
+	
+    public int m_iValidBuildPoseParam;
+};

@@ -308,8 +308,7 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 
 	// Play explosion sound and effect.
 	Vector vecOrigin = GetAbsOrigin();
-	CPVSFilter filter( vecOrigin );
-	TE_TFExplosion( filter, 0.0f, vecOrigin, pTrace->plane.normal, GetWeaponID(), pOther->entindex() );
+	SendDispatchEffect();
 	CSoundEnt::InsertSound ( SOUND_COMBAT, vecOrigin, 1024, 3.0 );
 
 	// Damage.
@@ -337,47 +336,16 @@ void CTFBaseRocket::Explode( trace_t *pTrace, CBaseEntity *pOther )
 
 void CTFBaseRocket::SendDispatchEffect( void )
 {
-	// TFP3: Horrifically bad code, revisit when tf_fx gets properly implemented
-#if 0
-	CEffectData explosionData; // [esp+4h] [ebp-64h] BYREF
-
 	CDisablePredictionFiltering disabler;
 
-	explosionData.m_vOrigin.y = 0.0;
-	explosionData.m_vOrigin.z = 0.0;
-	explosionData.m_vStart.x = 0.0;
-	explosionData.m_nEntIndex = 0;
-	explosionData.m_vStart.y = 0.0;
-	explosionData.m_flScale = 0.0;
-	explosionData.m_vStart.z = 0.0;
-	explosionData.m_nSurfaceProp = 0;
-	explosionData.m_vNormal.x = 0.0;
-	explosionData.m_nMaterial = 0;
-	explosionData.m_vNormal.y = 0.0;
-	memset(&explosionData.m_nDamageType, 0, 13);
-	explosionData.m_vNormal.z = 0.0;
-	explosionData.m_vAngles.x = 0.0;
-	explosionData.m_vAngles.y = 0.0;
-	explosionData.m_vAngles.z = 0.0;
-	*(float *)&explosionData.m_fFlags = 0.0;
-	explosionData.m_flMagnitude = 1.0;
-	explosionData.m_flRadius = 0.0;
-	*(float *)&explosionData.m_nAttachmentIndex = 0.0;
+	CEffectData explosionData;
 
-	const Vector vecOrigin = GetAbsOrigin();
-	const QAngle absAngles = GetAbsAngles();
+	explosionData.m_vOrigin = GetAbsOrigin();
+	explosionData.m_vAngles = GetAbsAngles();
+	explosionData.m_fFlags = GetWeaponID();
+	//explosionData.m_nEntIndex = entindex();
 
-	explosionData.m_vOrigin.y = vecOrigin.x;
-	explosionData.m_vOrigin.z = vecOrigin.y;
-	explosionData.m_vStart.x = vecOrigin.z;
-	
-	explosionData.m_vAngles.y = absAngles.x;
-	explosionData.m_vAngles.z = absAngles.y;
-	*(float *)&explosionData.m_fFlags = absAngles.z;
-
-	explosionData.m_nEntIndex = GetWeaponID();
 	DispatchEffect( "TF_Explosion", explosionData );
-#endif
 }
 
 //-----------------------------------------------------------------------------

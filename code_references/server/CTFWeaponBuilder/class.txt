@@ -1,0 +1,63 @@
+class CTFWeaponBuilder : public CTFWeaponBase
+{
+    public void CTFWeaponBuilder(class CTFWeaponBuilder & );
+    public void CTFWeaponBuilder();
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+	
+    public void SetSubType(int );
+    public void Precache();
+    public bool CanDeploy();
+    public bool Holster(class CBaseCombatWeapon * );
+    public void ItemPostFrame();
+    public void PrimaryAttack();
+    public void SecondaryAttack();
+    public void WeaponIdle();
+    public bool Deploy();
+    public enum Activity GetDrawActivity();
+    public char * GetViewModel(int );
+    public char * GetWorldModel();
+    
+	public bool AllowsAutoSwitchTo();
+    
+	public int GetType();
+	
+    public void SetCurrentState(int );
+    public void SwitchOwnersWeaponToLast();
+	
+    public void StartPlacement();
+    public void StopPlacement();
+    public void UpdatePlacementState();
+    public bool IsValidPlacement();
+	
+    public void StartBuilding();
+	
+    public bool HasAmmo();
+    public int GetSlot();
+    public int GetPosition();
+    public char * GetPrintName();
+	
+    public int GetWeaponID();
+	
+    class NetworkVar_m_iBuildState
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CTFWeaponBuilder::NetworkVar_m_iBuildState> m_iBuildState;
+    class NetworkVar_m_iObjectType
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<unsigned int,CTFWeaponBuilder::NetworkVar_m_iObjectType> m_iObjectType;
+	
+    class NetworkVar_m_hObjectBeingBuilt
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkHandleBase<CBaseObject,CTFWeaponBuilder::NetworkVar_m_hObjectBeingBuilt> m_hObjectBeingBuilt;
+	
+    public int m_iValidBuildPoseParam;
+	
+    public float m_flNextDenySound;
+};

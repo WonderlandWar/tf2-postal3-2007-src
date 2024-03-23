@@ -74,10 +74,6 @@ END_NETWORK_TABLE()
 //-----------------------------------------------------------------------------
 CTFWeaponBaseGrenadeProj::CTFWeaponBaseGrenadeProj()
 {
-#ifndef CLIENT_DLL
-	m_bUseImpactNormal = false;
-	m_vecImpactNormal.Init();
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -264,30 +260,7 @@ void CTFWeaponBaseGrenadeProj::Explode( trace_t *pTrace, int bitsDamageType )
 
 	// Explosion effect on client
 	Vector vecOrigin = GetAbsOrigin();
-	CPVSFilter filter( vecOrigin );
-	if ( UseImpactNormal() )
-	{
-		if ( pTrace->m_pEnt && pTrace->m_pEnt->IsPlayer() )
-		{
-			TE_TFExplosion( filter, 0.0f, vecOrigin, GetImpactNormal(), GetWeaponID(), pTrace->m_pEnt->entindex() );
-		}
-		else
-		{
-			TE_TFExplosion( filter, 0.0f, vecOrigin, GetImpactNormal(), GetWeaponID(), -1 );
-		}
-	}
-	else
-	{
-		if ( pTrace->m_pEnt && pTrace->m_pEnt->IsPlayer() )
-		{
-			TE_TFExplosion( filter, 0.0f, vecOrigin, pTrace->plane.normal, GetWeaponID(), pTrace->m_pEnt->entindex() );
-		}
-		else
-		{
-			TE_TFExplosion( filter, 0.0f, vecOrigin, pTrace->plane.normal, GetWeaponID(), -1 );
-		}
-	}
-
+	SendDispatchEffect();
 
 	// Use the thrower's position as the reported position
 	Vector vecReported = GetThrower() ? GetThrower()->GetAbsOrigin() : vec3_origin;
@@ -315,6 +288,23 @@ void CTFWeaponBaseGrenadeProj::Explode( trace_t *pTrace, int bitsDamageType )
 	AddEffects( EF_NODRAW );
 	SetAbsVelocity( vec3_origin );
 	SetNextThink( gpGlobals->curtime );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CTFWeaponBaseGrenadeProj::SendDispatchEffect( void )
+{
+	CDisablePredictionFiltering disabler;
+
+	CEffectData explosionData;
+
+	explosionData.m_vOrigin = GetAbsOrigin();
+	explosionData.m_vAngles = GetAbsAngles();
+	explosionData.m_fFlags = GetWeaponID();
+	//explosionData.m_nEntIndex = entindex();
+
+	DispatchEffect( "TF_Explosion", explosionData );
 }
 
 //-----------------------------------------------------------------------------

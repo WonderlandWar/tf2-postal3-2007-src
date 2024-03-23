@@ -1,0 +1,100 @@
+void __thiscall CTFWeaponBaseGrenadeProj::Explode(
+        CTFWeaponBaseGrenadeProj *this,
+        CGameTrace *pTrace,
+        int bitsDamageType)
+{
+  int v4; // ecx
+  double v6; // st6
+  double v7; // st7
+  CBaseCombatCharacter *Thrower; // edi
+  Vector *p_m_vecAbsOrigin; // eax
+  int m_iEFlags; // ecx
+  CBaseCombatCharacter *v11; // eax
+  double v12; // st7
+  const Vector *v13; // [esp-4h] [ebp-88h]
+  float flDuration; // [esp+4h] [ebp-80h]
+  float thinkTime; // [esp+10h] [ebp-74h]
+  Vector absOrigin; // [esp+24h] [ebp-60h] BYREF
+  Vector reportedPosition; // [esp+30h] [ebp-54h] BYREF
+  CTakeDamageInfo info; // [esp+3Ch] [ebp-48h] BYREF
+  float flRadius; // [esp+88h] [ebp+4h]
+
+  this->m_ModelName.pszValue = 0;
+  CBaseEntity::DispatchUpdateTransmitState(this);
+  CCollisionProperty::SetSolidFlags(&this->m_Collision, this->m_Collision.m_usSolidFlags.m_Value | 4);
+  if ( this->m_takedamage.m_Value )
+  {
+    v4 = 1;
+    if ( !this->m_takedamage.m_Value )
+      v4 = -1;
+  }
+  else
+  {
+    v4 = 0;
+  }
+  if ( v4 )
+  {
+    this->NetworkStateChanged_m_takedamage(this, &this->m_takedamage);
+    this->m_takedamage.m_Value = 0;
+  }
+  if ( 1.0 != pTrace->fraction )
+  {
+    v6 = 0.60000002 * pTrace->plane.normal.z;
+    v7 = pTrace->plane.normal.y * 0.60000002;
+    absOrigin.x = pTrace->plane.normal.x * 0.60000002 + pTrace->endpos.x;
+    absOrigin.y = v7 + pTrace->endpos.y;
+    absOrigin.z = v6 + pTrace->endpos.z;
+    CBaseEntity::SetAbsOrigin(this, &absOrigin);
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  CSoundEnt::InsertSound(1, &this->m_vecAbsOrigin, 1024, 3.0, 0, 0, 0);
+  CTFWeaponBaseGrenadeProj::SendDispatchEffect(this);
+  if ( CBaseGrenade::GetThrower(this) )
+  {
+    Thrower = CBaseGrenade::GetThrower(this);
+    if ( (Thrower->m_iEFlags & 0x800) != 0 )
+      CBaseEntity::CalcAbsolutePosition(Thrower);
+    p_m_vecAbsOrigin = &Thrower->m_vecAbsOrigin;
+  }
+  else
+  {
+    p_m_vecAbsOrigin = &vec3_origin;
+  }
+  reportedPosition.x = p_m_vecAbsOrigin->x;
+  m_iEFlags = this->m_iEFlags;
+  reportedPosition.y = p_m_vecAbsOrigin->y;
+  reportedPosition.z = p_m_vecAbsOrigin->z;
+  if ( (m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  flDuration = this->m_flDamage.m_Value;
+  v13 = this->GetBlastForce(this, &absOrigin);
+  v11 = CBaseGrenade::GetThrower(this);
+  CTakeDamageInfo::CTakeDamageInfo(
+    &info,
+    this,
+    v11,
+    v13,
+    &this->m_vecAbsOrigin,
+    flDuration,
+    bitsDamageType,
+    0,
+    &reportedPosition);
+  v12 = ((double (__thiscall *)(CTFWeaponBaseGrenadeProj *))this->GetDamageRadius)(this);
+  if ( tf_grenade_show_radius.m_pParent->m_nValue )
+  {
+    thinkTime = v12;
+    CTFWeaponBaseGrenadeProj::DrawRadius(this, thinkTime);
+  }
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  flRadius = v12;
+  RadiusDamage(&info, &this->m_vecAbsOrigin, flRadius, 0, 0);
+  if ( pTrace->m_pEnt && !pTrace->m_pEnt->IsPlayer(pTrace->m_pEnt) )
+    UTIL_DecalTrace(pTrace, "Scorch");
+  CBaseEntity::ThinkSet(this, CBaseEntity::SUB_Remove, 0.0, 0);
+  this->m_pfnTouch = 0;
+  CBaseEntity::AddEffects(this, 32);
+  CBaseEntity::SetAbsVelocity(this, &vec3_origin);
+  CBaseEntity::SetNextThink(this, gpGlobals->curtime, 0);
+}

@@ -93,15 +93,10 @@ public:
 
 	void					Explode( trace_t *pTrace, int bitsDamageType );
 
-	bool					UseImpactNormal()							{ return m_bUseImpactNormal; }
-	const Vector			&GetImpactNormal( void ) const				{ return m_vecImpactNormal; }
+	void					SendDispatchEffect( void );
 
 protected:
-
 	void					DrawRadius( float flRadius );
-
-	bool					m_bUseImpactNormal;
-	Vector					m_vecImpactNormal;
 
 private:
 

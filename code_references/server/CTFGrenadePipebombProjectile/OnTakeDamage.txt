@@ -1,0 +1,94 @@
+int __thiscall CTFGrenadePipebombProjectile::OnTakeDamage(
+        CTFGrenadePipebombProjectile *this,
+        const CTakeDamageInfo *info)
+{
+  const CTakeDamageInfo *v2; // ebx
+  unsigned int m_Index; // eax
+  unsigned int v6; // eax
+  CBaseEntity *m_pEntity; // ecx
+  int TeamNumber; // edi
+  bool v9; // zf
+  int m_bitsDamageType; // eax
+  double m_fValue; // st7
+  double v12; // st6
+  double v13; // st5
+  double v14; // rt0
+  double x; // st5
+  double v16; // st7
+  CTFGrenadePipebombProjectile_vtbl *v17; // edx
+  int (__thiscall *VPhysicsTakeDamage)(CBaseEntity *, const CTakeDamageInfo *); // edx
+  float vecForce_4; // [esp+8h] [ebp-54h]
+  float vecForce_8; // [esp+Ch] [ebp-50h]
+  CTakeDamageInfo newInfo; // [esp+10h] [ebp-4Ch] BYREF
+
+  v2 = info;
+  m_Index = info->m_hAttacker.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+    || !g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity )
+  {
+    return 0;
+  }
+  v6 = info->m_hAttacker.m_Index;
+  if ( v6 == -1 || g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_SerialNumber != v6 >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[info->m_hAttacker.m_Index & 0xFFF].m_pEntity;
+  TeamNumber = CBaseEntity::GetTeamNumber(m_pEntity);
+  v9 = TeamNumber == CBaseEntity::GetTeamNumber(this);
+  if ( !this->m_bTouched.m_Value )
+    return 0;
+  m_bitsDamageType = v2->m_bitsDamageType;
+  if ( (m_bitsDamageType & 0x20000042) == 0 || v9 )
+    return 0;
+  vecForce_4 = v2->m_vecDamageForce.x;
+  vecForce_8 = v2->m_vecDamageForce.y;
+  newInfo.m_vecDamageForce.x = v2->m_vecDamageForce.z;
+  if ( (m_bitsDamageType & 2) != 0 )
+  {
+    m_fValue = tf_grenade_forcefrom_bullet.m_pParent->m_fValue;
+LABEL_16:
+    v12 = vecForce_4 * m_fValue;
+    vecForce_4 = v12;
+    v13 = vecForce_8 * m_fValue;
+    vecForce_8 = v13;
+    v14 = v13;
+    x = m_fValue * newInfo.m_vecDamageForce.x;
+    v16 = v14;
+    newInfo.m_vecDamageForce.x = x;
+    goto LABEL_20;
+  }
+  if ( (m_bitsDamageType & 0x20000000) != 0 )
+  {
+    m_fValue = tf_grenade_forcefrom_buckshot.m_pParent->m_fValue;
+    goto LABEL_16;
+  }
+  if ( (m_bitsDamageType & 0x40) != 0 )
+  {
+    m_fValue = tf_grenade_forcefrom_blast.m_pParent->m_fValue;
+    goto LABEL_16;
+  }
+  v12 = vecForce_4;
+  x = newInfo.m_vecDamageForce.x;
+  v16 = vecForce_8;
+LABEL_20:
+  if ( v12 * v12 + x * x + v16 * v16 > tf_pipebomb_force_to_move.m_pParent->m_fValue
+                                     * tf_pipebomb_force_to_move.m_pParent->m_fValue )
+  {
+    this->m_pPhysicsObject->EnableMotion(this->m_pPhysicsObject, 1);
+    CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&newInfo.m_vecDamageForce.y, v2);
+    v17 = this->CTFWeaponBaseGrenadeProj::CBaseGrenade::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+    newInfo.m_vecDamageForce.y = vecForce_4;
+    VPhysicsTakeDamage = v17->VPhysicsTakeDamage;
+    newInfo.m_vecDamageForce.z = vecForce_8;
+    newInfo.m_vecDamagePosition.x = newInfo.m_vecDamageForce.x;
+    VPhysicsTakeDamage(this, (CTakeDamageInfo *)&newInfo.m_vecDamageForce.y);
+    this->m_flMinSleepTime = tf_grenade_force_sleeptime.m_pParent->m_fValue + gpGlobals->curtime;
+    LOBYTE(info) = 0;
+    CNetworkVarBase<bool,CTFGrenadePipebombProjectile::NetworkVar_m_bTouched>::Set(
+      &this->m_bTouched,
+      (const bool *)&info);
+    return 1;
+  }
+  return 0;
+}

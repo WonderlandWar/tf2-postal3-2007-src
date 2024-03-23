@@ -1,0 +1,75 @@
+void __thiscall CTFWeaponBaseGrenadeProj::VPhysicsUpdate(CTFWeaponBaseGrenadeProj *this, IPhysicsObject *pPhysics)
+{
+  float x; // edx
+  float y; // eax
+  int m_Value; // ebp
+  double frametime; // st7
+  void (__thiscall *SetVelocity)(IPhysicsObject *, const Vector *, const Vector *); // edx
+  void (__thiscall *v8)(IPhysicsObject *, const Vector *, const Vector *); // eax
+  double v9; // st1
+  double v10; // st7
+  Vector vel; // [esp+8h] [ebp-A0h] BYREF
+  Vector angVel; // [esp+14h] [ebp-94h] BYREF
+  Vector start; // [esp+20h] [ebp-88h] BYREF
+  float z; // [esp+2Ch] [ebp-7Ch]
+  Vector vecAbsEnd; // [esp+30h] [ebp-78h] BYREF
+  ITraceFilter pFilter; // [esp+3Ch] [ebp-6Ch] BYREF
+  CTFWeaponBaseGrenadeProj *v17; // [esp+40h] [ebp-68h]
+  CBaseCombatCharacter *Thrower; // [esp+44h] [ebp-64h]
+  int v19; // [esp+48h] [ebp-60h]
+  CGameTrace tr; // [esp+4Ch] [ebp-5Ch] BYREF
+
+  CBaseCombatCharacter::VPhysicsUpdate(this, pPhysics);
+  pPhysics->GetVelocity(pPhysics, (Vector *)&vel.y, (Vector *)&angVel.y);
+  if ( (this->m_iEFlags & 0x800) != 0 )
+    CBaseEntity::CalcAbsolutePosition(this);
+  x = this->m_vecAbsOrigin.x;
+  y = this->m_vecAbsOrigin.y;
+  z = this->m_vecAbsOrigin.z;
+  m_Value = this->m_CollisionGroup.m_Value;
+  start.y = x;
+  start.z = y;
+  Thrower = CBaseGrenade::GetThrower(this);
+  pFilter.__vftable = (ITraceFilter_vtbl *)&CTraceFilterCollisionGrenades::`vftable';
+  v17 = this;
+  v19 = m_Value;
+  tr.startpos.x = 0.0;
+  frametime = gpGlobals->frametime;
+  vecAbsEnd.x = vel.y * frametime + start.y;
+  vecAbsEnd.y = vel.z * frametime + start.z;
+  vecAbsEnd.z = frametime * angVel.x + z;
+  UTIL_TraceLine((Vector *)&start.y, &vecAbsEnd, 0x42000001u, &pFilter, (CGameTrace *)&tr.startpos.y);
+  if ( HIBYTE(tr.fractionleftsolid) )
+  {
+    if ( !this->m_bInSolid && this->m_bCollideWithTeammates )
+    {
+      SetVelocity = pPhysics->SetVelocity;
+      vel.y = vel.y * -0.2;
+      vel.z = vel.z * -0.2;
+      angVel.x = -0.2 * angVel.x;
+      SetVelocity(pPhysics, (Vector *)&vel.y, 0);
+    }
+    this->m_bInSolid = 1;
+  }
+  else
+  {
+    this->m_bInSolid = 0;
+    if ( *(float *)&tr.contents < 1.0 || BYTE2(tr.fractionleftsolid) )
+    {
+      this->Touch(this, (CBaseEntity *)tr.hitbox);
+      if ( this->m_bCollideWithTeammates )
+      {
+        v8 = pPhysics->SetVelocity;
+        v9 = vel.y * tr.plane.normal.y + tr.plane.normal.z * vel.z + tr.plane.dist * angVel.x;
+        v10 = this->m_flElasticity.m_Value;
+        vel.y = (tr.plane.normal.y * -2.0 * v9 + vel.y) * v10;
+        vel.z = (vel.z + tr.plane.normal.z * -2.0 * v9) * v10;
+        angVel.x = v10 * (angVel.x + tr.plane.dist * -2.0 * v9);
+        angVel.y = angVel.y * -0.5;
+        angVel.z = angVel.z * -0.5;
+        start.x = -0.5 * start.x;
+        v8(pPhysics, (Vector *)&vel.y, (Vector *)&angVel.y);
+      }
+    }
+  }
+}

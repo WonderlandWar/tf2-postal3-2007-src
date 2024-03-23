@@ -1,0 +1,64 @@
+class CTFWeaponBaseGrenadeProj : public CBaseGrenade
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    private void CTFWeaponBaseGrenadeProj(class CTFWeaponBaseGrenadeProj & );
+    public void CTFWeaponBaseGrenadeProj();
+    public void ~CTFWeaponBaseGrenadeProj();
+    public void Spawn();
+    public void Precache();
+    public void InitGrenade(class Vector & ,class Vector & ,class CBaseCombatCharacter * ,class CTFWeaponInfo & );
+    public int GetWeaponID();
+    class NetworkVar_m_vInitialVelocity
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVectorBase<Vector,CTFWeaponBaseGrenadeProj::NetworkVar_m_vInitialVelocity> m_vInitialVelocity;
+    public float GetShakeAmplitude();
+    public float GetShakeRadius();
+    public void SetCritical(bool );
+    public int GetDamageType();
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    public class CTFWeaponBaseGrenadeProj * Create(char * ,class Vector & ,class QAngle & ,class Vector & ,class Vector & ,class CBaseCombatCharacter * ,class CTFWeaponInfo & ,int );
+	
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    public void DetonateThink();
+    public void Detonate();
+	
+    public void SetupInitialTransmittedGrenadeVelocity(class Vector & );
+	
+    public bool ShouldNotDetonate();
+    public void RemoveGrenade(bool );
+	
+    public void SetTimer(float );
+    public float GetDetonateTime();
+	
+    public void SetDetonateTimerLength(float );
+	
+    public void VPhysicsUpdate(class IPhysicsObject * );
+	
+    public void Explode(class CGameTrace * ,int );
+	
+    public void SendDispatchEffect();
+	
+    protected void DrawRadius(float );
+    
+	private void ResolveFlyCollisionCustom(class CGameTrace & ,class Vector & );
+    
+	private float m_flDetonateTime;
+    
+	private bool m_bInSolid;
+	
+    class NetworkVar_m_bCritical
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,CTFWeaponBaseGrenadeProj::NetworkVar_m_bCritical> m_bCritical;
+	
+    private float m_flCollideWithTeammatesTime;
+    private bool m_bCollideWithTeammates;
+};

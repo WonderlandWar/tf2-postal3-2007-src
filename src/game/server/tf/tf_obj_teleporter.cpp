@@ -92,18 +92,15 @@ void CObjectTeleporter_Entrance::TeleporterSend( CTFPlayer *pPlayer )
 
 	SetTeleportingPlayer( pPlayer );
 
-	Vector origin = GetAbsOrigin();
-	CPVSFilter filter( origin );
-
 	switch( pPlayer->GetTeamNumber() )
 	{
 	case TF_TEAM_RED:
-		TE_TFParticleEffect( filter, 0.0, "teleported_red", origin, vec3_angle );
-		TE_TFParticleEffect( filter, 0.0, "player_sparkles_red", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		DispatchParticleEffect( "teleported_red", GetAbsOrigin(), vec3_angle );
+		DispatchParticleEffect( "player_sparkles_red", GetAbsOrigin(), vec3_angle );
 		break;
 	case TF_TEAM_BLUE:
-		TE_TFParticleEffect( filter, 0.0, "teleported_blue", origin, vec3_angle );
-		TE_TFParticleEffect( filter, 0.0, "player_sparkles_blue", origin, vec3_angle, pPlayer, PATTACH_POINT );
+		DispatchParticleEffect( "teleported_blue", GetAbsOrigin(), vec3_angle );
+		DispatchParticleEffect( "player_sparkles_blue", GetAbsOrigin(), vec3_angle );
 		break;
 	default:
 		break;
@@ -144,16 +141,13 @@ void CObjectTeleporter_Exit::TeleporterReceive( CTFPlayer *pPlayer, float flDela
 
 	SetTeleportingPlayer( pPlayer );
 
-	Vector origin = GetAbsOrigin();
-	CPVSFilter filter( origin );
-
 	switch( pPlayer->GetTeamNumber() )
 	{
 	case TF_TEAM_RED:
-		TE_TFParticleEffect( filter, 0.0, "teleportedin_red", origin, vec3_angle );
+		DispatchParticleEffect( "teleportedin_red", GetAbsOrigin(), vec3_angle );
 		break;
 	case TF_TEAM_BLUE:
-		TE_TFParticleEffect( filter, 0.0, "teleportedin_blue", origin, vec3_angle );
+		DispatchParticleEffect( "teleportedin_blue", GetAbsOrigin(), vec3_angle );
 		break;
 	default:
 		break;

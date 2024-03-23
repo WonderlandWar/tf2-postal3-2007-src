@@ -1,0 +1,48 @@
+class CTFGrenadePipebombProjectile : public CTFWeaponBaseGrenadeProj
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CTFGrenadePipebombProjectile(class CTFGrenadePipebombProjectile & );
+    public void CTFGrenadePipebombProjectile();
+    public void ~CTFGrenadePipebombProjectile();
+    public int GetWeaponID();
+    public int GetType();
+    public int GetDamageType();
+    public void SetChargeTime(float );
+    class NetworkVar_m_bTouched
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<bool,CTFGrenadePipebombProjectile::NetworkVar_m_bTouched> m_bTouched;
+    class NetworkVar_m_iType
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVarBase<int,CTFGrenadePipebombProjectile::NetworkVar_m_iType> m_iType;
+    public float m_flCreationTime;
+    public float m_flChargeTime;
+    class NetworkVar_m_vecFirePosition
+    {
+        public void NetworkStateChanged(void * );
+    };
+    public class CNetworkVectorBase<Vector,CTFGrenadePipebombProjectile::NetworkVar_m_vecFirePosition> m_vecFirePosition;
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+    public class CTFGrenadePipebombProjectile * Create(class Vector & ,class QAngle & ,class Vector & ,class Vector & ,class CBaseCombatCharacter * ,class CTFWeaponInfo & ,bool );
+    public void Spawn();
+    public void Precache();
+    public void UpdateOnRemove();
+    public void BounceSound();
+    public void Detonate();
+    public void Fizzle();
+    public void SetLauncher(class CBaseEntity * );
+    public void SetPipebombMode(bool );
+    public void PipebombTouch(class CBaseEntity * );
+    public void VPhysicsCollision(int ,struct gamevcollisionevent_t * );
+    public int OnTakeDamage(class CTakeDamageInfo & );
+    private class CHandle<CBaseEntity> m_hLauncher;
+    private bool m_bFizzle;
+    private float m_flMinSleepTime;
+};

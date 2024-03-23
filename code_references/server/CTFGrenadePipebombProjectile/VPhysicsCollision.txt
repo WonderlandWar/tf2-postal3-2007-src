@@ -1,0 +1,77 @@
+void __thiscall CTFGrenadePipebombProjectile::VPhysicsCollision(
+        CTFGrenadePipebombProjectile *this,
+        int index,
+        gamevcollisionevent_t *pEvent)
+{
+  BOOL v4; // eax
+  CBaseEntity *v5; // ebp
+  int TeamNumber; // edi
+  const Vector *AbsVelocity; // eax
+  const Vector *AbsOrigin; // eax
+  double v9; // st7
+  double v10; // st6
+  double v11; // st5
+  CTFGrenadePipebombProjectile_vtbl *v12; // edi
+  int v13; // eax
+  bool v14; // bl
+  bool val; // [esp+13h] [ebp-7Dh] BYREF
+  Vector vecAbsEnd; // [esp+14h] [ebp-7Ch] BYREF
+  float x; // [esp+20h] [ebp-70h] BYREF
+  float y; // [esp+24h] [ebp-6Ch]
+  Vector vecSpot; // [esp+28h] [ebp-68h] BYREF
+  CGameTrace pTrace; // [esp+34h] [ebp-5Ch] BYREF
+
+  CBaseEntity::VPhysicsCollision(this, index, pEvent);
+  v4 = index == 0;
+  v5 = pEvent->pEntities[v4];
+  if ( v5 )
+  {
+    if ( this->m_iType.m_Value )
+    {
+      if ( physprops->GetSurfaceData(physprops, pEvent->surfaceProps[v4])->game.material != 88 )
+      {
+        v14 = __RTDynamicCast(v5, 0, &CBaseEntity `RTTI Type Descriptor', &CDynamicProp `RTTI Type Descriptor', 0) != 0;
+        if ( (CBaseEntity::IsWorld(v5) || v14) && this->m_flMinSleepTime < (double)gpGlobals->curtime )
+        {
+          val = 1;
+          CNetworkVarBase<bool,CTFGrenadePipebombProjectile::NetworkVar_m_bTouched>::Set(&this->m_bTouched, &val);
+          this->m_pPhysicsObject->EnableMotion(this->m_pPhysicsObject, 0);
+        }
+      }
+    }
+    else
+    {
+      if ( CBaseEntity::GetTeamNumber(pEvent->pEntities[v4]) )
+      {
+        TeamNumber = CBaseEntity::GetTeamNumber(this);
+        if ( CBaseEntity::GetTeamNumber(v5) != TeamNumber )
+        {
+          AbsVelocity = CBaseEntity::GetAbsVelocity(this);
+          x = AbsVelocity->x;
+          y = AbsVelocity->y;
+          vecSpot.x = AbsVelocity->z;
+          pfVectorNormalize((Vector *)&x);
+          vecAbsEnd.x = x * 32.0;
+          vecAbsEnd.y = y * 32.0;
+          vecAbsEnd.z = 32.0 * vecSpot.x;
+          AbsOrigin = CBaseEntity::GetAbsOrigin(this);
+          v9 = AbsOrigin->x - vecAbsEnd.x;
+          vecSpot.y = v9;
+          v10 = AbsOrigin->y - vecAbsEnd.y;
+          vecSpot.z = v10;
+          v11 = AbsOrigin->z - vecAbsEnd.z;
+          pTrace.startpos.x = v11;
+          vecAbsEnd.x = v9 + x * 64.0;
+          vecAbsEnd.y = v10 + y * 64.0;
+          vecAbsEnd.z = 64.0 * vecSpot.x + v11;
+          UTIL_TraceLine((Vector *)&vecSpot.y, &vecAbsEnd, 0x200400Bu, this, 0, (CGameTrace *)&pTrace.startpos.y);
+          v12 = this->CTFWeaponBaseGrenadeProj::CBaseGrenade::CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+          v13 = this->GetDamageType(this);
+          v12->Explode(this, (CGameTrace *)&pTrace.startpos.y, v13);
+        }
+      }
+      val = 1;
+      CNetworkVarBase<bool,CTFGrenadePipebombProjectile::NetworkVar_m_bTouched>::Set(&this->m_bTouched, &val);
+    }
+  }
+}
