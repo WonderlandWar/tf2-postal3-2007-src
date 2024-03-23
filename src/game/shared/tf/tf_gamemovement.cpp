@@ -21,14 +21,12 @@
 	#include "c_tf_player.h"
 	#include "c_world.h"
 	#include "c_team.h"
-	#include "c_tf_team.h"
 
 	#define CTeam C_Team
 
 #else
 	#include "tf_player.h"
 	#include "team.h"
-	#include "tf_team.h"
 #endif
 
 ConVar	tf_maxspeed( "tf_maxspeed", "400", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT  | FCVAR_DEVELOPMENTONLY);
@@ -552,55 +550,10 @@ void CTFGameMovement::AvoidPlayers( void )
 		VectorScale( vecSeparationVelocity, flMaxPlayerSpeed, vecSeparationVelocity );
 	}
 
-	QAngle vAngles = mv->m_vecViewAngles;
-	vAngles.x = 0;
-	Vector currentdir;
-	Vector rightdir;
-
-	AngleVectors( vAngles, &currentdir, &rightdir, NULL );
-
-	Vector vDirection = vecSeparationVelocity;
-
-	VectorNormalize( vDirection );
-
-	float fwd = currentdir.Dot( vDirection );
-	float rt = rightdir.Dot( vDirection );
-
-	float forward = fwd * flPushStrength;
-	float side = rt * flPushStrength;
-
 	//Msg( "fwd: %f - rt: %f - forward: %f - side: %f\n", fwd, rt, forward, side );
 
 	m_pTFPlayer->m_Shared.SetSeparation( true );
 	m_pTFPlayer->m_Shared.SetSeparationVelocity( vecSeparationVelocity );
-
-	mv->m_flForwardMove	+= forward;
-	mv->m_flSideMove	+= side;
-
-	// Clamp the move to within legal limits, preserving direction. This is a little
-	// complicated because we have different limits for forward, back, and side
-
-	//Msg( "PRECLAMP: forwardmove=%f, sidemove=%f\n", mv->m_flForwardMove, mv->m_flSideMove );
-
-	float flForwardScale = 1.0f;
-	if ( mv->m_flForwardMove > fabs( FORWARDSPEED ) )
-	{
-		flForwardScale = fabs( FORWARDSPEED ) / mv->m_flForwardMove;
-	}
-	else if ( mv->m_flForwardMove < -fabs( BACKSPEED ) )
-	{
-		flForwardScale = fabs( BACKSPEED ) / fabs( mv->m_flForwardMove );
-	}
-
-	float flSideScale = 1.0f;
-	if ( fabs( mv->m_flSideMove ) > fabs( SIDESPEED ) )
-	{
-		flSideScale = fabs( SIDESPEED ) / fabs( mv->m_flSideMove );
-	}
-
-	float flScale = min( flForwardScale, flSideScale );
-	mv->m_flForwardMove *= flScale;
-	mv->m_flSideMove *= flScale;
 
 	//Msg( "Pforwardmove=%f, sidemove=%f\n", mv->m_flForwardMove, mv->m_flSideMove );
 }
@@ -981,6 +934,8 @@ void CTFGameMovement::WalkMove( void )
 	Vector vecWishDirection( ( ( vecForward.x * flForwardMove ) + ( vecRight.x * flSideMove ) ),
 		                     ( ( vecForward.y * flForwardMove ) + ( vecRight.y * flSideMove ) ), 
 							 0.0f );
+
+	vecWishDirection += m_pTFPlayer->m_Shared.GetSeparationVelocity();
 
 	// Calculate the speed and direction of movement, then clamp the speed.
 	float flWishSpeed = VectorNormalize( vecWishDirection );
