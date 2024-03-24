@@ -1,0 +1,100 @@
+void __thiscall CTFHudFlagObjectives::UpdateStatus(CTFHudFlagObjectives *this)
+{
+  C_TFPlayer *LocalPlayer; // ebx
+  C_TFItem *Item; // eax
+  C_TFItem *v4; // eax
+  bool v5; // zf
+  CTFFlagStatus *m_pBlueFlag; // ecx
+  CTFFlagStatus *m_pRedFlag; // ecx
+  vgui::AnimationController *v8; // eax
+  CTFArrowPanel *m_pCapturePoint; // ecx
+  int i; // ebp
+  C_BaseEntity *BaseEntity; // edi
+  int v12; // ebx
+  vgui::AnimationController *v13; // eax
+  CTFImagePanel *m_pCarriedImage; // ecx
+  CTFArrowPanel *v15; // ecx
+  CTFFlagStatus *v16; // ecx
+  CTFFlagStatus *v17; // ecx
+  C_TFPlayer *v18; // [esp+10h] [ebp-8h]
+  CHandle<C_BaseEntity> v19; // [esp+14h] [ebp-4h] BYREF
+
+  LocalPlayer = (C_TFPlayer *)C_BasePlayer::GetLocalPlayer();
+  v18 = LocalPlayer;
+  if ( LocalPlayer
+    && LocalPlayer->IsPlayer(LocalPlayer)
+    && C_TFPlayer::HasItem(LocalPlayer)
+    && (Item = C_TFPlayer::GetItem(LocalPlayer), Item->GetItemID(Item) == 1)
+    && (v4 = C_TFPlayer::GetItem(LocalPlayer),
+        __RTDynamicCast(v4, 0, &C_TFItem `RTTI Type Descriptor', &C_CaptureFlag `RTTI Type Descriptor', 0)) )
+  {
+    v5 = this->m_pCarriedImage == 0;
+    this->m_bCarryingFlag = 1;
+    if ( !v5 && !this->m_bFlagAnimationPlayed )
+    {
+      m_pBlueFlag = this->m_pBlueFlag;
+      this->m_bFlagAnimationPlayed = 1;
+      if ( m_pBlueFlag && m_pBlueFlag->IsVisible(m_pBlueFlag) )
+        this->m_pBlueFlag->SetVisible(this->m_pBlueFlag, 0);
+      m_pRedFlag = this->m_pRedFlag;
+      if ( m_pRedFlag && m_pRedFlag->IsVisible(m_pRedFlag) )
+        this->m_pRedFlag->SetVisible(this->m_pRedFlag, 0);
+      if ( !this->m_pCarriedImage->IsVisible(this->m_pCarriedImage) )
+        this->m_pCarriedImage->SetVisible(this->m_pCarriedImage, 1);
+      v8 = g_pClientMode->GetViewportAnimationController(g_pClientMode);
+      vgui::AnimationController::StartAnimationSequence(v8, "FlagOutline");
+      m_pCapturePoint = this->m_pCapturePoint;
+      if ( m_pCapturePoint )
+      {
+        if ( !m_pCapturePoint->IsVisible(m_pCapturePoint) )
+          this->m_pCapturePoint->SetVisible(this->m_pCapturePoint, 1);
+        for ( i = 0; i < g_CaptureZones.m_Size; ++i )
+        {
+          BaseEntity = CClientEntityList::GetBaseEntity(
+                         (CClientEntityList *)cl_entitylist.m_Index,
+                         g_CaptureZones.m_Memory.m_pMemory[i]);
+          if ( BaseEntity )
+          {
+            v12 = LocalPlayer->GetTeamNumber(LocalPlayer);
+            if ( BaseEntity->GetTeamNumber(BaseEntity) == v12 )
+            {
+              CHandle<C_BaseEntity>::CHandle<C_BaseEntity>(&v19, BaseEntity);
+              this->m_pCapturePoint->m_hEntity = v19;
+            }
+            LocalPlayer = v18;
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    if ( this->m_bCarryingFlag )
+    {
+      this->m_bCarryingFlag = 0;
+      v13 = g_pClientMode->GetViewportAnimationController(g_pClientMode);
+      vgui::AnimationController::StartAnimationSequence(v13, "FlagOutline");
+    }
+    m_pCarriedImage = this->m_pCarriedImage;
+    this->m_bFlagAnimationPlayed = 0;
+    if ( m_pCarriedImage && m_pCarriedImage->IsVisible(m_pCarriedImage) )
+      this->m_pCarriedImage->SetVisible(this->m_pCarriedImage, 0);
+    v15 = this->m_pCapturePoint;
+    if ( v15 && v15->IsVisible(v15) )
+      this->m_pCapturePoint->SetVisible(this->m_pCapturePoint, 0);
+    v16 = this->m_pBlueFlag;
+    if ( v16 )
+    {
+      if ( !v16->IsVisible(v16) )
+        this->m_pBlueFlag->SetVisible(this->m_pBlueFlag, 1);
+      CTFFlagStatus::UpdateStatus(this->m_pBlueFlag);
+    }
+    v17 = this->m_pRedFlag;
+    if ( v17 )
+    {
+      if ( !v17->IsVisible(v17) )
+        this->m_pRedFlag->SetVisible(this->m_pRedFlag, 1);
+      CTFFlagStatus::UpdateStatus(this->m_pRedFlag);
+    }
+  }
+}

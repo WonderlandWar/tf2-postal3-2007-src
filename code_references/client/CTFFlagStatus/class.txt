@@ -1,0 +1,42 @@
+class CTFFlagStatus : public vgui::EditablePanel
+{
+    public void AddToMap(char * ,void  ( * )(),int ,int ,char * ,int ,char * );
+    public void ChainToMap();
+    class CTFFlagStatus_RegisterMap
+    {
+        public void CTFFlagStatus_RegisterMap();
+    };
+    public class CTFFlagStatus::CTFFlagStatus_RegisterMap m_RegisterClass;
+    public struct vgui::PanelMessageMap * GetMessageMap();
+    public void AddToAnimationMap(char * ,char * ,char * ,char * ,bool ,void *  ( * )(class vgui::Panel * ));
+    public void ChainToAnimationMap();
+    class CTFFlagStatus_Register
+    {
+        public void CTFFlagStatus_Register();
+    };
+    public class CTFFlagStatus::CTFFlagStatus_Register m_RegisterAnimationClass;
+    public struct PanelAnimationMap * GetAnimMap();
+    public void KB_AddToMap(char * ,enum ButtonCode_t ,int ,void  ( * )(),char * ,char * ,bool );
+    public void KB_ChainToMap();
+    public void KB_AddBoundKey(char * ,int ,int );
+    class CTFFlagStatus_RegisterKBMap
+    {
+        public void CTFFlagStatus_RegisterKBMap();
+    };
+    public class CTFFlagStatus::CTFFlagStatus_RegisterKBMap m_RegisterClassKB;
+    public struct vgui::PanelKeyBindingMap * GetKBMap();
+    public char * GetPanelClassName();
+    public char * GetPanelBaseClassName();
+    public void CTFFlagStatus(class CTFFlagStatus & );
+    public void CTFFlagStatus(class vgui::Panel * ,char * );
+    public void ApplySchemeSettings(class vgui::IScheme * );
+    public bool IsVisible();
+    public void UpdateStatus();
+    public void SetEntity(class CHandle<C_BaseEntity> );
+	
+    private class CHandle<C_BaseEntity> m_hEntity;
+	
+    private class CTFArrowPanel * m_pArrow;
+    private class CTFImagePanel * m_pStatusIcon;
+    private class CTFImagePanel * m_pBriefcase;
+};

@@ -1,0 +1,189 @@
+void __usercall CTFArrowPanel::Paint(CTFArrowPanel *this@<ecx>, int a2@<ebx>, int a3@<ebp>, int a4@<esi>)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v6; // ecx
+  IHandleEntity *m_pEntity; // esi
+  vgui::IPanel *v8; // esi
+  unsigned int (__thiscall *GetVPanel)(vgui::IClientPanel *); // eax
+  vgui::IPanel_vtbl *v10; // ebp
+  int v11; // eax
+  int Wide; // ebp
+  IMatRenderContext *v13; // esi
+  IMesh *v14; // edi
+  float *v15; // eax
+  float *v16; // ecx
+  float *v17; // eax
+  float *v18; // eax
+  float *v19; // eax
+  float *v20; // eax
+  float *v21; // eax
+  float *v22; // eax
+  signed int m_nFirstIndex; // ebp
+  int v24; // eax
+  float angleDegrees; // [esp+2Ch] [ebp-24Ch]
+  float nHeight; // [esp+40h] [ebp-238h]
+  IMaterial *x; // [esp+44h] [ebp-234h]
+  float xa; // [esp+44h] [ebp-234h]
+  float y; // [esp+48h] [ebp-230h]
+  float v31; // [esp+4Ch] [ebp-22Ch]
+  int Tall; // [esp+50h] [ebp-228h]
+  int v33; // [esp+54h] [ebp-224h] BYREF
+  CMeshBuilder meshBuilder; // [esp+58h] [ebp-220h] BYREF
+  VMatrix panelRotation; // [esp+234h] [ebp-44h] BYREF
+
+  m_Index = this->m_hEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v6 = &g_pEntityList->m_EntPtrArray[this->m_hEntity.m_Index & 0xFFF];
+    if ( v6->m_SerialNumber == m_Index >> 12 )
+    {
+      if ( v6->m_pEntity )
+      {
+        if ( this->m_hEntity.m_Index == -1
+          || g_pEntityList->m_EntPtrArray[this->m_hEntity.m_Index & 0xFFF].m_SerialNumber != this->m_hEntity.m_Index >> 12 )
+        {
+          m_pEntity = 0;
+        }
+        else
+        {
+          m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hEntity.m_Index & 0xFFF].m_pEntity;
+        }
+        if ( ((int (__thiscall *)(IHandleEntity *, int, int, int))m_pEntity->__vftable[23].SetRefEHandle)(
+               m_pEntity,
+               a4,
+               a3,
+               a2) == 2 )
+        {
+          x = this->m_RedMaterial.m_pMaterial;
+        }
+        else if ( ((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[23].SetRefEHandle)(m_pEntity) == 3 )
+        {
+          x = this->m_BlueMaterial.m_pMaterial;
+        }
+        v8 = g_pVGuiPanel;
+        GetVPanel = this->GetVPanel;
+        v33 = 0;
+        meshBuilder.m_VertexSize_Position = 0;
+        v10 = g_pVGuiPanel->__vftable;
+        v11 = ((int (__thiscall *)(CTFArrowPanel *, int *, CMeshBuilder *))GetVPanel)(this, &v33, &meshBuilder);
+        ((void (__thiscall *)(vgui::IPanel *, int))v10->GetAbsPos)(v8, v11);
+        Wide = vgui::Panel::GetWide(this);
+        Tall = vgui::Panel::GetTall(this);
+        v13 = materials->GetRenderContext(materials);
+        if ( v13 )
+          v13->BeginRender(v13);
+        v13->MatrixMode(v13, MATERIAL_MODEL);
+        v13->PushMatrix(v13);
+        MatrixSetIdentity((VMatrix *)panelRotation.m[1]);
+        *(float *)&meshBuilder.m_VertexSize_BoneWeight = 0.0;
+        *(float *)&meshBuilder.m_VertexSize_BoneMatrixIndex = 0.0;
+        *(float *)&meshBuilder.m_VertexSize_Normal = 1.0;
+        angleDegrees = CTFArrowPanel::GetAngleRotation(this);
+        MatrixBuildRotationAboutAxis(
+          (VMatrix *)panelRotation.m[1],
+          (const Vector *)&meshBuilder.m_VertexSize_BoneWeight,
+          angleDegrees);
+        panelRotation.m[1][3] = (float)(v33 + Wide / 2);
+        panelRotation.m[2][3] = (float)(meshBuilder.m_VertexSize_Position + Tall / 2);
+        panelRotation.m[3][3] = 0.0;
+        v13->LoadMatrix(v13, (VMatrix *)panelRotation.m[1]);
+        v14 = v13->GetDynamicMesh(v13, 1, 0, 0, x);
+        CMeshBuilder::CMeshBuilder((CMeshBuilder *)&meshBuilder.m_VertexSize_Color);
+        meshBuilder.m_IndexBuilder.m_nOffset = (unsigned int)v14;
+        meshBuilder.m_IndexBuilder.m_nIndexSize = 1;
+        meshBuilder.m_IndexBuilder.m_nFirstIndex = 7;
+        v14->SetPrimitiveType(v14, MATERIAL_TRIANGLES);
+        (*(void (__thiscall **)(unsigned int, int, int, int *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_nOffset + 68))(
+          meshBuilder.m_IndexBuilder.m_nOffset,
+          4,
+          6,
+          &meshBuilder.m_VertexSize_Color);
+        meshBuilder.m_IndexBuilder.m_nBufferFirstIndex = meshBuilder.m_nFirstIndex;
+        meshBuilder.m_IndexBuilder.m_nCurrentIndex = (int)&v14->IIndexBuffer;
+        LOBYTE(meshBuilder.m_IndexBuilder.m_nIndexOffset) = meshBuilder.m_IndexBuilder.m_pIndices;
+        meshBuilder.m_IndexBuilder.m_nBufferOffset = 0;
+        meshBuilder.m_IndexBuilder.m_nTotalIndexCount = 6;
+        LOBYTE(meshBuilder.m_VertexBuilder.m_VertexSize_Normal) = 0;
+        meshBuilder.m_IndexBuilder.m_pIndexBuffer = (IIndexBuffer *)meshBuilder.m_pMesh;
+        *(_DWORD *)&meshBuilder.m_IndexBuilder.m_bModify = 0;
+        CVertexBuilder::AttachBegin(
+          (CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color,
+          v14,
+          4,
+          (const MeshDesc_t *)&meshBuilder.m_VertexSize_Color);
+        *(_DWORD *)&meshBuilder.m_IndexBuilder.m_bModify = 0;
+        CVertexBuilder::Reset((CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color);
+        v15 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4] = 0.0;
+        v15[1] = 0.0;
+        v16 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2];
+        xa = (float)(Wide / -2);
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2] = xa;
+        ++v16;
+        nHeight = (float)(Tall / -2);
+        *v16 = nHeight;
+        v16[1] = 0.0;
+        *(_DWORD *)LODWORD(panelRotation.m[0][0]) = -1;
+        CVertexBuilder::AdvanceVertex((CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color);
+        v17 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4] = 1.0;
+        v17[1] = 0.0;
+        v18 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2] + 1;
+        y = (float)(Wide / 2);
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2] = y;
+        *v18 = nHeight;
+        v18[1] = 0.0;
+        *(_DWORD *)LODWORD(panelRotation.m[0][0]) = -1;
+        CVertexBuilder::AdvanceVertex((CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color);
+        v19 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4] = 1.0;
+        v19[1] = 1.0;
+        v20 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2] = y;
+        ++v20;
+        v31 = (float)(Tall / 2);
+        *v20 = v31;
+        v20[1] = 0.0;
+        *(_DWORD *)LODWORD(panelRotation.m[0][0]) = -1;
+        CVertexBuilder::AdvanceVertex((CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color);
+        v21 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[4] = 0.0;
+        v21[1] = 1.0;
+        v22 = meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2];
+        *meshBuilder.m_VertexBuilder.m_pCurrTexCoord[2] = xa;
+        *++v22 = v31;
+        v22[1] = 0.0;
+        *(_DWORD *)LODWORD(panelRotation.m[0][0]) = -1;
+        CVertexBuilder::AdvanceVertex((CVertexBuilder *)&meshBuilder.m_VertexBuilder.m_VertexSize_Color);
+        if ( meshBuilder.m_IndexBuilder.m_nIndexSize )
+        {
+          m_nFirstIndex = meshBuilder.m_IndexBuilder.m_nFirstIndex;
+          v24 = CMeshBuilder::IndicesFromVertices(
+                  (CMeshBuilder *)&meshBuilder.m_VertexSize_Color,
+                  (MaterialPrimitiveType_t)meshBuilder.m_IndexBuilder.m_nFirstIndex,
+                  (int)meshBuilder.m_VertexBuilder.m_pCurrTexCoord[0]);
+          CIndexBuilder::GenerateIndices(
+            (CIndexBuilder *)&meshBuilder.m_IndexBuilder.m_pIndexBuffer,
+            (MaterialPrimitiveType_t)m_nFirstIndex,
+            v24);
+        }
+        (*(void (__thiscall **)(unsigned int, float *, unsigned int, int *))(*(_DWORD *)meshBuilder.m_IndexBuilder.m_nOffset
+                                                                           + 80))(
+          meshBuilder.m_IndexBuilder.m_nOffset,
+          meshBuilder.m_VertexBuilder.m_pCurrTexCoord[0],
+          meshBuilder.m_IndexBuilder.m_nBufferOffset,
+          &meshBuilder.m_VertexSize_Color);
+        meshBuilder.m_IndexBuilder.m_nMaxIndexCount = 0;
+        meshBuilder.m_IndexBuilder.m_nIndexCount = 0;
+        meshBuilder.m_VertexBuilder.m_nVertexCount = 0;
+        *(_DWORD *)&meshBuilder.m_VertexBuilder.m_bModify = 0;
+        meshBuilder.m_Type = MATERIAL_POINTS;
+        v14->Draw(v14, -1, 0);
+        v13->PopMatrix(v13);
+        CMeshBuilder::~CMeshBuilder((CMeshBuilder *)&meshBuilder.m_VertexSize_BoneWeight);
+        v13->EndRender(v13);
+        v13->Release(v13);
+      }
+    }
+  }
+}

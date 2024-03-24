@@ -1,0 +1,7 @@
+void __thiscall CTFHudFlagObjectives::Reset(CTFHudFlagObjectives *this)
+{
+  vgui::AnimationController *v1; // eax
+
+  v1 = g_pClientMode->GetViewportAnimationController(g_pClientMode);
+  vgui::AnimationController::StartAnimationSequence(v1, "FlagOutlineHide");
+}

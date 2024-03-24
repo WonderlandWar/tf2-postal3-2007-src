@@ -530,9 +530,9 @@ void CTFGameMovement::AvoidPlayers( void )
 #else
 	float flMaxPlayerSpeed = mv->m_flMaxSpeed;
 #endif
-	float flCropFraction = 1.33333333f;
+	float flCropFraction = 0.33333333f;
 
-	if ( !m_bSpeedCropped )
+	if ( m_bSpeedCropped )
 	{	
 		flMaxPlayerSpeed *= flCropFraction;
 	}	

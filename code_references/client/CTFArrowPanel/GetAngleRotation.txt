@@ -1,0 +1,44 @@
+double __thiscall CTFArrowPanel::GetAngleRotation(CTFArrowPanel *this)
+{
+  C_BasePlayer *LocalPlayer; // esi
+  C_BasePlayer *pPlayer; // ecx
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // esi
+  float *v6; // edi
+  float *v7; // eax
+  double angleBetween; // st7
+  Vector vecFlag; // [esp+8h] [ebp-40h] BYREF
+  Vector forward; // [esp+14h] [ebp-34h] BYREF
+  Vector right; // [esp+20h] [ebp-28h] BYREF
+  QAngle vangles; // [esp+2Ch] [ebp-1Ch] BYREF
+  Vector up; // [esp+38h] [ebp-10h] BYREF
+
+  LocalPlayer = C_BasePlayer::GetLocalPlayer();
+  if ( LocalPlayer && LocalPlayer->IsPlayer(LocalPlayer) )
+    pPlayer = LocalPlayer;
+  else
+    pPlayer = 0;
+  m_Index = this->m_hEntity.m_Index;
+  if ( m_Index == -1 || g_pEntityList->m_EntPtrArray[this->m_hEntity.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12 )
+    m_pEntity = 0;
+  else
+    m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hEntity.m_Index & 0xFFF].m_pEntity;
+  if ( !pPlayer || !m_pEntity )
+    return (float)0.0;
+  v6 = (float *)pPlayer->GetAbsOrigin(pPlayer);
+  v7 = (float *)((int (__thiscall *)(IHandleEntity *))m_pEntity->__vftable[21].SetRefEHandle)(m_pEntity);
+  vecFlag.y = *v7 - *v6;
+  vecFlag.z = v7[1] - v6[1];
+  forward.x = 0.0;
+  pfVectorNormalize((Vector *)&vecFlag.y);
+  engine->GetViewAngles(engine, (QAngle *)&vangles.y);
+  AngleVectors((QAngle *)&vangles.y, (Vector *)&forward.y, (Vector *)&right.y, (Vector *)&up.y);
+  right.x = 0.0;
+  vangles.x = 0.0;
+  pfVectorNormalize((Vector *)&forward.y);
+  pfVectorNormalize((Vector *)&right.y);
+  angleBetween = acos(vecFlag.y * forward.y + forward.z * vecFlag.z + right.x * forward.x);
+  if ( vecFlag.y * right.y + right.z * vecFlag.z + vangles.x * forward.x < 0.0 )
+    angleBetween = angleBetween * -1.0;
+  return angleBetween * 57.29578;
+}
