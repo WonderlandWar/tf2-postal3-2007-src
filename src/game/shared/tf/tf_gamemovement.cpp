@@ -356,8 +356,8 @@ void CTFGameMovement::AvoidPlayers( void )
 	static Vector vecUp( 0.0f, 0.0f, 1.0f );
 
 	Vector vecTFPlayerCenter = m_pTFPlayer->WorldSpaceCenter();
-	Vector vecTFPlayerMin = GetPlayerMins();
-	Vector vecTFPlayerMax = GetPlayerMaxs();
+	Vector vecTFPlayerMin = m_pTFPlayer->CollisionProp()->OBBMins();
+	Vector vecTFPlayerMax = m_pTFPlayer->CollisionProp()->OBBMaxs();
 	float flZHeight = vecTFPlayerMax.z - vecTFPlayerMin.z;
 	vecTFPlayerCenter.z += 0.5f * flZHeight;
 	VectorAdd( vecTFPlayerMin, vecTFPlayerCenter, vecTFPlayerMin );
