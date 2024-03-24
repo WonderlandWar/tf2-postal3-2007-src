@@ -37,9 +37,6 @@ private:
 	CMaterialReference	m_RedMaterial;
 	CMaterialReference	m_BlueMaterial;
 	CMaterialReference	m_NeutralMaterial;
-
-	CMaterialReference	m_RedMaterialNoArrow;
-	CMaterialReference	m_BlueMaterialNoArrow;
 };
 
 //-----------------------------------------------------------------------------
@@ -113,8 +110,6 @@ private:
 
 	bool					m_bFlagAnimationPlayed;
 	bool					m_bCarryingFlag;
-
-	vgui::ImagePanel		*m_pSpecCarriedImage;
 };
 
 #endif	// TF_HUD_FLAGSTATUS_H

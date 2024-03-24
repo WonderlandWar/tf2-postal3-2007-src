@@ -51,9 +51,6 @@ CTFArrowPanel::CTFArrowPanel( Panel *parent, const char *name ) : CTFImagePanel(
 	m_RedMaterial.Init( "hud/objectives_flagpanel_compass_red", TEXTURE_GROUP_VGUI ); 
 	m_BlueMaterial.Init( "hud/objectives_flagpanel_compass_blue", TEXTURE_GROUP_VGUI ); 
 	m_NeutralMaterial.Init( "hud/objectives_flagpanel_compass_grey", TEXTURE_GROUP_VGUI ); 
-
-	m_RedMaterialNoArrow.Init( "hud/objectives_flagpanel_compass_red_noArrow", TEXTURE_GROUP_VGUI ); 
-	m_BlueMaterialNoArrow.Init( "hud/objectives_flagpanel_compass_blue_noArrow", TEXTURE_GROUP_VGUI ); 
 }
 
 //-----------------------------------------------------------------------------
@@ -68,18 +65,17 @@ float CTFArrowPanel::GetAngleRotation( void )
 
 	if ( pPlayer && pEnt )
 	{
-		QAngle vangles;
-		Vector eyeOrigin;
-		float zNear, zFar, fov;
-
-		pPlayer->CalcView( eyeOrigin, vangles, zNear, zFar, fov );
-
-		Vector vecFlag = pEnt->WorldSpaceCenter() - eyeOrigin;
+		Vector vecFlag = pEnt->WorldSpaceCenter() - pPlayer->GetAbsOrigin();
 		vecFlag.z = 0;
 		vecFlag.NormalizeInPlace();
 
 		Vector forward, right, up;
+
+		QAngle vangles;
+		engine->GetViewAngles( vangles );
+
 		AngleVectors( vangles, &forward, &right, &up );
+		
 		forward.z = 0;
 		right.z = 0;
 		forward.NormalizeInPlace();
@@ -112,46 +108,14 @@ void CTFArrowPanel::Paint()
 	C_BaseEntity *pEnt = m_hEntity.Get();
 	IMaterial *pMaterial = m_NeutralMaterial;
 
-	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
-
 	// figure out what material we need to use
 	if ( pEnt->GetTeamNumber() == TF_TEAM_RED )
 	{
 		pMaterial = m_RedMaterial;
-
-		if ( pLocalPlayer && ( pLocalPlayer->GetObserverMode() == OBS_MODE_IN_EYE ) )
-		{
-			// is our target a player?
-			C_BaseEntity *pTargetEnt = pLocalPlayer->GetObserverTarget();
-			if ( pTargetEnt && pTargetEnt->IsPlayer() )
-			{
-				// does our target have the flag and are they carrying the flag we're currently drawing?
-				C_TFPlayer *pTarget = static_cast< C_TFPlayer* >( pTargetEnt );
-				if ( pTarget->HasTheFlag() && ( pTarget->GetItem() == pEnt ) )
-				{
-					pMaterial = m_RedMaterialNoArrow;
-				}
-			}
-		}
 	}
 	else if ( pEnt->GetTeamNumber() == TF_TEAM_BLUE )
 	{
 		pMaterial = m_BlueMaterial;
-
-		if ( pLocalPlayer && ( pLocalPlayer->GetObserverMode() == OBS_MODE_IN_EYE ) )
-		{
-			// is our target a player?
-			C_BaseEntity *pTargetEnt = pLocalPlayer->GetObserverTarget();
-			if ( pTargetEnt && pTargetEnt->IsPlayer() )
-			{
-				// does our target have the flag and are they carrying the flag we're currently drawing?
-				C_TFPlayer *pTarget = static_cast< C_TFPlayer* >( pTargetEnt );
-				if ( pTarget->HasTheFlag() && ( pTarget->GetItem() == pEnt ) )
-				{
-					pMaterial = m_BlueMaterialNoArrow;
-				}
-			}
-		}
 	}
 
 	int x = 0;
@@ -289,7 +253,6 @@ CTFHudFlagObjectives::CTFHudFlagObjectives( Panel *parent, const char *name ) : 
 	m_pPlayingTo = NULL;
 	m_bFlagAnimationPlayed = false;
 	m_bCarryingFlag = false;
-	m_pSpecCarriedImage = NULL;
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
 
@@ -326,8 +289,6 @@ void CTFHudFlagObjectives::ApplySchemeSettings( IScheme *pScheme )
 
 	m_pCapturePoint = dynamic_cast<CTFArrowPanel *>( FindChildByName( "CaptureFlag" ) );
 
-	m_pSpecCarriedImage = dynamic_cast<ImagePanel *>( FindChildByName( "SpecCarriedImage" ) );
-
 	// outline is always on, so we need to init the alpha to 0
 	CTFImagePanel *pOutline = dynamic_cast<CTFImagePanel *>( FindChildByName( "OutlineImage" ) );
 	if ( pOutline )
@@ -342,26 +303,6 @@ void CTFHudFlagObjectives::ApplySchemeSettings( IScheme *pScheme )
 void CTFHudFlagObjectives::Reset()
 {
 	g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "FlagOutlineHide" );
-
-	if ( m_pCarriedImage && m_pCarriedImage->IsVisible() )
-	{
-		m_pCarriedImage->SetVisible( false );
-	}
-
-	if ( m_pBlueFlag && !m_pBlueFlag->IsVisible() )
-	{
-		m_pBlueFlag->SetVisible( true );
-	}
-
-	if ( m_pRedFlag && !m_pRedFlag->IsVisible() )
-	{
-		m_pRedFlag->SetVisible( true );
-	}
-
-	if ( m_pSpecCarriedImage && m_pSpecCarriedImage->IsVisible() )
-	{
-		m_pSpecCarriedImage->SetVisible( false );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -447,52 +388,6 @@ void CTFHudFlagObjectives::OnTick()
 		}
 
 		SetPlayingToLabelVisible( false );
-	}
-
-	// check the local player to see if they're spectating, OBS_MODE_IN_EYE, and the target entity is carrying the flag
-	bool bSpecCarriedImage = false;
-	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( pPlayer && ( pPlayer->GetObserverMode() == OBS_MODE_IN_EYE ) )
-	{
-		// does our target have the flag?
-		C_BaseEntity *pEnt = pPlayer->GetObserverTarget();
-		if ( pEnt && pEnt->IsPlayer() )
-		{
-			C_TFPlayer *pTarget = static_cast< C_TFPlayer* >( pEnt );
-			if ( pTarget->HasTheFlag() )
-			{
-				bSpecCarriedImage = true;
-				if ( pTarget->GetTeamNumber() == TF_TEAM_RED )
-				{
-					if ( m_pSpecCarriedImage )
-					{
-						m_pSpecCarriedImage->SetImage( "../hud/objectives_flagpanel_carried_blue" );
-					}
-				}
-				else
-				{
-					if ( m_pSpecCarriedImage )
-					{
-						m_pSpecCarriedImage->SetImage( "../hud/objectives_flagpanel_carried_red" );
-					}
-				}
-			}
-		}
-	}
-
-	if ( bSpecCarriedImage )
-	{
-		if ( m_pSpecCarriedImage && !m_pSpecCarriedImage->IsVisible() )
-		{
-			m_pSpecCarriedImage->SetVisible( true );
-		}
-	}
-	else
-	{
-		if ( m_pSpecCarriedImage && m_pSpecCarriedImage->IsVisible() )
-		{
-			m_pSpecCarriedImage->SetVisible( false );
-		}
 	}
 }
 

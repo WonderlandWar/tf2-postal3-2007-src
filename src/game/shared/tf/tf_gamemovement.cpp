@@ -20,13 +20,8 @@
 #ifdef CLIENT_DLL
 	#include "c_tf_player.h"
 	#include "c_world.h"
-	#include "c_team.h"
-
-	#define CTeam C_Team
-
 #else
 	#include "tf_player.h"
-	#include "team.h"
 #endif
 
 ConVar	tf_maxspeed( "tf_maxspeed", "400", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT  | FCVAR_DEVELOPMENTONLY);
@@ -346,19 +341,21 @@ void CTFGameMovement::AvoidPlayers( void )
 	// Turn off the avoid player code.
 	if ( !tf_avoidteammates.GetBool() )
 		return;
-
-	// Don't test if the player doesn't exist or is dead.
-	if ( m_pTFPlayer->IsAlive() == false )
+	
+	if ( !m_pTFPlayer ) // TFP3: Seriously Valve????
 		return;
 
-	CTeam *pTeam = ( CTeam * )m_pTFPlayer->GetTeam();
-	if ( !pTeam )
+	// Don't test if the player doesn't exist or is dead.
+	if ( IsDead() )
+		return;
+
+	if ( !m_pTFPlayer->m_Shared.IsSeparationEnabled() && m_pTFPlayer->GetAbsVelocity().Length() < 0.1 )
 		return;
 
 	// Up vector.
 	static Vector vecUp( 0.0f, 0.0f, 1.0f );
 
-	Vector vecTFPlayerCenter = m_pTFPlayer->GetAbsOrigin();
+	Vector vecTFPlayerCenter = m_pTFPlayer->WorldSpaceCenter();
 	Vector vecTFPlayerMin = GetPlayerMins();
 	Vector vecTFPlayerMax = GetPlayerMaxs();
 	float flZHeight = vecTFPlayerMax.z - vecTFPlayerMin.z;
@@ -375,22 +372,20 @@ void CTFGameMovement::AvoidPlayers( void )
 	float flAvoidRadius = 0.0f;
 
 	Vector vecAvoidCenter, vecAvoidMin, vecAvoidMax;
-	for ( int i = 0; i < pTeam->GetNumPlayers(); ++i )
+	for ( int i = 1; i < gpGlobals->maxClients; ++i )
 	{
-		CTFPlayer *pAvoidPlayer = static_cast< CTFPlayer * >( pTeam->GetPlayer( i ) );
+		CTFPlayer *pAvoidPlayer = ToTFPlayer( UTIL_PlayerByIndex( i ) );
 		if ( pAvoidPlayer == NULL )
 			continue;
 		// Is the avoid player me?
 		if ( pAvoidPlayer == m_pTFPlayer )
 			continue;
 
+		if ( m_pTFPlayer->GetTeamNumber() != pAvoidPlayer->GetTeamNumber() )
+			continue;
 		// Save as list to check against for objects.
 		pAvoidPlayerList[nAvoidPlayerCount] = pAvoidPlayer;
 		++nAvoidPlayerCount;
-
-		// Check to see if the avoid player is dormant.
-		if ( pAvoidPlayer->IsDormant() )
-			continue;
 
 		// Is the avoid player solid?
 		if ( pAvoidPlayer->IsSolidFlagSet( FSOLID_NOT_SOLID ) )
