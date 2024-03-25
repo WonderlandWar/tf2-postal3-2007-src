@@ -1240,6 +1240,8 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 	QAngle angAngles;
 
 	int iMuzzleFlashAttachment = pAttachEnt->LookupAttachment( "muzzle" );
+	
+	int iEjectBrassAttachment = pAttachEnt->LookupAttachment( "eject_brass" );
 
 	const char *pszMuzzleFlashEffect = NULL;
 	const char *pszMuzzleFlashModel = GetMuzzleFlashModel();
@@ -1263,10 +1265,8 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 		pAttachEnt->GetAttachment( iMuzzleFlashAttachment, vecOrigin, angAngles );
 
 		// Muzzleflash light
-/*
 		CLocalPlayerFilter filter;
 		TE_DynamicLight( filter, 0.0f, &vecOrigin, 255, 192, 64, 5, 70.0f, 0.05f, 70.0f / 0.05f, LIGHT_INDEX_MUZZLEFLASH );
-*/
 
 		if ( pszMuzzleFlashEffect )
 		{
@@ -1304,6 +1304,24 @@ void CTFWeaponBase::CreateMuzzleFlashEffects( C_BaseEntity *pAttachEnt, int nInd
 		if ( pszMuzzleFlashParticleEffect ) 
 		{
 			DispatchParticleEffect( pszMuzzleFlashParticleEffect, PATTACH_POINT_FOLLOW, pAttachEnt, "muzzle" );
+		}
+	}
+
+	const CTFWeaponInfo *pInfo = &GetTFWpnData();
+
+	if ( pInfo->m_bDoInstantEjectBrass )
+	{
+		if ( iEjectBrassAttachment > 0 )
+		{
+			Vector vecOrigin;
+			QAngle angAngles;		
+			pAttachEnt->GetAttachment( iEjectBrassAttachment, vecOrigin, angAngles );
+			CEffectData data;
+			data.m_nHitBox = GetWeaponID();
+			data.m_vOrigin = vecOrigin;
+			data.m_vAngles = angAngles;
+			//data.m_hEntity = GetRefEHandle();
+			DispatchEffect( "TF_EjectBrass", data );
 		}
 	}
 }
