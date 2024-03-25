@@ -107,7 +107,7 @@ void CTFWrench::Smack( void )
 		OnEntityHit( trace.m_pEnt );
 
 		// Do Damage.
-		int iCustomDamage = TF_DMG_CUSTOM_NONE;
+		int iCustomDamage = TF_DMG_WRENCH_FIX;
 		float flDamage = GetMeleeDamage( trace.m_pEnt, iCustomDamage );
 		int iDmgType = DMG_BULLET | DMG_NEVERGIB | DMG_CLUB;
 		CTakeDamageInfo info( pPlayer, pPlayer, flDamage, iDmgType, iCustomDamage );
