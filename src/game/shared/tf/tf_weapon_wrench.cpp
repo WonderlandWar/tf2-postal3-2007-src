@@ -45,27 +45,6 @@ CTFWrench::CTFWrench()
 {
 }
 
-#ifdef GAME_DLL
-void CTFWrench::OnFriendlyBuildingHit( CBaseObject *pObject, CTFPlayer *pPlayer )
-{
-	// Did this object hit do any work? repair or upgrade?
-	bool bUsefulHit = pObject->InputWrenchHit( pPlayer );
-
-	CDisablePredictionFiltering disabler;
-
-	if ( bUsefulHit )
-	{
-		// play success sound
-		WeaponSound( SPECIAL1 );
-	}
-	else
-	{
-		// play failure sound
-		WeaponSound( SPECIAL2 );
-	}
-}
-#endif
-
 class CTraceFilterIgnorePlayers : public CTraceFilterSimple
 {
 public:
@@ -122,11 +101,19 @@ void CTFWrench::Smack( void )
 	// We hit, setup the smack.
 	if ( trace.fraction < 1.0f &&
 		 trace.m_pEnt &&
-		 trace.m_pEnt->IsBaseObject() &&
-		 trace.m_pEnt->GetTeamNumber() == pPlayer->GetTeamNumber() )
+		 trace.m_pEnt->IsBaseObject() )
 	{
 #ifdef GAME_DLL
-		OnFriendlyBuildingHit( dynamic_cast< CBaseObject * >( trace.m_pEnt ), pPlayer );
+		OnEntityHit( trace.m_pEnt );
+
+		// Do Damage.
+		int iCustomDamage = TF_DMG_CUSTOM_NONE;
+		float flDamage = GetMeleeDamage( trace.m_pEnt, iCustomDamage );
+		int iDmgType = DMG_BULLET | DMG_NEVERGIB | DMG_CLUB;
+		CTakeDamageInfo info( pPlayer, pPlayer, flDamage, iDmgType, iCustomDamage );
+		CalculateMeleeDamageForce( &info, vecForward, vecSwingEnd, 1.0f / flDamage );
+		trace.m_pEnt->DispatchTraceAttack( info, vecForward, &trace ); 
+		ApplyMultiDamage();
 #endif
 	}
 	else
@@ -134,4 +121,40 @@ void CTFWrench::Smack( void )
 		// if we cannot, Smack as usual for player hits
 		BaseClass::Smack();
 	}
+}
+
+void CTFWrench::OnEntityHit( CBaseEntity *pEntity )
+{
+#ifndef CLIENT_DLL
+	// Get the current player.
+	CTFPlayer *pPlayer = GetTFPlayerOwner();
+	if ( !pPlayer )
+		return;
+
+	if ( !CanAttack() )
+		return;
+
+	if ( GetTeamNumber() != pEntity->GetTeamNumber() )
+		return;
+
+	CBaseObject *pObject = dynamic_cast<CBaseObject*>( pEntity );
+	if ( !pObject )
+		return;
+
+	// Did this object hit do any work? repair or upgrade?
+	bool bUsefulHit = pObject->InputWrenchHit( pPlayer );
+
+	CDisablePredictionFiltering disabler;
+
+	if ( bUsefulHit )
+	{
+		// play success sound
+		WeaponSound( SPECIAL1 );
+	}
+	else
+	{
+		// play failure sound
+		WeaponSound( SPECIAL2 );
+	}
+#endif
 }

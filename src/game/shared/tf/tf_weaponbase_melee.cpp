@@ -40,10 +40,6 @@ DEFINE_FUNCTION( Smack )
 END_DATADESC()
 #endif
 
-#ifndef CLIENT_DLL
-ConVar tf_meleeattackforcescale( "tf_meleeattackforcescale", "80.0", FCVAR_CHEAT | FCVAR_GAMEDLL | FCVAR_DEVELOPMENTONLY );
-#endif;
-
 //=============================================================================
 //
 // TFWeaponBase Melee functions.
@@ -317,7 +313,7 @@ void CTFWeaponBaseMelee::Smack( void )
 			iDmgType |= DMG_CRITICAL;
 		}
 		CTakeDamageInfo info( pPlayer, pPlayer, flDamage, iDmgType, iCustomDamage );
-		CalculateMeleeDamageForce( &info, vecForward, vecSwingEnd, 1.0f / flDamage * tf_meleeattackforcescale.GetFloat() );
+		CalculateMeleeDamageForce( &info, vecForward, vecSwingEnd, 1.0f / flDamage );
 		trace.m_pEnt->DispatchTraceAttack( info, vecForward, &trace ); 
 		ApplyMultiDamage();
 

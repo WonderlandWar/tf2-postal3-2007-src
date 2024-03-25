@@ -31,10 +31,7 @@ public:
 	CTFWrench();
 	virtual int			GetWeaponID( void ) const			{ return TF_WEAPON_WRENCH; }
 	virtual void		Smack( void );
-
-#ifdef GAME_DLL
-	void OnFriendlyBuildingHit( CBaseObject *pObject, CTFPlayer *pPlayer );
-#endif
+	virtual void		OnEntityHit( CBaseEntity *pEntity );
 
 private:
 
