@@ -38,12 +38,6 @@ ConVar  tf_clamp_back_speed_min( "tf_clamp_back_speed_min", "100", FCVAR_REPLICA
 //ConVar	tf_waterjump_up( "tf_waterjump_up", "300", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 //ConVar	tf_waterjump_forward( "tf_waterjump_forward", "30", FCVAR_REPLICATED | FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 
-//-----------------------------------------------------------------------------
-// Purpose: Try to steer away from any players and objects we might interpenetrate
-//-----------------------------------------------------------------------------
-#define TF_AVOID_MAX_RADIUS_SQR		5184.0f			// Based on player extents and max buildable extents.
-#define TF_OO_AVOID_MAX_RADIUS_SQR	0.00019f
-
 class CTFGameMovement : public CGameMovement
 {
 public:
@@ -311,31 +305,14 @@ void CTFGameMovement::AirDash( void )
 	// Play the gesture.
 	m_pTFPlayer->DoAnimationEvent( PLAYERANIMEVENT_DOUBLEJUMP );
 }
-#ifdef CLIENT_DLL
-#define CTFTeam C_TFTeam
-#endif
-
-#define MAX_SEPARATION_FORCE 384
-
-#ifdef CLIENT_DLL
-extern ConVar cl_forwardspeed;
-extern ConVar cl_backspeed;
-extern ConVar cl_sidespeed;
-
-#define FORWARDSPEED cl_forwardspeed.GetFloat()
-#define BACKSPEED cl_backspeed.GetFloat()
-#define SIDESPEED cl_sidespeed.GetFloat()
-
-#else
-
-#define FORWARDSPEED 450.0
-#define BACKSPEED 450.0
-#define SIDESPEED 450.0
-
-#endif
 
 // TFP3:
 // FIXME: This is not accurate and was copied from C_TFPlayer::AvoidPlayers()!!
+//-----------------------------------------------------------------------------
+// Purpose: Try to steer away from any players and objects we might interpenetrate
+//-----------------------------------------------------------------------------
+#define TF_AVOID_MAX_RADIUS_SQR		5184.0f			// Based on player extents and max buildable extents.
+#define TF_OO_AVOID_MAX_RADIUS_SQR	0.00019f
 void CTFGameMovement::AvoidPlayers( void )
 {
 	// Turn off the avoid player code.
@@ -369,7 +346,6 @@ void CTFGameMovement::AvoidPlayers( void )
 
 	CTFPlayer *pIntersectPlayer = NULL;
 	CBaseObject *pIntersectObject = NULL;
-	float flAvoidRadius = 0.0f;
 
 	Vector vecAvoidCenter, vecAvoidMin, vecAvoidMax;
 	for ( int i = 1; i < gpGlobals->maxClients; ++i )
@@ -386,16 +362,20 @@ void CTFGameMovement::AvoidPlayers( void )
 		// Save as list to check against for objects.
 		pAvoidPlayerList[nAvoidPlayerCount] = pAvoidPlayer;
 		++nAvoidPlayerCount;
-
+#ifdef CLIENT_DLL
+		// Check to see if the avoid player is dormant.
+		if ( pAvoidPlayer->IsDormant() )
+			continue;
+#endif
 		// Is the avoid player solid?
 		if ( pAvoidPlayer->IsSolidFlagSet( FSOLID_NOT_SOLID ) )
 			continue;
 
 		Vector t1, t2;
 
-		vecAvoidCenter = pAvoidPlayer->GetAbsOrigin();
-		vecAvoidMin = pAvoidPlayer->GetPlayerMins();
-		vecAvoidMax = pAvoidPlayer->GetPlayerMaxs();
+		vecAvoidCenter = pAvoidPlayer->WorldSpaceCenter();
+		vecAvoidMin = pAvoidPlayer->WorldAlignMins();
+		vecAvoidMax = pAvoidPlayer->WorldAlignMaxs();
 		flZHeight = vecAvoidMax.z - vecAvoidMin.z;
 		vecAvoidCenter.z += 0.5f * flZHeight;
 		VectorAdd( vecAvoidMin, vecAvoidCenter, vecAvoidMin );
@@ -428,11 +408,11 @@ void CTFGameMovement::AvoidPlayers( void )
 				CBaseObject *pAvoidObject = pPlayer->GetObject( iObject );
 				if ( !pAvoidObject )
 					continue;
-
+#ifdef CLIENT_DLL
 				// Check to see if the object is dormant.
 				if ( pAvoidObject->IsDormant() )
 					continue;
-
+#endif
 				// Is the object solid.
 				if ( pAvoidObject->IsSolidFlagSet( FSOLID_NOT_SOLID ) )
 					continue;
@@ -472,24 +452,19 @@ void CTFGameMovement::AvoidPlayers( void )
 	if ( pIntersectPlayer )
 	{
 		VectorSubtract( pIntersectPlayer->WorldSpaceCenter(), vecTFPlayerCenter, vecDelta );
-
-		Vector vRad = pIntersectPlayer->WorldAlignMaxs() - pIntersectPlayer->WorldAlignMins();
-		vRad.z = 0;
-
-		flAvoidRadius = vRad.Length();
 	}
 	// Avoid a object.
 	else
 	{
 		VectorSubtract( pIntersectObject->WorldSpaceCenter(), vecTFPlayerCenter, vecDelta );
-
-		Vector vRad = pIntersectObject->WorldAlignMaxs() - pIntersectObject->WorldAlignMins();
-		vRad.z = 0;
-
-		flAvoidRadius = vRad.Length();
 	}
 
-	float flPushStrength = RemapValClamped( vecDelta.Length(), flAvoidRadius, 0, 0, MAX_SEPARATION_FORCE ); //flPushScale;
+	// TFP3:
+	// TODO: Is this accurate? This makes the push speed super slow
+	float flPushScale =  1.0 - (vecDelta.Length2DSqr() * TF_OO_AVOID_MAX_RADIUS_SQR);
+	flPushScale = min( 1.0, flPushScale );
+
+	float flPushStrength = (gpGlobals->frametime * 600) * flPushScale;
 
 	//Msg( "PushScale = %f\n", flPushStrength );
 
@@ -1054,6 +1029,8 @@ void CTFGameMovement::AirMove( void )
 	Vector		wishdir;
 	float		wishspeed;
 	Vector forward, right, up;
+
+	AvoidPlayers();
 
 	AngleVectors (mv->m_vecViewAngles, &forward, &right, &up);  // Determine movement angles
 
