@@ -65,7 +65,9 @@ C_BaseObject::C_BaseObject(  )
 	m_YawPreviewState = YAW_PREVIEW_OFF;
 	m_bBuilding = false;
 	m_bPlacing = false;
+	m_flDamageFlash = 0;
 	m_flPercentageConstructed = 0;
+	m_flNextEffect = 0;
 	m_fObjectFlags = 0;
 
 	m_flCurrentBuildRotation = 0;
@@ -97,8 +99,6 @@ void C_BaseObject::Spawn( void )
 //-----------------------------------------------------------------------------
 void C_BaseObject::UpdateOnRemove( void )
 {
-	StopAnimGeneratedSounds();
-
 	BaseClass::UpdateOnRemove();
 }
 
@@ -505,6 +505,14 @@ bool C_BaseObject::IsPreviewingYaw() const
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+float C_BaseObject::GetInitialBuilderYaw( void )
+{
+	return GetAbsAngles().y;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 BuildingDamageLevel_t C_BaseObject::CalculateDamageLevel( void )
 {
 	float flPercentHealth = (float)m_iHealth / (float)m_iMaxHealth;
@@ -844,34 +852,6 @@ BuildingHudAlert_t C_BaseObject::GetBuildingAlertLevel( void )
 	}
 
 	return alertLevel;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: find the anim events that may have started sounds, and stop them.
-//-----------------------------------------------------------------------------
-void C_BaseObject::StopAnimGeneratedSounds( void )
-{
-	MDLCACHE_CRITICAL_SECTION();
-
-	CStudioHdr *pStudioHdr = GetModelPtr();
-	if ( !pStudioHdr )
-		return;
-
-	mstudioseqdesc_t &seqdesc = pStudioHdr->pSeqdesc( GetSequence() );
-	float flCurrentCycle = GetCycle();
-
-	mstudioevent_t *pevent = GetEventIndexForSequence( seqdesc );
-
-	for (int i = 0; i < (int)seqdesc.numevents; i++)
-	{
-		if ( pevent[i].cycle < flCurrentCycle )
-		{
-			if ( pevent[i].event == CL_EVENT_SOUND || pevent[i].event == AE_CL_PLAYSOUND )
-			{
-				StopSound( entindex(), pevent[i].options );
-			}
-		}
-	}
 }
 
 //============================================================================================================

@@ -653,7 +653,7 @@ bool CBaseObject::IsPlacementPosValid( void )
 		return false;
 	}
 
-	CTFPlayer *pPlayer = GetOwner();
+	CTFPlayer *pPlayer = GetBuilder();
 
 	if ( !pPlayer )
 	{

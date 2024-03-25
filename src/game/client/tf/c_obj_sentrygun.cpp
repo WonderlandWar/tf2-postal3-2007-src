@@ -34,9 +34,11 @@ END_NETWORK_TABLE()
 IMPLEMENT_CLIENTCLASS_DT(C_ObjectSentrygun, DT_ObjectSentrygun, CObjectSentrygun)
 	RecvPropInt( RECVINFO(m_iUpgradeLevel) ),
 	RecvPropInt( RECVINFO(m_iAmmoShells) ),
+	RecvPropInt( RECVINFO(m_iMaxAmmoShells) ),
 	RecvPropInt( RECVINFO(m_iAmmoRockets) ),
 	RecvPropInt( RECVINFO(m_iState) ),
 	RecvPropInt( RECVINFO(m_iUpgradeMetal) ),
+	RecvPropInt( RECVINFO(m_iUpgradeMetalRequired) ),
 	RecvPropDataTable( "SentrygunLocalData", 0, 0, &REFERENCE_RECV_TABLE( DT_SentrygunLocalData ) ),
 END_RECV_TABLE()
 
@@ -46,7 +48,6 @@ END_RECV_TABLE()
 C_ObjectSentrygun::C_ObjectSentrygun()
 {
 	m_pDamageEffects = NULL;
-	m_iOldUpgradeLevel = 0;
 	m_iMaxAmmoShells = SENTRYGUN_MAX_SHELLS_1;
 }
 
@@ -56,71 +57,6 @@ void C_ObjectSentrygun::GetAmmoCount( int &iShells, int &iMaxShells, int &iRocke
 	iMaxShells = m_iMaxAmmoShells;
 	iRockets = m_iAmmoRockets;
 	iMaxRockets = SENTRYGUN_MAX_ROCKETS;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_ObjectSentrygun::UpgradeLevelChanged()
-{
-	switch( m_iUpgradeLevel )
-	{
-	case 1:	
-		{ 
-			VectorCopy( SENTRYGUN_EYE_OFFSET_LEVEL_1, m_vecViewOffset );
-			m_iMaxAmmoShells = SENTRYGUN_MAX_SHELLS_1;
-			break;
-		}
-	case 2:	
-		{ 
-			VectorCopy( SENTRYGUN_EYE_OFFSET_LEVEL_2, m_vecViewOffset );
-			m_iMaxAmmoShells = SENTRYGUN_MAX_SHELLS_2;
-			break;
-		}
-	case 3:	
-		{ 
-			VectorCopy( SENTRYGUN_EYE_OFFSET_LEVEL_3, m_vecViewOffset );
-			m_iMaxAmmoShells = SENTRYGUN_MAX_SHELLS_3;
-			break;
-		}
-	default: 
-		{ 
-			Assert( 0 ); 
-			break;
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_ObjectSentrygun::OnPreDataChanged( DataUpdateType_t updateType )
-{
-	BaseClass::OnPreDataChanged( updateType );
-
-	m_iOldBodygroups = GetBody();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_ObjectSentrygun::OnDataChanged( DataUpdateType_t updateType )
-{
-	BaseClass::OnDataChanged( updateType );
-
-	if ( m_iOldUpgradeLevel != m_iUpgradeLevel )
-	{
-		UpgradeLevelChanged();
-		m_iOldUpgradeLevel = m_iUpgradeLevel;
-	}
-
-	// intercept bodygroup sets from the server
-	// we aren't clientsideanimating, but we don't want the server setting our
-	// bodygroup while we are placing
-	if ( IsPlacing() && m_iOldBodygroups != GetBody() )
-	{
-		m_nBody = m_iOldBodygroups;
-	}
 }
 
 void C_ObjectSentrygun::GetStatusText( wchar_t *pStatus, int iMaxStatusLen )

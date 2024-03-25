@@ -42,7 +42,7 @@ public:
 	virtual BuildingHudAlert_t GetBuildingAlertLevel( void );
 
 	int GetUpgradeMetal( void ) { return m_iUpgradeMetal; }
-	int GetUpgradeMetalRequired( void ) { return SENTRYGUN_UPGRADE_METAL; }
+	int GetUpgradeMetalRequired( void ) { return m_iUpgradeMetalRequired; }
 
 	virtual const char *GetHudStatusIcon( void );
 
@@ -57,36 +57,27 @@ public:
 
 	void DebugDamageParticles();
 
-	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
-	virtual void	OnDataChanged( DataUpdateType_t updateType );
-
 	// ITargetIDProvidesHint
 public:
 	virtual void	DisplayHintTo( C_BasePlayer *pPlayer );
 
 private:
-
-	void UpgradeLevelChanged();
-
-private:
 	int m_iState;
 
 	int m_iUpgradeLevel;
-	int	m_iOldUpgradeLevel;
 
 	int m_iAmmoShells;
 	int m_iMaxAmmoShells;
 	int m_iAmmoRockets;
 
 	int m_iUpgradeMetal;
+	int m_iUpgradeMetalRequired;
 
 	int m_iKills;
 
 	CNewParticleEffect *m_pDamageEffects;
 
 	int m_iPlacementBodygroup;
-
-	int m_iOldBodygroups;
 
 private:
 	C_ObjectSentrygun( const C_ObjectSentrygun & ); // not defined, not accessible

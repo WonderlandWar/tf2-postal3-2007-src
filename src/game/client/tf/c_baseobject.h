@@ -52,6 +52,7 @@ public:
 	void			SetActivity( Activity act );
 	Activity		GetActivity( ) const;
 	void			SetObjectSequence( int sequence );
+	void			OnActivityChanged( Activity act );
 
 	virtual void	PreDataUpdate( DataUpdateType_t updateType );
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
@@ -64,6 +65,8 @@ public:
 
 	// Derive to customize an object's attached version
 	virtual	void	SetupAttachedVersion( void ) { return; }
+
+	virtual void	OnLostPower( void ) { return; }
 
 	virtual const char	*GetTargetDescription( void ) const;
 	virtual char	*GetIDString( void );
@@ -91,7 +94,8 @@ public:
 	void			ActivateYawPreview( bool enable );
 	void			PreviewYaw( float yaw );
 	bool			IsPreviewingYaw() const;
-	
+	float			GetInitialBuilderYaw( void );
+
 	virtual void	RecalculateIDString( void );
 
 	int GetType() const { return m_iObjectType; }
@@ -134,9 +138,6 @@ public:
 	virtual const char *GetHudStatusIcon( void );
 
 	virtual BuildingHudAlert_t GetBuildingAlertLevel( void );
-
-private:
-	void StopAnimGeneratedSounds( void );
 
 public:
 	// Client/Server shared build point code
@@ -232,6 +233,10 @@ private:
 	bool			m_bOldDisabled;
 	float			m_flPercentageConstructed;
 	EHANDLE			m_hBuiltOnEntity;
+	vgui::Label		*m_pNameLabel;
+	float			m_flDamageFlash;
+	int				m_iFlashes;
+	float			m_flNextEffect;
 
 	CNetworkVector( m_vecBuildMaxs );
 	CNetworkVector( m_vecBuildMins );

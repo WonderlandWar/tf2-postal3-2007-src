@@ -355,7 +355,7 @@ void C_ObjectTeleporter::GetTargetIDDataString( wchar_t *sDataString, int iMaxLe
 {
 	sDataString[0] = '\0';
 
-	if ( m_iState == TELEPORTER_STATE_RECHARGING && gpGlobals->curtime < m_flRechargeTime )
+	if ( gpGlobals->curtime < m_flRechargeTime )
 	{
 		float flPercent = clamp( ( m_flRechargeTime - gpGlobals->curtime ) / TELEPORTER_RECHARGE_TIME, 0.0f, 1.0f );
 
@@ -368,17 +368,6 @@ void C_ObjectTeleporter::GetTargetIDDataString( wchar_t *sDataString, int iMaxLe
 		g_pVGuiLocalize->ConstructString( sDataString, iMaxLenInBytes, g_pVGuiLocalize->Find(printFormatString),
 			1,
 			wszRecharging );
-	}	
-	else if ( m_iState == TELEPORTER_STATE_IDLE )
-	{
-		if ( GetType() == OBJ_TELEPORTER_ENTRANCE )
-		{
-			g_pVGuiLocalize->ConstructString( sDataString, MAX_ID_STRING, g_pVGuiLocalize->Find("#TF_playerid_teleporter_entrance_noexit" ), 0 );
-		}
-		else
-		{
-			g_pVGuiLocalize->ConstructString( sDataString, MAX_ID_STRING, g_pVGuiLocalize->Find("#TF_playerid_teleporter_exit_noentrance" ), 0 );
-		}
 	}
 }
 

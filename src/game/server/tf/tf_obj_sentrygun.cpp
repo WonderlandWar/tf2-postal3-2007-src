@@ -99,9 +99,11 @@ END_NETWORK_TABLE()
 IMPLEMENT_SERVERCLASS_ST( CObjectSentrygun, DT_ObjectSentrygun )
 	SendPropInt( SENDINFO(m_iUpgradeLevel), 3 ),
 	SendPropInt( SENDINFO(m_iAmmoShells), 9, SPROP_CHANGES_OFTEN ),
+	SendPropInt( SENDINFO(m_iMaxAmmoShells), 9 ),
 	SendPropInt( SENDINFO(m_iAmmoRockets), 6, SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO(m_iState), Q_log2( SENTRY_NUM_STATES ) + 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO(m_iUpgradeMetal), 10 ),
+	SendPropInt( SENDINFO(m_iUpgradeMetalRequired), 10 ),
 	SendPropDataTable( "SentrygunLocalData", 0, &REFERENCE_SEND_TABLE( DT_SentrygunLocalData ), SendProxy_SendLocalObjectDataTable ),
 END_SEND_TABLE()
 
