@@ -767,12 +767,8 @@ void C_BaseObject::GetTargetIDString( wchar_t *sIDString, int iMaxLenInBytes )
 		wchar_t wszBuilderName[ MAX_PLAYER_NAME_LENGTH ];
 
 		const char *pszStatusName = GetStatusName();
-		wchar_t *wszObjectName = g_pVGuiLocalize->Find( pszStatusName );
-
-		if ( !wszObjectName )
-		{
-			wszObjectName = L"";
-		}
+		wchar_t wszObjectName[32];
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszStatusName, wszObjectName, sizeof(wszObjectName) );
 
 		C_BasePlayer *pBuilder = GetOwner();
 
