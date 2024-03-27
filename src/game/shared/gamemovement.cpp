@@ -888,10 +888,23 @@ void CBasePlayer::UpdateWetness()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CGameMovement::CategorizeGroundSurface( trace_t &pm )
+void CGameMovement::CategorizeGroundSurface( void )
 {
+	//
+	// Find the name of the material that lies beneath the player.
+	//
+	Vector start, end;
+	VectorCopy( mv->m_vecAbsOrigin, start );
+	VectorCopy( mv->m_vecAbsOrigin, end );
+
+	// Straight down
+	end[2] -= 64;
+
+	// Fill in default values, just in case.
+	trace_t	trace;
+	TracePlayerBBox( start, end, PlayerSolidMask( BRUSH_ONLY ), COLLISION_GROUP_PLAYER_MOVEMENT, trace ); 
 	IPhysicsSurfaceProps *physprops = MoveHelper()->GetSurfaceProps();
-	player->m_surfaceProps = pm.surface.surfaceProps;
+	player->m_surfaceProps = trace.surface.surfaceProps;
 	player->m_pSurfaceData = physprops->GetSurfaceData( player->m_surfaceProps );
 	physprops->GetPhysicsProperties( player->m_surfaceProps, NULL, NULL, &player->m_surfaceFriction, NULL );
 	
@@ -3503,10 +3516,8 @@ bool CGameMovement::CheckWater( void )
 	return ( player->GetWaterLevel() > WL_Feet );
 }
 
-void CGameMovement::SetGroundEntity( trace_t *pm )
+void CGameMovement::SetGroundEntity( CBaseEntity *newGround )
 {
-	CBaseEntity *newGround = pm ? pm->m_pEnt : NULL;
-
 	CBaseEntity *oldGround = player->GetGroundEntity();
 	Vector vecBaseVelocity = player->GetBaseVelocity();
 
@@ -3522,25 +3533,14 @@ void CGameMovement::SetGroundEntity( trace_t *pm )
  		vecBaseVelocity += oldGround->GetAbsVelocity();
 		vecBaseVelocity.z = oldGround->GetAbsVelocity().z;
 	}
+	// TODO
+	//else if ( oldGround && newGround && oldGround != newGround )
+	//{
+	//   subtract old and add new ground velocity?  When might his occur, who knows?  ywb 9/24/03
+	//}
 
 	player->SetBaseVelocity( vecBaseVelocity );
 	player->SetGroundEntity( newGround );
-
-	// If we are on something...
-
-	if ( newGround )
-	{
-		CategorizeGroundSurface( *pm );
-
-		// Then we are not in water jump sequence
-		player->m_flWaterJumpTime = 0;
-
-		// Standing on an entity other than the world, so signal that we are touching something.
-		if ( !pm->DidHitWorld() )
-		{
-			MoveHelper()->AddToTouched( *pm, mv->m_vecVelocity );
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -3647,37 +3647,15 @@ void CGameMovement::CategorizePosition( void )
 
 	Vector bumpOrigin;
 	bumpOrigin = mv->m_vecAbsOrigin;
+	bumpOrigin.z += 2;
 
 	// Shooting up really fast.  Definitely not on ground.
 	// On ladder moving up, so not on ground either
 	// NOTE: 145 is a jump.
-#define NON_JUMP_VELOCITY 140.0f
-
-	float zvel = mv->m_vecVelocity[2];
-	bool bMovingUp = zvel > 0.0f;
-	bool bMovingUpRapidly = zvel > NON_JUMP_VELOCITY;
-	float flGroundEntityVelZ = 0.0f;
-	if ( bMovingUpRapidly )
+	if ( mv->m_vecVelocity[2] > 140 || 
+		( mv->m_vecVelocity[2] > 0.0f && player->GetMoveType() == MOVETYPE_LADDER ) )   
 	{
-		// Tracker 73219, 75878:  ywb 8/2/07
-		// After save/restore (and maybe at other times), we can get a case where we were saved on a lift and 
-		//  after restore we'll have a high local velocity due to the lift making our abs velocity appear high.  
-		// We need to account for standing on a moving ground object in that case in order to determine if we really 
-		//  are moving away from the object we are standing on at too rapid a speed.  Note that CheckJump already sets
-		//  ground entity to NULL, so this wouldn't have any effect unless we are moving up rapidly not from the jump button.
-		CBaseEntity *ground = player->GetGroundEntity();
-		if ( ground )
-		{
-			flGroundEntityVelZ = ground->GetAbsVelocity().z;
-			bMovingUpRapidly = ( zvel - flGroundEntityVelZ ) > NON_JUMP_VELOCITY;
-		}
-	}
-
-	// Was on ground, but now suddenly am not
-	if ( bMovingUpRapidly || 
-		( bMovingUp && player->GetMoveType() == MOVETYPE_LADDER ) )   
-	{
-		SetGroundEntity( NULL );
+		SetGroundEntity( (CBaseEntity *)NULL );
 	}
 	else
 	{
@@ -3693,20 +3671,26 @@ void CGameMovement::CategorizePosition( void )
 			{
 				SetGroundEntity( NULL );
 				// probably want to add a check for a +z velocity too!
-				if ( ( mv->m_vecVelocity.z > 0.0f ) && 
-					( player->GetMoveType() != MOVETYPE_NOCLIP ) )
+				if ( ( mv->m_vecVelocity.z > 0.0f ) && ( player->GetMoveType() != MOVETYPE_NOCLIP ) )
 				{
 					player->m_surfaceFriction = 0.25f;
 				}
 			}
 			else
 			{
-				SetGroundEntity( &pm );
+				SetGroundEntity( pm.m_pEnt );  // Otherwise, point to index of ent under us.
 			}
 		}
 		else
 		{
-			SetGroundEntity( &pm );  // Otherwise, point to index of ent under us.
+			SetGroundEntity( pm.m_pEnt );  // Otherwise, point to index of ent under us.
+		}
+
+		// If we are on something...
+		if (player->GetGroundEntity() != NULL)
+		{
+			// Then we are not in water jump sequence
+			player->m_flWaterJumpTime = 0;
 		}
 
 #ifndef CLIENT_DLL
@@ -3732,6 +3716,12 @@ void CGameMovement::CategorizePosition( void )
 			player->m_chPreviousTextureType = cCurrGameMaterial;
 		}
 #endif
+
+		// Standing on an entity other than the world
+		if ( pm.m_pEnt && !pm.DidHitWorld() )   // So signal that we are touching something.
+		{
+			MoveHelper( )->AddToTouched( pm, mv->m_vecVelocity );
+		}
 	}
 }
 
@@ -4410,6 +4400,8 @@ void CGameMovement::PlayerMove( void )
 
 	m_nOnLadder = 0;
 
+	CategorizeGroundSurface();
+
 	player->UpdateStepSound( player->m_pSurfaceData, mv->m_vecAbsOrigin, mv->m_vecVelocity );
 
 	UpdateDuckJumpEyeOffset();
@@ -4522,7 +4514,7 @@ void CGameMovement::PerformFlyCollisionResolution( trace_t &pm, Vector &move )
 		if (mv->m_vecVelocity[2] < sv_gravity.GetFloat() * gpGlobals->frametime)
 		{
 			// we're rolling on the ground, add static friction.
-			SetGroundEntity( &pm ); 
+			SetGroundEntity( pm.m_pEnt ); 
 			mv->m_vecVelocity[2] = 0;
 		}
 
@@ -4532,7 +4524,7 @@ void CGameMovement::PerformFlyCollisionResolution( trace_t &pm, Vector &move )
 
 		if (vel < (30 * 30) || (player->GetMoveCollide() != MOVECOLLIDE_FLY_BOUNCE))
 		{
-			SetGroundEntity( &pm ); 
+			SetGroundEntity( pm.m_pEnt ); 
 			mv->m_vecVelocity.Init();
 		}
 		else
@@ -4632,7 +4624,7 @@ void CGameMovement::FullTossMove( void )
 	if (pm.allsolid)
 	{	
 		// entity is trapped in another solid
-		SetGroundEntity( &pm );
+		SetGroundEntity( pm.m_pEnt );
 		mv->m_vecVelocity.Init();
 		return;
 	}

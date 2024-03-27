@@ -1206,12 +1206,12 @@ void CTFGameMovement::CategorizePosition( void )
 		}
 		else
 		{
-			SetGroundEntity( &trace );
+			SetGroundEntity( trace.m_pEnt );
 		}
 	}
 	else
 	{
-		SetGroundEntity( &trace );
+		SetGroundEntity( trace.m_pEnt );
 	}
 	
 	if ( m_pTFPlayer->GetGroundEntity() )
@@ -1220,7 +1220,7 @@ void CTFGameMovement::CategorizePosition( void )
 		m_pTFPlayer->m_flWaterJumpTime = 0.0;
 	}
 
-	if ( trace.hitbox )
+	if ( trace.m_pEnt )
 	{		
 		// Standing on an entity other than the world, so signal that we are touching something.
 		if ( !trace.DidHitWorld() )
@@ -1548,7 +1548,7 @@ void CTFGameMovement::FullTossMove( void )
 	if (pm.allsolid)
 	{	
 		// entity is trapped in another solid
-		SetGroundEntity( &pm );
+		SetGroundEntity( pm.m_pEnt );
 		mv->m_vecVelocity.Init();
 		return;
 	}
