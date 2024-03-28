@@ -1,0 +1,46 @@
+void __thiscall C_WeaponMedigun::OnDataChanged(C_WeaponMedigun *this, DataUpdateType_t updateType)
+{
+  C_BaseCombatCharacter *Owner; // eax
+  C_BasePlayer *v4; // ebp
+  const Vector *v5; // eax
+  CLocalPlayerFilter filter; // [esp+10h] [ebp-24h] BYREF
+
+  C_TFWeaponBase::OnDataChanged(this, updateType);
+  if ( BYTE1(this->m_flChargeLevel.m_Value) )
+  {
+    C_WeaponMedigun::UpdateEffects((C_WeaponMedigun *)((char *)this - 8));
+    BYTE1(this->m_flChargeLevel.m_Value) = 0;
+  }
+  if ( *((_BYTE *)&this->m_bReloadedThroughAnimEvent + 2) )
+  {
+    CClientThinkList::SetNextClientThink(&g_ClientThinkList, (CBaseHandle)this->touchStamp, -1293.0);
+    C_WeaponMedigun::ManageChargeEffect((C_WeaponMedigun *)((char *)this - 8));
+    return;
+  }
+  CClientThinkList::SetNextClientThink(&g_ClientThinkList, (CBaseHandle)this->touchStamp, -1.0);
+  LOBYTE(this->m_flChargeLevel.m_Value) = 0;
+  C_BaseEntity::StopSound((C_WeaponMedigun *)((char *)this - 8), "WeaponMedigun.Healing");
+  if ( ((unsigned __int8 (__thiscall *)(CSoundPatch **))LODWORD(this[-1].m_pChargedSound[11].m_pitch.m_target))(&this[-1].m_pChargedSound)
+    && C_BaseCombatWeapon::GetOwner((C_WeaponMedigun *)((char *)this - 8))
+    && (Owner = C_BaseCombatWeapon::GetOwner((C_WeaponMedigun *)((char *)this - 8)), Owner->IsAlive(Owner))
+    && *((_BYTE *)&this->m_bReloadedThroughAnimEvent + 3)
+    && (v4 = (C_BasePlayer *)C_BaseCombatWeapon::GetOwner((C_WeaponMedigun *)((char *)this - 8)),
+        v4 == C_BasePlayer::GetLocalPlayer()) )
+  {
+    if ( *(float *)(gpGlobals.m_Index + 12) >= *(double *)&this->m_hHealingTargets.m_Value[0].m_Index )
+    {
+      CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+      v5 = this->GetAbsOrigin(this);
+      C_BaseEntity::EmitSound((IRecipientFilter *)&filter.m_bReliable, (int)v5, "WeaponMedigun.NoTarget", 0, 0.0, 0);
+      *(double *)&this->m_hHealingTargets.m_Value[0].m_Index = *(float *)(gpGlobals.m_Index + 12) + 0.5;
+      C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+      C_WeaponMedigun::ManageChargeEffect((C_WeaponMedigun *)((char *)this - 8));
+      return;
+    }
+  }
+  else
+  {
+    C_BaseEntity::StopSound((C_WeaponMedigun *)((char *)this - 8), "WeaponMedigun.NoTarget");
+  }
+  C_WeaponMedigun::ManageChargeEffect((C_WeaponMedigun *)((char *)this - 8));
+}

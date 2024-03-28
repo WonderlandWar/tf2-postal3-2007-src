@@ -1,0 +1,7 @@
+void __thiscall C_BaseObject::RemoveAllObjects(C_BaseObject *this)
+{
+  int i; // edi
+
+  for ( i = 0; i < ((int (__thiscall *)(C_BaseObject *))this->~IHandleEntity)(this); ++i )
+    ;
+}

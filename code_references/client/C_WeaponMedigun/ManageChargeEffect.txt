@@ -1,0 +1,79 @@
+void __thiscall C_WeaponMedigun::ManageChargeEffect(C_WeaponMedigun *this)
+{
+  C_TFPlayer *LocalTFPlayer; // edi
+  C_WeaponMedigun *ViewModel; // ebp
+  C_TFPlayer *TFPlayerOwner; // eax
+  int v5; // eax
+  const char *v6; // eax
+  CSoundEnvelopeController *v7; // edi
+  CSoundEnvelopeController_vtbl *v8; // ebx
+  int v9; // eax
+  CSoundPatch *v10; // eax
+  CSoundEnvelopeController *Controller; // eax
+  CLocalPlayerFilter filter; // [esp+24h] [ebp-24h] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  ViewModel = this;
+  if ( LocalTFPlayer )
+  {
+    if ( LocalTFPlayer != C_TFWeaponBase::GetTFPlayerOwner(this)
+      || (ViewModel = (C_WeaponMedigun *)C_BasePlayer::GetViewModel(LocalTFPlayer, 0)) != 0 )
+    {
+      if ( this->m_bHolstered.m_Value || this->m_flChargeLevel.m_Value < 1.0 && !this->m_bChargeRelease.m_Value )
+      {
+        if ( this->m_pChargeEffect )
+        {
+          CParticleProperty::StopEmission(&ViewModel->m_Particles, this->m_pChargeEffect);
+          this->m_pChargeEffect = 0;
+        }
+        if ( this->m_pChargedSound )
+        {
+          Controller = CSoundEnvelopeController::GetController();
+          Controller->SoundDestroy(Controller, this->m_pChargedSound);
+          this->m_pChargedSound = 0;
+        }
+      }
+      else
+      {
+        if ( !this->m_pChargeEffect )
+        {
+          TFPlayerOwner = C_TFWeaponBase::GetTFPlayerOwner(this);
+          v5 = TFPlayerOwner->GetTeamNumber(TFPlayerOwner) - 2;
+          if ( v5 )
+          {
+            if ( v5 == 1 )
+              v6 = "medicgun_invulnstatus_fullcharge_blue";
+            else
+              v6 = locale;
+          }
+          else
+          {
+            v6 = "medicgun_invulnstatus_fullcharge_red";
+          }
+          this->m_pChargeEffect = CParticleProperty::Create(&ViewModel->m_Particles, v6, PATTACH_POINT_FOLLOW, "muzzle");
+        }
+        if ( !this->m_pChargedSound )
+        {
+          CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+          v7 = CSoundEnvelopeController::GetController();
+          v8 = v7->__vftable;
+          v9 = ((int (__thiscall *)(IClientNetworkable *, const char *))this->entindex)(
+                 &this->IClientNetworkable,
+                 "WeaponMedigun.Charged");
+          v10 = (CSoundPatch *)((int (__thiscall *)(CSoundEnvelopeController *, CUtlVector<int,CUtlMemory<int,int> > *, int))v8->SoundCreate)(
+                                 v7,
+                                 &filter.m_Recipients,
+                                 v9);
+          this->m_pChargedSound = v10;
+          ((void (__thiscall *)(CSoundEnvelopeController *, CSoundPatch *, _DWORD, _DWORD, _DWORD))v7->Play)(
+            v7,
+            v10,
+            1.0,
+            100.0,
+            0.0);
+          C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+        }
+      }
+    }
+  }
+}

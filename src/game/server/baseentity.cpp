@@ -1210,18 +1210,16 @@ int CBaseEntity::TakeHealth( float flHealth, int bitsDamageType )
 	if ( !edict() || m_takedamage < DAMAGE_YES )
 		return 0;
 
-	int iMax = GetMaxHealth();
-
 // heal
-	if ( m_iHealth >= iMax )
+	if ( m_iHealth >= m_iMaxHealth )
 		return 0;
 
 	const int oldHealth = m_iHealth;
 
 	m_iHealth += flHealth;
 
-	if (m_iHealth > iMax)
-		m_iHealth = iMax;
+	if (m_iHealth > m_iMaxHealth)
+		m_iHealth = m_iMaxHealth;
 
 	return m_iHealth - oldHealth;
 }
@@ -1821,6 +1819,7 @@ extern bool g_bReceivedChainedUpdateOnRemove;
 void CBaseEntity::UpdateOnRemove( void )
 {
 	g_bReceivedChainedUpdateOnRemove = true;
+
 	// Virtual call to shut down any looping sounds.
 	StopLoopingSounds();
 
@@ -5661,8 +5660,6 @@ matrix3x4_t& CBaseEntity::GetParentToWorldTransform( matrix3x4_t &tempMatrix )
 
 	if ( m_iParentAttachment != 0 )
 	{
-		MDLCACHE_CRITICAL_SECTION();
-
 		CBaseAnimating *pAnimating = pMoveParent->GetBaseAnimating();
 		if ( pAnimating && pAnimating->GetAttachment( m_iParentAttachment, tempMatrix ) )
 		{

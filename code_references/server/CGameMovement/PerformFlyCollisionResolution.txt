@@ -1,0 +1,59 @@
+void __thiscall CGameMovement::PerformFlyCollisionResolution(CGameMovement *this, CGameTrace *pm, Vector *move)
+{
+  CBasePlayer *player; // ecx
+  unsigned __int8 m_Value; // al
+  double v6; // st7
+  CMoveData *mv; // ecx
+  CMoveData *v8; // eax
+  double v9; // st7
+  float *p_m_bFirstRunOfFunctions; // eax
+  CMoveData *v11; // esi
+  float overbounce; // [esp+0h] [ebp-Ch]
+
+  player = this->player;
+  m_Value = player->m_MoveCollide.m_Value;
+  if ( m_Value <= 1u )
+  {
+    if ( m_Value == 1 )
+      v6 = 2.0 - player->m_surfaceFriction;
+    else
+      v6 = 1.0;
+    overbounce = v6;
+    CGameMovement::ClipVelocity(this, &this->mv->m_vecVelocity, &pm->plane.normal, &this->mv->m_vecVelocity, overbounce);
+  }
+  if ( pm->plane.normal.z > 0.7 )
+  {
+    mv = this->mv;
+    if ( sv_gravity.m_pParent->m_fValue * gpGlobals->frametime > mv->m_vecVelocity.z )
+    {
+      this->SetGroundEntity(this, pm->m_pEnt);
+      mv = this->mv;
+      mv->m_vecVelocity.z = 0.0;
+    }
+    v8 = this->mv;
+    if ( v8->m_vecVelocity.z * v8->m_vecVelocity.z
+       + v8->m_vecVelocity.y * v8->m_vecVelocity.y
+       + v8->m_vecVelocity.x * v8->m_vecVelocity.x >= 900.0
+      && this->player->m_MoveCollide.m_Value == 1 )
+    {
+      v9 = (1.0 - pm->fraction) * gpGlobals->frametime * 0.9;
+      move->x = mv->m_vecVelocity.x * v9;
+      move->y = mv->m_vecVelocity.y * v9;
+      move->z = v9 * mv->m_vecVelocity.z;
+      CGameMovement::PushEntity(this, move, pm);
+    }
+    else
+    {
+      this->SetGroundEntity(this, pm->m_pEnt);
+      p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+      p_m_bFirstRunOfFunctions[16] = 0.0;
+      p_m_bFirstRunOfFunctions += 16;
+      p_m_bFirstRunOfFunctions[1] = 0.0;
+      p_m_bFirstRunOfFunctions[2] = 0.0;
+    }
+    v11 = this->mv;
+    v11->m_vecVelocity.x = v11->m_vecVelocity.x;
+    v11->m_vecVelocity.y = v11->m_vecVelocity.y;
+    v11->m_vecVelocity.z = v11->m_vecVelocity.z;
+  }
+}

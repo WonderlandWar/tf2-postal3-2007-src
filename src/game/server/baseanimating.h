@@ -15,7 +15,6 @@
 #include "studio.h"
 #include "datacache/idatacache.h"
 #include "tier0/threadtools.h"
-#include "datacache/imdlcache.h"
 
 
 struct animevent_t;
@@ -429,7 +428,6 @@ friend class CBlendingCycler;
 //-----------------------------------------------------------------------------
 inline CStudioHdr *CBaseAnimating::GetModelPtr( void ) 
 { 
-	MDLCACHE_CRITICAL_SECTION();
 #ifdef _DEBUG
 	// GetModelPtr() is often called before OnNewModel() so go ahead and set it up first chance.
 	static IDataCacheSection *pModelCache = datacache->FindSection( "ModelData" );

@@ -1,0 +1,12 @@
+double __thiscall CTFKnife::GetMeleeDamage(CTFKnife *this, CBaseEntity *pTarget, int *iCustomDamage)
+{
+  double result; // st7
+  float flBaseDamage; // [esp+14h] [ebp+8h]
+
+  flBaseDamage = CTFWeaponBaseMelee::GetMeleeDamage(this, pTarget, iCustomDamage);
+  if ( !pTarget->IsPlayer(pTarget) || !CTFKnife::IsBehindTarget(this, pTarget) && this->m_iWeaponMode != 1 )
+    return flBaseDamage;
+  result = (double)(2 * pTarget->m_iHealth.m_Value);
+  *iCustomDamage = 2;
+  return result;
+}

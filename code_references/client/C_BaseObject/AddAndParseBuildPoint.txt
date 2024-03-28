@@ -1,0 +1,48 @@
+void __thiscall C_BaseObject::AddAndParseBuildPoint(
+        C_BaseObject *this,
+        KeyValues *iAttachmentNumber,
+        KeyValues *pkvBuildPoint)
+{
+  BuildPoint_t *v4; // esi
+  KeyValues *Key; // eax
+  KeyValues *FirstSubKey; // eax
+  const char *Name; // ebx
+  int v8; // edi
+  int v9; // esi
+  const CObjectInfo *ObjectInfo; // eax
+  int v11; // [esp+Ch] [ebp-4h]
+  KeyValues *pkvObject; // [esp+14h] [ebp+4h]
+
+  v11 = this->AddBuildPoint(this, (int)iAttachmentNumber);
+  v4 = &this->m_BuildPoints.m_Memory.m_pMemory[v11];
+  v4->m_bPutInAttachmentSpace = KeyValues::GetInt(pkvBuildPoint, "PutInAttachmentSpace", 0) != 0;
+  Key = KeyValues::FindKey(pkvBuildPoint, "valid_objects", 0);
+  if ( Key )
+  {
+    FirstSubKey = KeyValues::GetFirstSubKey(Key);
+    pkvObject = FirstSubKey;
+    if ( FirstSubKey )
+    {
+      while ( 1 )
+      {
+        Name = KeyValues::GetName(FirstSubKey);
+        v8 = strlen(Name);
+        v9 = 0;
+        while ( 1 )
+        {
+          ObjectInfo = GetObjectInfo(v9);
+          if ( !V_strncasecmp(ObjectInfo->m_pClassName, Name, v8) )
+            break;
+          if ( ++v9 >= 5 )
+            goto LABEL_10;
+        }
+        this->AddValidObjectToBuildPoint(this, v11, v9);
+LABEL_10:
+        pkvObject = CParticleOperatorDefinition<C_OP_Noise>::GetId(pkvObject);
+        if ( !pkvObject )
+          break;
+        FirstSubKey = pkvObject;
+      }
+    }
+  }
+}

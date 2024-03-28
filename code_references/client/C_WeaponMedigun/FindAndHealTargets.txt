@@ -1,0 +1,87 @@
+bool __thiscall C_WeaponMedigun::FindAndHealTargets(C_WeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // ecx
+  unsigned int v6; // eax
+  IHandleEntity *v7; // ecx
+  unsigned int v8; // eax
+  CEntInfo *v9; // ecx
+  IHandleEntity *v10; // esi
+  char v11; // al
+  IHandleEntity *v12; // eax
+  IHandleEntity *v13; // edi
+  int v14; // ebx
+  void (__thiscall *SetRefEHandle)(IHandleEntity *, const CBaseHandle *); // eax
+  double v16; // st7
+  double v17; // st7
+  int iCurrentTargets; // [esp+18h] [ebp-8h] BYREF
+  int v19; // [esp+1Ch] [ebp-4h]
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+  if ( v3->m_SerialNumber != m_Index >> 12 )
+    return 0;
+  m_pEntity = v3->m_pEntity;
+  if ( !m_pEntity || !m_pEntity->__vftable[40].GetRefEHandle(m_pEntity) )
+    return 0;
+  v6 = this->m_hHealingTargets.m_Value[0].m_Index;
+  v19 = 0;
+  if ( v6 == -1 || g_pEntityList->m_EntPtrArray[v6 & 0xFFF].m_SerialNumber != v6 >> 12 )
+    v7 = 0;
+  else
+    v7 = g_pEntityList->m_EntPtrArray[v6 & 0xFFF].m_pEntity;
+  if ( v7 && ((unsigned __int8 (__thiscall *)(IHandleEntity *))v7->__vftable[40].SetRefEHandle)(v7) )
+    C_WeaponMedigun::MaintainTargetInSlot(this, 0);
+  else
+    C_WeaponMedigun::FindNewTargetForSlot(this, 0);
+  v8 = this->m_hHealingTargets.m_Value[0].m_Index;
+  if ( v8 != -1 )
+  {
+    v9 = &g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF];
+    if ( g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber == v8 >> 12 )
+    {
+      v10 = v9->m_pEntity;
+      if ( v9->m_pEntity )
+      {
+        if ( ((unsigned __int8 (__thiscall *)(IHandleEntity *))v10->__vftable[40].SetRefEHandle)(v9->m_pEntity) )
+        {
+          v11 = (char)v10->__vftable[40].GetRefEHandle(v10);
+          v19 = 1;
+          v12 = v11 != 0 ? v10 : 0;
+          v13 = v12;
+          if ( !this->m_bChargeRelease.m_Value )
+          {
+            if ( v12 )
+            {
+              *(float *)&iCurrentTargets = COERCE_FLOAT(CTFPlayerShared::GetMaxBuffedHealth((CTFPlayerShared *)&v12[1144]));
+              v14 = (int)floor((double)iCurrentTargets * 0.95);
+              if ( 0.0 != weapon_medigun_charge_rate.m_pParent->m_fValue )
+              {
+                SetRefEHandle = v10->__vftable[33].SetRefEHandle;
+                *(float *)&iCurrentTargets = *(float *)(gpGlobals.m_Index + 16)
+                                           / weapon_medigun_charge_rate.m_pParent->m_fValue;
+                v16 = *(float *)&iCurrentTargets;
+                if ( ((int (__thiscall *)(IHandleEntity *))SetRefEHandle)(v10) >= v14 )
+                  v16 = v16 * 0.5;
+                iCurrentTargets = (int)v13[1175].__vftable;
+                if ( iCurrentTargets > 1 )
+                  v16 = v16 / (double)iCurrentTargets;
+                v17 = v16 + this->m_flChargeLevel.m_Value;
+                if ( v17 >= 1.0 )
+                  v17 = 1.0;
+                *(float *)&iCurrentTargets = v17;
+                CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+                  (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flChargeLevel,
+                  (const float *)&iCurrentTargets);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return v19 > 0;
+}

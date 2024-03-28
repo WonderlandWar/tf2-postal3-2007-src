@@ -1,0 +1,32 @@
+C_BaseObject *__thiscall C_BaseObject::GetObjectOfTypeOnMe(C_BaseObject *this, int iObjectType)
+{
+  int v3; // ebx
+  int i; // edi
+  unsigned int v5; // eax
+  C_BaseObject **v6; // ecx
+  C_BaseObject *result; // eax
+
+  v3 = 0;
+  if ( (int)this->GetClientRenderable(this) <= 0 )
+    return 0;
+  for ( i = 0; ; i += 20 )
+  {
+    v5 = *(unsigned int *)((char *)&this->GetClientClass + i);
+    if ( v5 != -1 )
+    {
+      v6 = (C_BaseObject **)&g_pEntityList->m_EntPtrArray[*(int *)((_BYTE *)&this->GetClientClass + i) & 0xFFF];
+      if ( g_pEntityList->m_EntPtrArray[*(int *)((_BYTE *)&this->GetClientClass + i) & 0xFFF].m_SerialNumber == v5 >> 12 )
+      {
+        result = *v6;
+        if ( *v6 )
+        {
+          if ( result->m_iObjectType == iObjectType )
+            break;
+        }
+      }
+    }
+    if ( ++v3 >= (int)this->GetClientRenderable(this) )
+      return 0;
+  }
+  return result;
+}

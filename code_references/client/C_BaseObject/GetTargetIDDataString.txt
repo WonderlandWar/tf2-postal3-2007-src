@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::GetTargetIDDataString(C_BaseObject *this, wchar_t *sDataString, int iMaxLenInBytes)
+{
+  *sDataString = 0;
+}

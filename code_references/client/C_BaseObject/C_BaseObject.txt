@@ -1,0 +1,30 @@
+void __thiscall C_BaseObject::C_BaseObject(C_BaseObject *this)
+{
+  C_BaseCombatCharacter::C_BaseCombatCharacter(this);
+  this->IHasBuildPoints::__vftable = (IHasBuildPoints_vtbl *)&IHasBuildPoints::`vftable';
+  this->ITargetIDProvidesHint::__vftable = (ITargetIDProvidesHint_vtbl *)&ITargetIDProvidesHint::`vftable';
+  this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_BaseObject_vtbl *)&C_BaseObject::`vftable'{for `IClientUnknown'};
+  this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_BaseObject::`vftable'{for `IClientRenderable'};
+  this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_BaseObject::`vftable'{for `IClientNetworkable'};
+  this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_BaseObject::`vftable'{for `IClientThinkable'};
+  this->IHasBuildPoints::__vftable = (IHasBuildPoints_vtbl *)&C_BaseObject::`vftable'{for `IHasBuildPoints'};
+  this->ITargetIDProvidesHint::__vftable = (ITargetIDProvidesHint_vtbl *)&C_BaseObject::`vftable'{for `ITargetIDProvidesHint'};
+  this->m_BuildPoints.m_Memory.m_pMemory = 0;
+  this->m_BuildPoints.m_Memory.m_nAllocationCount = 0;
+  this->m_BuildPoints.m_Memory.m_nGrowSize = 0;
+  this->m_BuildPoints.m_Size = 0;
+  this->m_BuildPoints.m_pElements = 0;
+  this->m_hOldOwner.m_Index = -1;
+  this->m_hBuilder.m_Index = -1;
+  this->m_hBuiltOnEntity.m_Index = -1;
+  this->m_flDamageFlash = 0.0;
+  this->m_flPercentageConstructed = 0.0;
+  this->m_YawPreviewState = 0;
+  this->m_flNextEffect = 0.0;
+  this->m_bBuilding = 0;
+  this->m_bPlacing = 0;
+  this->m_flCurrentBuildRotation = 0.0;
+  this->m_fObjectFlags = 0;
+  this->m_damageLevel = BUILDING_DAMAGE_LEVEL_NONE;
+  this->m_iLastPlacementPosValid = -1;
+}

@@ -1,0 +1,31 @@
+C_BaseObject *__thiscall C_BaseObject::GetParentObject(C_BaseObject *this)
+{
+  unsigned int m_Index; // eax
+  unsigned int v2; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // ecx
+
+  m_Index = this->m_pMoveParent.m_Index;
+  if ( m_Index == -1
+    || g_pEntityList->m_EntPtrArray[this->m_pMoveParent.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+    || !g_pEntityList->m_EntPtrArray[this->m_pMoveParent.m_Index & 0xFFF].m_pEntity )
+  {
+    return 0;
+  }
+  v2 = this->m_pMoveParent.m_Index;
+  if ( v2 == -1
+    || (v3 = &g_pEntityList->m_EntPtrArray[this->m_pMoveParent.m_Index & 0xFFF], v3->m_SerialNumber != v2 >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = v3->m_pEntity;
+  }
+  return (C_BaseObject *)__RTDynamicCast(
+                           m_pEntity,
+                           0,
+                           &C_BaseEntity `RTTI Type Descriptor',
+                           &C_BaseObject `RTTI Type Descriptor',
+                           0);
+}

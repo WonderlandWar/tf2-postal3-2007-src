@@ -1,0 +1,155 @@
+void __userpurge C_BaseObject::HighlightBuildPoints(
+        C_BaseObject *this@<ecx>,
+        int flags,
+        int a3,
+        int a4,
+        int a5,
+        int a6,
+        int a7,
+        int a8,
+        int a9,
+        int a10,
+        int a11)
+{
+  C_TFPlayer *LocalTFPlayer; // ebx
+  IHasBuildPoints *v13; // ebp
+  C_BaseCombatWeapon *v14; // eax
+  C_TFWeaponBuilder *v15; // esi
+  C_BaseObject *PlacementModel; // eax
+  C_BaseEntity *v17; // esi
+  Vector *v18; // eax
+  Vector *v19; // eax
+  char v20; // bl
+  float *v21; // eax
+  C_BaseEntity_vtbl *v22; // edx
+  float *v23; // eax
+  int v24; // edi
+  IVModelRender_vtbl *v25; // ebx
+  int v26; // eax
+  int v27; // eax
+  const Vector *v28; // [esp+54h] [ebp-6Ch]
+  float v29; // [esp+54h] [ebp-6Ch]
+  bool i_3; // [esp+6Bh] [ebp-55h]
+  int v31; // [esp+6Ch] [ebp-54h]
+  int v32; // [esp+6Ch] [ebp-54h]
+  Vector color; // [esp+74h] [ebp-4Ch] BYREF
+  Vector vecPrevAbsOrigin; // [esp+80h] [ebp-40h] BYREF
+  QAngle vecPrevAbsAngles; // [esp+8Ch] [ebp-34h] BYREF
+  QAngle vecBPAngles; // [esp+98h] [ebp-28h] BYREF
+  Vector vecBPOrigin; // [esp+A4h] [ebp-1Ch] BYREF
+  Vector orgColor; // [esp+B0h] [ebp-10h] BYREF
+
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( LocalTFPlayer )
+  {
+    v13 = &this->IHasBuildPoints;
+    if ( this->GetNumBuildPoints(&this->IHasBuildPoints) )
+    {
+      if ( this->InLocalTeam(this) )
+      {
+        v14 = LocalTFPlayer->GetActiveWeaponForSelection(LocalTFPlayer);
+        v15 = (C_TFWeaponBuilder *)__RTDynamicCast(
+                                     v14,
+                                     0,
+                                     &C_BaseCombatWeapon `RTTI Type Descriptor',
+                                     &C_TFWeaponBuilder `RTTI Type Descriptor',
+                                     0);
+        if ( v15 )
+        {
+          if ( v15->IsPlacingObject(v15) )
+          {
+            PlacementModel = C_TFWeaponBuilder::GetPlacementModel(v15);
+            v17 = PlacementModel;
+            if ( PlacementModel )
+            {
+              if ( PlacementModel != this )
+              {
+                v28 = LocalTFPlayer->GetAbsOrigin(LocalTFPlayer);
+                v18 = (Vector *)this->GetAbsOrigin(this);
+                v19 = Vector::operator-(v18, (Vector *)&orgColor.y, v28);
+                if ( v19->z * v19->z + v19->y * v19->y + v19->x * v19->x < 160000.0 )
+                {
+                  v20 = 0;
+                  v21 = (float *)v17->GetAbsOrigin(v17);
+                  vecPrevAbsOrigin.y = *v21;
+                  vecPrevAbsOrigin.z = v21[1];
+                  v22 = v17->IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+                  vecPrevAbsAngles.x = v21[2];
+                  v23 = (float *)v22->GetAbsAngles(v17);
+                  vecPrevAbsAngles.y = *v23;
+                  vecPrevAbsAngles.z = v23[1];
+                  vecBPAngles.x = v23[2];
+                  render->GetColorModulation(render, &orgColor.y);
+                  color.x = render->GetBlend(render);
+                  v31 = v17->GetTeamNumber(v17);
+                  i_3 = v31 == this->GetTeamNumber(this);
+                  if ( !v17->IClientEntity::IClientUnknown::IHandleEntity::__vftable[1].GetTeam(v17) && i_3 )
+                  {
+                    v24 = 0;
+                    v32 = 0;
+                    if ( v13->GetNumBuildPoints(v13) > 0 )
+                    {
+                      do
+                      {
+                        if ( v13->CanBuildObjectOnBuildPoint(
+                               v13,
+                               v24,
+                               v17[3].m_VarMap.m_Entries.m_Memory.m_nAllocationCount)
+                          && v13->GetBuildPoint(v13, v24, (Vector *)&vecBPOrigin.y, (QAngle *)&vecBPAngles.y) )
+                        {
+                          C_BaseAnimating::InvalidateBoneCaches();
+                          color.y = 0.0;
+                          color.z = 255.0;
+                          vecPrevAbsOrigin.x = 0.0;
+                          render->SetColorModulation(render, &color.y);
+                          v29 = (double)(175
+                                       - (int)(cos(fmod(*(float *)(gpGlobals.m_Index + 12), 3.0) * 6.283185307179586)
+                                             * -75.0))
+                              * 0.00392156862745098;
+                          ((void (__thiscall *)(IVRenderView *, _DWORD))render->SetBlend)(render, LODWORD(v29));
+                          C_BaseEntity::SetAbsOrigin(v17, (Vector *)&vecBPOrigin.y);
+                          C_BaseEntity::SetAbsAngles(v17, (QAngle *)&vecBPAngles.y);
+                          v25 = modelrender->__vftable;
+                          v26 = ((int (__thiscall *)(IClientRenderable *, float *, float *, IClientRenderable_vtbl *, IClientNetworkable_vtbl *, IClientThinkable_vtbl *, _DWORD, _DWORD))v17->GetModel)(
+                                  &v17->IClientRenderable,
+                                  &vecBPOrigin.y,
+                                  &vecBPAngles.y,
+                                  v17[1].IClientEntity::IClientRenderable::__vftable,
+                                  v17[1].IClientEntity::IClientNetworkable::__vftable,
+                                  v17[1].IClientEntity::IClientThinkable::__vftable,
+                                  0,
+                                  0);
+                          v27 = ((int (__thiscall *)(IClientRenderable *, int, int))v17->GetModelInstance)(
+                                  &v17->IClientRenderable,
+                                  v17->index,
+                                  v26);
+                          ((void (__thiscall *)(IVModelRender *, int, IClientRenderable *, int))v25->DrawModel)(
+                            modelrender,
+                            a11,
+                            &v17->IClientRenderable,
+                            v27);
+                          v24 = v32;
+                          v20 = 1;
+                        }
+                        v32 = ++v24;
+                      }
+                      while ( v24 < v13->GetNumBuildPoints(v13) );
+                      if ( v20 )
+                      {
+                        C_BaseEntity::SetAbsOrigin(v17, (Vector *)&vecPrevAbsOrigin.y);
+                        C_BaseEntity::SetAbsAngles(v17, (QAngle *)&vecPrevAbsAngles.y);
+                        C_BaseAnimating::InvalidateBoneCaches();
+                        render->SetColorModulation(render, &orgColor.y);
+                        ((void (__stdcall *)(_DWORD))render->SetBlend)(LODWORD(color.x));
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

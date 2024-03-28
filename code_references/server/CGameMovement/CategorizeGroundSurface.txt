@@ -1,0 +1,29 @@
+void __thiscall CGameMovement::CategorizeGroundSurface(CGameMovement *this)
+{
+  CMoveData *mv; // eax
+  CGameMovement_vtbl *v3; // edi
+  unsigned int (__thiscall *PlayerSolidMask)(CGameMovement *, bool); // edx
+  int v5; // eax
+  IPhysicsSurfaceProps *v6; // edi
+  Vector end; // [esp+10h] [ebp-68h] BYREF
+  float v8; // [esp+1Ch] [ebp-5Ch] BYREF
+  _WORD v9[42]; // [esp+20h] [ebp-58h] BYREF
+
+  mv = this->mv;
+  v3 = this->__vftable;
+  PlayerSolidMask = this->PlayerSolidMask;
+  end.x = mv->m_vecAbsOrigin.z;
+  end.y = mv->m_vecAbsOrigin.x;
+  end.z = mv->m_vecAbsOrigin.y;
+  v8 = mv->m_vecAbsOrigin.z - 64.0;
+  v5 = ((int (__thiscall *)(CGameMovement *, int, int, _WORD *))PlayerSolidMask)(this, 1, 8, v9);
+  ((void (__thiscall *)(CGameMovement *, Vector *, float *, int))v3->TracePlayerBBox)(this, &end, &v8, v5);
+  v6 = IMoveHelper::sm_pSingleton->GetSurfaceProps(IMoveHelper::sm_pSingleton);
+  this->player->m_surfaceProps = v9[32];
+  this->player->m_pSurfaceData = v6->GetSurfaceData(v6, this->player->m_surfaceProps);
+  v6->GetPhysicsProperties(v6, this->player->m_surfaceProps, 0, 0, &this->player->m_surfaceFriction, 0);
+  this->player->m_surfaceFriction = this->player->m_surfaceFriction * 1.25;
+  if ( this->player->m_surfaceFriction > 1.0 )
+    this->player->m_surfaceFriction = 1.0;
+  this->player->m_chTextureType = this->player->m_pSurfaceData->game.material;
+}

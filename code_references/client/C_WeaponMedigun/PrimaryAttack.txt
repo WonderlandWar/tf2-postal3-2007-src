@@ -1,0 +1,39 @@
+void __thiscall C_WeaponMedigun::PrimaryAttack(C_WeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  C_TFPlayer *m_pEntity; // edi
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_TFPlayer *)v3->m_pEntity;
+      if ( v3->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((C_BaseEntity *)v3->m_pEntity) && C_TFWeaponBase::CanAttack(this) )
+        {
+          if ( C_WeaponMedigun::FindAndHealTargets(this) )
+          {
+            if ( !this->m_bHealing.m_Value )
+            {
+              this->SendWeaponAnim(this, 1091);
+              C_TFPlayer::DoAnimationEvent(m_pEntity, PLAYERANIMEVENT_ATTACK_PRE, 0);
+            }
+            val = 1;
+            CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bChargeRelease>::operator=<bool>(
+              (CNetworkVarBase<bool,C_TFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bHealing,
+              &val);
+          }
+          else
+          {
+            C_WeaponMedigun::RemoveHealingTarget(this, -1, 0);
+          }
+        }
+      }
+    }
+  }
+}

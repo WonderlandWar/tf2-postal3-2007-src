@@ -1,0 +1,14 @@
+bool __thiscall C_BaseObject::CanBuildObjectOnBuildPoint(C_BaseObject *this, int iPoint, int iObjectType)
+{
+  char *v3; // eax
+  unsigned int v5; // eax
+
+  v3 = (char *)this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable
+     + 20 * iPoint;
+  if ( !v3[iObjectType + 12] )
+    return 0;
+  v5 = *((_DWORD *)v3 + 2);
+  return v5 == -1
+      || g_pEntityList->m_EntPtrArray[v5 & 0xFFF].m_SerialNumber != v5 >> 12
+      || g_pEntityList->m_EntPtrArray[v5 & 0xFFF].m_pEntity == 0;
+}

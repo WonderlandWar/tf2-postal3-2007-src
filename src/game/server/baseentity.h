@@ -921,7 +921,6 @@ public:
 	virtual bool	IsNetClient( void ) const { return false; }
 	virtual bool	IsTemplate( void ) { return false; }
 	virtual bool	IsBaseObject( void ) const { return false; }
-	virtual bool	IsBaseTrain( void ) const { return false; }
 	bool			IsBSPModel() const;
 	bool			IsInWorld( void ) const;
 
@@ -1051,7 +1050,7 @@ public:
 	virtual bool IsLockedByMaster( void ) { return false; }
 
 	// Health accessors.
-	virtual int		GetMaxHealth()  const	{ return m_iMaxHealth; }
+	int		GetMaxHealth()  const	{ return m_iMaxHealth; }
 	void	SetMaxHealth( int amt )	{ m_iMaxHealth = amt; }
 
 	int		GetHealth() const		{ return m_iHealth; }

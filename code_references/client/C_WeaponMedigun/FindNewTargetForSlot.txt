@@ -1,0 +1,60 @@
+void __thiscall C_WeaponMedigun::FindNewTargetForSlot(C_WeaponMedigun *this, int iSlot)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  C_BasePlayer *m_pEntity; // edi
+  unsigned int v6; // eax
+  double v7; // st7
+  Vector vecSrc; // [esp+4h] [ebp-80h] BYREF
+  Vector vecAiming; // [esp+10h] [ebp-74h] BYREF
+  Vector vecEnd; // [esp+1Ch] [ebp-68h] BYREF
+  CGameTrace tr; // [esp+28h] [ebp-5Ch] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v4->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_BasePlayer *)v4->m_pEntity;
+      if ( v4->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((C_BaseEntity *)v4->m_pEntity) )
+        {
+          m_pEntity->Weapon_ShootPosition(m_pEntity, (Vector *)&vecSrc.y);
+          v6 = this->m_hHealingTargets.m_Value[iSlot].m_Index;
+          if ( v6 != -1
+            && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[iSlot].m_Index & 0xFFF].m_SerialNumber == v6 >> 12
+            && g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[iSlot].m_Index & 0xFFF].m_pEntity )
+          {
+            C_WeaponMedigun::RemoveHealingTarget(this, iSlot, 0);
+          }
+          C_BasePlayer::EyeVectors(m_pEntity, (Vector *)&vecAiming.y, 0, 0);
+          v7 = ((double (__thiscall *)(C_WeaponMedigun *))this->GetTargetRange)(this);
+          vecEnd.y = vecAiming.y * v7 + vecSrc.y;
+          vecEnd.z = vecAiming.z * v7 + vecSrc.z;
+          tr.startpos.x = v7 * vecEnd.x + vecAiming.x;
+          UTIL_TraceLine(
+            (Vector *)&vecSrc.y,
+            (Vector *)&vecEnd.y,
+            0x6004003u,
+            m_pEntity,
+            0,
+            (CGameTrace *)&tr.startpos.y);
+          if ( 1.0 != *(float *)&tr.contents && tr.hitbox )
+          {
+            if ( C_WeaponMedigun::CouldHealTarget(this, (C_BaseEntity *)tr.hitbox) )
+            {
+              CHandle<C_BaseEntity>::CHandle<C_BaseEntity>((CHandle<C_BaseEntity> *)&vecSrc, (C_BaseEntity *)tr.hitbox);
+              C_WeaponMedigun::NetworkVar_m_hHealingTargets::Set(
+                (C_BaseCombatCharacter::NetworkVar_m_iAmmo *)&this->m_hHealingTargets,
+                iSlot,
+                (int *)&vecSrc);
+              this->m_flNextTargetCheckTime = *(float *)(gpGlobals.m_Index + 12) + 1.0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

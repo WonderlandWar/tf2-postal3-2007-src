@@ -1,0 +1,4 @@
+double __thiscall C_BaseObject::GetInitialBuilderYaw(C_BaseObject *this)
+{
+  return this->GetAbsAngles(this)->y;
+}

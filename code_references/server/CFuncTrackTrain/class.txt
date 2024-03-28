@@ -1,0 +1,112 @@
+class CFuncTrackTrain : public CBaseEntity
+{
+    public class ServerClass * GetServerClass();
+    public class SendTable * m_pClassSendTable;
+    public int YouForgotToImplementOrDeclareServerClass();
+    public void CFuncTrackTrain(class CFuncTrackTrain & );
+    public void CFuncTrackTrain();
+	
+    public void Spawn();
+    public bool CreateVPhysics();
+    public void Precache();
+    public void UpdateOnRemove();
+    public void MoveDone();
+	
+    public void Blocked(class CBaseEntity * );
+    public bool KeyValue(char * ,char * );
+	
+    public int DrawDebugTextOverlays();
+    public void DrawDebugGeometryOverlays();
+	
+    public void Next();
+    public void Find();
+    public void NearestPath();
+    public void DeadEnd();
+	
+    public void SetTrack(class CPathTrack * );
+    public void SetControls(class CBaseEntity * );
+    public bool OnControls(class CBaseEntity * );
+	
+    public void SoundStop();
+    public void SoundUpdate();
+	
+    public void Start();
+    public void Stop();
+	
+    public bool IsDirForward();
+    public void SetDirForward(bool );
+    public void SetSpeed(float );
+    public void Use(class CBaseEntity * ,class CBaseEntity * ,enum USE_TYPE ,float );
+	
+    public void InputSetSpeed(struct inputdata_t & );
+    public void InputSetSpeedDir(struct inputdata_t & );
+    public void InputSetSpeedReal(struct inputdata_t & );
+    public void InputStop(struct inputdata_t & );
+    public void InputResume(struct inputdata_t & );
+    public void InputReverse(struct inputdata_t & );
+    public void InputStartForward(struct inputdata_t & );
+    public void InputStartBackward(struct inputdata_t & );
+    public void InputToggle(struct inputdata_t & );
+	
+    public class CFuncTrackTrain * Instance(struct edict_t * );
+	
+    public struct datamap_t m_DataMap;
+    public struct datamap_t * GetBaseMap();
+    public struct datamap_t * GetDataDescMap();
+	
+    public int ObjectCaps();
+	
+    public void OnRestore();
+	
+    public float GetMaxSpeed();
+    public float GetCurrentSpeed();
+	
+    private void ArriveAtNode(class CPathTrack * );
+    private void FirePassInputs(class CPathTrack * ,class CPathTrack * ,bool );
+	
+    public class CPathTrack * m_ppath;
+    public float m_length;
+	
+    private enum TrainVelocityType_t GetTrainVelocityType();
+    private void UpdateTrainVelocity(class CPathTrack * ,class CPathTrack * ,class Vector & ,float );
+	
+    private enum TrainOrientationType_t GetTrainOrientationType();
+    private void UpdateTrainOrientation(class CPathTrack * ,class CPathTrack * ,class Vector & ,float );
+    private void UpdateOrientationAtPathTracks(class CPathTrack * ,class CPathTrack * ,class Vector & ,float );
+    private void UpdateOrientationBlend(enum TrainOrientationType_t ,class CPathTrack * ,class CPathTrack * ,class Vector & ,float );
+    private void DoUpdateOrientation(class QAngle & ,class QAngle & ,float );
+    
+	private void TeleportToPathTrack(class CPathTrack * );
+	
+	
+    private class Vector m_controlMins;
+    private class Vector m_controlMaxs;
+    private class Vector m_lastBlockPos;
+    private int m_lastBlockTick;
+    private float m_flVolume;
+    private float m_flBank;
+    private float m_oldSpeed;
+    private float m_flBlockDamage;
+    private float m_height;
+    private float m_maxSpeed;
+    private float m_dir;
+	
+    private struct string_t m_iszSoundMove;
+    private struct string_t m_iszSoundMovePing;
+    private struct string_t m_iszSoundStart;
+    private struct string_t m_iszSoundStop;
+	
+    private float m_flMoveSoundMinTime;
+    private float m_flMoveSoundMaxTime;
+    private float m_flNextMoveSoundTime;
+	
+    private int m_nMoveSoundMinPitch;
+    private int m_nMoveSoundMaxPitch;
+	
+    private enum TrainOrientationType_t m_eOrientationType;
+    private enum TrainVelocityType_t m_eVelocityType;
+    private bool m_bSoundPlaying;
+	
+    private class COutputEvent m_OnStart;
+    private class COutputEvent m_OnNext;
+};

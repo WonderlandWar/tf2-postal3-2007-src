@@ -1,0 +1,8 @@
+const char *__thiscall C_ObjectSentrygun::GetHudStatusIcon(C_ObjectSentrygun *this)
+{
+  if ( this->m_iUpgradeLevel == 2 )
+    return "obj_status_sentrygun_2";
+  if ( this->m_iUpgradeLevel == 3 )
+    return "obj_status_sentrygun_3";
+  return "obj_status_sentrygun_1";
+}

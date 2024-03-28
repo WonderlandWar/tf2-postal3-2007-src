@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::AddValidObjectToBuildPoint(C_BaseObject *this, int iPoint, int iObjectType)
+{
+  this->m_BuildPoints.m_Memory.m_pMemory[iPoint].m_bValidObjects[iObjectType] = 1;
+}

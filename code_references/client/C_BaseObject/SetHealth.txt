@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::SetHealth(C_BaseObject *this, int health)
+{
+  this->m_iHealth = health;
+}

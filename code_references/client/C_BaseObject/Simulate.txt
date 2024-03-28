@@ -1,0 +1,28 @@
+void __thiscall C_BaseObject::Simulate(C_BaseObject *this)
+{
+  int v2; // eax
+  void (__thiscall *OnPlacementStateChanged)(C_BaseObject *, bool); // edx
+  CInterpolatedVar<Vector> *OriginInterpolator; // eax
+  CInterpolatedVar<QAngle> *RotationInterpolator; // eax
+
+  if ( this->m_bPlacing && !(unsigned __int8)C_BaseObject::MustBeBuiltOnAttachmentPoint(this) )
+  {
+    v2 = this->IsPlacementPosValid(this) && this->m_bServerOverridePlacement.m_Value;
+    if ( this->m_iLastPlacementPosValid != v2 )
+    {
+      OnPlacementStateChanged = this->OnPlacementStateChanged;
+      this->m_iLastPlacementPosValid = v2;
+      LOBYTE(v2) = v2 > 0;
+      OnPlacementStateChanged(this, v2);
+    }
+    C_BaseEntity::SetLocalOrigin(this, &this->m_vecBuildOrigin);
+    C_BaseAnimating::InvalidateBoneCache(this);
+    OriginInterpolator = C_BaseEntity::GetOriginInterpolator(this);
+    OriginInterpolator->m_VarHistory.m_count = 0;
+    OriginInterpolator->m_VarHistory.m_firstElement = 0;
+    RotationInterpolator = C_BaseEntity::GetRotationInterpolator(this);
+    RotationInterpolator->m_VarHistory.m_count = 0;
+    RotationInterpolator->m_VarHistory.m_firstElement = 0;
+  }
+  C_BaseAnimating::Simulate(this);
+}

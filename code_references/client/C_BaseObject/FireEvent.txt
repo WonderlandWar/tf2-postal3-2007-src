@@ -1,0 +1,56 @@
+void __thiscall C_BaseObject::FireEvent(
+        C_BaseObject *this,
+        const Vector *origin,
+        const QAngle *angles,
+        int event,
+        const char *options)
+{
+  int BodygroupByName; // eax
+  int v7; // eax
+  int NumBodyGroups; // ebx
+  int i; // edi
+  int BodygroupCount; // eax
+  const char *Classname; // eax
+  int v12; // [esp-4h] [ebp-14h]
+
+  switch ( event )
+  {
+    case 6000:
+      BodygroupByName = C_BaseAnimating::FindBodygroupByName(this, options);
+      if ( BodygroupByName >= 0 )
+        C_BaseAnimating::SetBodygroup(this, BodygroupByName, 1);
+      break;
+    case 6001:
+      v7 = C_BaseAnimating::FindBodygroupByName(this, options);
+      if ( v7 >= 0 )
+        C_BaseAnimating::SetBodygroup(this, v7, 0);
+      break;
+    case 6002:
+    case 6003:
+      NumBodyGroups = C_BaseAnimating::GetNumBodyGroups(this);
+      for ( i = 1; i < NumBodyGroups; ++i )
+      {
+        BodygroupCount = C_BaseAnimating::GetBodygroupCount(this, i);
+        if ( BodygroupCount == 2 )
+        {
+          C_BaseAnimating::SetBodygroup(this, i, event == 6002);
+        }
+        else
+        {
+          v12 = BodygroupCount;
+          Classname = C_BaseEntity::GetClassname(this);
+          DevMsg(
+            "TF_OBJ_ENABLE/DISABLEBODY GROUP:  %s has a group with %i subparts, should be exactly 2\n",
+            Classname,
+            v12);
+        }
+      }
+      break;
+    case 6004:
+      C_BaseEntity::EmitSound(this, options, 0.0, 0);
+      break;
+    default:
+      C_BaseAnimating::FireEvent(this, origin, angles, event, options);
+      break;
+  }
+}

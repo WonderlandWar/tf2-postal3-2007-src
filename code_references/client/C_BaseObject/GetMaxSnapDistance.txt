@@ -1,0 +1,4 @@
+double __thiscall C_BaseObject::GetMaxSnapDistance(C_BaseObject *this, int iPoint)
+{
+  return tf_obj_max_attach_dist.m_pParent->m_fValue;
+}

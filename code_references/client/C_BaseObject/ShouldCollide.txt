@@ -1,0 +1,21 @@
+bool __thiscall C_BaseObject::ShouldCollide(C_BaseObject *this, int collisionGroup, int contentsMask)
+{
+  int v5; // eax
+
+  if ( collisionGroup == 8 )
+  {
+    if ( this->m_CollisionGroup == 22 )
+      return 1;
+    v5 = this->GetTeamNumber(this) - 2;
+    if ( v5 )
+    {
+      if ( v5 == 1 && (contentsMask & 0x1000) == 0 )
+        return 0;
+    }
+    else if ( (contentsMask & 0x800) == 0 )
+    {
+      return 0;
+    }
+  }
+  return C_BaseEntity::ShouldCollide(this, collisionGroup, contentsMask);
+}

@@ -1,0 +1,24 @@
+bool __thiscall C_WeaponMedigun::Deploy(C_WeaponMedigun *this)
+{
+  int v2; // ecx
+  bool result; // al
+
+  if ( !C_TFWeaponBase::Deploy(this) )
+    return 0;
+  if ( this->m_bHolstered.m_Value )
+  {
+    v2 = 1;
+    if ( !this->m_bHolstered.m_Value )
+      v2 = -1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  if ( v2 )
+    this->m_bHolstered.m_Value = 0;
+  C_WeaponMedigun::ManageChargeEffect(this);
+  result = 1;
+  this->m_flNextTargetCheckTime = *(float *)(gpGlobals.m_Index + 12);
+  return result;
+}

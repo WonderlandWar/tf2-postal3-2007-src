@@ -1,0 +1,18 @@
+void __thiscall C_ObjectSentrygun::GetShadowRenderBounds(
+        C_ObjectSentrygun *this,
+        Vector *mins,
+        Vector *maxs,
+        ShadowType_t shadowType)
+{
+  const char **p_m_ModelName; // esi
+  float *v5; // eax
+  int (__thiscall *v6)(const char **); // edx
+
+  p_m_ModelName = &this->m_ModelName;
+  v5 = (float *)(*((int (__thiscall **)(const char **))this->m_ModelName + 1))(&this->m_ModelName);
+  mins->x = *v5;
+  mins->y = v5[1];
+  v6 = (int (__thiscall *)(const char **))*((_DWORD *)*p_m_ModelName + 2);
+  mins->z = v5[2];
+  *maxs = *(Vector *)v6(p_m_ModelName);
+}

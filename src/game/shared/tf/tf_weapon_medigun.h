@@ -16,6 +16,11 @@
 #define CWeaponMedigun C_WeaponMedigun
 #endif
 
+// There is a crash that keeps occuring when we try to network an array of healing targets, for now just use a singlular handle
+#if 1
+#define TFP3_MEDIGUN_FIX
+#endif
+
 #define MAX_HEALING_TARGETS			1	//6
 
 #define CLEAR_ALL_TARGETS			-1
@@ -56,8 +61,6 @@ public:
 
 	bool			IsReleasingCharge( void ) { return (m_bChargeRelease && !m_bHolstered); }
 
-	CBaseEntity		*GetHealTarget( void ) { return m_hHealingTarget.Get(); }
-
 #if defined( CLIENT_DLL )
 	// Stop all sounds being output.
 	void			StopHealSound( bool bStopHealingSound = true, bool bStopNoTargetSound = true );
@@ -66,7 +69,11 @@ public:
 	virtual void	ClientThink();
 	void			UpdateEffects( void );
 	void			ForceHealingTargetUpdate( void ) { m_bUpdateHealingTargets = true; }
-
+#ifdef TFP3_MEDIGUN_FIX
+	CBaseEntity		*GetHealTarget( void ) { return m_hHealingTarget.Get(); }
+#else
+	CBaseEntity		*GetHealTarget( void ) { return m_hHealingTargets[0].Get(); }
+#endif
 	void			ManageChargeEffect( void );
 #else
 
@@ -76,19 +83,22 @@ public:
 
 private:
 	bool					FindAndHealTargets( void );
-	void					MaintainTargetInSlot();
-	void					FindNewTargetForSlot();
-	void					RemoveHealingTarget( bool bStopHealingSelf = false );
+	void					MaintainTargetInSlot( int iSlot );
+	void					FindNewTargetForSlot( int iSlot );
+	void					RemoveHealingTarget( int iSlot, bool bStopHealingSelf = false );
 	bool					HealingTarget( CBaseEntity *pTarget );
 	bool					CouldHealTarget( CBaseEntity *pTarget );
-	bool					AllowedToHealTarget( CBaseEntity *pTarget );
 
 public:
 
+#ifdef TFP3_MEDIGUN_FIX
 #ifdef GAME_DLL
 	CNetworkHandle( CBaseEntity, m_hHealingTarget );
 #else
 	CNetworkHandle( C_BaseEntity, m_hHealingTarget );
+#endif
+#else
+	CNetworkArray( CHandle<CBaseEntity>, m_hHealingTargets, MAX_HEALING_TARGETS );
 #endif
 
 protected:
@@ -105,7 +115,6 @@ protected:
 	CNetworkVar( float,		m_flChargeLevel );
 
 	float					m_flNextTargetCheckTime;
-	bool					m_bCanChangeTarget; // used to track the PrimaryAttack key being released for AutoHeal mode
 	
 #ifdef GAME_DLL
 	CDamageModifier			m_DamageModifier;		// This attaches to whoever we're healing.
@@ -120,7 +129,7 @@ protected:
 		C_BaseEntity		*pTarget;
 		CNewParticleEffect	*pEffect;
 	};
-	healingtargeteffects_t m_hHealingTargetEffect;
+	CUtlVector<healingtargeteffects_t> m_hHealingTargetEffects;
 
 	float					m_flFlashCharge;
 	bool					m_bOldChargeRelease;

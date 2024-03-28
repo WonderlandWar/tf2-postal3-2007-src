@@ -1,0 +1,4 @@
+unsigned int __thiscall C_BaseObject::MustBeBuiltOnAttachmentPoint(C_BaseObject *this)
+{
+  return ((unsigned int)this->m_fObjectFlags >> 1) & 1;
+}

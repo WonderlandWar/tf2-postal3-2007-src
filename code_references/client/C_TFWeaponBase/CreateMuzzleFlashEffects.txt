@@ -1,0 +1,144 @@
+void __thiscall C_TFWeaponBase::CreateMuzzleFlashEffects(C_TFWeaponBase *this, C_BaseEntity *pAttachEnt, int nIndex)
+{
+  IClientRenderable *v3; // edi
+  int iMuzzleFlashAttachment; // ebp
+  int (__thiscall *LookupAttachment)(IClientRenderable *, const char *); // edx
+  C_BasePlayer *LocalPlayer; // ebx
+  unsigned int m_Index; // eax
+  IHandleEntity *m_pEntity; // ecx
+  C_BaseEntity *v10; // ebx
+  const char *v11; // eax
+  const char *v12; // ebx
+  double v13; // st7
+  const CBaseHandle *(__thiscall *GetRefEHandle)(IHandleEntity *); // edx
+  float v15; // eax
+  unsigned int v16; // eax
+  CHandle<C_BaseCombatWeapon> *v17; // ebx
+  C_MuzzleFlashModel *v18; // eax
+  const C_BaseCombatWeapon *MuzzleFlashModel; // eax
+  C_MuzzleFlashModel *v20; // eax
+  FileWeaponInfo_t *WpnData; // eax
+  int v22; // eax
+  float flLifetime; // [esp+38h] [ebp-BCh]
+  float flLifetimea; // [esp+38h] [ebp-BCh]
+  const char *pszMuzzleFlashParticleEffect; // [esp+4Ch] [ebp-A8h]
+  Vector vecOrigin; // [esp+50h] [ebp-A4h] BYREF
+  QAngle angAngles; // [esp+5Ch] [ebp-98h] BYREF
+  int mysteryvar; // [esp+68h] [ebp-8Ch]
+  int iEjectBrassAttachment; // [esp+6Ch] [ebp-88h]
+  CEffectData data; // [esp+70h] [ebp-84h] BYREF
+  CLocalPlayerFilter filter; // [esp+D0h] [ebp-24h] BYREF
+
+  v3 = &pAttachEnt->IClientRenderable;
+  iMuzzleFlashAttachment = pAttachEnt->LookupAttachment(&pAttachEnt->IClientRenderable, "muzzle");
+  LookupAttachment = pAttachEnt->LookupAttachment;
+  LODWORD(data.m_vOrigin.x) = iMuzzleFlashAttachment;
+  iEjectBrassAttachment = LookupAttachment(&pAttachEnt->IClientRenderable, "eject_brass");
+  pszMuzzleFlashParticleEffect = this->GetMuzzleFlashModel(this);
+  LODWORD(vecOrigin.x) = this->GetMuzzleFlashParticleEffect(this);
+  LocalPlayer = C_BasePlayer::GetLocalPlayer();
+  if ( LocalPlayer
+    && ((m_Index = this->m_hOwnerEntity.m_Index, m_Index == -1)
+     || g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF].m_SerialNumber != m_Index >> 12
+      ? (m_pEntity = 0)
+      : (m_pEntity = g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF].m_pEntity),
+        m_pEntity == LocalPlayer
+     || LocalPlayer->GetObserverMode(LocalPlayer) == 4
+     && (v10 = LocalPlayer->GetObserverTarget(LocalPlayer), v10 == C_BaseEntity::GetOwnerEntity(this))) )
+  {
+    v11 = this->GetMuzzleFlashEffectName_1st(this);
+  }
+  else
+  {
+    v11 = this->GetMuzzleFlashEffectName_3rd(this);
+  }
+  v12 = v11;
+  if ( iMuzzleFlashAttachment > 0 && (v11 || pszMuzzleFlashParticleEffect || LODWORD(vecOrigin.x)) )
+  {
+    v3->GetAttachment(v3, iMuzzleFlashAttachment, (Vector *)&vecOrigin.y, (QAngle *)&angAngles.y);
+    CLocalPlayerFilter::CLocalPlayerFilter((CLocalPlayerFilter *)&filter.m_bReliable);
+    v13 = 0.0;
+    TE_DynamicLight(
+      (IRecipientFilter *)&filter.m_bReliable,
+      0.0,
+      (Vector *)&vecOrigin.y,
+      255,
+      192,
+      64,
+      5,
+      70.0,
+      0.050000001,
+      1400.0,
+      0x40000000);
+    if ( v12 )
+    {
+      CEffectData::CEffectData((CEffectData *)&data.m_vOrigin.y);
+      data.m_vOrigin.y = vecOrigin.y;
+      GetRefEHandle = pAttachEnt->GetRefEHandle;
+      data.m_vOrigin.z = vecOrigin.z;
+      data.m_vStart.x = angAngles.x;
+      data.m_vAngles.y = angAngles.y;
+      data.m_vAngles.z = angAngles.z;
+      data.m_fFlags = mysteryvar;
+      v15 = *(float *)&GetRefEHandle(pAttachEnt)->m_Index;
+      v13 = 0.2;
+      data.m_flRadius = 0.2;
+      data.m_flScale = v15;
+      *(_DWORD *)&data.m_nSurfaceProp = iMuzzleFlashAttachment;
+      DispatchEffect(v12, (CEffectData *)&data.m_vOrigin.y);
+    }
+    if ( pszMuzzleFlashParticleEffect )
+    {
+      this->GetMuzzleFlashModelLifetime(this);
+      v16 = this->m_hMuzzleFlashModel[nIndex].m_Index;
+      v17 = (CHandle<C_BaseCombatWeapon> *)&this->m_hMuzzleFlashModel[nIndex];
+      if ( v16 != -1
+        && g_pEntityList->m_EntPtrArray[this->m_hMuzzleFlashModel[nIndex].m_Index & 0xFFF].m_SerialNumber == v16 >> 12
+        && g_pEntityList->m_EntPtrArray[this->m_hMuzzleFlashModel[nIndex].m_Index & 0xFFF].m_pEntity )
+      {
+        flLifetime = v13;
+        v18 = (C_MuzzleFlashModel *)CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *((CHandle<C_BaseCombatWeapon> *)&this->m_hMuzzleFlashModel[nIndex]);
+        C_MuzzleFlashModel::SetLifetime(v18, flLifetime);
+      }
+      else
+      {
+        flLifetimea = v13;
+        MuzzleFlashModel = (const C_BaseCombatWeapon *)C_MuzzleFlashModel::CreateMuzzleFlashModel(
+                                                         pszMuzzleFlashParticleEffect,
+                                                         pAttachEnt,
+                                                         SLODWORD(data.m_vOrigin.x),
+                                                         flLifetimea);
+        CHandle<C_MuzzleFlashModel>::operator=(v17, MuzzleFlashModel);
+        v20 = (C_MuzzleFlashModel *)CHandle<C_BaseCombatWeapon>::operator C_BaseCombatWeapon *(v17);
+        C_MuzzleFlashModel::SetIs3rdPersonFlash(v20, nIndex == 1);
+      }
+    }
+    if ( LODWORD(vecOrigin.x) )
+      DispatchParticleEffect((const char *)LODWORD(vecOrigin.x), PATTACH_POINT_FOLLOW, pAttachEnt, "muzzle", 0);
+    C_RecipientFilter::~C_RecipientFilter((C_RecipientFilter *)&filter.m_bReliable);
+  }
+  WpnData = (FileWeaponInfo_t *)C_BaseCombatWeapon::GetWpnData(this);
+  if ( *((_BYTE *)__RTDynamicCast(
+                    WpnData,
+                    0,
+                    &FileWeaponInfo_t `RTTI Type Descriptor',
+                    &CTFWeaponInfo `RTTI Type Descriptor',
+                    0)
+       + 2160) )
+  {
+    if ( iEjectBrassAttachment > 0 )
+    {
+      v3->GetAttachment(v3, iEjectBrassAttachment, (Vector *)&vecOrigin.y, (QAngle *)&angAngles.y);
+      CEffectData::CEffectData((CEffectData *)&data.m_vOrigin.y);
+      v22 = this->GetWeaponID(this);
+      data.m_vOrigin.y = vecOrigin.y;
+      *(_DWORD *)&data.m_nColor = v22;
+      data.m_vOrigin.z = vecOrigin.z;
+      data.m_vStart.x = angAngles.x;
+      data.m_vAngles.y = angAngles.y;
+      data.m_vAngles.z = angAngles.z;
+      data.m_fFlags = mysteryvar;
+      DispatchEffect("TF_EjectBrass", (CEffectData *)&data.m_vOrigin.y);
+    }
+  }
+}

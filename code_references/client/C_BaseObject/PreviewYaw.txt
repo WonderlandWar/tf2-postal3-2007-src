@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::PreviewYaw(C_BaseObject *this, float yaw)
+{
+  this->m_fYawPreview = yaw;
+}

@@ -1,0 +1,73 @@
+void __thiscall C_WeaponMedigun::WeaponReset(C_WeaponMedigun *this)
+{
+  int v2; // ecx
+  int v3; // eax
+  int v4; // ecx
+  int v5; // eax
+  float val; // [esp+8h] [ebp-4h] BYREF
+
+  C_TFWeaponBase::WeaponReset(this);
+  this->m_flHealEffectLifetime = 0.0;
+  if ( this->m_bHealing.m_Value )
+  {
+    v2 = 1;
+    if ( !this->m_bHealing.m_Value )
+      v2 = -1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  if ( v2 )
+    this->m_bHealing.m_Value = 0;
+  if ( this->m_bAttacking.m_Value )
+  {
+    v3 = 1;
+    if ( !this->m_bAttacking.m_Value )
+      v3 = -1;
+  }
+  else
+  {
+    v3 = 0;
+  }
+  if ( v3 )
+    this->m_bAttacking.m_Value = 0;
+  if ( this->m_bHolstered.m_Value )
+  {
+    v4 = 0;
+  }
+  else
+  {
+    v4 = 1;
+    if ( this->m_bHolstered.m_Value - 1 <= 0 )
+      v4 = -1;
+  }
+  if ( v4 )
+    this->m_bHolstered.m_Value = 1;
+  if ( this->m_bChargeRelease.m_Value )
+  {
+    v5 = 1;
+    if ( !this->m_bChargeRelease.m_Value )
+      v5 = -1;
+  }
+  else
+  {
+    v5 = 0;
+  }
+  if ( v5 )
+    this->m_bChargeRelease.m_Value = 0;
+  this->m_flNextBuzzTime = 0.0;
+  this->m_flReleaseStartedAt = 0.0;
+  val = 0.0;
+  CNetworkVarBase<float,C_Sprite::NetworkVar_m_flBrightnessTime>::Set(
+    (CNetworkVarBase<float,C_BaseCombatWeapon::NetworkVar_m_flTimeWeaponIdle> *)&this->m_flChargeLevel,
+    &val);
+  C_WeaponMedigun::RemoveHealingTarget(this, -1, 1);
+  this->m_bPlayingSound = 0;
+  this->m_bUpdateHealingTargets = 0;
+  this->m_bOldChargeRelease = 0;
+  C_WeaponMedigun::UpdateEffects(this);
+  C_WeaponMedigun::ManageChargeEffect(this);
+  this->m_pChargeEffect = 0;
+  this->m_pChargedSound = 0;
+}

@@ -1,0 +1,25 @@
+BOOL __thiscall CTFKnife::IsBehindTarget(CTFKnife *this, CBaseEntity *pTarget)
+{
+  const QAngle *v3; // eax
+  CBaseCombatCharacter *Owner; // eax
+  float *v5; // edi
+  const Vector *v6; // eax
+  double v7; // st7
+  Vector vecToTarget; // [esp+4h] [ebp-1Ch] BYREF
+  Vector vecVictimForward; // [esp+10h] [ebp-10h] BYREF
+  float v11; // [esp+1Ch] [ebp-4h]
+
+  v3 = pTarget->EyeAngles(pTarget);
+  AngleVectors(v3, (Vector *)&vecVictimForward.y, 0, 0);
+  v11 = 0.0;
+  pfVectorNormalize((Vector *)&vecVictimForward.y);
+  Owner = CBaseCombatWeapon::GetOwner(this);
+  v5 = (float *)Owner->WorldSpaceCenter(Owner);
+  v6 = pTarget->WorldSpaceCenter(pTarget);
+  v7 = v6->y - v5[1];
+  vecToTarget.y = v6->x - *v5;
+  vecToTarget.z = v7;
+  vecVictimForward.x = 0.0;
+  pfVectorNormalize((Vector *)&vecToTarget.y);
+  return vecVictimForward.z * vecToTarget.z + vecVictimForward.y * vecToTarget.y + vecVictimForward.x * v11 > -0.1;
+}

@@ -1,0 +1,85 @@
+void __thiscall C_BaseObject::OnDataChanged(C_BaseObject *this, DataUpdateType_t updateType)
+{
+  C_BaseObject *this_2; // edi
+  char v4; // al
+  char m_iMaxHealth; // al
+  bool v6; // zf
+  C_BaseObject_vtbl *v7; // eax
+  CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> *v8; // ecx
+  int v9; // ebx
+  signed int v10; // eax
+  unsigned int v11; // eax
+  C_TFPlayer *m_pEntity; // ebx
+  IGameEvent *v13; // ebx
+  float y; // eax
+
+  if ( updateType == DATA_UPDATE_CREATED )
+    C_BaseObject::CreateBuildPoints((C_BaseObject *)((char *)this - 8));
+  C_BaseAnimating::OnDataChanged(this, updateType);
+  if ( LOBYTE(this->m_iHealth) && !BYTE1(this->m_iHealth) )
+    (*(void (__thiscall **)(CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> *))(*(_DWORD *)&this[-1].m_bServerOverridePlacement.m_Value + 816))(&this[-1].m_bServerOverridePlacement);
+  this_2 = (C_BaseObject *)((char *)this - 8);
+  v4 = (*(int (__thiscall **)(CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> *))(*(_DWORD *)&this[-1].m_bServerOverridePlacement.m_Value + 792))(&this[-1].m_bServerOverridePlacement);
+  if ( LOBYTE(this->m_hOldOwner.m_Index) )
+  {
+    if ( !v4 )
+      this_2->OnGoInactive((C_BaseObject *)((char *)this - 8));
+  }
+  else if ( v4 )
+  {
+    this_2->OnGoActive((C_BaseObject *)((char *)this - 8));
+  }
+  m_iMaxHealth = this->m_iMaxHealth;
+  if ( m_iMaxHealth != BYTE1(this->m_iMaxHealth) )
+  {
+    v6 = m_iMaxHealth == 0;
+    v7 = this_2->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+    v8 = &this[-1].m_bServerOverridePlacement;
+    if ( v6 )
+      v7->OnEndDisabled((C_BaseObject *)v8);
+    else
+      v7->OnStartDisabled((C_BaseObject *)v8);
+  }
+  if ( !BYTE1(this->m_iHealth) && *(_DWORD *)&this->m_bHasSapper != this->m_hBuilder.m_Index )
+  {
+    v9 = C_BaseObject::CalculateDamageLevel((C_BaseObject *)((char *)this - 8));
+    if ( v9 != *(_DWORD *)&this->m_szIDString[248] )
+    {
+      this_2->UpdateDamageEffects((C_BaseObject *)((char *)this - 8), (BuildingDamageLevel_t)v9);
+      *(_DWORD *)&this->m_szIDString[248] = v9;
+    }
+  }
+  v10 = *(_DWORD *)&this->m_bHasSapper;
+  if ( v10 > (signed int)this->m_hBuilder.m_Index && v10 == this->m_iObjectType )
+    C_BaseEntity::RemoveAllDecals((C_BaseObject *)((char *)this - 8));
+  v11 = *(_DWORD *)&this->m_YawPreviewState;
+  if ( v11 == -1
+    || g_pEntityList->m_EntPtrArray[*(_DWORD *)&this->m_YawPreviewState & 0xFFF].m_SerialNumber != v11 >> 12 )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = (C_TFPlayer *)g_pEntityList->m_EntPtrArray[*(_DWORD *)&this->m_YawPreviewState & 0xFFF].m_pEntity;
+  }
+  if ( m_pEntity == C_TFPlayer::GetLocalTFPlayer() )
+  {
+    v13 = gameeventmanager->CreateEvent(gameeventmanager, "building_info_changed", 0);
+    if ( v13 )
+    {
+      v13->SetInt(v13, "building_type", this->m_iOldHealth);
+      gameeventmanager->FireEventClientSide(gameeventmanager, v13);
+    }
+  }
+  if ( HIBYTE(this->m_iHealth) )
+  {
+    y = this->m_vecPreRagdollMaxs.y;
+    if ( LODWORD(y) != this->m_iLastPlacementPosValid )
+    {
+      LOBYTE(y) = this->m_iDesiredBuildRotations.m_Value > 0;
+      ((void (__thiscall *)(CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> *, float))this_2->OnPlacementStateChanged)(
+        &this[-1].m_bServerOverridePlacement,
+        COERCE_FLOAT(LODWORD(y)));
+    }
+  }
+}

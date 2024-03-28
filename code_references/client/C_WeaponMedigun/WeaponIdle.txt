@@ -1,0 +1,10 @@
+void __thiscall C_WeaponMedigun::WeaponIdle(C_WeaponMedigun *this)
+{
+  if ( this->HasWeaponIdleTimeElapsed(this) )
+  {
+    if ( this->m_bHealing.m_Value )
+      this->SendWeaponAnim(this, 180);
+    else
+      C_TFWeaponBase::WeaponIdle(this);
+  }
+}

@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall C_BaseObject::Select(C_BaseObject *this)
+{
+  C_TFPlayer::GetLocalTFPlayer();
+}

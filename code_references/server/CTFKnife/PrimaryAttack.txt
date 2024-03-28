@@ -1,0 +1,39 @@
+void __thiscall CTFKnife::PrimaryAttack(CTFKnife *this)
+{
+  CTFPlayer *PlayerOwner; // edi
+  CBasePlayer *pTarget; // eax
+  int TeamNumber; // ebx
+  CGameTrace trace; // [esp+4h] [ebp-5Ch] BYREF
+
+  PlayerOwner = (CTFPlayer *)CTFWeaponBase::GetPlayerOwner(this);
+  if ( !PlayerOwner || !PlayerOwner->IsPlayer(PlayerOwner) )
+    PlayerOwner = 0;
+  if ( CTFWeaponBase::CanAttack(this) )
+  {
+    this->m_iWeaponMode = 0;
+    if ( CTFWeaponBaseMelee::DoSwingTrace(this, (CGameTrace *)&trace.startpos.y) )
+    {
+      if ( trace.hitbox )
+      {
+        if ( (*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)trace.hitbox + 304))(trace.hitbox) )
+        {
+          pTarget = ToBaseMultiplayerPlayer((CBaseEntity *)trace.hitbox);
+          if ( pTarget )
+          {
+            TeamNumber = CBaseEntity::GetTeamNumber(pTarget);
+            if ( TeamNumber != CBaseEntity::GetTeamNumber(PlayerOwner)
+              && CTFKnife::IsBehindTarget(this, (CBaseEntity *)trace.hitbox) )
+            {
+              this->m_iWeaponMode = 1;
+            }
+          }
+        }
+      }
+    }
+    CTFPlayer::RemoveInvisibility(PlayerOwner);
+    CTFPlayer::RemoveDisguise(PlayerOwner);
+    CTFWeaponBaseMelee::Swing(this, PlayerOwner);
+    CTFPlayer::SpeakWeaponFire(PlayerOwner, -1);
+    CTFGameStats::Event_PlayerFiredWeapon(&CTF_GameStats, PlayerOwner, this->m_bCurrentAttackIsCrit);
+  }
+}

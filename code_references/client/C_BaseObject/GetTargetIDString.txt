@@ -1,0 +1,49 @@
+void __thiscall C_BaseObject::GetTargetIDString(C_BaseObject *this, wchar_t *sIDString, int iMaxLenInBytes)
+{
+  C_TFPlayer *LocalTFPlayer; // edi
+  int v5; // ebx
+  vgui::ILocalize_vtbl *v6; // edi
+  int v7; // eax
+  unsigned int m_Index; // esi
+  C_BasePlayer **v9; // eax
+  vgui::ILocalize_vtbl *v10; // esi
+  const char *PlayerName; // eax
+  vgui::ILocalize_vtbl *v12; // esi
+  wchar_t *v13; // eax
+  wchar_t wszBuilderName[32]; // [esp+8h] [ebp-88h] BYREF
+  wchar_t wszObjectName[32]; // [esp+48h] [ebp-48h] BYREF
+
+  *sIDString = 0;
+  LocalTFPlayer = C_TFPlayer::GetLocalTFPlayer();
+  if ( LocalTFPlayer )
+  {
+    v5 = this->GetTeamNumber(this);
+    if ( v5 == LocalTFPlayer->GetTeamNumber(LocalTFPlayer) )
+    {
+      v6 = g_pVGuiLocalize->__vftable;
+      v7 = ((int (__thiscall *)(C_BaseObject *, wchar_t *, int))this->GetStatusName)(this, &wszObjectName[2], 64);
+      ((void (__thiscall *)(vgui::ILocalize *, int))v6->ConvertANSIToUnicode)(g_pVGuiLocalize, v7);
+      m_Index = this->m_hBuilder.m_Index;
+      if ( m_Index != -1
+        && (v9 = (C_BasePlayer **)&g_pEntityList->m_EntPtrArray[m_Index & 0xFFF],
+            g_pEntityList->m_EntPtrArray[m_Index & 0xFFF].m_SerialNumber == m_Index >> 12)
+        && *v9 )
+      {
+        v10 = g_pVGuiLocalize->__vftable;
+        PlayerName = C_BasePlayer::GetPlayerName(*v9);
+        v10->ConvertANSIToUnicode(g_pVGuiLocalize, PlayerName, &wszBuilderName[2], 64);
+      }
+      else
+      {
+        wszBuilderName[2] = 0;
+      }
+      v12 = g_pVGuiLocalize->__vftable;
+      v13 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_playerid_object");
+      ((void (__cdecl *)(vgui::ILocalize *, wchar_t *, int, wchar_t *))v12->ConstructString)(
+        g_pVGuiLocalize,
+        sIDString,
+        iMaxLenInBytes,
+        v13);
+    }
+  }
+}

@@ -1,0 +1,43 @@
+void __thiscall C_WeaponMedigun::SecondaryAttack(C_WeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  C_TFPlayer *m_pEntity; // esi
+  bool val; // [esp+13h] [ebp-1h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_TFPlayer *)v3->m_pEntity;
+      if ( v3->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((C_BaseEntity *)v3->m_pEntity) && C_TFWeaponBase::CanAttack(this) )
+        {
+          if ( this->m_flChargeLevel.m_Value >= 1.0 )
+          {
+            if ( C_TFPlayer::HasTheFlag(m_pEntity) )
+            {
+              C_BaseEntity::EmitSound(m_pEntity, "Player.DenyWeaponSelection", 0.0, 0);
+            }
+            else
+            {
+              val = 1;
+              CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bChargeRelease>::operator=<bool>(
+                (CNetworkVarBase<bool,C_TFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bChargeRelease,
+                &val);
+              this->m_flReleaseStartedAt = 0.0;
+            }
+          }
+          else if ( !this->m_bChargeRelease.m_Value && this->m_flFlashCharge <= 0.0 )
+          {
+            this->m_flFlashCharge = 10.0;
+            C_BaseEntity::EmitSound(m_pEntity, "Player.DenyWeaponSelection", 0.0, 0);
+          }
+        }
+      }
+    }
+  }
+}

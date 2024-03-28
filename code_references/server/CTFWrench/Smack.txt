@@ -1,0 +1,91 @@
+void __thiscall CTFWrench::Smack(CTFWrench *this)
+{
+  CTFPlayer *TFPlayerOwner; // esi
+  unsigned int v3; // eax
+  const QAngle *v4; // eax
+  float (__thiscall *GetMeleeDamage)(CTFWeaponBaseMelee *, CBaseEntity *, int *); // eax
+  float flScale; // [esp+18h] [ebp-E4h]
+  Vector vecSwingEnd; // [esp+24h] [ebp-D8h] BYREF
+  Vector vecForward; // [esp+30h] [ebp-CCh] BYREF
+  float flDamage; // [esp+3Ch] [ebp-C0h]
+  Vector vecSwingStart; // [esp+40h] [ebp-BCh] BYREF
+  CTraceFilterIgnorePlayers traceFilter; // [esp+4Ch] [ebp-B0h] BYREF
+  CTakeDamageInfo info; // [esp+58h] [ebp-A4h] BYREF
+  CGameTrace trace; // [esp+A0h] [ebp-5Ch] BYREF
+
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  if ( TFPlayerOwner && CTFWeaponBase::CanAttack(this) )
+  {
+    v3 = _S3_157;
+    if ( (_S3_157 & 1) == 0 )
+    {
+      v3 = _S3_157 | 1;
+      vecSwingMins.x = -18.0;
+      _S3_157 |= 1u;
+      vecSwingMins.y = -18.0;
+      vecSwingMins.z = -18.0;
+    }
+    if ( (v3 & 2) == 0 )
+    {
+      vecSwingMaxs.x = 18.0;
+      _S3_157 = v3 | 2;
+      vecSwingMaxs.y = 18.0;
+      vecSwingMaxs.z = 18.0;
+    }
+    v4 = TFPlayerOwner->EyeAngles(TFPlayerOwner);
+    AngleVectors(v4, (Vector *)&vecForward.y);
+    TFPlayerOwner->Weapon_ShootPosition(TFPlayerOwner, (Vector *)&vecSwingStart.y);
+    vecSwingEnd.y = vecForward.y * 70.0 + vecSwingStart.y;
+    vecSwingEnd.z = vecForward.z * 70.0 + vecSwingStart.z;
+    vecForward.x = 70.0 * flDamage + *(float *)&traceFilter.__vftable;
+    CTraceFilterSimple::CTraceFilterSimple((CTraceFilterSimple *)&traceFilter.m_pPassEnt, 0, 0);
+    traceFilter.m_pPassEnt = (const IHandleEntity *)&CTraceFilterIgnorePlayers::`vftable';
+    UTIL_TraceLine(
+      (Vector *)&vecSwingStart.y,
+      (Vector *)&vecSwingEnd.y,
+      0x200400Bu,
+      (ITraceFilter *)&traceFilter.m_pPassEnt,
+      (CGameTrace *)&trace.startpos.y);
+    if ( *(float *)&trace.contents >= 1.0 )
+      UTIL_TraceHull(
+        (Vector *)&vecSwingStart.y,
+        (Vector *)&vecSwingEnd.y,
+        &vecSwingMins,
+        &vecSwingMaxs,
+        0x200400Bu,
+        (ITraceFilter *)&traceFilter.m_pPassEnt,
+        (CGameTrace *)&trace.startpos.y);
+    if ( *(float *)&trace.contents < 1.0
+      && trace.hitbox
+      && (*(unsigned __int8 (__thiscall **)(int))(*(_DWORD *)trace.hitbox + 316))(trace.hitbox) )
+    {
+      this->OnEntityHit(this, (CBaseEntity *)trace.hitbox);
+      GetMeleeDamage = this->GetMeleeDamage;
+      LODWORD(vecSwingEnd.x) = 4;
+      vecSwingStart.x = GetMeleeDamage(this, (CBaseEntity *)trace.hitbox, (int *)&vecSwingEnd);
+      CTakeDamageInfo::CTakeDamageInfo(
+        (CTakeDamageInfo *)&info.m_vecDamageForce.y,
+        TFPlayerOwner,
+        TFPlayerOwner,
+        vecSwingStart.x,
+        4226,
+        SLODWORD(vecSwingEnd.x));
+      flScale = 1.0 / vecSwingStart.x;
+      CalculateMeleeDamageForce(
+        (CTakeDamageInfo *)&info.m_vecDamageForce.y,
+        (Vector *)&vecForward.y,
+        (Vector *)&vecSwingEnd.y,
+        flScale);
+      CBaseEntity::DispatchTraceAttack(
+        (CBaseEntity *)trace.hitbox,
+        (CTakeDamageInfo *)&info.m_vecDamageForce.y,
+        (Vector *)&vecForward.y,
+        (CGameTrace *)&trace.startpos.y);
+      ApplyMultiDamage();
+    }
+    else
+    {
+      CTFWeaponBaseMelee::Smack(this, (int)this);
+    }
+  }
+}

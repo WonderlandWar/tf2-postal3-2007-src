@@ -1,0 +1,80 @@
+void __thiscall C_BaseObject::CreateBuildPoints(C_BaseObject *this)
+{
+  KeyValues *v2; // eax
+  KeyValues *v3; // eax
+  IClientRenderable *v4; // edi
+  const char *(__thiscall **p_GetModelKeyValueText)(IVModelInfo *, const struct model_t *); // esi
+  const char *(__thiscall **p_GetModelName)(IVModelInfo *, const struct model_t *); // ebx
+  int v7; // eax
+  int v8; // eax
+  const char *v9; // eax
+  KeyValues *v10; // ebx
+  KeyValues *Key; // eax
+  KeyValues *FirstSubKey; // esi
+  const char *Name; // eax
+  KeyValues *v14; // eax
+  const char *Menu; // eax
+  KeyValues *v16; // eax
+  KeyValues *i; // esi
+  const char *v18; // [esp-Ch] [ebp-20h]
+  const char *v19; // [esp-8h] [ebp-1Ch]
+  const char *String; // [esp-4h] [ebp-18h]
+  KeyValues *v21; // [esp+10h] [ebp-4h]
+
+  this->m_BuildPoints.m_Size = 0;
+  v2 = (KeyValues *)KeyValues::operator new(0x20u);
+  if ( v2 )
+  {
+    KeyValues::KeyValues(v2, locale);
+    v21 = v3;
+  }
+  else
+  {
+    v21 = 0;
+  }
+  v4 = &this->IClientRenderable;
+  p_GetModelKeyValueText = &modelinfo->GetModelKeyValueText;
+  p_GetModelName = &modelinfo->GetModelName;
+  v18 = (const char *)this->GetModel(&this->IClientRenderable);
+  v7 = ((int (__thiscall *)(IVModelInfoClient *))*p_GetModelKeyValueText)(modelinfo);
+  v8 = ((int (__thiscall *)(IClientRenderable *, int))v4->GetModel)(v4, v7);
+  v9 = (*p_GetModelName)(modelinfo, (const struct model_t *)v8);
+  v10 = v21;
+  if ( KeyValues::LoadFromBuffer(v21, v9, v18, 0, 0) )
+  {
+    Key = KeyValues::FindKey(v21, "build_points", 0);
+    if ( Key )
+    {
+      FirstSubKey = KeyValues::GetFirstSubKey(Key);
+      if ( FirstSubKey )
+      {
+        do
+        {
+          Name = KeyValues::GetName(FirstSubKey);
+          v14 = (KeyValues *)v4->LookupAttachment(&this->IClientRenderable, Name);
+          if ( v14 )
+          {
+            C_BaseObject::AddAndParseBuildPoint(this, v14, FirstSubKey);
+          }
+          else
+          {
+            String = KeyValues::GetString(FirstSubKey, 0, locale);
+            v19 = KeyValues::GetString(FirstSubKey, 0, locale);
+            Menu = (const char *)vgui::MenuButton::GetMenu((vgui::MenuItem *)this);
+            _Msg("ERROR: Model %s specifies buildpoint %s, but has no attachment named %s.\n", Menu, v19, String);
+          }
+          FirstSubKey = CParticleOperatorDefinition<C_OP_Noise>::GetId(FirstSubKey);
+        }
+        while ( FirstSubKey );
+        v10 = v21;
+      }
+    }
+    v16 = KeyValues::FindKey(v10, "virtual_build_points", 0);
+    if ( v16 )
+    {
+      for ( i = KeyValues::GetFirstSubKey(v16); i; i = CParticleOperatorDefinition<C_OP_Noise>::GetId(i) )
+        C_BaseObject::AddAndParseBuildPoint(this, (KeyValues *)0xFFFFFFFF, i);
+    }
+    KeyValues::deleteThis(v10);
+  }
+}

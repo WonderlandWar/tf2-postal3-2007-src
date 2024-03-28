@@ -1,0 +1,80 @@
+char __thiscall CBaseObject::PassDamageOntoChildren(
+        CBaseObject *this,
+        const CTakeDamageInfo *info,
+        float *flDamageLeftOver)
+{
+  double v4; // st7
+  int m_bitsDamageType; // eax
+  CBaseObject_vtbl *v7; // edx
+  CBaseEntity *v8; // esi
+  void *v9; // eax
+  unsigned int m_Index; // eax
+  const char *v12; // edx
+  unsigned int v13; // eax
+  unsigned int v14; // edx
+  IHandleEntity *m_pEntity; // ecx
+  int m_Value; // eax
+  int v17; // ecx
+  const char *pszValue; // edi
+  CTakeDamageInfo childInfo; // [esp+1Ch] [ebp-4Ch] BYREF
+  float flDamage; // [esp+6Ch] [ebp+4h]
+
+  v4 = info->m_flDamage + info->m_flDamage;
+  flDamage = v4;
+  if ( 0.0 != obj_child_damage_factor.m_pParent->m_fValue )
+    flDamage = v4 * (1.0 / obj_child_damage_factor.m_pParent->m_fValue);
+  CTakeDamageInfo::CTakeDamageInfo((CTakeDamageInfo *)&childInfo.m_vecDamageForce.y, info);
+  m_bitsDamageType = info->m_bitsDamageType;
+  childInfo.m_flMaxDamage = flDamage;
+  v7 = this->CBaseCombatCharacter::CBaseFlex::CBaseAnimatingOverlay::CBaseAnimating::CBaseEntity::IServerEntity::IServerUnknown::IHandleEntity::__vftable;
+  childInfo.m_iDamageCustom = m_bitsDamageType & 0xFFFFFFBF;
+  v8 = v7->GetFirstFriendlyObjectOnMe(this);
+  if ( v8 )
+  {
+    while ( 1 )
+    {
+      childInfo.m_vecDamageForce.x = (float)v8->OnTakeDamage(v8, (CTakeDamageInfo *)&childInfo.m_vecDamageForce.y);
+      v9 = __RTDynamicCast(v8, 0, &CBaseEntity `RTTI Type Descriptor', &CBaseObject `RTTI Type Descriptor', 0);
+      if ( !v9 || !(*(unsigned __int8 (__thiscall **)(void *))(*(_DWORD *)v9 + 1180))(v9) )
+        break;
+      flDamage = flDamage - childInfo.m_vecDamageForce.x;
+      v8 = this->GetFirstFriendlyObjectOnMe(this);
+      if ( !v8 )
+        goto LABEL_7;
+    }
+    m_Index = info->m_hInflictor.m_Index;
+    v12 = "unknown";
+    if ( m_Index != -1
+      && g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_SerialNumber == m_Index >> 12
+      && g_pEntityList->m_EntPtrArray[info->m_hInflictor.m_Index & 0xFFF].m_pEntity )
+    {
+      v13 = info->m_hInflictor.m_Index;
+      if ( v13 == -1
+        || (v14 = info->m_hInflictor.m_Index & 0xFFF, g_pEntityList->m_EntPtrArray[v14].m_SerialNumber != v13 >> 12) )
+      {
+        m_pEntity = 0;
+      }
+      else
+      {
+        m_pEntity = g_pEntityList->m_EntPtrArray[v14].m_pEntity;
+      }
+      v12 = (const char *)m_pEntity[3].__vftable;
+      if ( !v12 )
+        v12 = locale;
+    }
+    m_Value = this->m_iMaxHealth.m_Value;
+    v17 = this->m_iHealth.m_Value;
+    pszValue = this->m_iClassname.pszValue;
+    if ( !pszValue )
+      pszValue = locale;
+    ReportDamage(v12, pszValue, childInfo.m_vecDamageForce.x, v17, m_Value);
+    *flDamageLeftOver = flDamage;
+    return 1;
+  }
+  else
+  {
+LABEL_7:
+    *flDamageLeftOver = flDamage;
+    return 0;
+  }
+}

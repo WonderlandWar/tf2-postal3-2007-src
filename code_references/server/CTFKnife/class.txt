@@ -1,0 +1,18 @@
+class CTFKnife : public CTFWeaponBaseMelee
+{
+    private void CTFKnife(class CTFKnife & );
+    public void CTFKnife();
+	
+    public void PrimaryAttack();
+    public int GetWeaponID();
+	
+    public float GetMeleeDamage(class CBaseEntity * ,int & );
+	
+    public void SendPlayerAnimEvent(class CTFPlayer * );
+	
+    public bool IsBehindTarget(class CBaseEntity * );
+	
+    public bool CalcIsAttackCriticalHelper();
+	
+    private bool m_bStealthAttack;
+};

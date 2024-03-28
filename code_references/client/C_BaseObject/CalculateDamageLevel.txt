@@ -1,0 +1,36 @@
+int __thiscall C_BaseObject::CalculateDamageLevel(C_BaseObject *this)
+{
+  double v1; // st7
+  int v2; // ecx
+  int result; // eax
+
+  v1 = (double)this->m_iHealth / (double)this->m_iMaxHealth;
+  v2 = 0;
+  if ( v1 >= 0.25 )
+  {
+    if ( v1 >= 0.45 )
+    {
+      if ( v1 >= 0.65 )
+      {
+        if ( v1 < 0.85 )
+          v2 = 1;
+      }
+      else
+      {
+        v2 = 2;
+      }
+    }
+    else
+    {
+      v2 = 3;
+    }
+  }
+  else
+  {
+    v2 = 4;
+  }
+  result = cl_obj_test_building_damage.m_pParent->m_nValue;
+  if ( result < 0 )
+    return v2;
+  return result;
+}

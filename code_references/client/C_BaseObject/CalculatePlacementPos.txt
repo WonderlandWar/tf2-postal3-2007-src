@@ -1,0 +1,224 @@
+bool __thiscall C_BaseObject::CalculatePlacementPos(C_BaseObject *this)
+{
+  C_TFPlayer *Builder; // edi
+  double v3; // st7
+  long double v4; // st7
+  long double v5; // st6
+  long double v6; // st7
+  long double v7; // st6
+  C_TFPlayer_vtbl *v8; // eax
+  float *v9; // eax
+  float *v10; // eax
+  long double v11; // st7
+  long double v12; // st6
+  long double v13; // st7
+  long double v14; // st6
+  double v15; // st7
+  float *v16; // eax
+  double v17; // st6
+  double v18; // st5
+  double v19; // st7
+  double v20; // st6
+  double v21; // st5
+  const Vector *(__thiscall *WorldAlignMins)(C_BaseEntity *); // eax
+  int v23; // ebx
+  double v24; // st7
+  const Vector *(__thiscall *WorldSpaceCenter)(C_BaseEntity *); // eax
+  int v26; // eax
+  int v27; // eax
+  int v28; // edi
+  double v29; // st7
+  double v30; // st6
+  double v31; // rt0
+  double v32; // st6
+  double v33; // st7
+  double z; // st7
+  double v35; // st6
+  double v36; // st5
+  double v37; // st5
+  double v38; // rt2
+  bool result; // al
+  double v40; // st6
+  double v41; // st7
+  float target; // [esp+0h] [ebp-104h]
+  float value; // [esp+4h] [ebp-100h]
+  float valuea; // [esp+4h] [ebp-100h]
+  float speed; // [esp+8h] [ebp-FCh]
+  float vecPlayerMinsa; // [esp+14h] [ebp-F0h]
+  float vecPlayerMinsb; // [esp+14h] [ebp-F0h]
+  float vecPlayerMins; // [esp+14h] [ebp-F0h]
+  float vecPlayerMins_4a; // [esp+18h] [ebp-ECh]
+  float vecPlayerMins_4b; // [esp+18h] [ebp-ECh]
+  float vecPlayerMins_4; // [esp+18h] [ebp-ECh]
+  float vecPlayerMins_8; // [esp+1Ch] [ebp-E8h]
+  float vecPlayerMins_8b; // [esp+1Ch] [ebp-E8h]
+  float vecPlayerMins_8a; // [esp+1Ch] [ebp-E8h]
+  float vErrorOrigin; // [esp+20h] [ebp-E4h]
+  float vErrorOrigin_4; // [esp+24h] [ebp-E0h]
+  float vErrorOrigin_8; // [esp+28h] [ebp-DCh]
+  float vErrorOrigin_8a; // [esp+28h] [ebp-DCh]
+  Vector2D vecPlayerRadius; // [esp+2Ch] [ebp-D8h] BYREF
+  float y; // [esp+34h] [ebp-D0h]
+  Vector2D vecObjectRadius; // [esp+38h] [ebp-CCh]
+  float v62; // [esp+40h] [ebp-C4h]
+  float topZ; // [esp+44h] [ebp-C0h]
+  QAngle vecAngles; // [esp+48h] [ebp-BCh] BYREF
+  Vector vHalfPlayerDims; // [esp+54h] [ebp-B0h] BYREF
+  QAngle objAngles; // [esp+60h] [ebp-A4h] BYREF
+  float x; // [esp+6Ch] [ebp-98h]
+  Vector hullMin; // [esp+70h] [ebp-94h] BYREF
+  Vector hullMax; // [esp+7Ch] [ebp-88h] BYREF
+  float v70[2]; // [esp+88h] [ebp-7Ch] BYREF
+  Vector vBuildDims; // [esp+90h] [ebp-74h]
+  float v72; // [esp+9Ch] [ebp-68h]
+  Vector vecAbsEnd; // [esp+A0h] [ebp-64h] BYREF
+  CGameTrace ptr; // [esp+ACh] [ebp-58h] BYREF
+
+  Builder = C_BaseObject::GetBuilder(this);
+  if ( !Builder )
+    return 0;
+  vecAngles.z = vec3_angle.y;
+  vHalfPlayerDims.x = vec3_angle.z;
+  vecAngles.y = vec3_angle.x;
+  vecAngles.z = Builder->EyeAngles(Builder)->y;
+  objAngles.y = vecAngles.y;
+  objAngles.z = vecAngles.z;
+  x = vHalfPlayerDims.x;
+  C_BaseEntity::SetAbsAngles(this, (QAngle *)&objAngles.y);
+  speed = *(float *)(gpGlobals.m_Index + 16) * tf_obj_build_rotation_speed.m_pParent->m_fValue;
+  target = (double)this->m_iDesiredBuildRotations.m_Value * 90.0;
+  v3 = ApproachAngle(target, this->m_flCurrentBuildRotation, speed);
+  this->m_flCurrentBuildRotation = v3;
+  objAngles.z = v3 + objAngles.z;
+  C_BaseEntity::SetLocalAngles(this, (QAngle *)&objAngles.y);
+  AngleVectors((QAngle *)&vecAngles.y, (Vector *)v70);
+  v4 = fabs(this->m_vecBuildMins.m_Value.x);
+  v5 = fabs(this->m_vecBuildMaxs.m_Value.x);
+  if ( v5 >= v4 )
+    v4 = v5;
+  vecObjectRadius.y = v4;
+  v6 = fabs(this->m_vecBuildMins.m_Value.y);
+  v7 = fabs(this->m_vecBuildMaxs.m_Value.y);
+  if ( v7 >= v6 )
+    v6 = v7;
+  v8 = Builder->C_BasePlayer::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+  v62 = v6;
+  v9 = (float *)v8->WorldAlignMins(Builder);
+  vecPlayerMins_8 = v9[1];
+  vecPlayerMins_4a = *v9;
+  v10 = (float *)Builder->WorldAlignMaxs(Builder);
+  v11 = fabs(vecPlayerMins_4a);
+  v12 = fabs(*v10);
+  vErrorOrigin_8 = v10[1];
+  if ( v12 >= v11 )
+    v11 = v12;
+  vecPlayerRadius.y = v11;
+  v13 = fabs(vecPlayerMins_8);
+  v14 = fabs(vErrorOrigin_8);
+  if ( v14 >= v13 )
+    v13 = v14;
+  y = v13;
+  value = v62 * v62 + vecObjectRadius.y * vecObjectRadius.y;
+  vecPlayerMinsa = pfSqrt(value);
+  valuea = y * y + vecPlayerRadius.y * vecPlayerRadius.y;
+  v15 = pfSqrt(valuea) + vecPlayerMinsa + 4.0;
+  vecPlayerMins_4b = v70[0] * v15;
+  vecPlayerMins_8b = v70[1] * v15;
+  vErrorOrigin = v15 * vBuildDims.x;
+  v16 = (float *)Builder->WorldSpaceCenter(Builder);
+  v17 = v16[1] + vecPlayerMins_8b;
+  v18 = *v16 + vecPlayerMins_4b;
+  v19 = v16[2] + vErrorOrigin;
+  this->m_vecBuildOrigin.x = v18;
+  this->m_vecBuildOrigin.y = v17;
+  this->m_vecBuildOrigin.z = v19;
+  vErrorOrigin_4 = v18
+                 - (this->m_vecBuildMaxs.m_Value.x - this->m_vecBuildMins.m_Value.x) * 0.5
+                 - this->m_vecBuildMins.m_Value.x;
+  vErrorOrigin_8a = v17
+                  - (this->m_vecBuildMaxs.m_Value.y - this->m_vecBuildMins.m_Value.y) * 0.5
+                  - this->m_vecBuildMins.m_Value.y;
+  vecPlayerRadius.x = v19
+                    - (this->m_vecBuildMaxs.m_Value.z - this->m_vecBuildMins.m_Value.z) * 0.5
+                    - this->m_vecBuildMins.m_Value.z;
+  v20 = this->m_vecBuildMaxs.m_Value.x - this->m_vecBuildMins.m_Value.x;
+  v21 = this->m_vecBuildMaxs.m_Value.y - this->m_vecBuildMins.m_Value.y;
+  v72 = this->m_vecBuildMaxs.m_Value.z - this->m_vecBuildMins.m_Value.z;
+  vecPlayerMins_4 = v20 * 0.5;
+  vecPlayerMins_8a = 0.5 * v21;
+  WorldAlignMins = Builder->WorldAlignMins;
+  hullMax.y = vecPlayerMins_8a;
+  hullMax.x = vecPlayerMins_4;
+  hullMax.z = 0.0;
+  v23 = (int)WorldAlignMins(Builder);
+  v24 = Builder->WorldAlignMaxs(Builder)->z - *(float *)(v23 + 8);
+  WorldSpaceCenter = Builder->WorldSpaceCenter;
+  objAngles.x = v24 * 0.5;
+  v26 = (int)WorldSpaceCenter(Builder);
+  vecPlayerMinsb = *(float *)(v26 + 8) + v72 + objAngles.x;
+  v27 = (int)Builder->WorldSpaceCenter(Builder);
+  v28 = 0;
+  v29 = *(float *)(v27 + 8) - objAngles.x - v72;
+  vecAngles.x = vecPlayerMinsb;
+  v30 = vecPlayerMinsb;
+  vecPlayerRadius.y = (v29 - vecPlayerMinsb) * 0.14285715;
+  vecPlayerMins = -vecPlayerMins_4;
+  hullMin.x = vecPlayerMins;
+  topZ = -vecPlayerMins_8a;
+  hullMin.y = topZ;
+  hullMin.z = 0.0;
+  v31 = v30;
+  v32 = v29;
+  v33 = v31;
+  vecAbsEnd.z = v32;
+  while ( 1 )
+  {
+    vecAbsEnd.x = this->m_vecBuildOrigin.x;
+    vecAbsEnd.y = this->m_vecBuildOrigin.y;
+    vHalfPlayerDims.y = this->m_vecBuildOrigin.x;
+    vHalfPlayerDims.z = this->m_vecBuildOrigin.y;
+    objAngles.x = v33;
+    UTIL_TraceHull((Vector *)&vHalfPlayerDims.y, &vecAbsEnd, &hullMin, &hullMax, 0x1400Bu, this, 8, &ptr);
+    z = ptr.endpos.z;
+    vecObjectRadius.y = ptr.endpos.z;
+    if ( 1.0 == ptr.fraction )
+      goto LABEL_17;
+    v35 = vecAngles.x;
+    v36 = v72;
+    if ( v72 < vecAngles.x - z )
+      goto LABEL_16;
+    ++v28;
+    v37 = v35 + vecPlayerRadius.y;
+    vecAngles.x = v37;
+    if ( v28 >= 8 )
+      break;
+    v33 = v37;
+  }
+  v38 = v37;
+  v36 = v72;
+  v35 = v38;
+LABEL_16:
+  if ( v28 == 8
+    || v35 - z < v36
+    || (vecPlayerRadius.y = this->m_vecBuildOrigin.x,
+        y = this->m_vecBuildOrigin.y,
+        vecObjectRadius.x = ptr.endpos.z,
+        !C_BaseObject::VerifyCorner(this, (const Vector *)&vecPlayerRadius.y, vecPlayerMins, topZ))
+    || !C_BaseObject::VerifyCorner(this, (const Vector *)&vecPlayerRadius.y, vecPlayerMins_4, vecPlayerMins_8a)
+    || !C_BaseObject::VerifyCorner(this, (const Vector *)&vecPlayerRadius.y, vecPlayerMins_4, topZ)
+    || !C_BaseObject::VerifyCorner(this, (const Vector *)&vecPlayerRadius.y, vecPlayerMins, vecPlayerMins_8a) )
+  {
+LABEL_17:
+    this->m_vecBuildOrigin.x = vErrorOrigin_4;
+    this->m_vecBuildOrigin.y = vErrorOrigin_8a;
+    this->m_vecBuildOrigin.z = vecPlayerRadius.x;
+    return 0;
+  }
+  result = 1;
+  v40 = this->m_vecBuildOrigin.y - vecPlayerMins_8a - this->m_vecBuildMins.m_Value.y;
+  v41 = vecObjectRadius.y - this->m_vecBuildMins.m_Value.z;
+  this->m_vecBuildOrigin.x = this->m_vecBuildOrigin.x - vecPlayerMins_4 - this->m_vecBuildMins.m_Value.x;
+  this->m_vecBuildOrigin.y = v40;
+  this->m_vecBuildOrigin.z = v41;
+  return result;
+}

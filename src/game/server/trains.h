@@ -92,7 +92,7 @@ public:
 
 	bool IsDirForward();
 	void SetDirForward( bool bForward );
-	void SetSpeed( float flSpeed, bool bAccel = false );
+	void SetSpeed( float flSpeed );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	
 	// Input handlers
@@ -105,7 +105,6 @@ public:
 	void InputStartForward( inputdata_t &inputdata );
 	void InputStartBackward( inputdata_t &inputdata );
 	void InputToggle( inputdata_t &inputdata );
-	void InputSetSpeedDirAccel( inputdata_t &inputdata );
 
 	static CFuncTrackTrain *Instance( edict_t *pent );
 
@@ -117,9 +116,6 @@ public:
 
 	float GetMaxSpeed() const { return m_maxSpeed; }
 	float GetCurrentSpeed() const { return m_flSpeed; }
-	float GetDesiredSpeed() const { return m_flDesiredSpeed;}
-
-	virtual bool IsBaseTrain( void ) const { return true; }
 
 private:
 
@@ -181,15 +177,6 @@ private:
 	bool		m_bSoundPlaying;
 
 	COutputEvent m_OnStart,m_OnNext; 
-
-	bool		m_bManualSpeedChanges;		// set when we want to send entity IO to govern speed and obey our TrainVelocityType_t
-	float		m_flDesiredSpeed;			// target speed, when m_bManualSpeedChanges is set
-	float		m_flSpeedChangeTime;
-	float		m_flAccelSpeed;
-	float		m_flDecelSpeed;
-	bool		m_bAccelToSpeed;
-
-	float		m_flNextMPSoundTime;
 };
 
 

@@ -1,0 +1,52 @@
+void __thiscall C_ObjectSentrygun::GetStatusText(C_ObjectSentrygun *this, wchar_t *pStatus, int iMaxStatusLen)
+{
+  double v4; // st7
+  wchar_t *v5; // eax
+  wchar_t *v6; // eax
+  wchar_t *v7; // eax
+  wchar_t wszShells[16]; // [esp+Ch] [ebp-88h] BYREF
+  wchar_t wszRockets[16]; // [esp+2Ch] [ebp-68h] BYREF
+  wchar_t wszHealthPercent[32]; // [esp+4Ch] [ebp-48h] BYREF
+
+  *(float *)wszShells = (float)this->GetHealth(this);
+  v4 = *(float *)wszShells / (double)this->GetMaxHealth(this) * 100.0;
+  _snwprintf(&wszHealthPercent[2], 0x1Fu, L"%d%%", (int)v4);
+  if ( this->m_bBuilding )
+  {
+    v5 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_ObjStatus_SentryGun_Building");
+    if ( v5 )
+      g_pVGuiLocalize->ConstructString(g_pVGuiLocalize, pStatus, iMaxStatusLen, v5, 1, &wszHealthPercent[2]);
+  }
+  else if ( this->m_iUpgradeLevel >= 3 )
+  {
+    _snwprintf(&wszShells[2], 0xFu, L"%d/%d", this->m_iAmmoShells, this->m_iMaxAmmoShells);
+    _snwprintf(&wszRockets[2], 0xFu, L"%d/%d", this->m_iAmmoRockets, 20);
+    v7 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_ObjStatus_SentryGun_Level3");
+    if ( v7 )
+      g_pVGuiLocalize->ConstructString(
+        g_pVGuiLocalize,
+        pStatus,
+        iMaxStatusLen,
+        v7,
+        3,
+        &wszHealthPercent[2],
+        &wszShells[2],
+        &wszRockets[2]);
+  }
+  else
+  {
+    _snwprintf(&wszRockets[2], 0xFu, L"%d", this->m_iUpgradeLevel);
+    _snwprintf(&wszShells[2], 0xFu, L"%d/%d", this->m_iAmmoShells, this->m_iMaxAmmoShells);
+    v6 = g_pVGuiLocalize->Find(g_pVGuiLocalize, "#TF_ObjStatus_SentryGun_Level1");
+    if ( v6 )
+      g_pVGuiLocalize->ConstructString(
+        g_pVGuiLocalize,
+        pStatus,
+        iMaxStatusLen,
+        v6,
+        3,
+        &wszRockets[2],
+        &wszHealthPercent[2],
+        &wszShells[2]);
+  }
+}

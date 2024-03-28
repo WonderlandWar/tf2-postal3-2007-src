@@ -1,0 +1,10 @@
+void __thiscall C_BaseObject::SetObjectOnBuildPoint(C_BaseObject *this, int iPoint, C_BaseObject *pObject)
+{
+  ClientClass *(__thiscall **v3)(IClientNetworkable *); // esi
+
+  v3 = &this->GetClientClass + 5 * iPoint;
+  if ( pObject )
+    *v3 = (ClientClass *(__thiscall *)(IClientNetworkable *))pObject->GetRefEHandle(pObject)->m_Index;
+  else
+    *v3 = (ClientClass *(__thiscall *)(IClientNetworkable *))-1;
+}

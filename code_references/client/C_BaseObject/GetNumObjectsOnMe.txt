@@ -1,0 +1,28 @@
+int __thiscall C_BaseObject::GetNumObjectsOnMe(C_BaseObject *this)
+{
+  int v2; // ebp
+  int v3; // ebx
+  int v4; // edi
+  unsigned int v5; // eax
+
+  v2 = 0;
+  v3 = 0;
+  if ( ((int (__thiscall *)(C_BaseObject *))this->~IHandleEntity)(this) > 0 )
+  {
+    v4 = 0;
+    do
+    {
+      v5 = *(unsigned int *)((char *)&this->GetClientClass + v4);
+      if ( v5 != -1
+        && g_pEntityList->m_EntPtrArray[*(int *)((_BYTE *)&this->GetClientClass + v4) & 0xFFF].m_SerialNumber == v5 >> 12
+        && g_pEntityList->m_EntPtrArray[*(int *)((_BYTE *)&this->GetClientClass + v4) & 0xFFF].m_pEntity )
+      {
+        ++v2;
+      }
+      ++v3;
+      v4 += 20;
+    }
+    while ( v3 < ((int (__thiscall *)(C_BaseObject *))this->~IHandleEntity)(this) );
+  }
+  return v2;
+}

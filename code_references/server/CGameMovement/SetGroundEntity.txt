@@ -1,0 +1,43 @@
+void __thiscall CGameMovement::SetGroundEntity(CGameMovement *this, CBaseEntity *newGround)
+{
+  CBaseEntity *oldGround; // esi
+  double z; // st7
+  CBasePlayer *player; // ecx
+  Vector vecBaseVelocity_4; // [esp+Ch] [ebp-18h]
+  Vector val; // [esp+18h] [ebp-Ch] BYREF
+
+  oldGround = CBaseEntity::GetGroundEntity(this->player);
+  vecBaseVelocity_4 = (Vector)this->player->m_vecBaseVelocity;
+  if ( oldGround )
+  {
+    if ( !newGround )
+    {
+      if ( (oldGround->m_iEFlags & 0x1000) != 0 )
+        CBaseEntity::CalcAbsoluteVelocity(oldGround);
+      vecBaseVelocity_4.x = oldGround->m_vecAbsVelocity.x + vecBaseVelocity_4.x;
+      vecBaseVelocity_4.y = oldGround->m_vecAbsVelocity.y + vecBaseVelocity_4.y;
+      if ( (oldGround->m_iEFlags & 0x1000) != 0 )
+        CBaseEntity::CalcAbsoluteVelocity(oldGround);
+      z = oldGround->m_vecAbsVelocity.z;
+      goto LABEL_14;
+    }
+  }
+  else if ( newGround )
+  {
+    if ( (newGround->m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(newGround);
+    vecBaseVelocity_4.x = vecBaseVelocity_4.x - newGround->m_vecAbsVelocity.x;
+    vecBaseVelocity_4.y = vecBaseVelocity_4.y - newGround->m_vecAbsVelocity.y;
+    if ( (newGround->m_iEFlags & 0x1000) != 0 )
+      CBaseEntity::CalcAbsoluteVelocity(newGround);
+    z = newGround->m_vecAbsVelocity.z;
+LABEL_14:
+    vecBaseVelocity_4.z = z;
+  }
+  val.z = vecBaseVelocity_4.z;
+  player = this->player;
+  val.x = vecBaseVelocity_4.x;
+  val.y = vecBaseVelocity_4.y;
+  CNetworkVarBase<Vector,CBaseEntity::NetworkVar_m_vecBaseVelocity>::Set(&player->m_vecBaseVelocity, &val);
+  CBaseEntity::SetGroundEntity(this->player, newGround);
+}

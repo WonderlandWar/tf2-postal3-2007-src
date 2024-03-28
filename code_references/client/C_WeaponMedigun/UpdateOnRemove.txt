@@ -1,0 +1,26 @@
+void __thiscall C_WeaponMedigun::UpdateOnRemove(C_WeaponMedigun *this)
+{
+  int v2; // ecx
+
+  if ( this->m_bPlayingSound )
+  {
+    this->m_bPlayingSound = 0;
+    C_BaseEntity::StopSound(this, "WeaponMedigun.Healing");
+    C_BaseEntity::StopSound(this, "WeaponMedigun.NoTarget");
+  }
+  C_WeaponMedigun::UpdateEffects(this);
+  C_WeaponMedigun::RemoveHealingTarget(this, -1, 1);
+  if ( this->m_bAttacking.m_Value )
+  {
+    v2 = 1;
+    if ( !this->m_bAttacking.m_Value )
+      v2 = -1;
+  }
+  else
+  {
+    v2 = 0;
+  }
+  if ( v2 )
+    this->m_bAttacking.m_Value = 0;
+  C_BaseEntity::UpdateOnRemove(this);
+}

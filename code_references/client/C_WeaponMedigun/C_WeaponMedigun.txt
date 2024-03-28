@@ -1,0 +1,16 @@
+void __thiscall C_WeaponMedigun::C_WeaponMedigun(C_WeaponMedigun *this)
+{
+  C_TFWeaponBaseGun::C_TFWeaponBaseGun(this);
+  this->C_TFWeaponBaseGun::C_TFWeaponBase::C_BaseCombatWeapon::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_WeaponMedigun_vtbl *)&C_WeaponMedigun::`vftable'{for `IClientUnknown'};
+  this->C_TFWeaponBaseGun::C_TFWeaponBase::C_BaseCombatWeapon::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_WeaponMedigun::`vftable'{for `IClientRenderable'};
+  this->C_TFWeaponBaseGun::C_TFWeaponBase::C_BaseCombatWeapon::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_WeaponMedigun::`vftable'{for `IClientNetworkable'};
+  this->C_TFWeaponBaseGun::C_TFWeaponBase::C_BaseCombatWeapon::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_WeaponMedigun::`vftable'{for `IClientThinkable'};
+  this->m_hHealingTargets.m_Value[0].m_Index = -1;
+  this->m_hHealingTargetEffects.m_Memory.m_pMemory = 0;
+  this->m_hHealingTargetEffects.m_Memory.m_nAllocationCount = 0;
+  this->m_hHealingTargetEffects.m_Memory.m_nGrowSize = 0;
+  this->m_hHealingTargetEffects.m_Size = 0;
+  this->m_hHealingTargetEffects.m_pElements = 0;
+  C_WeaponMedigun::WeaponReset(this);
+  C_BaseEntity::SetPredictionEligible(this, 1);
+}

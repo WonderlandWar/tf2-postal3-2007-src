@@ -1,0 +1,221 @@
+class C_BaseObject : public C_BaseCombatCharacter, public IHasBuildPoints, public ITargetIDProvidesHint
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+    private void C_BaseObject(class C_BaseObject & );
+    public void C_BaseObject();
+    public void ~C_BaseObject();
+	
+    public void Spawn();
+	
+    public bool IsBaseObject();
+    public bool IsAnUpgrade();
+	
+    public void SetType(int );
+	
+    public void AddEntity();
+    public void Select();
+	
+    public void SetActivity(enum Activity );
+    public enum Activity GetActivity();
+    public void SetObjectSequence(int );
+    public void OnActivityChanged(enum Activity );
+	
+    public void PreDataUpdate(enum DataUpdateType_t );
+    public void OnDataChanged(enum DataUpdateType_t );
+	
+    public int GetHealth();
+    public void SetHealth(int );
+    public int GetMaxHealth();
+    public int GetObjectFlags();
+    public void SetObjectFlags(int );
+	
+    public void SetupAttachedVersion();
+	
+    public void OnLostPower();
+	
+    public char * GetTargetDescription();
+    public char * GetIDString();
+    public bool IsValidIDTarget();
+	
+    public void GetTargetIDString(wchar_t * ,int );
+    public void GetTargetIDDataString(wchar_t * ,int );
+	
+    public void AttemptToGoActive();
+    public bool ShouldBeActive();
+    public void OnGoActive();
+    public void OnGoInactive();
+	
+    public void UpdateOnRemove();
+	
+    public class C_TFPlayer * GetBuilder();
+	
+    public void SetDormant(bool );
+	
+    public void SendClientCommand(char * );
+	
+    public void FireEvent(class Vector & ,class QAngle & ,int ,char * );
+	
+    public void ActivateYawPreview(bool );
+    public void PreviewYaw(float );
+    public bool IsPreviewingYaw();
+    public float GetInitialBuilderYaw();
+	
+    public void RecalculateIDString();
+	
+    public int GetType();
+    public bool IsOwnedByLocalPlayer();
+    public class C_TFPlayer * GetOwner();
+	
+    public void Simulate();
+	
+    public int DrawModel(int );
+	
+    public float GetPercentageConstructed();
+	
+    public bool IsPlacing();
+    public bool IsBuilding();
+    public bool IsUpgrading();
+	
+    public void FinishedBuilding();
+	
+    public char * GetStatusName();
+    public void GetStatusText(wchar_t * ,int );
+	
+    public void HighlightBuildPoints(int );
+	
+    public bool HasSapper();
+	
+    public void OnStartDisabled();
+    public void OnEndDisabled();
+	
+    public bool ShouldCollide(int ,int );
+    public bool ShouldPlayersAvoid();
+	
+    public bool MustBeBuiltOnAttachmentPoint();
+	
+    public bool IsHostileUpgrade();
+	
+    public int GetDisplayPriority();
+	
+    public char * GetHudStatusIcon();
+	
+    public enum BuildingHudAlert_t GetBuildingAlertLevel();
+	
+    public void CreateBuildPoints();
+    public void AddAndParseBuildPoint(int ,class KeyValues * );
+    public int AddBuildPoint(int );
+    public void AddValidObjectToBuildPoint(int ,int );
+    public class C_BaseObject * GetBuildPointObject(int );
+    public bool IsBuiltOnAttachment();
+    public void AttachObjectToObject(class C_BaseEntity * ,int ,class Vector & );
+    public class C_BaseObject * GetParentObject();
+    public void SetBuildPointPassenger(int ,int );
+	
+    public class CUtlVector<BuildPoint_t,CUtlMemory<BuildPoint_t,int> > m_BuildPoints;
+	
+    public bool IsDisabled();
+	
+    public bool VerifyCorner(class Vector & ,float ,float );
+    public bool CalculatePlacementPos();
+    public bool IsPlacementPosValid();
+    public float GetNearbyObjectCheckRadius();
+	
+    public void OnPlacementStateChanged(bool );
+	
+    public bool ServerValidPlacement();
+	
+    public bool WasLastPlacementPosValid();
+	
+    public int GetNumBuildPoints();
+    public bool GetBuildPoint(int ,class Vector & ,class QAngle & );
+    public int GetBuildPointAttachmentIndex(int );
+    public bool CanBuildObjectOnBuildPoint(int ,int );
+    public void SetObjectOnBuildPoint(int ,class C_BaseObject * );
+    public float GetMaxSnapDistance(int );
+    public bool ShouldCheckForMovement();
+    public int GetNumObjectsOnMe();
+    public class C_BaseObject * GetObjectOfTypeOnMe(int );
+    public void RemoveAllObjects();
+    public int FindObjectOnBuildPoint(class C_BaseObject * );
+	
+    public bool TestHitboxes(struct Ray_t & ,unsigned int ,class CGameTrace & );
+	
+    public void DisplayHintTo(class C_BasePlayer * );
+	
+	
+    protected void UpdateDamageEffects(enum BuildingDamageLevel_t );
+	
+    protected void UpdateDesiredBuildRotation(float );
+	
+	
+    protected enum BuildingDamageLevel_t CalculateDamageLevel();
+	
+    protected char m_szIDString[256];
+	
+    protected enum BuildingDamageLevel_t m_damageLevel;
+	
+    protected class Vector m_vecBuildOrigin;
+	
+    enum _unnamed_12163
+    {
+        YAW_PREVIEW_OFF=0,
+        YAW_PREVIEW_ON=1,
+        YAW_PREVIEW_WAITING_FOR_UPDATE=2
+    };
+    private enum Activity m_Activity;
+	
+    private int m_fObjectFlags;
+    private float m_fYawPreview;
+    private char m_YawPreviewState;
+    private class CHandle<C_TFPlayer> m_hOldOwner;
+    private class CHandle<C_TFPlayer> m_hBuilder;
+    private bool m_bWasActive;
+    private int m_iOldHealth;
+    private bool m_bHasSapper;
+    private bool m_bOldSapper;
+    private int m_iObjectType;
+    private int m_iHealth;
+    private int m_iMaxHealth;
+    private bool m_bWasBuilding;
+    private bool m_bBuilding;
+    private bool m_bWasPlacing;
+    private bool m_bPlacing;
+    private bool m_bDisabled;
+    private bool m_bOldDisabled;
+    private float m_flPercentageConstructed;
+    private class CHandle<C_BaseEntity> m_hBuiltOnEntity;
+    private class vgui::Label * m_pNameLabel;
+    private float m_flDamageFlash;
+    private int m_iFlashes;
+    private float m_flNextEffect;
+	
+    class NetworkVar_m_vecBuildMaxs
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<Vector,C_BaseObject::NetworkVar_m_vecBuildMaxs> m_vecBuildMaxs;
+    class NetworkVar_m_vecBuildMins
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVectorBase<Vector,C_BaseObject::NetworkVar_m_vecBuildMins> m_vecBuildMins;
+	
+    class NetworkVar_m_iDesiredBuildRotations
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<int,C_BaseObject::NetworkVar_m_iDesiredBuildRotations> m_iDesiredBuildRotations;    
+	private float m_flCurrentBuildRotation;
+	
+    private int m_iLastPlacementPosValid;
+	
+    class NetworkVar_m_bServerOverridePlacement
+    {
+        public void NetworkStateChanged(void * );
+    };
+    private class CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> m_bServerOverridePlacement;
+	
+    private int m_nObjectOldSequence;
+};

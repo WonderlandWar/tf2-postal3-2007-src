@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::ActivateYawPreview(C_BaseObject *this, bool enable)
+{
+  this->m_YawPreviewState = !enable + 1;
+}

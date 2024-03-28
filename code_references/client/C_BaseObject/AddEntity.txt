@@ -1,0 +1,23 @@
+void __thiscall C_BaseObject::AddEntity(C_BaseObject *this)
+{
+  char m_YawPreviewState; // al
+
+  if ( this->ShouldDraw(&this->IClientRenderable) )
+  {
+    m_YawPreviewState = this->m_YawPreviewState;
+    if ( m_YawPreviewState )
+    {
+      if ( m_YawPreviewState == 2
+        && fmod(fabs(C_BaseEntity::GetLocalAngles(this)->y - this->m_fYawPreview), 360.0) < 1.0 )
+      {
+        this->m_YawPreviewState = 0;
+      }
+      if ( this->m_fYawPreview != C_BaseEntity::GetLocalOrigin(this)->y )
+      {
+        C_BaseEntity::SetLocalAnglesDim(this, 1, this->m_fYawPreview);
+        C_BaseAnimating::InvalidateBoneCache(this);
+      }
+    }
+    this->CreateLightEffects(this);
+  }
+}

@@ -1,0 +1,44 @@
+void __thiscall CTFWrench::OnEntityHit(CTFWrench *this, CBaseEntity *pEntity)
+{
+  CTFPlayer *TFPlayerOwner; // esi
+  int TeamNumber; // eax
+  CBaseEntity *v5; // edi
+  CBaseObject *pObject; // eax
+  bool bUsefulHit; // al
+  IPredictionSystem *v8; // ecx
+  void (__thiscall *WeaponSound)(CBaseCombatWeapon *, WeaponSound_t, float); // edx
+  float v10; // [esp+0h] [ebp-14h]
+
+  TFPlayerOwner = CTFWeaponBase::GetTFPlayerOwner(this);
+  if ( TFPlayerOwner )
+  {
+    if ( CTFWeaponBase::CanAttack(this) )
+    {
+      TeamNumber = CBaseEntity::GetTeamNumber(TFPlayerOwner);
+      v5 = pEntity;
+      if ( TeamNumber == CBaseEntity::GetTeamNumber(pEntity) )
+      {
+        pObject = (CBaseObject *)__RTDynamicCast(
+                              v5,
+                              0,
+                              &CBaseEntity `RTTI Type Descriptor',
+                              &CBaseObject `RTTI Type Descriptor',
+                              0);
+        if ( pObject )
+        {
+          bUsefulHit = CBaseObject::InputWrenchHit(pObject, TFPlayerOwner);
+          v8 = IPredictionSystem::g_pPredictionSystems;
+          for ( LOBYTE(pEntity) = 1; v8; v8 = v8->m_pNextSystem )
+            ++v8->m_nStatusPushed;
+          v10 = 0.0;
+          WeaponSound = this->WeaponSound;
+          if ( bUsefulHit )
+            ((void (__thiscall *)(CTFWrench *, int, _DWORD))WeaponSound)(this, 11, LODWORD(v10));
+          else
+            ((void (__thiscall *)(CTFWrench *, int, _DWORD))WeaponSound)(this, 12, LODWORD(v10));
+          CDisablePredictionFiltering::~CDisablePredictionFiltering((CDisablePredictionFiltering *)&pEntity);
+        }
+      }
+    }
+  }
+}

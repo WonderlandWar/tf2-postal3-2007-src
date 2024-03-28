@@ -1,0 +1,50 @@
+void __thiscall C_ObjectSentrygun::UpdateDamageEffects(C_ObjectSentrygun *this, BuildingDamageLevel_t damageLevel)
+{
+  CNewParticleEffect *m_pDamageEffects; // ecx
+  const char *v4; // edx
+  int m_iUpgradeLevel; // eax
+  CNewParticleEffect *v6; // eax
+
+  m_pDamageEffects = this->m_pDamageEffects;
+  if ( m_pDamageEffects )
+  {
+    CNewParticleEffect::StopEmission(m_pDamageEffects, 0, 0);
+    this->m_pDamageEffects = 0;
+  }
+  v4 = locale;
+  switch ( damageLevel )
+  {
+    case BUILDING_DAMAGE_LEVEL_LIGHT:
+      v4 = "sentrydamage_1";
+      break;
+    case BUILDING_DAMAGE_LEVEL_MEDIUM:
+      v4 = "sentrydamage_2";
+      break;
+    case BUILDING_DAMAGE_LEVEL_HEAVY:
+      v4 = "sentrydamage_3";
+      break;
+    case BUILDING_DAMAGE_LEVEL_CRITICAL:
+      v4 = "sentrydamage_4";
+      break;
+    default:
+      break;
+  }
+  if ( (int)strlen(v4) > 0 )
+  {
+    m_iUpgradeLevel = this->m_iUpgradeLevel;
+    if ( m_iUpgradeLevel > 0 )
+    {
+      if ( m_iUpgradeLevel <= 2 )
+      {
+        v6 = CParticleProperty::Create(&this->m_Particles, v4, PATTACH_POINT_FOLLOW, "build_point_0");
+      }
+      else
+      {
+        if ( m_iUpgradeLevel != 3 )
+          return;
+        v6 = CParticleProperty::Create(&this->m_Particles, v4, PATTACH_POINT_FOLLOW, "sentrydamage");
+      }
+      this->m_pDamageEffects = v6;
+    }
+  }
+}

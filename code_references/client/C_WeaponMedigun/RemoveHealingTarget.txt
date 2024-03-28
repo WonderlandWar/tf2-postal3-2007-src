@@ -1,0 +1,55 @@
+void __thiscall C_WeaponMedigun::RemoveHealingTarget(C_WeaponMedigun *this, int iSlot, bool bStopHealingSelf)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v5; // ecx
+  C_TFPlayer *m_pEntity; // edi
+  unsigned int v7; // eax
+  int v8; // eax
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v5 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v5->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_TFPlayer *)v5->m_pEntity;
+      if ( v5->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((C_BaseEntity *)v5->m_pEntity) )
+        {
+          if ( iSlot == -1 || !iSlot )
+          {
+            iSlot = -1;
+            C_WeaponMedigun::NetworkVar_m_hHealingTargets::Set(
+              (C_BaseCombatCharacter::NetworkVar_m_iAmmo *)&this->m_hHealingTargets,
+              0,
+              &iSlot);
+          }
+          v7 = this->m_hHealingTargets.m_Value[0].m_Index;
+          if ( v7 == -1
+            || g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_SerialNumber != v7 >> 12
+            || !g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[0].m_Index & 0xFFF].m_pEntity )
+          {
+            if ( this->m_bHealing.m_Value )
+            {
+              this->SendWeaponAnim(this, 1092);
+              C_TFPlayer::DoAnimationEvent(m_pEntity, PLAYERANIMEVENT_ATTACK_POST, 0);
+            }
+            if ( this->m_bHealing.m_Value )
+            {
+              v8 = 1;
+              if ( !this->m_bHealing.m_Value )
+                v8 = -1;
+            }
+            else
+            {
+              v8 = 0;
+            }
+            if ( v8 )
+              this->m_bHealing.m_Value = 0;
+          }
+        }
+      }
+    }
+  }
+}

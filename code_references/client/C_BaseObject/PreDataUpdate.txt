@@ -1,0 +1,38 @@
+void __thiscall C_BaseObject::PreDataUpdate(C_BaseObject *this, DataUpdateType_t updateType)
+{
+  unsigned int v3; // eax
+  int v4; // edx
+  C_TFPlayer *m_pEntity; // ecx
+  char v6; // al
+  char v7; // cl
+  char m_iMaxHealth; // dl
+  char m_iHealth_high; // al
+  int y_low; // ecx
+
+  C_BaseAnimating::PreDataUpdate(this, updateType);
+  this->m_hBuilder.m_Index = *(_DWORD *)&this->m_bHasSapper;
+  v3 = *(_DWORD *)&this->m_YawPreviewState;
+  if ( v3 == -1
+    || (v4 = *(_DWORD *)&this->m_YawPreviewState & 0xFFF, g_pEntityList->m_EntPtrArray[v4].m_SerialNumber != v3 >> 12) )
+  {
+    m_pEntity = 0;
+  }
+  else
+  {
+    m_pEntity = (C_TFPlayer *)g_pEntityList->m_EntPtrArray[v4].m_pEntity;
+  }
+  if ( m_pEntity )
+    LODWORD(this->m_fYawPreview) = m_pEntity->GetRefEHandle(m_pEntity)->m_Index;
+  else
+    this->m_fYawPreview = NAN;
+  v6 = (*(int (__thiscall **)(CNetworkVarBase<bool,C_BaseObject::NetworkVar_m_bServerOverridePlacement> *))(*(_DWORD *)&this[-1].m_bServerOverridePlacement.m_Value + 792))(&this[-1].m_bServerOverridePlacement);
+  v7 = BYTE1(this->m_iHealth);
+  m_iMaxHealth = this->m_iMaxHealth;
+  LOBYTE(this->m_hOldOwner.m_Index) = v6;
+  m_iHealth_high = HIBYTE(this->m_iHealth);
+  LOBYTE(this->m_iHealth) = v7;
+  y_low = LODWORD(this->m_vecPreRagdollMaxs.y);
+  BYTE1(this->m_iMaxHealth) = m_iMaxHealth;
+  BYTE2(this->m_iHealth) = m_iHealth_high;
+  this->m_iLastPlacementPosValid = y_low;
+}

@@ -1,0 +1,16 @@
+C_BaseObject *__thiscall C_BaseObject::GetBuildPointObject(C_BaseObject *this, int iPoint)
+{
+  BuildPoint_t *m_pMemory; // ecx
+  unsigned int m_Index; // eax
+  int v4; // edx
+
+  m_pMemory = this->m_BuildPoints.m_Memory.m_pMemory;
+  m_Index = m_pMemory[iPoint].m_hObject.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v4 = m_pMemory[iPoint].m_hObject.m_Index & 0xFFF;
+  if ( g_pEntityList->m_EntPtrArray[v4].m_SerialNumber != m_Index >> 12 )
+    return 0;
+  else
+    return (C_BaseObject *)g_pEntityList->m_EntPtrArray[v4].m_pEntity;
+}

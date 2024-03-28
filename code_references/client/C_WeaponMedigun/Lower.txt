@@ -1,0 +1,23 @@
+bool __thiscall C_WeaponMedigun::Lower(C_WeaponMedigun *this)
+{
+  int v2; // ecx
+
+  if ( this->m_bHealing.m_Value )
+  {
+    C_WeaponMedigun::RemoveHealingTarget(this, -1, 1);
+    if ( this->m_bAttacking.m_Value )
+    {
+      v2 = 1;
+      if ( !this->m_bAttacking.m_Value )
+        v2 = -1;
+    }
+    else
+    {
+      v2 = 0;
+    }
+    if ( v2 )
+      this->m_bAttacking.m_Value = 0;
+    C_WeaponMedigun::UpdateEffects(this);
+  }
+  return C_TFWeaponBase::Lower(this);
+}

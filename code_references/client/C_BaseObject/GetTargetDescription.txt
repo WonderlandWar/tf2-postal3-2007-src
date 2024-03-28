@@ -1,0 +1,4 @@
+const char *__thiscall C_BaseObject::GetTargetDescription(C_BaseObject *this)
+{
+  return this->GetStatusName(this);
+}

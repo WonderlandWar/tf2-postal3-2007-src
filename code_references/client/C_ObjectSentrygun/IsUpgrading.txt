@@ -1,0 +1,4 @@
+BOOL __thiscall C_ObjectSentrygun::IsUpgrading(C_ObjectSentrygun *this)
+{
+  return this->m_iState == 3;
+}

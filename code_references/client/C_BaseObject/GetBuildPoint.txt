@@ -1,0 +1,26 @@
+char __thiscall C_BaseObject::GetBuildPoint(C_BaseObject *this, int iPoint, Vector *vecOrigin, QAngle *vecAngles)
+{
+  IClientNetworkable_vtbl *v4; // edx
+  char *p_y; // esi
+  float *v6; // eax
+  double v7; // st7
+  char result; // al
+
+  v4 = this->C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable;
+  if ( *((_DWORD *)&v4->Release + 5 * iPoint) != -1 )
+    return (*(int (__thiscall **)(float *, _DWORD, Vector *, QAngle *))(LODWORD(this[-1].m_Collision.m_vecSurroundingMins.z)
+                                                                      + 148))(
+             &this[-1].m_Collision.m_vecSurroundingMins.z,
+             *((_DWORD *)&v4->Release + 5 * iPoint),
+             vecOrigin,
+             vecAngles);
+  p_y = (char *)&this[-1].m_Collision.m_vecSurroundingMins.y;
+  *vecOrigin = *(Vector *)(*(int (__thiscall **)(float *))(LODWORD(this[-1].m_Collision.m_vecSurroundingMins.y) + 36))(&this[-1].m_Collision.m_vecSurroundingMins.y);
+  v6 = (float *)(*(int (__thiscall **)(char *))(*(_DWORD *)p_y + 40))(p_y);
+  vecAngles->x = *v6;
+  vecAngles->y = v6[1];
+  v7 = v6[2];
+  result = 1;
+  vecAngles->z = v7;
+  return result;
+}

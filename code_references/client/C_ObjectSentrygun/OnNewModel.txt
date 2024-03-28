@@ -1,0 +1,12 @@
+CStudioHdr *__thiscall C_ObjectSentrygun::OnNewModel(C_ObjectSentrygun *this)
+{
+  CStudioHdr *v2; // ebx
+  int i; // edi
+
+  v2 = C_BaseFlex::OnNewModel(this);
+  this->UpdateDamageEffects(this, this->m_damageLevel);
+  for ( i = C_BaseAnimating::GetNumBodyGroups(this) - 1; i >= 0; --i )
+    C_BaseAnimating::SetBodygroup(this, i, 0);
+  this->m_iPlacementBodygroup = C_BaseAnimating::FindBodygroupByName(this, "sentry1_range");
+  return v2;
+}

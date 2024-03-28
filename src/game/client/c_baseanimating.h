@@ -148,7 +148,6 @@ public:
 	virtual int DrawModel( int flags );
 	virtual int	InternalDrawModel( int flags );
 	virtual bool OnInternalDrawModel( ClientModelRenderInfo_t *pInfo );
-	virtual bool OnPostInternalDrawModel( ClientModelRenderInfo_t *pInfo );
 	void		DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray = NULL );
 
 	//
@@ -159,13 +158,6 @@ public:
 	virtual void DoAnimationEvents( CStudioHdr *pStudio );
 	virtual void FireEvent( const Vector& origin, const QAngle& angles, int event, const char *options );
 	virtual void FireObsoleteEvent( const Vector& origin, const QAngle& angles, int event, const char *options );
-
-#if defined ( SDK_DLL ) || defined ( HL2MP )
-	virtual void ResetEventsParity() { m_nPrevResetEventsParity = -1; } // used to force animation events to function on players so the muzzleflashes and other events occur
-																		// so new functions don't have to be made to parse the models like CSS does in ProcessMuzzleFlashEvent
-																		// allows the multiplayer world weapon models to declare the muzzleflashes, and other effects like sp
-																		// without the need to script it and add extra parsing code.
-#endif
 
 	// Parses and distributes muzzle flash events
 	virtual bool DispatchMuzzleEffect( const char *options, bool isFirstPerson );
@@ -412,8 +404,6 @@ public:
 	void							SetReceivedSequence( void );
 	virtual bool					ShouldResetSequenceOnNewModel( void );
 
-	virtual bool					IsViewModel() const;
-
 protected:
 	// View models scale their attachment positions to account for FOV. To get the unmodified
 	// attachment position (like if you're rendering something else during the view model's DrawModel call),
@@ -421,6 +411,7 @@ protected:
 	virtual void					FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld ) {}
 
 	// View models say yes to this.
+	virtual bool					IsViewModel() const;
 	bool							IsBoneAccessAllowed() const;
 	CMouthInfo&						MouthInfo();
 

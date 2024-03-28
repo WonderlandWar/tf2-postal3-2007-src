@@ -1,0 +1,112 @@
+void __thiscall CGameMovement::CategorizePosition(CGameMovement *this)
+{
+  CBasePlayer *player; // ecx
+  CMoveData *mv; // eax
+  float *p_m_bFirstRunOfFunctions; // eax
+  double v5; // st7
+  double v6; // st7
+  CGameMovement_vtbl *v7; // eax
+  const Vector *v8; // eax
+  CBasePlayer *v9; // eax
+  IPhysicsSurfaceProps *v10; // eax
+  char material; // bl
+  CBasePlayer *v12; // ecx
+  CBasePlayer *v13; // eax
+  const Vector *v14; // [esp+10h] [ebp-8Ch]
+  CBaseEntity *v15; // [esp+14h] [ebp-88h]
+  Vector bumpOrigin; // [esp+24h] [ebp-78h] BYREF
+  float cCurrGameMaterial; // [esp+30h] [ebp-6Ch]
+  Vector point; // [esp+34h] [ebp-68h] BYREF
+  float v19; // [esp+40h] [ebp-5Ch]
+  _BYTE v20[32]; // [esp+44h] [ebp-58h] BYREF
+  float v21; // [esp+64h] [ebp-38h]
+  char v22; // [esp+7Bh] [ebp-21h]
+  __int16 v23; // [esp+84h] [ebp-18h]
+  CBaseEntity *v24; // [esp+90h] [ebp-Ch]
+
+  this->CheckWater(this);
+  player = this->player;
+  if ( (player->m_afPhysicsFlags & 8) == 0 )
+  {
+    mv = this->mv;
+    point.y = mv->m_vecAbsOrigin.x;
+    point.z = mv->m_vecAbsOrigin.y;
+    v19 = mv->m_vecAbsOrigin.z - 2.0;
+    bumpOrigin.y = mv->m_vecAbsOrigin.x;
+    bumpOrigin.z = mv->m_vecAbsOrigin.y;
+    cCurrGameMaterial = mv->m_vecAbsOrigin.z + 2.0;
+    if ( mv->m_vecVelocity.z > 140.0 || this->mv->m_vecVelocity.z > 0.0 && player->m_MoveType.m_Value == 9 )
+    {
+      this->SetGroundEntity(this, 0);
+    }
+    else
+    {
+      this->TracePlayerBBox(this, (Vector *)&bumpOrigin.y, (Vector *)&point.y, 33636363u, 8, (CGameTrace *)v20);
+      if ( v22 )
+      {
+        p_m_bFirstRunOfFunctions = (float *)&this->mv->m_bFirstRunOfFunctions;
+        v5 = p_m_bFirstRunOfFunctions[25];
+        p_m_bFirstRunOfFunctions += 25;
+        bumpOrigin.y = v5;
+        bumpOrigin.z = p_m_bFirstRunOfFunctions[1];
+        v6 = p_m_bFirstRunOfFunctions[2];
+        v7 = this->__vftable;
+        cCurrGameMaterial = v6;
+        v7->TracePlayerBBox(this, (Vector *)&bumpOrigin.y, (Vector *)&point.y, 33636363u, 8, (CGameTrace *)v20);
+      }
+      if ( v21 >= 0.7
+        || (v15 = CHandle<CBaseAnimating>::operator CBaseAnimating *((CHandle<CBaseEntity> *)&this->mv->m_nPlayerHandle),
+            v14 = this->GetPlayerMaxs(this),
+            v8 = this->GetPlayerMins(this),
+            TracePlayerBBoxForGround(
+              (Vector *)&bumpOrigin.y,
+              (Vector *)&point.y,
+              v8,
+              v14,
+              v15,
+              0x201400Bu,
+              8,
+              (CGameTrace *)v20),
+            v21 >= 0.7) )
+      {
+        this->SetGroundEntity(this, v24);
+      }
+      else
+      {
+        this->SetGroundEntity(this, 0);
+        if ( this->mv->m_vecVelocity.z > 0.0 )
+        {
+          v9 = this->player;
+          if ( v9->m_MoveType.m_Value != 8 )
+            v9->m_surfaceFriction = 0.25;
+        }
+      }
+      if ( CBaseEntity::GetGroundEntity(this->player) )
+        this->player->m_flWaterJumpTime = 0.0;
+      if ( !this->player->IsInAVehicle(this->player) )
+      {
+        v10 = IMoveHelper::sm_pSingleton->GetSurfaceProps(IMoveHelper::sm_pSingleton);
+        material = v10->GetSurfaceData(v10, v23)->game.material;
+        v12 = this->player;
+        LOBYTE(point.x) = material;
+        if ( !CBaseEntity::GetGroundEntity(v12) )
+        {
+          material = 0;
+          LOBYTE(point.x) = 0;
+        }
+        v13 = this->player;
+        if ( v13->m_chPreviousTextureType != material )
+          CEnvPlayerSurfaceTrigger::SetPlayerSurface(v13, SLOBYTE(point.x));
+        this->player->m_chPreviousTextureType = material;
+      }
+      if ( v24 )
+      {
+        if ( !CGameTrace::DidHitWorld((CGameTrace *)v20) )
+          IMoveHelper::sm_pSingleton->AddToTouched(
+            IMoveHelper::sm_pSingleton,
+            (const CGameTrace *)v20,
+            &this->mv->m_vecVelocity);
+      }
+    }
+  }
+}

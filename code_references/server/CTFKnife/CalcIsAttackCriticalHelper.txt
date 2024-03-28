@@ -1,0 +1,4 @@
+BOOL __thiscall CTFKnife::CalcIsAttackCriticalHelper(CTFKnife *this)
+{
+  return this->m_iWeaponMode == 1;
+}

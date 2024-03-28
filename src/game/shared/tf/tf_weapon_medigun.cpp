@@ -49,7 +49,11 @@ ConVar tf_medigun_lagcomp(  "tf_medigun_lagcomp", "1", FCVAR_DEVELOPMENTONLY );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+#ifdef TFP3_MEDIGUN_FIX
 void RecvProxy_HealingTarget( const CRecvProxyData *pData, void *pStruct, void *pOut )
+#else
+void RecvProxy_HealingTargets( const CRecvProxyData *pData, void *pStruct, void *pOut )
+#endif
 {
 	CWeaponMedigun *pMedigun = ((CWeaponMedigun*)(pStruct));
 	if ( pMedigun != NULL )
@@ -69,14 +73,22 @@ IMPLEMENT_NETWORKCLASS_ALIASED( WeaponMedigun, DT_WeaponMedigun )
 BEGIN_NETWORK_TABLE( CWeaponMedigun, DT_WeaponMedigun )
 #if !defined( CLIENT_DLL )
 	SendPropFloat( SENDINFO(m_flChargeLevel), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN ),
+#ifdef TFP3_MEDIGUN_FIX
 	SendPropEHandle( SENDINFO( m_hHealingTarget ) ),
+#else
+	SendPropArray3( SENDINFO_ARRAY3(m_hHealingTargets), SendPropEHandle( SENDINFO_ARRAY(m_hHealingTargets), MAX_HEALING_TARGETS, SendProxy_EHandleToInt ) ),
+#endif
 	SendPropBool( SENDINFO( m_bHealing ) ),
 	SendPropBool( SENDINFO( m_bAttacking ) ),
 	SendPropBool( SENDINFO( m_bChargeRelease ) ),
-	SendPropBool( SENDINFO( m_bHolstered ) ),
+	SendPropBool( SENDINFO( m_bHolstered ) ),	
 #else
 	RecvPropFloat( RECVINFO(m_flChargeLevel) ),
+#ifdef TFP3_MEDIGUN_FIX
 	RecvPropEHandle( RECVINFO( m_hHealingTarget ), RecvProxy_HealingTarget ),
+#else
+	RecvPropArray3( RECVINFO_ARRAY(m_hHealingTargets), RecvPropEHandle( RECVINFO( m_hHealingTargets[0] ), RecvProxy_HealingTargets ) ),
+#endif
 	RecvPropBool( RECVINFO( m_bHealing ) ),
 	RecvPropBool( RECVINFO( m_bAttacking ) ),
 	RecvPropBool( RECVINFO( m_bChargeRelease ) ),
@@ -90,8 +102,11 @@ BEGIN_PREDICTION_DATA( CWeaponMedigun  )
 	DEFINE_PRED_FIELD( m_bHealing, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bAttacking, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_bHolstered, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+#ifdef TFP3_MEDIGUN_FIX
 	DEFINE_PRED_FIELD( m_hHealingTarget, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
-
+#else
+	DEFINE_PRED_ARRAY( m_hHealingTargets, FIELD_EHANDLE, MAX_HEALING_TARGETS, FTYPEDESC_INSENDTABLE ),
+#endif
 	DEFINE_FIELD( m_flHealEffectLifetime, FIELD_FLOAT ),
 
 	DEFINE_PRED_FIELD( m_flChargeLevel, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
@@ -142,8 +157,6 @@ void CWeaponMedigun::WeaponReset( void )
 	m_bAttacking = false;
 	m_bHolstered = true;
 	m_bChargeRelease = false;
-
-	m_bCanChangeTarget = true;
 
 	m_flNextBuzzTime = 0;
 	m_flReleaseStartedAt = 0;
@@ -291,36 +304,16 @@ float CWeaponMedigun::GetHealRate( void )
 //-----------------------------------------------------------------------------
 bool CWeaponMedigun::HealingTarget( CBaseEntity *pTarget )
 {
+#ifdef TFP3_MEDIGUN_FIX
 	if ( pTarget == m_hHealingTarget )
 		return true;
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CWeaponMedigun::AllowedToHealTarget( CBaseEntity *pTarget )
-{
-	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
-	if ( !pOwner )
-		return false;
-
-	CTFPlayer *pTFPlayer = ToTFPlayer( pTarget );
-	if ( !pTFPlayer )
-		return false;
-
-	bool bStealthed = pTFPlayer->m_Shared.InCond( TF_COND_STEALTHED );
-	bool bDisguised = pTFPlayer->m_Shared.InCond( TF_COND_DISGUISED );
-
-	// We can heal teammates and enemies that are disguised as teammates
-	if ( !bStealthed &&
-		( pTFPlayer->InSameTeam( pOwner ) ||
-		( bDisguised && pTFPlayer->m_Shared.GetDisguiseTeam() == pOwner->GetTeamNumber() ) ) )
+#else
+	for ( int i = 0; i < MAX_HEALING_TARGETS; ++i )
 	{
-		return true;
+		if ( pTarget == m_hHealingTargets[i] )
+			return true;
 	}
-
+#endif
 	return false;
 }
 
@@ -334,7 +327,22 @@ bool CWeaponMedigun::CouldHealTarget( CBaseEntity *pTarget )
 		return false;
 
 	if ( pTarget->IsPlayer() && pTarget->IsAlive() && !HealingTarget(pTarget) )
-		return AllowedToHealTarget( pTarget );
+	{		
+		CTFPlayer *pTFPlayer = ToTFPlayer( pTarget );
+		if ( !pTFPlayer )
+			return false;
+
+		bool bStealthed = pTFPlayer->m_Shared.InCond( TF_COND_STEALTHED );
+		bool bDisguised = pTFPlayer->m_Shared.InCond( TF_COND_DISGUISED );
+
+		// We can heal teammates and enemies that are disguised as teammates
+		if ( !bStealthed &&
+			( pTFPlayer->InSameTeam( pOwner ) ||
+			( bDisguised && pTFPlayer->m_Shared.GetDisguiseTeam() == pOwner->GetTeamNumber() ) ) )
+		{
+			return true;
+		}
+	}
 
 	return false;
 }
@@ -369,13 +377,16 @@ public:
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CWeaponMedigun::MaintainTargetInSlot()
+void CWeaponMedigun::MaintainTargetInSlot( int iSlot )
 {
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
 	if ( !pOwner )
 		return;
-
+#ifdef TFP3_MEDIGUN_FIX
 	CBaseEntity *pTarget = m_hHealingTarget;
+#else
+	CBaseEntity *pTarget = m_hHealingTargets[iSlot];
+#endif
 	Assert( pTarget );
 
 	// Make sure the guy didn't go out of range.
@@ -423,23 +434,27 @@ void CWeaponMedigun::MaintainTargetInSlot()
 	// We've lost this guy
 	if ( bLostTarget )
 	{
-		RemoveHealingTarget();
+		RemoveHealingTarget( iSlot );
 	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CWeaponMedigun::FindNewTargetForSlot()
+void CWeaponMedigun::FindNewTargetForSlot( int iSlot )
 {
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
 	if ( !pOwner )
 		return;
 
 	Vector vecSrc = pOwner->Weapon_ShootPosition( );
+#ifdef TFP3_MEDIGUN_FIX
 	if ( m_hHealingTarget )
+#else
+	if ( m_hHealingTargets[iSlot] )
+#endif
 	{
-		RemoveHealingTarget();
+		RemoveHealingTarget( iSlot );
 	}
 
 	// In Normal mode, we heal players under our crosshair
@@ -463,8 +478,11 @@ void CWeaponMedigun::FindNewTargetForSlot()
 				pTarget->SpeakConceptIfAllowed( MP_CONCEPT_HEALTARGET_STARTEDHEALING );
 			}
 #endif
-
+#ifdef TFP3_MEDIGUN_FIX
 			m_hHealingTarget.Set( tr.m_pEnt );
+#else
+			m_hHealingTargets.Set( iSlot, tr.m_pEnt );
+#endif	
 			m_flNextTargetCheckTime = gpGlobals->curtime + 1.0f;
 		}			
 	}
@@ -482,17 +500,24 @@ bool CWeaponMedigun::FindAndHealTargets( void )
 	bool bFound = false;
 
 	// Maintaining beam to existing target?
+#ifdef TFP3_MEDIGUN_FIX
 	CBaseEntity *pTarget = m_hHealingTarget;
+#else
+	CBaseEntity *pTarget = m_hHealingTargets[0];
+#endif
 	if ( pTarget && pTarget->IsAlive() )
 	{
-		MaintainTargetInSlot();
+		MaintainTargetInSlot( 0 );
 	}
 	else
 	{	
-		FindNewTargetForSlot();
+		FindNewTargetForSlot( 0 );
 	}
-
+#ifdef TFP3_MEDIGUN_FIX
 	CBaseEntity *pNewTarget = m_hHealingTarget;
+#else
+	CBaseEntity *pNewTarget = m_hHealingTargets[0];
+#endif
 	if ( pNewTarget && pNewTarget->IsAlive() )
 	{
 		CTFPlayer *pTFPlayer = ToTFPlayer( pNewTarget );
@@ -639,7 +664,7 @@ void CWeaponMedigun::ItemPostFrame( void )
  		else if ( m_bHealing )
  		{
  			// Detach from the player if they release the attack button.
- 			RemoveHealingTarget();
+ 			RemoveHealingTarget( -1 );
  		}
 	}
 
@@ -673,30 +698,47 @@ bool CWeaponMedigun::Lower( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CWeaponMedigun::RemoveHealingTarget( bool bStopHealingSelf )
+void CWeaponMedigun::RemoveHealingTarget( int iSlot, bool bStopHealingSelf )
 {
 	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
 	if ( !pOwner )
 		return;
-
-#ifdef GAME_DLL
+#ifdef TFP3_MEDIGUN_FIX
 	if ( m_hHealingTarget )
+#else
+	if ( m_hHealingTargets[iSlot] )
+#endif
 	{
 		// HACK: For now, just deal with players
+#ifdef TFP3_MEDIGUN_FIX
 		if ( m_hHealingTarget->IsPlayer() )
+#else
+		if ( m_hHealingTargets[iSlot]->IsPlayer() )
+#endif
 		{
-			CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
-			CTFPlayer *pTFPlayer = ToTFPlayer( m_hHealingTarget );
-			pTFPlayer->m_Shared.StopHealing( pOwner );
-			pTFPlayer->m_Shared.RecalculateInvuln( false );
+			if ( !iSlot || iSlot == -1 )
+			{
+	#ifdef GAME_DLL
+				CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
+#ifdef TFP3_MEDIGUN_FIX
+				CTFPlayer *pTFPlayer = ToTFPlayer( m_hHealingTarget );
+#else
+				CTFPlayer *pTFPlayer = ToTFPlayer( m_hHealingTargets[0] );
+#endif
+				pTFPlayer->m_Shared.StopHealing( pOwner );
+				pTFPlayer->m_Shared.RecalculateInvuln( false );
 
-			pOwner->SpeakConceptIfAllowed( MP_CONCEPT_MEDIC_STOPPEDHEALING, pTFPlayer->IsAlive() ? "healtarget:alive" : "healtarget:dead" );
-			pTFPlayer->SpeakConceptIfAllowed( MP_CONCEPT_HEALTARGET_STOPPEDHEALING );
+				pOwner->SpeakConceptIfAllowed( MP_CONCEPT_MEDIC_STOPPEDHEALING, pTFPlayer->IsAlive() ? "healtarget:alive" : "healtarget:dead" );
+				pTFPlayer->SpeakConceptIfAllowed( MP_CONCEPT_HEALTARGET_STOPPEDHEALING );
+	#endif
+#ifdef TFP3_MEDIGUN_FIX
+				m_hHealingTarget.Set( NULL );
+#else
+				m_hHealingTargets.Set( 0, NULL );
+#endif	
+			}
 		}
 	}
-#endif
-
-	m_hHealingTarget.Set( NULL );
 
 	// Stop the welding animation
 	if ( m_bHealing )
@@ -759,7 +801,7 @@ void CWeaponMedigun::PrimaryAttack( void )
 	}
 	else
 	{
-		RemoveHealingTarget();
+		RemoveHealingTarget( -1 );
 	}
 	
 #if !defined (CLIENT_DLL)
@@ -813,20 +855,19 @@ void CWeaponMedigun::SecondaryAttack( void )
 	pOwner->m_Shared.RecalculateInvuln();
 
 	pOwner->SpeakConceptIfAllowed( MP_CONCEPT_MEDIC_CHARGEDEPLOYED );
-
+#ifdef TFP3_MEDIGUN_FIX
 	if ( m_hHealingTarget && m_hHealingTarget->IsPlayer() )
+#else
+	if ( m_hHealingTargets[0] && m_hHealingTargets[0]->IsPlayer() )
+#endif
 	{
+#ifdef TFP3_MEDIGUN_FIX
 		CTFPlayer *pTFPlayer = ToTFPlayer( m_hHealingTarget );
+#else
+		CTFPlayer *pTFPlayer = ToTFPlayer( m_hHealingTargets[0] );
+#endif
 		pTFPlayer->m_Shared.RecalculateInvuln();
 		pTFPlayer->SpeakConceptIfAllowed( MP_CONCEPT_HEALTARGET_CHARGEDEPLOYED );
-	}
-
-	IGameEvent * event = gameeventmanager->CreateEvent( "player_chargedeployed" );
-	if ( event )
-	{
-		event->SetInt( "userid", pOwner->GetUserID() );
-
-		gameeventmanager->FireEvent( event, true );	// don't send to clients
 	}
 #endif
 }
@@ -1007,9 +1048,17 @@ void CWeaponMedigun::ClientThink()
 		
 	// If the local player is the guy getting healed, let him know 
 	// who's healing him, and their charge level.
+#ifdef TFP3_MEDIGUN_FIX
 	if( m_hHealingTarget != NULL )
+#else
+	if( m_hHealingTargets[0] != NULL )
+#endif
 	{
+#ifdef TFP3_MEDIGUN_FIX
 		if ( pLocalPlayer == m_hHealingTarget )
+#else
+		if ( pLocalPlayer == m_hHealingTargets[0] )
+#endif
 		{
 			pLocalPlayer->SetHealer( pFiringPlayer, m_flChargeLevel );
 		}
@@ -1048,57 +1097,126 @@ void CWeaponMedigun::UpdateEffects( void )
 	}
 
 	// Remove all the effects
-	if ( pEffectOwner )
+		
+	for ( int i = 0; i < m_hHealingTargetEffects.Count(); ++i )
 	{
-		pEffectOwner->ParticleProp()->StopEmission( m_hHealingTargetEffect.pEffect );
+		if ( pEffectOwner )
+		{
+			pEffectOwner->ParticleProp()->StopEmission( m_hHealingTargetEffects[i].pEffect );
+		}
+		else
+		{
+			m_hHealingTargetEffects[i].pEffect->StopEmission();
+		}
+
+		m_hHealingTargetEffects.Remove( i );
 	}
-	else
-	{
-		m_hHealingTargetEffect.pEffect->StopEmission();
-	}
-	m_hHealingTargetEffect.pTarget = NULL;
-	m_hHealingTargetEffect.pEffect = NULL;
 
 	// Don't add targets if the medic is dead
-	if ( !pEffectOwner || pFiringPlayer->IsPlayerDead() || !pFiringPlayer->IsPlayerClass( TF_CLASS_MEDIC ) )
+	if ( !pEffectOwner || pFiringPlayer->IsPlayerDead() )
 		return;
 
 	// Add our targets
 	// Loops through the healing targets, and make sure we have an effect for each of them
+#ifdef TFP3_MEDIGUN_FIX
 	if ( m_hHealingTarget )
+#else
+	if ( m_hHealingTargets[0] )
+#endif
 	{
-		if ( m_hHealingTargetEffect.pTarget == m_hHealingTarget )
-			return;
-
-		const char *pszEffectName;
-		if ( pFiringPlayer->GetTeamNumber() == TF_TEAM_RED )
-		{
-			if ( m_bChargeRelease )
+		if ( m_hHealingTargetEffects.Count() <= 0 )
+		{			
+			const char *pszEffectName;
+			if ( pFiringPlayer->GetTeamNumber() == TF_TEAM_RED )
 			{
-				pszEffectName = "medicgun_beam_red_invun";
+				if ( m_bChargeRelease )
+				{
+					pszEffectName = "medicgun_beam_red_invun";
+				}
+				else
+				{
+					pszEffectName = "medicgun_beam_red";
+				}
 			}
 			else
 			{
-				pszEffectName = "medicgun_beam_red";
+				if ( m_bChargeRelease )
+				{
+					pszEffectName = "medicgun_beam_blue_invun";
+				}
+				else
+				{
+					pszEffectName = "medicgun_beam_blue";
+				}
 			}
+
+			CNewParticleEffect *pEffect = pEffectOwner->ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "muzzle" );
+#ifdef TFP3_MEDIGUN_FIX
+			pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
+#else
+			pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTargets[0], PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
+#endif
+			//m_hHealingTargetEffects.InsertBefore( i, healingtargeteffects_t() );
+			m_hHealingTargetEffects.AddToTail( healingtargeteffects_t() );
+#ifdef TFP3_MEDIGUN_FIX
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pTarget = m_hHealingTarget;
+#else
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pTarget = m_hHealingTargets[0];
+#endif	
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pEffect = pEffect;
 		}
 		else
 		{
-			if ( m_bChargeRelease )
+			for ( int i = 0; i < m_hHealingTargetEffects.Count(); ++i )
 			{
-				pszEffectName = "medicgun_beam_blue_invun";
-			}
-			else
-			{
-				pszEffectName = "medicgun_beam_blue";
+#ifdef TFP3_MEDIGUN_FIX
+				if ( m_hHealingTargetEffects[i].pTarget == m_hHealingTarget )
+#else
+				if ( m_hHealingTargetEffects[i].pTarget == m_hHealingTargets[0] )
+#endif
+					return;
+
+				const char *pszEffectName;
+				if ( pFiringPlayer->GetTeamNumber() == TF_TEAM_RED )
+				{
+					if ( m_bChargeRelease )
+					{
+						pszEffectName = "medicgun_beam_red_invun";
+					}
+					else
+					{
+						pszEffectName = "medicgun_beam_red";
+					}
+				}
+				else
+				{
+					if ( m_bChargeRelease )
+					{
+						pszEffectName = "medicgun_beam_blue_invun";
+					}
+					else
+					{
+						pszEffectName = "medicgun_beam_blue";
+					}
+				}
+
+				CNewParticleEffect *pEffect = pEffectOwner->ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "muzzle" );
+#ifdef TFP3_MEDIGUN_FIX
+				pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
+#else
+				pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTargets[0], PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
+#endif			
+				//m_hHealingTargetEffects.InsertBefore( i, healingtargeteffects_t() );
+				m_hHealingTargetEffects.AddToTail( healingtargeteffects_t() );
+	
+#ifdef TFP3_MEDIGUN_FIX
+				m_hHealingTargetEffects[i].pTarget = m_hHealingTarget;
+#else
+				m_hHealingTargetEffects[i].pTarget = m_hHealingTargets[0];
+#endif	
+				m_hHealingTargetEffects[i].pEffect = pEffect;
 			}
 		}
-
-		CNewParticleEffect *pEffect = pEffectOwner->ParticleProp()->Create( pszEffectName, PATTACH_POINT_FOLLOW, "muzzle" );
-		pEffectOwner->ParticleProp()->AddControlPoint( pEffect, 1, m_hHealingTarget, PATTACH_ABSORIGIN_FOLLOW, NULL, Vector(0,0,50) );
-
-		m_hHealingTargetEffect.pTarget = m_hHealingTarget;
-		m_hHealingTargetEffect.pEffect = pEffect;
 	}
 }
 #endif

@@ -1,0 +1,7 @@
+void __thiscall C_BaseObject::OnPlacementStateChanged(C_BaseObject *this, bool bValidPlacement)
+{
+  if ( bValidPlacement )
+    C_BaseObject::SetActivity(this, ACT_OBJ_PLACING);
+  else
+    C_BaseObject::SetActivity(this, ACT_OBJ_IDLE);
+}

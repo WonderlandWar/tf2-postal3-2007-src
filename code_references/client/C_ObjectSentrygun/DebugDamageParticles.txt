@@ -1,0 +1,15 @@
+void __thiscall C_ObjectSentrygun::DebugDamageParticles(C_ObjectSentrygun *this)
+{
+  int v2; // eax
+  int v3; // eax
+
+  v2 = this->GetHealth(this);
+  _Msg("Health %d\n", v2);
+  v3 = C_BaseObject::CalculateDamageLevel(this);
+  _Msg("Damage Level %d\n", v3);
+  if ( this->m_pDamageEffects )
+    _Msg("m_pDamageEffects is valid\n");
+  else
+    _Msg("m_pDamageEffects is NULL\n");
+  CParticleProperty::DebugPrintEffects(&this->m_Particles);
+}

@@ -1,0 +1,28 @@
+void __thiscall C_ObjectSentrygun::DisplayHintTo(C_ObjectSentrygun *this, C_TFPlayer *pPlayer)
+{
+  C_TFPlayer *v4; // edi
+  int *p_m_nGrowSize; // esi
+  bool v6; // al
+  C_BasePlayer *pPlayera; // [esp+14h] [ebp+4h]
+
+  if ( pPlayer && pPlayer->IsPlayer(pPlayer) )
+    v4 = pPlayer;
+  else
+    v4 = 0;
+  p_m_nGrowSize = &this[-1].m_Particles.m_ParticleEffects.m_Memory.m_nGrowSize;
+  if ( !(*(unsigned __int8 (__thiscall **)(int *, C_TFPlayer *))(this[-1].m_Particles.m_ParticleEffects.m_Memory.m_nGrowSize
+                                                               + 292))(
+          &this[-1].m_Particles.m_ParticleEffects.m_Memory.m_nGrowSize,
+          pPlayer)
+    || !C_TFPlayer::IsPlayerClass(v4, 9)
+    || (pPlayera = (C_BasePlayer *)(*(int (__thiscall **)(int *))(*p_m_nGrowSize + 404))(&this[-1].m_Particles.m_ParticleEffects.m_Memory.m_nGrowSize),
+        (C_BasePlayer *)(*(int (__thiscall **)(int *))(*p_m_nGrowSize + 400))(&this[-1].m_Particles.m_ParticleEffects.m_Memory.m_nGrowSize) != pPlayera)
+    || SLODWORD(this->m_Collision.m_vecSurroundingMins.y) >= 3
+    || (C_TFPlayer::GetBuildResources(v4) < 130
+      ? (v6 = C_BasePlayer::HintMessage(v4, 33, 0, 1))
+      : (v6 = C_BasePlayer::HintMessage(v4, 34, 0, 1)),
+        !v6) )
+  {
+    C_BaseObject::DisplayHintTo(this, pPlayer);
+  }
+}

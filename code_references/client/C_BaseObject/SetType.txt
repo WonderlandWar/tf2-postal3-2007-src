@@ -1,0 +1,4 @@
+void __thiscall C_BaseObject::SetType(C_BaseObject *this, int iObjectType)
+{
+  this->m_iObjectType = iObjectType;
+}

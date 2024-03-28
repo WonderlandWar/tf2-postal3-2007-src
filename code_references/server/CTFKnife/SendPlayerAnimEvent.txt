@@ -1,0 +1,7 @@
+void __thiscall CTFKnife::SendPlayerAnimEvent(CTFKnife *this, CTFPlayer *pPlayer)
+{
+  if ( this->m_iWeaponMode == 1 )
+    CTFPlayer::DoAnimationEvent(pPlayer, PLAYERANIMEVENT_CUSTOM_GESTURE, 1067);
+  else
+    CTFPlayer::DoAnimationEvent(pPlayer, PLAYERANIMEVENT_ATTACK_PRIMARY, 0);
+}

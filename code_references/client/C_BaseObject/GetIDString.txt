@@ -1,0 +1,11 @@
+char *__thiscall C_BaseObject::GetIDString(C_BaseObject *this)
+{
+  void (*RecalculateIDString)(void); // edx
+  char *m_szIDString; // esi
+
+  RecalculateIDString = (void (*)(void))this->RecalculateIDString;
+  m_szIDString = this->m_szIDString;
+  this->m_szIDString[0] = 0;
+  RecalculateIDString();
+  return m_szIDString;
+}

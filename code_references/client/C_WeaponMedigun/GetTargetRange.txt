@@ -1,0 +1,4 @@
+double __thiscall C_WeaponMedigun::GetTargetRange(C_WeaponMedigun *this)
+{
+  return this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_flRange;
+}

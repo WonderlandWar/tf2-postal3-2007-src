@@ -988,15 +988,12 @@ public:
 	/////////////////
 
 	virtual bool					IsPlayer( void ) const { return false; };
-	virtual bool					IsBot( void ) const { return ((GetFlags() & FL_FAKECLIENT) == FL_FAKECLIENT) ? true : false; }
 	virtual bool					IsBaseCombatCharacter( void ) { return false; };
 	virtual C_BaseCombatCharacter	*MyCombatCharacterPointer( void ) { return NULL; }
 	virtual bool					IsNPC( void ) { return false; }
 	C_AI_BaseNPC					*MyNPCPointer( void ); 
 	// TF2 specific
 	virtual bool					IsBaseObject( void ) const { return false; }
-
-	virtual bool					IsBaseTrain( void ) const { return false; }
 
 	// Returns the eye point + angles (used for viewing + shooting)
 	virtual Vector			EyePosition( void );

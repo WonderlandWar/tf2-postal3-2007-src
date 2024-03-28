@@ -1,0 +1,4 @@
+void __thiscall C_ObjectSentrygun::GetTargetIDString(C_ObjectSentrygun *this, wchar_t *sIDString, int iMaxLenInBytes)
+{
+  C_BaseObject::GetTargetIDString(this, sIDString, iMaxLenInBytes);
+}

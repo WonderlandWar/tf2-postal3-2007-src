@@ -1,0 +1,5 @@
+// attributes: thunk
+void __thiscall C_BaseObject::SetDormant(C_BaseObject *this, bool bDormant)
+{
+  C_BaseEntity::SetDormant(this, bDormant);
+}

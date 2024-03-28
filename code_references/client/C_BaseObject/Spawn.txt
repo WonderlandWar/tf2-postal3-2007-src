@@ -1,0 +1,18 @@
+void __thiscall C_BaseObject::Spawn(C_BaseObject *this)
+{
+  int v2; // ecx
+
+  C_BaseFlex::Spawn(this);
+  if ( this->m_bServerOverridePlacement.m_Value )
+  {
+    v2 = 0;
+  }
+  else
+  {
+    v2 = 1;
+    if ( this->m_bServerOverridePlacement.m_Value - 1 <= 0 )
+      v2 = -1;
+  }
+  if ( v2 )
+    this->m_bServerOverridePlacement.m_Value = 1;
+}

@@ -1,0 +1,25 @@
+int __thiscall C_ObjectSentrygun::GetBuildingAlertLevel(C_ObjectSentrygun *this)
+{
+  int result; // eax
+  BuildingHudAlert_t v3; // edx
+  double v4; // st7
+
+  result = C_BaseObject::GetBuildingAlertLevel(this);
+  v3 = BUILDING_HUD_ALERT_NONE;
+  v4 = (double)this->m_iAmmoShells / (double)this->m_iMaxAmmoShells;
+  if ( !this->m_bBuilding )
+  {
+    if ( v4 >= 0.25 )
+    {
+      if ( v4 < 0.5 )
+        v3 = BUILDING_HUD_ALERT_LOW_AMMO;
+    }
+    else
+    {
+      v3 = BUILDING_HUD_ALERT_VERY_LOW_AMMO;
+    }
+  }
+  if ( result <= v3 )
+    return v3;
+  return result;
+}

@@ -1,0 +1,4 @@
+BOOL __thiscall C_BaseObject::ShouldPlayersAvoid(C_BaseObject *this)
+{
+  return this->m_CollisionGroup == 21;
+}

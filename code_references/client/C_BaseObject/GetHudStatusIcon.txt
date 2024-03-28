@@ -1,0 +1,4 @@
+char *__thiscall C_BaseObject::GetHudStatusIcon(C_BaseObject *this)
+{
+  return GetObjectInfo(this->m_iObjectType)->m_pHudStatusIcon;
+}

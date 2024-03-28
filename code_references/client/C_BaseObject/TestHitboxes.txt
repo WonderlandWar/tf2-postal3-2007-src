@@ -1,0 +1,12 @@
+bool __thiscall C_BaseObject::TestHitboxes(
+        C_BaseObject *this,
+        const Ray_t *ray,
+        unsigned int fContentsMask,
+        CGameTrace *tr)
+{
+  bool v4; // cl
+
+  v4 = C_BaseAnimating::TestHitboxes(this, ray, fContentsMask, tr);
+  return (!sv_ignore_hitboxes.m_pParent->m_nValue || v4 && (1.0 != tr->fraction || tr->allsolid || tr->startsolid))
+      && v4;
+}

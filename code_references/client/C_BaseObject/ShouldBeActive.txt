@@ -1,0 +1,4 @@
+bool __thiscall C_BaseObject::ShouldBeActive(C_BaseObject *this)
+{
+  return !this->m_bPlacing && !this->m_bBuilding;
+}

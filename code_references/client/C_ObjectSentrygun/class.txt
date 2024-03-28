@@ -1,0 +1,57 @@
+class C_ObjectSentrygun : public C_BaseObject
+{
+    public int YouForgotToImplementOrDeclareClientClass();
+    public class ClientClass * GetClientClass();
+    public class RecvTable * m_pClassRecvTable;
+	
+    private void C_ObjectSentrygun(class C_ObjectSentrygun & );
+    public void C_ObjectSentrygun();
+	
+    public int GetUpgradeLevel();
+	
+    public void GetAmmoCount(int & ,int & ,int & ,int & );
+	
+    public void GetStatusText(wchar_t * ,int );
+	
+    public bool IsUpgrading();
+	
+    public void GetTargetIDString(wchar_t * ,int );
+    public void GetTargetIDDataString(wchar_t * ,int );
+	
+    public enum BuildingHudAlert_t GetBuildingAlertLevel();
+	
+    public int GetUpgradeMetal();
+    public int GetUpgradeMetalRequired();
+	
+    public char * GetHudStatusIcon();
+	
+    public int GetKills();
+	
+    public void GetShadowRenderBounds(class Vector & ,class Vector & ,enum ShadowType_t );
+	
+    public class CStudioHdr * OnNewModel();
+    public void UpdateDamageEffects(enum BuildingDamageLevel_t );
+	
+    public void OnPlacementStateChanged(bool );
+	
+    public void DebugDamageParticles();
+	
+    public void DisplayHintTo(class C_BasePlayer * );
+	
+    private int m_iState;
+	
+    private int m_iUpgradeLevel;
+	
+    private int m_iAmmoShells;
+    private int m_iMaxAmmoShells;
+    private int m_iAmmoRockets;
+	
+    private int m_iUpgradeMetal;
+    private int m_iUpgradeMetalRequired;
+	
+    private int m_iKills;
+	
+    private class CNewParticleEffect * m_pDamageEffects;
+	
+    private int m_iPlacementBodygroup;
+};

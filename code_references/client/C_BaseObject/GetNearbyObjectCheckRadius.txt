@@ -1,0 +1,4 @@
+double __thiscall C_BaseObject::GetNearbyObjectCheckRadius(C_BaseObject *this)
+{
+  return 30.0;
+}

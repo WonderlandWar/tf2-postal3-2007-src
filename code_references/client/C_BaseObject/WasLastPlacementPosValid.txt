@@ -1,0 +1,7 @@
+BOOL __thiscall C_BaseObject::WasLastPlacementPosValid(C_BaseObject *this)
+{
+  if ( (unsigned __int8)C_BaseObject::MustBeBuiltOnAttachmentPoint(this) )
+    return (this->m_fEffects & 0x20) == 0;
+  else
+    return this->m_iLastPlacementPosValid > 0;
+}

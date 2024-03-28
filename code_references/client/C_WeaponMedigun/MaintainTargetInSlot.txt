@@ -1,0 +1,116 @@
+void __thiscall C_WeaponMedigun::MaintainTargetInSlot(C_WeaponMedigun *this, int iSlot)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  C_BasePlayer *m_pEntity; // edi
+  unsigned int v6; // eax
+  IHandleEntity *v7; // ebx
+  int v8; // eax
+  float v9; // ecx
+  float v10; // edx
+  float v11; // eax
+  double v12; // st7
+  C_WeaponMedigun_vtbl *v13; // eax
+  double v14; // st7
+  double v15; // st7
+  const Vector *v16; // eax
+  float _X; // [esp+4h] [ebp-BCh]
+  Vector vecSrc; // [esp+14h] [ebp-ACh] BYREF
+  float flDistance; // [esp+20h] [ebp-A0h]
+  Vector vecTargetPoint; // [esp+24h] [ebp-9Ch] BYREF
+  Vector vecAiming; // [esp+30h] [ebp-90h] BYREF
+  Vector vecPoint; // [esp+3Ch] [ebp-84h] BYREF
+  Vector vecEnd; // [esp+48h] [ebp-78h] BYREF
+  CMedigunFilter drainFilter; // [esp+54h] [ebp-6Ch] BYREF
+  CGameTrace tr; // [esp+64h] [ebp-5Ch] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v4 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v4->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = (C_BasePlayer *)v4->m_pEntity;
+      if ( v4->m_pEntity )
+      {
+        if ( m_pEntity->IsPlayer((C_BaseEntity *)v4->m_pEntity) )
+        {
+          v6 = this->m_hHealingTargets.m_Value[iSlot].m_Index;
+          if ( v6 == -1
+            || g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[iSlot].m_Index & 0xFFF].m_SerialNumber != v6 >> 12 )
+          {
+            v7 = 0;
+          }
+          else
+          {
+            v7 = g_pEntityList->m_EntPtrArray[this->m_hHealingTargets.m_Value[iSlot].m_Index & 0xFFF].m_pEntity;
+          }
+          m_pEntity->Weapon_ShootPosition(m_pEntity, (Vector *)&vecSrc.y);
+          v8 = ((int (__thiscall *)(IHandleEntity *))v7->__vftable[21].SetRefEHandle)(v7);
+          v9 = *(float *)v8;
+          v10 = *(float *)(v8 + 4);
+          v11 = *(float *)(v8 + 8);
+          vecTargetPoint.y = v9;
+          vecTargetPoint.z = v10;
+          vecAiming.x = v11;
+          CCollisionProperty::CalcNearestPoint(
+            (CCollisionProperty *)&v7[88],
+            (Vector *)&vecSrc.y,
+            (Vector *)&vecPoint.y);
+          _X = (vecPoint.y - vecSrc.y) * (vecPoint.y - vecSrc.y)
+             + (vecPoint.z - vecSrc.z) * (vecPoint.z - vecSrc.z)
+             + (vecEnd.x - flDistance) * (vecEnd.x - flDistance);
+          v12 = pfSqrt(_X);
+          v13 = this->C_TFWeaponBaseGun::C_TFWeaponBase::C_BaseCombatWeapon::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+          vecTargetPoint.x = v12;
+          v14 = ((double (__thiscall *)(C_WeaponMedigun *))v13->GetStickRange)(this);
+          if ( v14 <= vecTargetPoint.x )
+            goto LABEL_16;
+          if ( *(float *)(gpGlobals.m_Index + 12) >= (double)this->m_flNextTargetCheckTime )
+          {
+            this->m_flNextTargetCheckTime = *(float *)(gpGlobals.m_Index + 12) + 1.0;
+            CTraceFilterSimple::CTraceFilterSimple((CTraceFilterSimple *)&drainFilter.m_pPassEnt, m_pEntity, 11);
+            drainFilter.m_pPassEnt = (const IHandleEntity *)&CMedigunFilter::`vftable';
+            LODWORD(tr.startpos.x) = m_pEntity;
+            C_BasePlayer::EyeVectors(m_pEntity, (Vector *)&vecAiming.y, 0, 0);
+            v15 = ((double (__thiscall *)(C_WeaponMedigun *))this->GetTargetRange)(this);
+            vecEnd.y = vecAiming.y * v15 + vecSrc.y;
+            vecEnd.z = vecAiming.z * v15 + vecSrc.z;
+            *(float *)&drainFilter.__vftable = v15 * vecPoint.x + flDistance;
+            UTIL_TraceLine(
+              (Vector *)&vecSrc.y,
+              (Vector *)&vecEnd.y,
+              0x6004003u,
+              m_pEntity,
+              0,
+              (CGameTrace *)&tr.startpos.y);
+            if ( (IHandleEntity *)tr.hitbox != v7 )
+            {
+              UTIL_TraceLine(
+                (Vector *)&vecSrc.y,
+                (Vector *)&vecTargetPoint.y,
+                0x46004003u,
+                (ITraceFilter *)&drainFilter.m_pPassEnt,
+                (CGameTrace *)&tr.startpos.y);
+              if ( 1.0 != *(float *)&tr.contents && (IHandleEntity *)tr.hitbox != v7 )
+              {
+                v16 = (const Vector *)((int (__thiscall *)(IHandleEntity *, float *))v7->__vftable[42].SetRefEHandle)(
+                                        v7,
+                                        &vecTargetPoint.y);
+                UTIL_TraceLine(
+                  (Vector *)&vecSrc.y,
+                  v16,
+                  0x46004003u,
+                  (ITraceFilter *)&drainFilter.m_pPassEnt,
+                  (CGameTrace *)&tr.startpos.y);
+                if ( 1.0 != *(float *)&tr.contents && (IHandleEntity *)tr.hitbox != v7 )
+LABEL_16:
+                  C_WeaponMedigun::RemoveHealingTarget(this, iSlot, 0);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

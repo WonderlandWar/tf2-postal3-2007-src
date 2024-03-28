@@ -1,0 +1,12 @@
+void __thiscall C_ObjectSentrygun::GetAmmoCount(
+        C_ObjectSentrygun *this,
+        int *iShells,
+        int *iMaxShells,
+        int *iRockets,
+        int *iMaxRockets)
+{
+  *iShells = this->m_iAmmoShells;
+  *iMaxShells = this->m_iMaxAmmoShells;
+  *iRockets = this->m_iAmmoRockets;
+  *iMaxRockets = 20;
+}

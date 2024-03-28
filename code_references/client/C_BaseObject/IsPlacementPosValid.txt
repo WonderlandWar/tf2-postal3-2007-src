@@ -1,0 +1,45 @@
+bool __thiscall C_BaseObject::IsPlacementPosValid(C_BaseObject *this)
+{
+  bool result; // al
+  C_TFPlayer *Builder; // ebx
+  IHandleEntity v4; // eax
+  double v5; // st7
+  void (__thiscall *SetRefEHandle)(IHandleEntity *, const CBaseHandle *); // edx
+  const Vector *v7; // eax
+  Vector vecAbsEnd; // [esp+4h] [ebp-70h] BYREF
+  char v9[8]; // [esp+10h] [ebp-64h] BYREF
+  CGameTrace tr; // [esp+18h] [ebp-5Ch] BYREF
+
+  result = C_BaseObject::CalculatePlacementPos(this);
+  if ( result )
+  {
+    Builder = C_BaseObject::GetBuilder(this);
+    if ( Builder )
+    {
+      UTIL_TraceEntity(
+        this,
+        &this->m_vecBuildOrigin,
+        &this->m_vecBuildOrigin,
+        0x200400Bu,
+        0,
+        5,
+        (CGameTrace *)&tr.startpos.y);
+      if ( *(float *)&tr.contents < 1.0 )
+        return 0;
+      v4.__vftable = (IHandleEntity_vtbl *)Builder->C_BasePlayer::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable;
+      v5 = this->m_vecBuildMaxs.m_Value.z * 0.5;
+      vecAbsEnd.x = this->m_vecBuildOrigin.x;
+      vecAbsEnd.y = this->m_vecBuildOrigin.y;
+      SetRefEHandle = v4.__vftable[42].SetRefEHandle;
+      vecAbsEnd.z = v5 + this->m_vecBuildOrigin.z;
+      v7 = (const Vector *)((int (__thiscall *)(C_TFPlayer *, char *))SetRefEHandle)(Builder, v9);
+      UTIL_TraceLine(v7, &vecAbsEnd, 0x1400Bu, Builder, 0, (CGameTrace *)&tr.startpos.y);
+      return *(float *)&tr.contents >= 1.0;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  return result;
+}

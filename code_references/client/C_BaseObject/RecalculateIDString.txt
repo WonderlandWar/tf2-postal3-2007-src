@@ -1,0 +1,38 @@
+void __thiscall C_BaseObject::RecalculateIDString(C_BaseObject *this)
+{
+  char *m_szIDString; // edi
+  const char *v3; // eax
+  double v4; // st7
+  double v5; // st7
+  double X; // [esp+8h] [ebp-148h]
+  int m_iMaxHealth; // [esp+40h] [ebp-110h]
+  char szHealth[256]; // [esp+48h] [ebp-108h] BYREF
+
+  m_szIDString = this->m_szIDString;
+  if ( !this->m_szIDString[0] )
+  {
+    v3 = this->GetTargetDescription(this);
+    V_strncpy(m_szIDString, v3, 256);
+  }
+  m_iMaxHealth = this->m_iMaxHealth;
+  if ( this->m_iHealth < m_iMaxHealth )
+  {
+    X = (double)this->m_iHealth / (double)m_iMaxHealth * 100.0;
+    if ( this->m_bBuilding )
+    {
+      v4 = ceil(X);
+      V_snprintf(
+        szHealth,
+        256,
+        "\nConstruction at %.0f percent\nHealth at %.0f percent",
+        this->m_flPercentageConstructed * 100.0,
+        v4);
+    }
+    else
+    {
+      v5 = ceil(X);
+      V_snprintf(szHealth, 256, "\nHealth at %.0f percent", v5);
+    }
+    V_strncat(m_szIDString, szHealth, 0x100u, -1);
+  }
+}

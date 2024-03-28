@@ -1,0 +1,4 @@
+int __thiscall C_BaseObject::GetMaxHealth(C_BaseObject *this)
+{
+  return this->m_iMaxHealth;
+}

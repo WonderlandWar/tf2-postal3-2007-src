@@ -1,0 +1,43 @@
+void __thiscall C_BaseObject::DisplayHintTo(C_BaseObject *this, C_TFPlayer *pPlayer)
+{
+  C_BasePlayer *v2; // esi
+  char v3; // bl
+  Vector *p_m_vecSurroundingMins; // edi
+  CHintSystem *v6; // eax
+  int v7; // ebx
+
+  v2 = pPlayer;
+  v3 = 0;
+  if ( !pPlayer || !pPlayer->IsPlayer(pPlayer) )
+    pPlayer = 0;
+  p_m_vecSurroundingMins = &this[-1].m_Collision.m_vecSurroundingMins;
+  if ( (*(unsigned __int8 (__thiscall **)(Vector *, C_BasePlayer *))(LODWORD(this[-1].m_Collision.m_vecSurroundingMins.x)
+                                                                   + 292))(
+         &this[-1].m_Collision.m_vecSurroundingMins,
+         v2) )
+  {
+    if ( LOBYTE(this->m_pMoveChild.m_Index) )
+    {
+      if ( v2->Hints(v2) )
+      {
+        v6 = v2->Hints(v2);
+        v3 = CHintSystem::HintMessage(v6, 35, 1, 1);
+      }
+      else
+      {
+        v3 = 0;
+      }
+    }
+    if ( C_TFPlayer::IsPlayerClass(pPlayer, 9)
+      && !v3
+      && (!BYTE1(this->m_hOldMoveParent.m_Index)
+       || (C_BaseObject::GetBuilder((C_BaseObject *)((char *)this - 3220)) == pPlayer
+        || !C_BasePlayer::HintMessage(v2, 26, 0, 1))
+       && !BYTE1(this->m_hOldMoveParent.m_Index)) )
+    {
+      v7 = (*(int (__thiscall **)(Vector *))(LODWORD(p_m_vecSurroundingMins->x) + 404))(&this[-1].m_Collision.m_vecSurroundingMins);
+      if ( (*(int (__thiscall **)(Vector *))(LODWORD(p_m_vecSurroundingMins->x) + 400))(&this[-1].m_Collision.m_vecSurroundingMins) < v7 )
+        C_BasePlayer::HintMessage(v2, 32, 0, 1);
+    }
+  }
+}

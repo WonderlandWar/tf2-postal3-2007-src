@@ -1,0 +1,19 @@
+int __thiscall C_BaseObject::AddBuildPoint(C_BaseObject *this, int iAttachmentNum)
+{
+  CUtlVector<BuildPoint_t,CUtlMemory<BuildPoint_t,int> > *p_m_BuildPoints; // ecx
+  int m_Size; // [esp-4h] [ebp-20h]
+  BuildPoint_t sNewPoint; // [esp+0h] [ebp-1Ch] BYREF
+  char v6; // [esp+14h] [ebp-8h]
+
+  sNewPoint.m_hObject.m_Index = iAttachmentNum;
+  p_m_BuildPoints = &this->m_BuildPoints;
+  LOBYTE(sNewPoint.m_iAttachmentNum) = 0;
+  *(_DWORD *)&sNewPoint.m_bValidObjects[4] = 0;
+  v6 = 0;
+  m_Size = p_m_BuildPoints->m_Size;
+  *(_DWORD *)sNewPoint.m_bValidObjects = -1;
+  return CUtlVector<BuildPoint_t,CUtlMemory<BuildPoint_t,int>>::InsertBefore(
+           p_m_BuildPoints,
+           m_Size,
+           (const BuildPoint_t *)&sNewPoint.m_iAttachmentNum);
+}

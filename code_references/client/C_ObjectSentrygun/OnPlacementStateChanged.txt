@@ -1,0 +1,15 @@
+void __thiscall C_ObjectSentrygun::OnPlacementStateChanged(C_ObjectSentrygun *this, bool bValidPlacement)
+{
+  int m_iPlacementBodygroup; // eax
+
+  if ( bValidPlacement && (m_iPlacementBodygroup = this->m_iPlacementBodygroup, m_iPlacementBodygroup >= 0) )
+  {
+    C_BaseAnimating::SetBodygroup(this, m_iPlacementBodygroup, 1);
+    C_BaseObject::OnPlacementStateChanged(this, bValidPlacement);
+  }
+  else
+  {
+    C_BaseAnimating::SetBodygroup(this, this->m_iPlacementBodygroup, 0);
+    C_BaseObject::OnPlacementStateChanged(this, bValidPlacement);
+  }
+}

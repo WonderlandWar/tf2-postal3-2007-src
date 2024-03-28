@@ -1,0 +1,55 @@
+void __thiscall C_WeaponMedigun::ItemPostFrame(C_WeaponMedigun *this)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v3; // ecx
+  IHandleEntity *m_pEntity; // ebp
+  int v5; // ecx
+  bool val; // [esp+7h] [ebp-1h] BYREF
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index != -1 )
+  {
+    v3 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+    if ( v3->m_SerialNumber == m_Index >> 12 )
+    {
+      m_pEntity = v3->m_pEntity;
+      if ( v3->m_pEntity )
+      {
+        if ( m_pEntity->__vftable[40].GetRefEHandle(v3->m_pEntity) )
+        {
+          C_WeaponMedigun::DrainCharge(this);
+          if ( !this->m_bLowered.m_Value )
+          {
+            if ( this->m_bAttacking.m_Value )
+            {
+              v5 = 1;
+              if ( !this->m_bAttacking.m_Value )
+                v5 = -1;
+            }
+            else
+            {
+              v5 = 0;
+            }
+            if ( v5 )
+              this->m_bAttacking.m_Value = 0;
+            if ( ((int)m_pEntity[954].__vftable & 1) != 0 )
+            {
+              this->PrimaryAttack(this);
+              val = 1;
+              CNetworkVarBase<bool,C_WeaponMedigun::NetworkVar_m_bChargeRelease>::operator=<bool>(
+                (CNetworkVarBase<bool,C_TFFlameThrower::NetworkVar_m_bCritFire> *)&this->m_bAttacking,
+                &val);
+            }
+            else if ( this->m_bHealing.m_Value )
+            {
+              C_WeaponMedigun::RemoveHealingTarget(this, -1, 0);
+            }
+            if ( ((int)m_pEntity[954].__vftable & 0x800) != 0 )
+              this->SecondaryAttack(this);
+            this->WeaponIdle(this);
+          }
+        }
+      }
+    }
+  }
+}

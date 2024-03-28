@@ -1,0 +1,11 @@
+void __thiscall C_ObjectSentrygun::C_ObjectSentrygun(C_ObjectSentrygun *this)
+{
+  C_BaseObject::C_BaseObject(this);
+  this->C_BaseObject::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientUnknown::IHandleEntity::__vftable = (C_ObjectSentrygun_vtbl *)&C_ObjectSentrygun::`vftable'{for `IClientUnknown'};
+  this->C_BaseObject::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientRenderable::__vftable = (IClientRenderable_vtbl *)&C_ObjectSentrygun::`vftable'{for `IClientRenderable'};
+  this->C_BaseObject::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientNetworkable::__vftable = (IClientNetworkable_vtbl *)&C_ObjectSentrygun::`vftable'{for `IClientNetworkable'};
+  this->C_BaseObject::C_BaseCombatCharacter::C_BaseFlex::C_BaseAnimatingOverlay::C_BaseAnimating::C_BaseEntity::IClientEntity::IClientThinkable::__vftable = (IClientThinkable_vtbl *)&C_ObjectSentrygun::`vftable'{for `IClientThinkable'};
+  this->C_BaseObject::IHasBuildPoints::__vftable = (IHasBuildPoints_vtbl *)&C_ObjectSentrygun::`vftable'{for `IHasBuildPoints'};
+  this->C_BaseObject::ITargetIDProvidesHint::__vftable = (ITargetIDProvidesHint_vtbl *)&C_ObjectSentrygun::`vftable'{for `ITargetIDProvidesHint'};
+  this->m_pDamageEffects = 0;
+}

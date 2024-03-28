@@ -1,0 +1,4 @@
+int __thiscall C_BaseObject::GetDisplayPriority(C_BaseObject *this)
+{
+  return GetObjectInfo(this->m_iObjectType)->m_iDisplayPriority;
+}

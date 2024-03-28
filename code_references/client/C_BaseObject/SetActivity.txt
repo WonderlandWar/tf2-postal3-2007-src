@@ -1,0 +1,22 @@
+void __thiscall C_BaseObject::SetActivity(C_BaseObject *this, Activity act)
+{
+  int v3; // eax
+
+  this->OnActivityChanged(this, act);
+  if ( this->m_pStudioHdr )
+    goto LABEL_5;
+  if ( this->GetModel(&this->IClientRenderable) )
+    C_BaseAnimating::LockStudioHdr(this);
+  if ( this->m_pStudioHdr )
+  {
+LABEL_5:
+    v3 = C_BaseAnimating::SelectWeightedSequence(this, act);
+    if ( v3 != -1 )
+    {
+      this->m_Activity = act;
+      C_BaseAnimating::SetSequence(this, v3);
+      C_BaseAnimating::ResetSequenceInfo(this);
+      C_BaseAnimating::SetCycle(this, 0.0);
+    }
+  }
+}

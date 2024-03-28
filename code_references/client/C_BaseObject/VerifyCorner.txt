@@ -1,0 +1,28 @@
+bool __thiscall C_BaseObject::VerifyCorner(
+        C_BaseObject *this,
+        const Vector *vBottomCenter,
+        float xOffset,
+        float yOffset)
+{
+  double z; // st5
+  Vector vStart; // [esp+0h] [ebp-74h] BYREF
+  float v7; // [esp+Ch] [ebp-68h]
+  Vector vecAbsEnd; // [esp+10h] [ebp-64h] BYREF
+  CGameTrace ptr; // [esp+1Ch] [ebp-58h] BYREF
+
+  vStart.y = vBottomCenter->x + xOffset;
+  vStart.z = vBottomCenter->y + yOffset;
+  z = vBottomCenter->z;
+  v7 = vBottomCenter->z;
+  vecAbsEnd.x = vStart.y;
+  vecAbsEnd.y = vStart.z;
+  vecAbsEnd.z = z - 32.0;
+  UTIL_TraceLine((Vector *)&vStart.y, &vecAbsEnd, 0x1400Bu, this, 8, &ptr);
+  if ( ptr.fraction < 1.0 )
+  {
+    pfVectorNormalize(&ptr.plane.normal);
+    if ( (ptr.plane.normal.y + ptr.plane.normal.x) * 0.0 + ptr.plane.normal.z < 0.65 )
+      return 0;
+  }
+  return !ptr.startsolid && ptr.fraction < 1.0;
+}

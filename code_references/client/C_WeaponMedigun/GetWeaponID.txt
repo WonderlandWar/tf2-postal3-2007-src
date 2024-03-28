@@ -1,0 +1,4 @@
+int __thiscall C_WeaponMedigun::GetWeaponID(C_WeaponMedigun *this)
+{
+  return 44;
+}

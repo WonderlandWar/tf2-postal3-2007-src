@@ -1,0 +1,38 @@
+char __thiscall C_WeaponMedigun::CouldHealTarget(C_WeaponMedigun *this, C_BaseEntity *pTarget)
+{
+  unsigned int m_Index; // eax
+  CEntInfo *v4; // ecx
+  C_BaseEntity *m_pEntity; // ebp
+  C_BasePlayer *v7; // esi
+  bool bStealthed; // bl
+  float z; // esi
+  bool bDisguised; // [esp+Ch] [ebp+4h]
+
+  m_Index = this->m_hOwnerEntity.m_Index;
+  if ( m_Index == -1 )
+    return 0;
+  v4 = &g_pEntityList->m_EntPtrArray[this->m_hOwnerEntity.m_Index & 0xFFF];
+  if ( v4->m_SerialNumber != m_Index >> 12 )
+    return 0;
+  m_pEntity = (C_BaseEntity *)v4->m_pEntity;
+  if ( !v4->m_pEntity || !m_pEntity->IsPlayer((C_BaseEntity *)v4->m_pEntity) )
+    return 0;
+  if ( pTarget->IsPlayer(pTarget) && pTarget->IsAlive(pTarget) && !C_WeaponMedigun::HealingTarget(this, pTarget) )
+  {
+    v7 = ToBasePlayer(pTarget);
+    bStealthed = CTFPlayerShared::InCond((CTFPlayerShared *)&v7[1].m_nFXComputeFrame, 8);
+    bDisguised = CTFPlayerShared::InCond((CTFPlayerShared *)&v7[1].m_nFXComputeFrame, 7);
+    if ( !bStealthed )
+    {
+      if ( v7->InSameTeam(v7, m_pEntity) )
+        return 1;
+      if ( bDisguised )
+      {
+        z = v7[1].m_vecViewOffset.z;
+        if ( LODWORD(z) == m_pEntity->GetTeamNumber(m_pEntity) )
+          return 1;
+      }
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,4 @@
+double __thiscall C_WeaponMedigun::GetHealRate(C_WeaponMedigun *this)
+{
+  return (double)this->m_pWeaponInfo->m_WeaponData[this->m_iWeaponMode].m_nDamage;
+}

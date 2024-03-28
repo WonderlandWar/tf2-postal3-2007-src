@@ -1,0 +1,4 @@
+BOOL __thiscall C_BaseObject::IsPreviewingYaw(C_BaseObject *this)
+{
+  return this->m_YawPreviewState != 0;
+}

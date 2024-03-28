@@ -1,0 +1,53 @@
+void __userpurge C_ObjectSentrygun::GetTargetIDDataString(
+        C_ObjectSentrygun *this@<ecx>,
+        int a2@<edi>,
+        wchar_t *sDataString,
+        int iMaxLenInBytes)
+{
+  vgui::ILocalize_vtbl *v5; // edi
+  int v6; // eax
+  C_TFPlayer *Builder; // eax
+  vgui::ILocalize_vtbl *v8; // edi
+  const char *PlayerName; // eax
+  vgui::ILocalize_vtbl *v10; // esi
+  int v11; // eax
+  wchar_t wszUpgradeProgress[32]; // [esp+8h] [ebp-C8h] BYREF
+  wchar_t wszBuilderName[32]; // [esp+48h] [ebp-88h] BYREF
+  wchar_t wszObjectName[32]; // [esp+88h] [ebp-48h] BYREF
+
+  *sDataString = 0;
+  if ( this->m_iUpgradeLevel < 3 && C_TFPlayer::GetLocalTFPlayer() )
+  {
+    v5 = g_pVGuiLocalize->__vftable;
+    v6 = ((int (__thiscall *)(C_ObjectSentrygun *, wchar_t *, int, int))this->GetStatusName)(
+           this,
+           &wszObjectName[2],
+           64,
+           a2);
+    ((void (__thiscall *)(vgui::ILocalize *, int))v5->ConvertANSIToUnicode)(g_pVGuiLocalize, v6);
+    Builder = C_BaseObject::GetBuilder(this);
+    if ( Builder )
+    {
+      v8 = g_pVGuiLocalize->__vftable;
+      PlayerName = C_BasePlayer::GetPlayerName(Builder);
+      v8->ConvertANSIToUnicode(g_pVGuiLocalize, PlayerName, &wszBuilderName[4], 64);
+    }
+    else
+    {
+      wszBuilderName[4] = 0;
+    }
+    _snwprintf(&wszUpgradeProgress[4], 0x1Fu, L"%d / %d", this->m_iUpgradeMetal, this->m_iUpgradeMetalRequired);
+    wszBuilderName[3] = 0;
+    v10 = g_pVGuiLocalize->__vftable;
+    v11 = ((int (__thiscall *)(vgui::ILocalize *, const char *, int, wchar_t *))g_pVGuiLocalize->Find)(
+            g_pVGuiLocalize,
+            "#TF_playerid_object_upgrading",
+            1,
+            &wszUpgradeProgress[4]);
+    ((void (__cdecl *)(vgui::ILocalize *, wchar_t *, int, int))v10->ConstructString)(
+      g_pVGuiLocalize,
+      sDataString,
+      iMaxLenInBytes,
+      v11);
+  }
+}

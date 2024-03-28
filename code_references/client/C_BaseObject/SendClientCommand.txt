@@ -1,0 +1,9 @@
+void __thiscall C_BaseObject::SendClientCommand(C_BaseObject *this, const char *pCmd)
+{
+  int v2; // eax
+  char szbuf[128]; // [esp+0h] [ebp-88h] BYREF
+
+  v2 = ((int (__thiscall *)(IClientNetworkable *, const char *))this->entindex)(&this->IClientNetworkable, pCmd);
+  V_snprintf(&szbuf[4], 128, "objcmd %d %s", v2, *(const char **)szbuf);
+  engine->ClientCmd(engine, &szbuf[4]);
+}
