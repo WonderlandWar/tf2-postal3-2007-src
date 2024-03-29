@@ -148,6 +148,18 @@ void CTFWeaponBaseGrenadeProj::OnDataChanged( DataUpdateType_t type )
 		// Add the current sample.
 		vCurOrigin = GetLocalOrigin();
 		interpolator.AddToHead( changeTime, &vCurOrigin, false );
+		
+		if ( m_bCritical )
+		{
+			if ( GetTeamNumber() == TF_TEAM_BLUE )
+			{
+				ParticleProp()->Create( "critical_grenade_blue", PATTACH_ABSORIGIN_FOLLOW );
+			}
+			else
+			{
+				ParticleProp()->Create( "critical_grenade_red", PATTACH_ABSORIGIN_FOLLOW );
+			}
+		}
 	}
 }
 
