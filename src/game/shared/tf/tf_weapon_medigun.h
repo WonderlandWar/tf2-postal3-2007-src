@@ -98,7 +98,7 @@ public:
 	CNetworkHandle( C_BaseEntity, m_hHealingTarget );
 #endif
 #else
-	CNetworkArray( CHandle<CBaseEntity>, m_hHealingTargets, MAX_HEALING_TARGETS );
+	CNetworkArray( EHANDLE, m_hHealingTargets, MAX_HEALING_TARGETS );
 #endif
 
 protected:

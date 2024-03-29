@@ -42,10 +42,8 @@ public:
 	CNetworkVar( int, m_iType ); // TF_GL_MODE_REGULAR or TF_GL_MODE_REMOTE_DETONATE
 	float		m_flCreationTime;
 	float		m_flChargeTime;
-	float		m_flFullDamage;
-
-	CNetworkHandle( CBaseEntity, m_hLauncher );
 	
+	CNetworkVector( m_vecFirePosition );
 #ifdef CLIENT_DLL
 
 	virtual void OnDataChanged( DataUpdateType_t updateType );
@@ -81,6 +79,7 @@ public:
 
 private:
 
+	EHANDLE		m_hLauncher;
 	
 	bool		m_bFizzle;
 

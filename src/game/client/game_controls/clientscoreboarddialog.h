@@ -47,8 +47,6 @@ public:
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
 
-	virtual bool ShowAvatars() { return IsPC(); }
-
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
@@ -56,8 +54,6 @@ public:
  	
 	// IGameEventListener interface:
 	virtual void FireGameEvent( IGameEvent *event);
-
-	virtual void UpdatePlayerAvatar( int playerIndex, KeyValues *kv );
 			
 protected:
 	MESSAGE_FUNC_INT( OnPollHideCode, "PollHideCode", code );
@@ -94,17 +90,6 @@ protected:
 
 	void MoveLabelToFront(const char *textEntryName);
 	void MoveToCenterOfScreen();
-
-	vgui::ImageList				*m_pImageList;
-	int							m_iImageAvatars[MAX_PLAYERS+1];
-	CUtlMap<int,int>			m_mapAvatarsToImageList;
-
-	CPanelAnimationVar( int, m_iAvatarWidth, "avatar_width", "34" );		// Avatar width doesn't scale with resolution
-	CPanelAnimationVarAliasType( int, m_iNameWidth, "name_width", "136", "proportional_int" );
-	CPanelAnimationVarAliasType( int, m_iClassWidth, "class_width", "35", "proportional_int" );
-	CPanelAnimationVarAliasType( int, m_iScoreWidth, "score_width", "35", "proportional_int" );
-	CPanelAnimationVarAliasType( int, m_iDeathWidth, "death_width", "35", "proportional_int" );
-	CPanelAnimationVarAliasType( int, m_iPingWidth, "ping_width", "23", "proportional_int" );
 
 private:
 	int			m_iPlayerIndexSymbol;

@@ -49,6 +49,11 @@ ConVar tf_invuln_time( "tf_invuln_time", "1.0", FCVAR_DEVELOPMENTONLY | FCVAR_RE
 ConVar tf_boost_drain_time( "tf_boost_drain_time", "15.0", FCVAR_DEVELOPMENTONLY, "Time is takes for a full health boost to drain away from a player.", true, 0.1, false, 0 );
 ConVar tf_debug_bullets( "tf_debug_bullets", "0", FCVAR_DEVELOPMENTONLY, "Visualize bullet traces." );
 ConVar tf_damage_events_track_for( "tf_damage_events_track_for", "30",  FCVAR_DEVELOPMENTONLY );
+
+ConVar tf_damage_criticalmod_mintime( "tf_damage_criticalmod_mintime", "2", FCVAR_NONE );
+ConVar tf_damage_criticalmod_maxtime( "tf_damage_criticalmod_maxtime", "20", FCVAR_NONE );
+ConVar tf_damage_criticalmod_maxmult( "tf_damage_criticalmod_maxmult", "4", FCVAR_NONE );
+ConVar tf_damage_criticalmod_damage( "tf_damage_criticalmod_damage", "800", FCVAR_NONE );
 #endif
 
 ConVar tf_useparticletracers( "tf_useparticletracers", "1", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "Use particle tracers instead of old style ones." );
@@ -1609,11 +1614,11 @@ float CTFPlayerShared::GetCritMult( void )
 void CTFPlayerShared::UpdateCritMult( void )
 {
 	const float flMinMult = 1.0;
-	const float flMaxMult = TF_DAMAGE_CRITMOD_MAXMULT;
+	const float flMaxMult = tf_damage_criticalmod_maxmult.GetFloat();
 
 	if ( m_DamageEvents.Count() == 0 )
 	{
-		m_flCritMult = RemapValClamped( flMinMult, 1.0, 4.0, 0, 255 );
+		m_flCritMult = 1.0;
 		return;
 	}
 
@@ -1634,13 +1639,13 @@ void CTFPlayerShared::UpdateCritMult( void )
 
 		// Ignore damage we've just done. We do this so that we have time to get those damage events
 		// to the client in time for using them in prediction in this code.
-		if ( flDelta < TF_DAMAGE_CRITMOD_MINTIME )
+		if ( flDelta < tf_damage_criticalmod_mintime.GetFloat() )
 		{
 			//Msg( "      Ignored (%d: time %.2f, now %.2f)\n", i, m_DamageEvents[i].flTime, gpGlobals->curtime );
 			continue;
 		}
 
-		if ( flDelta > TF_DAMAGE_CRITMOD_MAXTIME )
+		if ( flDelta > tf_damage_criticalmod_maxtime.GetFloat() )
 			continue;
 
 		//Msg( "      Added %.2f (%d: time %.2f, now %.2f)\n", m_DamageEvents[i].flDamage, i, m_DamageEvents[i].flTime, gpGlobals->curtime );
@@ -1648,11 +1653,11 @@ void CTFPlayerShared::UpdateCritMult( void )
 		flTotalDamage += m_DamageEvents[i].flDamage;
 	}
 
-	float flMult = RemapValClamped( flTotalDamage, 0, TF_DAMAGE_CRITMOD_DAMAGE, flMinMult, flMaxMult );
+	float flMult = RemapValClamped( flTotalDamage, 0, tf_damage_criticalmod_damage.GetFloat(), flMinMult, flMaxMult );
 
 	//Msg( "   TotalDamage: %.2f   -> Mult %.2f\n", flTotalDamage, flMult );
 
-	m_flCritMult = (int)RemapValClamped( flMult, 1.0, 4.0, 0, 255 );
+	m_flCritMult = flMult;
 }
 
 //-----------------------------------------------------------------------------

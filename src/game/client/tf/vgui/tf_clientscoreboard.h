@@ -57,10 +57,9 @@ private:
 
 	static bool TFPlayerSortFunc( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
 
-	vgui::SectionedListPanel *GetSelectedPlayerList( void );
-
 	vgui::SectionedListPanel	*m_pPlayerListBlue;
 	vgui::SectionedListPanel	*m_pPlayerListRed;
+	vgui::ImageList				*m_pImageList;
 	CTFLabel					*m_pLabelPlayerName;
 	vgui::ImagePanel			*m_pImagePanelHorizLine;
 	CTFClassImage				*m_pClassImage;
@@ -68,9 +67,8 @@ private:
 	int							m_iImageDead;
 	int							m_iImageDominated;
 	int							m_iImageNemesis;
-	
-	CPanelAnimationVarAliasType( int, m_iStatusWidth, "status_width", "12", "proportional_int" );
-	CPanelAnimationVarAliasType( int, m_iNemesisWidth, "nemesis_width", "20", "proportional_int" );
+	int							m_iImageAvatars[MAX_PLAYERS+1];
+	CUtlMap<int,int>			m_mapAvatarsToImageList;
 };
 
 const wchar_t *GetPointsString( int iPoints );

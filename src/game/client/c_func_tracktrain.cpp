@@ -25,9 +25,6 @@ public:
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 	virtual bool GetSoundSpatialization( SpatializationInfo_t& info );
 
-	virtual bool IsBaseTrain( void ) const { return true; }
-
-
 private:
 	int m_nLongAxis;
 	float m_flRadius;

@@ -43,7 +43,7 @@ using namespace vgui;
 
 #define SCOREBOARD_MAX_LIST_ENTRIES 12
 
-extern bool IsInCommentaryMode( void );
+extern bool AvatarIndexLessFunc( const int &lhs, const int &rhs );
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -69,6 +69,12 @@ CTFClientScoreBoardDialog::CTFClientScoreBoardDialog( IViewPort *pViewPort ) : C
 	SetDialogVariable( "server", "" );
 
 	SetVisible( false );
+
+	m_pImageList = NULL;
+
+	m_mapAvatarsToImageList.SetLessFunc( AvatarIndexLessFunc );
+	m_mapAvatarsToImageList.RemoveAll();
+	memset( &m_iImageAvatars, 0, sizeof(int) * (MAX_PLAYERS+1) );
 }
 
 //-----------------------------------------------------------------------------
@@ -94,19 +100,23 @@ void CTFClientScoreBoardDialog::ApplySchemeSettings( vgui::IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	LoadControlSettings("Resource/UI/scoreboard.res");
-
+	
 	if ( m_pImageList )
-	{
-		m_iImageDead = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_dead", true ) );
-		m_iImageDominated = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_dominated", true ) );
-		m_iImageNemesis = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_nemesis", true ) );
+		delete m_pImageList;
+	m_pImageList = new ImageList( false );
+
+	m_mapAvatarsToImageList.RemoveAll();
+	memset( &m_iImageAvatars, 0, sizeof(int) * (MAX_PLAYERS+1) );
+
+	m_iImageDead = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_dead", true ) );
+	m_iImageDominated = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_dominated", true ) );
+	m_iImageNemesis = m_pImageList->AddImage( scheme()->GetImage( "../hud/leaderboard_nemesis", true ) );
 		
-		// resize the images to our resolution
-		for (int i = 1; i < m_pImageList->GetImageCount(); i++ )
-		{
-			int wide = 13, tall = 13;
-			m_pImageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(), wide ), scheme()->GetProportionalScaledValueEx( GetScheme(),tall ) );
-		}
+	// resize the images to our resolution
+	for (int i = 1; i < m_pImageList->GetImageCount(); i++ )
+	{
+		int wide = 13, tall = 13;
+		m_pImageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(), wide ), scheme()->GetProportionalScaledValueEx( GetScheme(),tall ) );
 	}
 
 	SetPlayerListImages( m_pPlayerListBlue );
@@ -124,45 +134,19 @@ void CTFClientScoreBoardDialog::ApplySchemeSettings( vgui::IScheme *pScheme )
 //-----------------------------------------------------------------------------
 void CTFClientScoreBoardDialog::ShowPanel( bool bShow )
 {
-	// Catch the case where we call ShowPanel before ApplySchemeSettings, eg when
-	// going from windowed <-> fullscreen
-	if ( m_pImageList == NULL )
-	{
-		InvalidateLayout( true, true );
-	}
-
-	// Don't show in commentary mode
-	if ( IsInCommentaryMode() )
-	{
-		bShow = false;
-	}
-	
 	if ( IsVisible() == bShow )
 	{
 		return;
 	}
 
-	int iRenderGroup = gHUD.LookupRenderGroupIndexByName( "global" );
-
 	if ( bShow )
 	{		
 		SetVisible( true );
 		MoveToFront();
-
-		gHUD.LockRenderGroup( iRenderGroup );
-
-		// Clear the selected item, this forces the default to the local player
-		SectionedListPanel *pList = GetSelectedPlayerList();
-		if ( pList )
-		{
-			pList->ClearSelection();
-		}
 	}
 	else
 	{
 		SetVisible( false );
-
-		gHUD.UnlockRenderGroup( iRenderGroup );
 	}
 }
 
@@ -190,16 +174,26 @@ void CTFClientScoreBoardDialog::InitPlayerList( SectionedListPanel *pPlayerList 
 	pPlayerList->SetBorder( NULL );
 
 	// Avatars are always displayed at 32x32 regardless of resolution
-	if ( ShowAvatars() )
-	{
-		pPlayerList->AddColumnToSection( 0, "avatar", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, m_iAvatarWidth );
-	}
-	pPlayerList->AddColumnToSection( 0, "name", "#TF_Scoreboard_Name", 0, m_iNameWidth );
-	pPlayerList->AddColumnToSection( 0, "status", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, m_iStatusWidth );
-	pPlayerList->AddColumnToSection( 0, "nemesis", "", SectionedListPanel::COLUMN_IMAGE, m_iNemesisWidth );
-	pPlayerList->AddColumnToSection( 0, "class", "", 0, m_iClassWidth );
-	pPlayerList->AddColumnToSection( 0, "score", "#TF_Scoreboard_Score", SectionedListPanel::COLUMN_RIGHT, m_iScoreWidth );
-	pPlayerList->AddColumnToSection( 0, "ping", "#TF_Scoreboard_Ping", SectionedListPanel::COLUMN_RIGHT, m_iPingWidth );
+	int nAvatarWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 34 );
+	pPlayerList->AddColumnToSection( 0, "avatar", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, nAvatarWidth );
+	
+	int nNameWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 136 );
+	pPlayerList->AddColumnToSection( 0, "name", "#TF_Scoreboard_Name", 0, nNameWidth - nAvatarWidth );
+	
+	int nStatusWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 12 );
+	pPlayerList->AddColumnToSection( 0, "status", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, nStatusWidth );
+	
+	int nNemesisWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 20 );
+	pPlayerList->AddColumnToSection( 0, "nemesis", "", SectionedListPanel::COLUMN_IMAGE, nNemesisWidth );
+
+	int nClassWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 35 );
+	pPlayerList->AddColumnToSection( 0, "class", "", 0, nClassWidth );
+
+	int nScoreWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 35 );
+	pPlayerList->AddColumnToSection( 0, "score", "#TF_Scoreboard_Score", SectionedListPanel::COLUMN_RIGHT, nScoreWidth );
+
+	int nPingWidth = scheme()->GetProportionalScaledValueEx( GetScheme(), 23 );
+	pPlayerList->AddColumnToSection( 0, "ping", "#TF_Scoreboard_Ping", SectionedListPanel::COLUMN_RIGHT, nPingWidth );
 }
 
 //-----------------------------------------------------------------------------
@@ -299,25 +293,6 @@ bool AreEnemyTeams( int iTeam1, int iTeam2 )
 //-----------------------------------------------------------------------------
 void CTFClientScoreBoardDialog::UpdatePlayerList()
 {
-	int iSelectedPlayerIndex = GetLocalPlayerIndex();
-
-	// Save off which player we had selected
-	SectionedListPanel *pList = GetSelectedPlayerList();
-
-	if ( pList )
-	{
-		int itemID = pList->GetSelectedItem();
-
-		if ( itemID >= 0 )
-		{
-			KeyValues *pInfo = pList->GetItemData( itemID );
-			if ( pInfo )
-			{
-				iSelectedPlayerIndex = pInfo->GetInt( "playerIndex" );
-			}
-		}
-	}	
-
 	m_pPlayerListRed->RemoveAll();
 	m_pPlayerListBlue->RemoveAll();
 
@@ -433,15 +408,59 @@ void CTFClientScoreBoardDialog::UpdatePlayerList()
 			{
 				pKeyValues->SetInt( "ping", g_PR->GetPing( playerIndex ) );
 			}
+			
+			
+			// Update their avatar
+			
+			// TFP3: SteamFriends() and SteamUtils() doesn't exist in the 2007 SDK, instead we're going to use CSteamAPIContext
+			CSteamAPIContext SteamAPIContext;
+			SteamAPIContext.Init();
+			ISteamFriends *pSteamFriends = SteamAPIContext.SteamFriends();
+			ISteamUtils *pSteamUtils = SteamAPIContext.SteamUtils();
 
+			if ( pKeyValues && pSteamFriends && pSteamUtils )
+			{
+				player_info_t pi;
+				if ( engine->GetPlayerInfo( playerIndex, &pi ) )
+				{
+					if ( pi.friendsID )
+					{
+						CSteamID steamIDForPlayer( pi.friendsID, 1, pSteamUtils->GetConnectedUniverse(), k_EAccountTypeIndividual );
 
-			UpdatePlayerAvatar( playerIndex, pKeyValues );
+						// See if the avatar's changed
+						int iAvatar = pSteamFriends->GetFriendAvatar( steamIDForPlayer );
+						if ( m_iImageAvatars[playerIndex] != iAvatar )
+						{
+							m_iImageAvatars[playerIndex] = iAvatar;
+
+							// Now see if we already have that avatar in our list
+							int iIndex = m_mapAvatarsToImageList.Find( iAvatar );
+							if ( iIndex == m_mapAvatarsToImageList.InvalidIndex() )
+							{
+								CAvatarImage *pImage = new CAvatarImage();
+								pImage->SetAvatarSteamID( steamIDForPlayer );
+								pImage->SetSize( 32, 32 );	// Deliberately non scaling
+								int iImageIndex = m_pImageList->AddImage( pImage );
+
+								m_mapAvatarsToImageList.Insert( iAvatar, iImageIndex );
+							}
+						}
+
+						int iIndex = m_mapAvatarsToImageList.Find( iAvatar );
+
+						if ( iIndex != m_mapAvatarsToImageList.InvalidIndex() )
+						{
+							pKeyValues->SetInt( "avatar", m_mapAvatarsToImageList[iIndex] );
+						}
+					}
+				}
+			}
 			
 			int itemID = pPlayerList->AddItem( 0, pKeyValues );
 			Color clr = g_PR->GetTeamColor( g_PR->GetTeam( playerIndex ) );
 			pPlayerList->SetItemFgColor( itemID, clr );
 
-			if ( iSelectedPlayerIndex == playerIndex )
+			if ( GetLocalPlayerIndex() == playerIndex )
 			{
 				bMadeSelection = true;
 				pPlayerList->SetSelectedItem( itemID );
@@ -559,53 +578,21 @@ void CTFClientScoreBoardDialog::ClearPlayerDetails()
 {
 	m_pClassImage->SetVisible( false );
 
-	// HLTV has no game stats
-	bool bVisible = !engine->IsHLTV();
-
 	SetDialogVariable( "kills", "" ); 
-	SetControlVisible( "KillsLabel", bVisible );
-
 	SetDialogVariable( "deaths", "" );
-	SetControlVisible( "DeathsLabel", bVisible );
-
 	SetDialogVariable( "captures", "" );
-	SetControlVisible( "CapturesLabel", bVisible );
-
 	SetDialogVariable( "defenses", "" );
-	SetControlVisible( "DefensesLabel", bVisible );
-
 	SetDialogVariable( "dominations", "" );
-	SetControlVisible( "DominationLabel", bVisible );
-
 	SetDialogVariable( "revenge", "" );
-	SetControlVisible( "RevengeLabel", bVisible );
-
 	SetDialogVariable( "assists", "" );
-	SetControlVisible( "AssistsLabel", bVisible );
-
 	SetDialogVariable( "destruction", "" );
-	SetControlVisible( "DestructionLabel", bVisible );
-
 	SetDialogVariable( "healing", "" );
-	SetControlVisible( "HealingLabel", bVisible );
-
 	SetDialogVariable( "invulns", "" );
-	SetControlVisible( "InvulnLabel", bVisible );
-
 	SetDialogVariable( "teleports", "" );
-	SetControlVisible( "TeleportsLabel", bVisible );
-
 	SetDialogVariable( "headshots", "" );
-	SetControlVisible( "HeadshotsLabel", bVisible );
-
 	SetDialogVariable( "backstabs", "" );
-	SetControlVisible( "BackstabsLabel", bVisible );
-
 	SetDialogVariable( "playername", "" );
-
 	SetDialogVariable( "playerscore", "" );
-
-	
 }
 
 //-----------------------------------------------------------------------------
@@ -692,26 +679,6 @@ void CTFClientScoreBoardDialog::FireGameEvent( IGameEvent *event )
 	{
 		Update();
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-SectionedListPanel *CTFClientScoreBoardDialog::GetSelectedPlayerList( void )
-{
-	SectionedListPanel *pList = NULL;
-
-	// navigation
-	if ( m_pPlayerListBlue->GetSelectedItem() >= 0 )
-	{
-		pList = m_pPlayerListBlue;
-	}
-	else if ( m_pPlayerListRed->GetSelectedItem() >= 0 )
-	{
-		pList = m_pPlayerListRed;
-	}
-
-	return pList;
 }
 
 #if defined ( _X360 )

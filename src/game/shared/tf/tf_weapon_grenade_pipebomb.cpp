@@ -49,18 +49,13 @@ BEGIN_NETWORK_TABLE( CTFGrenadePipebombProjectile, DT_TFProjectile_Pipebomb )
 #ifdef CLIENT_DLL
 RecvPropInt( RECVINFO( m_bTouched ) ),
 RecvPropInt( RECVINFO( m_iType ) ),
-RecvPropEHandle( RECVINFO( m_hLauncher ) ),
+RecvPropVector( RECVINFO( m_vecFirePosition ) ),
 #else
 SendPropBool( SENDINFO( m_bTouched ) ),
 SendPropInt( SENDINFO( m_iType ), 2 ),
-SendPropEHandle( SENDINFO( m_hLauncher ) ),
-
+SendPropVector( SENDINFO( m_vecFirePosition ) ),
 #endif
 END_NETWORK_TABLE()
-
-#ifdef GAME_DLL
-static string_t s_iszTrainName;
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -70,9 +65,6 @@ CTFGrenadePipebombProjectile::CTFGrenadePipebombProjectile()
 {
 	m_bTouched = false;
 	m_flChargeTime = 0.0f;
-#ifdef GAME_DLL
-	s_iszTrainName  = AllocPooledString( "models/props_vehicles/train_enginecar.mdl" );
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -139,47 +131,6 @@ void CTFGrenadePipebombProjectile::OnDataChanged(DataUpdateType_t updateType)
 	{
 		m_flCreationTime = gpGlobals->curtime;
 		ParticleProp()->Create( GetTrailParticleName(), PATTACH_ABSORIGIN_FOLLOW );
-
-		CTFPipebombLauncher *pLauncher = dynamic_cast<CTFPipebombLauncher*>( m_hLauncher.Get() );
-
-		if ( pLauncher )
-		{
-			CTFPipebombLauncher::PipebombHandle hHandle;
-			hHandle = this;
-			pLauncher->m_Pipebombs.AddToTail( hHandle );
-		}
-
-		if ( m_bCritical )
-		{
-			switch( GetTeamNumber() )
-			{
-			case TF_TEAM_BLUE:
-
-				if ( m_iType == TF_GL_MODE_REMOTE_DETONATE )
-				{
-					ParticleProp()->Create( "critical_grenade_blue", PATTACH_ABSORIGIN_FOLLOW );
-				}
-				else
-				{
-					ParticleProp()->Create( "critical_pipe_blue", PATTACH_ABSORIGIN_FOLLOW );
-				}
-				break;
-			case TF_TEAM_RED:
-
-				if ( m_iType == TF_GL_MODE_REMOTE_DETONATE )
-				{
-					ParticleProp()->Create( "critical_grenade_red", PATTACH_ABSORIGIN_FOLLOW );
-				}
-				else
-				{
-					ParticleProp()->Create( "critical_pipe_red", PATTACH_ABSORIGIN_FOLLOW );
-				}
-				break;
-			default:
-				break;
-			}
-		}
-
 	}
 }
 
@@ -189,9 +140,17 @@ void CTFGrenadePipebombProjectile::OnDataChanged(DataUpdateType_t updateType)
 //-----------------------------------------------------------------------------
 int CTFGrenadePipebombProjectile::DrawModel( int flags )
 {
-	if ( gpGlobals->curtime < ( m_flCreationTime + 0.1 ) )
+	if ( gpGlobals->curtime < ( m_flCreationTime + 0.2 ) )
 		return 0;
+	// tfp3: Revisit later, too buggy right now
+#if 0
+	Vector vecToFirePos = m_vInitialVelocity - m_vecFirePosition;
 
+	Vector vecVelocity;
+	EstimateAbsVelocity( vecVelocity );
+	if ( DotProduct( vecVelocity, vecToFirePos ) < 0 )
+		return 0;
+#endif
 	return BaseClass::DrawModel( flags );
 }
 
@@ -205,7 +164,6 @@ int CTFGrenadePipebombProjectile::DrawModel( int flags )
 #define TF_WEAPON_PIPEBOMB_MODEL		"models/weapons/w_models/w_stickybomb.mdl"
 #define TF_WEAPON_PIPEBOMB_BOUNCE_SOUND	"Weapon_Grenade_Pipebomb.Bounce"
 #define TF_WEAPON_GRENADE_DETONATE_TIME 6.0f
-#define TF_WEAPON_GRENADE_XBOX_DAMAGE 112
 
 BEGIN_DATADESC( CTFGrenadePipebombProjectile )
 END_DATADESC()
@@ -232,22 +190,8 @@ CTFGrenadePipebombProjectile* CTFGrenadePipebombProjectile::Create( const Vector
 
 		pGrenade->InitGrenade( velocity, angVelocity, pOwner, weaponInfo );
 
-#ifdef _X360 
-		if ( pGrenade->m_iType != TF_GL_MODE_REMOTE_DETONATE )
-		{
-			pGrenade->SetDamage( TF_WEAPON_GRENADE_XBOX_DAMAGE );
-		}
-#endif
-		pGrenade->m_flFullDamage = pGrenade->GetDamage();
-
-		if ( pGrenade->m_iType != TF_GL_MODE_REMOTE_DETONATE )
-		{
-			// Some hackery here. Reduce the damage by 25%, so that if we explode on timeout,
-			// we'll do less damage. If we explode on contact, we'll restore this to full damage.
-			pGrenade->SetDamage( pGrenade->GetDamage() * TF_WEAPON_PIPEBOMB_TIMER_DMG_REDUCTION );
-		}
-
 		pGrenade->ApplyLocalAngularVelocityImpulse( angVelocity );
+		pGrenade->m_vecFirePosition = position;
 	}
 
 	return pGrenade;
@@ -402,14 +346,6 @@ void CTFGrenadePipebombProjectile::PipebombTouch( CBaseEntity *pOther )
 			}
 		}
 
-		// Restore damage. See comment in CTFGrenadePipebombProjectile::Create() above to understand this.
-		m_flDamage = m_flFullDamage;
-		Explode( &pTrace, GetDamageType() );
-	}
-
-	// Train hack!
-	if ( pOther->GetModelName() == s_iszTrainName && ( pOther->GetAbsVelocity().LengthSqr() > 1.0f ) )
-	{
 		Explode( &pTrace, GetDamageType() );
 	}
 }
