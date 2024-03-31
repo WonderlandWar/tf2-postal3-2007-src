@@ -59,13 +59,9 @@ protected:
 	CTFRichText			*m_pMapInfo;
 	vgui::HTML			*m_pMapInfoHTML;
 
-#ifdef _X360
-	CTFFooter			*m_pFooter;
-#else
 	CTFButton			*m_pContinue;
 	CTFButton			*m_pBack;
 	CTFButton			*m_pIntro;
-#endif
 
 	vgui::ImagePanel	*m_pMapImage;
 

@@ -69,11 +69,7 @@ private:
 	CTFTeamButton	*m_pAutoTeamButton;
 	CTFTeamButton	*m_pSpecTeamButton;
 
-#ifdef _X360
-	CTFFooter		*m_pFooter;
-#else
 	CTFButton		*m_pCancelButton;
-#endif
 
 	bool m_bRedDisabled;
 	bool m_bBlueDisabled;

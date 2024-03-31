@@ -55,11 +55,7 @@ protected:
 	vgui::ImagePanel	*m_pRoundImage;
 	vgui::ImagePanel	*m_pStateImage;
 	
-#ifdef _X360
-	CTFFooter			*m_pFooter;
-#else
 	CTFButton			*m_pContinue;
-#endif
 	
     ButtonCode_t		m_iRoundInfoKey;
     

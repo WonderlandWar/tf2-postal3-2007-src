@@ -71,10 +71,6 @@ private:
 	CTFVideoPanel	*m_pVideo;
 	CModelPanel		*m_pModel;
 
-#ifdef _X360
-	CTFFooter		*m_pFooter;
-#endif
-
 	float			m_flThink;
 	int				m_iAction;
 };

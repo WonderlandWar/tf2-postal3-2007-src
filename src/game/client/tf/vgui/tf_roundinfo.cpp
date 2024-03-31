@@ -63,11 +63,7 @@ CTFRoundInfo::CTFRoundInfo( IViewPort *pViewPort ) : Frame( NULL, PANEL_ROUNDINF
 	m_pStateImage = new ImagePanel( this, "StateImage" );
 	m_pRoundImage = new ImagePanel( this, "RoundImage" );
 
-#ifdef _X360
-	m_pFooter = new CTFFooter( this, "Footer" );
-#else
 	m_pContinue = new CTFButton( this, "RoundContinue", "#TF_Continue" );
-#endif
 
 	m_szTitle[0] = 0;
 	m_szMapImage[0] = 0;

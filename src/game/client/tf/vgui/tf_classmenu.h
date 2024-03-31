@@ -102,10 +102,6 @@ protected:
 
 private:
 
-#ifdef _X360
-	CTFFooter		*m_pFooter;
-#endif
-
 	ButtonCode_t	m_iClassMenuKey;
 	int				m_iCurrentClassIndex;
 };

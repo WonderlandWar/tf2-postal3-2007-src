@@ -78,10 +78,6 @@ CTFClassMenu::CTFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	m_iClassMenuKey = BUTTON_CODE_INVALID;
 	m_iCurrentClassIndex = TF_CLASS_HEAVYWEAPONS;
 
-#ifdef _X360
-	m_pFooter = new CTFFooter( this, "Footer" );
-#endif
-
 	m_pClassInfoPanel = new CTFClassInfoPanel( this, "ClassInfoPanel" );
 	LoadControlSettings( "Resource/UI/ClassInfoPanel.res" );
 

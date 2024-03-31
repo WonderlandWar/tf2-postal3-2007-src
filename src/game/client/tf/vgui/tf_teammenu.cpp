@@ -70,11 +70,7 @@ CTFTeamMenu::CTFTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	m_pAutoTeamButton = new CTFTeamButton( this, "teambutton2" );
 	m_pSpecTeamButton = new CTFTeamButton( this, "teambutton3" );
 
-#ifdef _X360
-	m_pFooter = new CTFFooter( this, "Footer" );
-#else
 	m_pCancelButton = new CTFButton( this, "CancelButton", "#TF_Cancel" );
-#endif
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
 

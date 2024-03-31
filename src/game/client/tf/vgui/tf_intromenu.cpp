@@ -55,10 +55,6 @@ CTFIntroMenu::CTFIntroMenu( IViewPort *pViewPort ) : CIntroMenu( pViewPort )
 {
 	LoadControlSettings( "Resource/UI/IntroMenu.res" );
 
-#ifdef _X360
-	m_pFooter = new CTFFooter( this, "Footer" );
-#endif
-
 	m_flThink = -1;
 	m_iAction = INTRO_NONE;
 

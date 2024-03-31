@@ -51,13 +51,9 @@ CTFMapInfoMenu::CTFMapInfoMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_MAPI
 
 	m_pTitle = new CTFLabel( this, "MapInfoTitle", " " );
 
-#ifdef _X360
-	m_pFooter = new CTFFooter( this, "Footer" );
-#else
 	m_pContinue = new CTFButton( this, "MapInfoContinue", "#TF_Continue" );
 	m_pBack = new CTFButton( this, "MapInfoBack", "#TF_Back" );
 	m_pIntro = new CTFButton( this, "MapInfoWatchIntro", "#TF_WatchIntro" );
-#endif
 
 	// info window about this map
 	m_pMapInfo = new CTFRichText( this, "MapInfoText" );
