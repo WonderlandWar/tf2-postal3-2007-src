@@ -42,8 +42,6 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 CTFTextWindow::CTFTextWindow( IViewPort *pViewPort ) : CTextWindow( pViewPort )
 {
-	m_pTFTextMessage = new CTFRichText( this, "TFTextMessage" );
-
 	SetProportional( true );
 }
 
@@ -59,15 +57,11 @@ CTFTextWindow::~CTFTextWindow()
 //-----------------------------------------------------------------------------
 void CTFTextWindow::ApplySchemeSettings( IScheme *pScheme )
 {
-	Frame::ApplySchemeSettings( pScheme );  // purposely skipping the CTextWindow version
-
-	LoadControlSettings("Resource/UI/TextWindow.res");
-
-	Reset();
-
-	if ( m_pHTMLMessage )
+	BaseClass::ApplySchemeSettings( pScheme );
+	
+	if ( m_pTextMessage )
 	{
-		m_pHTMLMessage->SetBgColor( pScheme->GetColor( "HTMLBackground", Color( 255, 0, 0, 255 ) ) );
+		m_pTextMessage->SetFont( pScheme->GetFont( "ChalkboardText", true ) );
 	}
 }
 
@@ -88,11 +82,6 @@ void CTFTextWindow::Update()
 	if ( pTitle )
 	{
 		pTitle->SetText( m_szTitle );
-	}
-
-	if ( m_pTFTextMessage )
-	{
-		m_pTFTextMessage->SetVisible( false );
 	}
 
 	BaseClass::Update();
@@ -142,14 +131,7 @@ void CTFTextWindow::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 void CTFTextWindow::OnKeyCodePressed( KeyCode code )
 {
-	if ( code == KEY_XBUTTON_A )
-	{
-		OnCommand( "okay" );		
-	}
-	else
-	{
-		BaseClass::OnKeyCodePressed( code );
-	}
+	BaseClass::OnKeyCodePressed( code );
 }
 
 //-----------------------------------------------------------------------------
@@ -172,50 +154,5 @@ void CTFTextWindow::OnCommand( const char *command )
 	else
 	{
 		BaseClass::OnCommand( command );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFTextWindow::ShowText( const char *text )
-{
-	ShowTitleLabel( true );
-
-	if ( m_pTFTextMessage )
-	{
-		m_pTFTextMessage->SetVisible( true );
-		m_pTFTextMessage->SetText( text );
-		m_pTFTextMessage->GotoTextStart();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFTextWindow::ShowURL( const char *URL )
-{
-	ShowTitleLabel( false )	;
-	BaseClass::ShowURL( URL );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFTextWindow::ShowFile( const char *filename )
-{
-	ShowTitleLabel( false )	;
-	BaseClass::ShowFile( filename );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFTextWindow::ShowTitleLabel( bool show )
-{
-	CTFLabel *pTitle = dynamic_cast<CTFLabel *>( FindChildByName( "TFMessageTitle" ) );
-	if ( pTitle )
-	{
-		pTitle->SetVisible( show );
 	}
 }

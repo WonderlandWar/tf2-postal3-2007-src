@@ -18,7 +18,7 @@
 #include "clientmode_shared.h"
 #include "c_baseplayer.h"
 #include "c_team.h"
-#if defined ( TF_DLL )
+#if defined ( TF_CLIENT_DLL )
 #include "tf_shareddefs.h"
 #endif
 
@@ -420,7 +420,7 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		Msg( "%s defended %s for team #%d\n", m_DeathNotices[iMsg].Killer.szName, m_DeathNotices[iMsg].Victim.szName, m_DeathNotices[iMsg].Killer.iTeam );
 	}
 //Tony; this is tf2 specific, it should be moved to hud_tfdeathnotice!!
-#if defined ( TF_DLL )
+#if defined ( TF_CLIENT_DLL )
 	else if ( FStrEq( "teamplay_flag_event", pszEventName ) )
 	{
 		const char *pszMsgKey = NULL;
@@ -483,7 +483,7 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		if ( !m_DeathNotices[iMsg].iconDeath )
 		{
 			// Can't find it, so use the default skull & crossbones icon
-#if defined ( TF_DLL )
+#if defined ( TF_CLIENT_DLL )
 			m_DeathNotices[iMsg].iconDeath = GetIcon( "d_skull_tf", m_DeathNotices[iMsg].bLocalPlayerInvolved );
 #else
 			m_DeathNotices[iMsg].iconDeath = GetIcon( "d_skull", m_DeathNotices[iMsg].bLocalPlayerInvolved );

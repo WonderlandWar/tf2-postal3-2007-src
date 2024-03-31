@@ -2854,7 +2854,6 @@ void CTFPlayer::Event_Killed( const CTakeDamageInfo &info )
 			{
 				event->SetInt( "player", pPlayerAttacker->entindex() );
 				event->SetInt( "eventtype", TF_FLAGEVENT_DEFEND );
-				event->SetInt( "priority", 8 );
 				gameeventmanager->FireEvent( event );
 			}
 			CTF_GameStats.Event_PlayerDefendedPoint( pPlayerAttacker );

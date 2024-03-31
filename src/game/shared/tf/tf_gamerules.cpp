@@ -423,8 +423,6 @@ static const char *s_PreserveEnts[] =
 	"tf_player_manager",
 	"tf_team",
 	"tf_objective_resource",
-	"keyframe_rope",
-	"move_rope",
 	"tf_viewmodel",
 	"", // END Marker
 };

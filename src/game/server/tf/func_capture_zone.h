@@ -43,8 +43,6 @@ private:
 	COutputEvent	m_outputOnCapture;	// Fired a flag is captured on this point.
 
 	DECLARE_DATADESC();
-
-	float			m_flNextTouchingEnemyZoneWarning;	// don't spew warnings to the player who is touching the wrong cap
 };
 
 #endif // FUNC_CAPTURE_ZONE_H

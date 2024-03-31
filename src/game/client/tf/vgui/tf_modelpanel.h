@@ -109,7 +109,6 @@ public:
 		m_nSkin = -1;
 		m_vecAbsAngles.Init();
 		m_vecOriginOffset.Init();
-		m_bUseSpotlight = false;
 	}
 
 	~CModelPanelModelInfo()
@@ -143,7 +142,6 @@ public:
 	const char	*m_pszVCD;
 	Vector		m_vecAbsAngles;
 	Vector		m_vecOriginOffset;
-	bool		m_bUseSpotlight;
 
 	CUtlVector<CModelPanelModelAnimation*>		m_Animations;
 	CUtlVector<CModelPanelAttachedModelInfo*>	m_AttachedModelsInfo;
@@ -168,10 +166,6 @@ public:
 	virtual void SetFOV( int nFOV ){ m_nFOV = nFOV; }
 	virtual void SetPanelDirty( void ){ m_bPanelDirty = true; }
 	virtual bool SetSequence( const char *pszSequence );
-
-	MESSAGE_FUNC_PARAMS( OnSetAnimation, "SetAnimation", data );
-
-	void	SetDefaultAnimation( const char *pszName );
 
 public: // IGameEventListener:
 	virtual void FireGameEvent( IGameEvent * event );

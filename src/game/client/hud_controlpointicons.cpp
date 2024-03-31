@@ -1264,6 +1264,14 @@ void CControlPointProgressBar::UpdateBarText( void )
 	int iPlayerTeam = pPlayer->GetTeamNumber();
 	int iOwnerTeam = ObjectiveResource()->GetOwningTeam( iCP );
 
+	CHudControlPointIcons *pIcons = GET_HUDELEMENT( CHudControlPointIcons );
+
+	if ( pIcons->IsFakingCapture( iCP ) )
+	{
+		m_pBarText->SetText( "#Team_Capture_OwnPoint" );
+		return;
+	}
+
 	if ( !TeamplayGameRules()->PointsMayBeCaptured() )
 	{
 		m_pBarText->SetText( "#Team_Capture_NotNow" );
@@ -1286,17 +1294,6 @@ void CControlPointProgressBar::UpdateBarText( void )
 
 	if ( ObjectiveResource()->GetOwningTeam(iCP) == iPlayerTeam )
 	{
-		// If the opponents can never recapture this point back, we use a different string
-		if ( iPlayerTeam != TEAM_UNASSIGNED )
-		{
-			int iEnemyTeam = ( iPlayerTeam == TF_TEAM_RED ) ? TF_TEAM_BLUE : TF_TEAM_RED;
-			if ( !ObjectiveResource()->TeamCanCapPoint( iCP, iEnemyTeam ) )
-			{
-				m_pBarText->SetText( "#Team_Capture_Owned" );
-				return;
-			}
-		}
-
 		m_pBarText->SetText( "#Team_Capture_OwnPoint" );
 		return;
 	}

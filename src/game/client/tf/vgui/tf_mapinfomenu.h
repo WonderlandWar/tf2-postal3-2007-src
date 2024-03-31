@@ -57,6 +57,7 @@ protected:
 	IViewPort			*m_pViewPort;
 	CTFLabel			*m_pTitle;
 	CTFRichText			*m_pMapInfo;
+	vgui::HTML			*m_pMapInfoHTML;
 
 #ifdef _X360
 	CTFFooter			*m_pFooter;

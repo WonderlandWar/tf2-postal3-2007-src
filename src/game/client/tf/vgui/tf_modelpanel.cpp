@@ -113,7 +113,6 @@ void CModelPanel::ParseModelInfo( KeyValues *inResourceData )
 	m_pModelInfo->m_vecAbsAngles.Init( inResourceData->GetFloat( "angles_x", 0.0 ), inResourceData->GetFloat( "angles_y", 0.0 ), inResourceData->GetFloat( "angles_z", 0.0 ) );
 	m_pModelInfo->m_vecOriginOffset.Init( inResourceData->GetFloat( "origin_x", 110.0 ), inResourceData->GetFloat( "origin_y", 5.0 ), inResourceData->GetFloat( "origin_z", 5.0 ) );
 	m_pModelInfo->m_pszVCD = ReadAndAllocStringValue( inResourceData, "vcd" );
-	m_pModelInfo->m_bUseSpotlight = ( inResourceData->GetInt( "spotlight", 0 ) == 1 );
 	
 	for ( KeyValues *pData = inResourceData->GetFirstSubKey(); pData != NULL; pData = pData->GetNextKey() )
 	{
@@ -169,29 +168,6 @@ void CModelPanel::FireGameEvent( IGameEvent * event )
 		// force the models to re-setup themselves
 		m_bPanelDirty = true;
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CModelPanel::SetDefaultAnimation( const char *pszName )
-{
-	if ( m_pModelInfo )
-	{
-		for ( int i = 0; i < m_pModelInfo->m_Animations.Count(); i++ )
-		{
-			if ( m_pModelInfo->m_Animations[i] && m_pModelInfo->m_Animations[i]->m_pszName )
-			{
-				if ( !Q_stricmp( m_pModelInfo->m_Animations[i]->m_pszName, pszName ) )
-				{
-					m_iDefaultAnimation = i;
-					return;
-				}
-			}
-		}
-	}
-
-	Assert( 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -514,15 +490,6 @@ void CModelPanel::Paint()
 
 	g_pStudioRender->SetAmbientLightColors( white );
 	g_pStudioRender->SetLocalLights( 0, NULL );
-
-	if ( m_pModelInfo->m_bUseSpotlight )
-	{
-		Vector vecMins, vecMaxs;
-		m_hModel->GetRenderBounds( vecMins, vecMaxs );
-		LightDesc_t spotLight( vec3_origin + Vector( 0, 0, 200 ), Vector( 1, 1, 1 ), m_hModel->GetAbsOrigin() + Vector( 0, 0, ( vecMaxs.z - vecMins.z ) * 0.75 ), 0.035, 0.873 );
-		g_pStudioRender->SetLocalLights( 1, &spotLight );
-	}
-
 	Frustum dummyFrustum;
 	render->Push3DView( view, 0, NULL, dummyFrustum );
 
@@ -592,16 +559,4 @@ bool CModelPanel::SetSequence( const char *pszName )
 	}
 
 	return bRetVal;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CModelPanel::OnSetAnimation( KeyValues *data )
-{
-	if ( data )
-	{
-		const char *pszAnimation = data->GetString( "animation", "" );
-		SetSequence( pszAnimation );
-	}
 }

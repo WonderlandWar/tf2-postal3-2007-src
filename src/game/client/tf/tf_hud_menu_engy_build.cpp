@@ -23,9 +23,6 @@
 
 using namespace vgui;
 
-// Set to 1 to simulate xbox-style menu interaction
-ConVar tf_build_menu_controller_mode( "tf_build_menu_controller_mode", "0", FCVAR_ARCHIVE, "Use console controller build menus. 1 = ON, 0 = OFF." );
-
 //======================================
 
 DECLARE_HUDELEMENT_DEPTH( CHudMenuEngyBuild, 40 );	// in front of engy building status

@@ -237,6 +237,12 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 		if ( m_pMapImage && m_pMapImage->IsVisible() )
 		{
 			m_pMapImage->SetVisible( false );
+			
+			// take off the vgui/ at the beginning when we set the image
+			Q_snprintf( szMapImage, sizeof( szMapImage ), "maps/menu_photos_%s", mapName );
+			Q_strlower( szMapImage );
+			
+			m_pMapImage->SetImage( szMapImage );
 		}
 	}
 
@@ -245,23 +251,28 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 
 	char uilanguage[ 64 ];
 	engine->GetUILanguage( uilanguage, sizeof( uilanguage ) );
-
-	Q_snprintf( mapRES, sizeof( mapRES ), "maps/%s_%s.txt", mapName, uilanguage );
-
-	// try English if the file doesn't exist for our language
-	if( !g_pFullFileSystem->FileExists( mapRES, "GAME" ) )
+	V_snprintf( mapRES, sizeof(mapRES), "resource/maphtml/%s_%s.html", mapName, uilanguage );
+	
+	if ( g_pFullFileSystem->FileExists( mapRES )
+		|| (V_snprintf( mapRES, sizeof(mapRES), "resource/maphtml/%s_english.html", mapName ),
+			g_pFullFileSystem->FileExists( mapRES ) ) )
 	{
-		Q_snprintf( mapRES, sizeof( mapRES ), "maps/%s_english.txt", mapName );
-
-		// if the file doesn't exist for English either, try the filename without any language extension
-		if( !g_pFullFileSystem->FileExists( mapRES, "GAME" ) )
-		{
-			Q_snprintf( mapRES, sizeof( mapRES ), "maps/%s.txt", mapName );
-		}
+		char pPathData[MAX_PATH];
+		char localURL[MAX_PATH+7];
+		V_strncpy( localURL, "file://", sizeof( localURL ) );
+		g_pFullFileSystem->GetLocalPath( mapRES, pPathData, sizeof(mapRES) );
+		V_strncat( localURL, pPathData, sizeof( localURL ), -1 );
+		g_pFullFileSystem->GetLocalCopy( pPathData );
+		m_pMapInfo->SetVisible( false );
+		return;
 	}
 
+	m_pMapInfo->SetVisible( true );
+
+	Q_snprintf( mapRES, sizeof( mapRES ), "maps/%s.txt", mapName );
+
 	// if no map specific description exists, load default text
-	if( !g_pFullFileSystem->FileExists( mapRES, "GAME" ) )
+	if( !g_pFullFileSystem->FileExists( mapRES ) )
 	{
 		const char *pszDefault = "maps/default.txt";
 
@@ -298,7 +309,7 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 		}
 	}
 
-	FileHandle_t f = g_pFullFileSystem->Open( mapRES, "rb" );
+	FileHandle_t f = g_pFullFileSystem->Open( mapRES, "r" );
 
 	// read into a memory block
 	int fileSize = g_pFullFileSystem->Size(f);

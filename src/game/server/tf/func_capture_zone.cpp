@@ -56,8 +56,6 @@ void CCaptureZone::Spawn()
 	{
 		SetDisabled( true );
 	}
-
-	m_flNextTouchingEnemyZoneWarning = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -87,13 +85,8 @@ void CCaptureZone::Touch( CBaseEntity *pOther )
 					{
 						if ( pFlag->GetGameType() == TF_FLAGTYPE_CTF )
 						{
-							// Do this at most once every 5 seconds
-							if ( m_flNextTouchingEnemyZoneWarning < gpGlobals->curtime )
-							{
-								CSingleUserRecipientFilter filter( pPlayer );
-								TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_TOUCHING_ENEMY_CTF_CAP );
-								m_flNextTouchingEnemyZoneWarning = gpGlobals->curtime + 5;
-							}
+							CSingleUserRecipientFilter filter( pPlayer );
+							TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_TOUCHING_ENEMY_CTF_CAP );
 						}
 						else if ( pFlag->GetGameType() == TF_FLAGTYPE_INVADE )
 						{
@@ -110,25 +103,6 @@ void CCaptureZone::Touch( CBaseEntity *pOther )
 
 					// Output.
 					m_outputOnCapture.FireOutput( this, this );
-
-					IGameEvent *event = gameeventmanager->CreateEvent( "ctf_flag_captured" );
-					if ( event )
-					{
-						int iCappingTeam = pPlayer->GetTeamNumber();
-						int	iCappingTeamScore = 0;
-						CTFTeam* pCappingTeam = pPlayer->GetTFTeam();
-						if ( pCappingTeam )
-						{
-							iCappingTeamScore = pCappingTeam->GetFlagCaptures();
-						}
-
-						event->SetInt( "capping_team", iCappingTeam );
-						event->SetInt( "capping_team_score", iCappingTeamScore );
-						event->SetInt( "capper", pPlayer->GetUserID() );
-						event->SetInt( "priority", 9 ); // HLTV priority
-
-						gameeventmanager->FireEvent( event );
-					}
 				}
 			}
 		}

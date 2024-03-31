@@ -75,11 +75,6 @@ public:
 	virtual int		GetWeaponID( void ) const { return TF_WEAPON_PDA_ENGINEER_BUILD; }
 };
 
-#ifdef CLIENT_DLL
-
-extern ConVar tf_build_menu_controller_mode;
-
-#endif
 class CTFWeaponPDA_Engineer_Destroy : public CTFWeaponPDA
 {
 public:
@@ -89,20 +84,6 @@ public:
 
 	virtual const char *GetPanelName() { return ""; }
 	virtual int		GetWeaponID( void ) const { return TF_WEAPON_PDA_ENGINEER_DESTROY; }
-
-	virtual bool	VisibleInWeaponSelection( void )
-	{
-		if ( IsConsole()
-#ifdef CLIENT_DLL
-			|| tf_build_menu_controller_mode.GetBool() 
-#endif 
-			)
-		{
-			return false;
-		}
-
-		return BaseClass::VisibleInWeaponSelection();
-	}
 };
 
 class CTFWeaponPDA_Spy : public CTFWeaponPDA

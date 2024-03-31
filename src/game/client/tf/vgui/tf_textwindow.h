@@ -37,10 +37,6 @@ public:
 	virtual void ShowPanel( bool bShow );
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
-	virtual void ShowFile( const char *filename );
-	virtual void ShowURL( const char *URL );
-	virtual void ShowText( const char *text );
-	void ShowTitleLabel( bool show );
 
 public:
 	virtual void PaintBackground();
@@ -48,9 +44,6 @@ public:
 protected:
 	// vgui overrides
 	virtual void OnCommand( const char *command );
-
-private:
-	CTFRichText		*m_pTFTextMessage;
 };
 
 

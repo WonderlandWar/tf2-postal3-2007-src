@@ -2606,10 +2606,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tf\tf_fx_particleeffect.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\shared\tf\tf_fx_shared.cpp"
 					>
 				</File>
@@ -3258,14 +3254,6 @@
 					</File>
 					<File
 						RelativePath=".\tf\vgui\tf_modelpanel.h"
-						>
-					</File>
-					<File
-						RelativePath=".\tf\vgui\tf_overview.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\tf\vgui\tf_overview.h"
 						>
 					</File>
 					<File

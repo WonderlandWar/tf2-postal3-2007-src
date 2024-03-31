@@ -577,7 +577,6 @@ void CCaptureFlag::PickUp( CTFPlayer *pPlayer, bool bInvisible )
 	{
 		event->SetInt( "player", pPlayer->entindex() );
 		event->SetInt( "eventtype", TF_FLAGEVENT_PICKUP );
-		event->SetInt( "priority", 8 );
 		gameeventmanager->FireEvent( event );
 	}
 
@@ -723,7 +722,6 @@ void CCaptureFlag::Capture( CTFPlayer *pPlayer, int nCapturePoint )
 	{
 		event->SetInt( "player", pPlayer->entindex() );
 		event->SetInt( "eventtype", TF_FLAGEVENT_CAPTURE );
-		event->SetInt( "priority", 9 );
 		gameeventmanager->FireEvent( event );
 	}
 

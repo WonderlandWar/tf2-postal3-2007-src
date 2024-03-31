@@ -14,8 +14,6 @@
 //-----------------------------------------------------------------------------
 // Purpose: displays the RoundInfo menu
 //-----------------------------------------------------------------------------
-class RoundInfoOverlay;
-
 class CTFRoundInfo : public vgui::Frame, public IViewPortPanel, public CGameEventListener
 {
 private:
@@ -41,10 +39,12 @@ public:
 
 protected:
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
+	virtual void OnKeyCodeReleased( vgui::KeyCode code );
 	virtual void PerformLayout();
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
 	virtual void OnCommand( const char *command );
 
+    void SetData( const char *pszTitle, const char *pszRedImage, const char *pszBlueImage, const char *pszStateImage );
 	void UpdateImage( vgui::ImagePanel *pImagePanel, const char *pszImageName );
 
 protected:
@@ -52,19 +52,23 @@ protected:
 
 	CTFLabel			*m_pTitle;
 	vgui::ImagePanel	*m_pMapImage;
+	vgui::ImagePanel	*m_pRoundImage;
+	vgui::ImagePanel	*m_pStateImage;
 	
 #ifdef _X360
 	CTFFooter			*m_pFooter;
 #else
 	CTFButton			*m_pContinue;
 #endif
+	
+    ButtonCode_t		m_iRoundInfoKey;
+    
+	char				m_szTitle[255];
 
 	char				m_szMapImage[MAX_ROUND_IMAGE_NAME];
-
-	RoundInfoOverlay	*m_pOverlay;
-
-	int m_iFoundPoints;
-	int m_iNextRoundPoints[2];
+    char				m_szRedImage[MAX_ROUND_IMAGE_NAME];
+    char				m_szBlueImage[MAX_ROUND_IMAGE_NAME];
+    char				m_szStateImage[MAX_ROUND_IMAGE_NAME];
 };
 
 
