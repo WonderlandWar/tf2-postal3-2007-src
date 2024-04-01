@@ -216,7 +216,7 @@ BEGIN_DATADESC( CBaseAnimating )
 // Sendtable for fields we don't want to send to clientside animating entities
 BEGIN_SEND_TABLE_NOBASE( CBaseAnimating, DT_ServerAnimationData )
 	// ANIMATION_CYCLE_BITS is defined in shareddefs.h
-	SendPropFloat	(SENDINFO(m_flCycle),		ANIMATION_CYCLE_BITS, SPROP_CHANGES_OFTEN|SPROP_ROUNDDOWN,	0.0f,   1.0f)
+	SendPropFloat	(SENDINFO(m_flCycle),		ANIMATION_CYCLE_BITS, SPROP_ROUNDDOWN,	0.0f,   1.0f)
 END_SEND_TABLE()
 
 void *SendProxy_ClientSideAnimation( const SendProp *pProp, const void *pStruct, const void *pVarData, CSendProxyRecipients *pRecipients, int objectID );

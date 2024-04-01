@@ -628,8 +628,7 @@ void RagdollSolveSeparation( ragdoll_t &ragdoll, CBaseEntity *pEntity )
 			Vector dir = target-start;
 			if ( dir.LengthSqr() > 1.0f )
 			{
-				// this fixes a bug in ep2 with antlion grubs, but causes problems in TF2 - revisit, but disable for TF now
-#if !defined(TF_CLIENT_DLL)
+				// this fixes a bug in ep2 with antlion grubs
 				// heuristic: guess that anything separated and small mass ratio is in some state that's 
 				// keeping the solver from fixing it
 				float mass = element.pObject->GetMass();
@@ -643,7 +642,6 @@ void RagdollSolveSeparation( ragdoll_t &ragdoll, CBaseEntity *pEntity )
 					++fixCount;
 					continue;
 				}
-#endif
 
 				if ( PhysHasContactWithOtherInDirection(element.pObject, dir) )
 				{

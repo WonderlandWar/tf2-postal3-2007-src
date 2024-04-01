@@ -19,13 +19,7 @@ class CPlayerInfoManager: public IPlayerInfoManager
 {
 public:
 	virtual IPlayerInfo *GetPlayerInfo( edict_t *pEdict );
-	virtual IPlayerInfo *GetPlayerInfo( int index );
 	virtual CGlobalVars *GetGlobalVars();
-	// accessor to hook into aliastoweaponid
-	virtual int			AliasToWeaponId(const char *weaponName);
-	// accessor to hook into weaponidtoalias
-	virtual const char *WeaponIdToAlias(int weaponId);
-
 };
 
 class CPluginBotManager: public IBotManager

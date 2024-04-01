@@ -19,11 +19,7 @@
 #define ROUND_TO_TICKS( t )		( TICK_INTERVAL * TIME_TO_TICKS( t ) )
 #define TICK_NEVER_THINK		(-1)
 
-#if defined( TF_DLL )
-#define ANIMATION_CYCLE_BITS		10
-#else
 #define ANIMATION_CYCLE_BITS		15
-#endif
 #define ANIMATION_CYCLE_MINFRAC		(1.0f / (1<<ANIMATION_CYCLE_BITS))
 
 // Each mod defines these for itself.
@@ -89,11 +85,7 @@ public:
 
 #define MAX_CLIMB_SPEED		200
 
-#if defined(TF_DLL) || defined(TF_CLIENT_DLL)
-	#define TIME_TO_DUCK		0.2
-#else
-	#define TIME_TO_DUCK		0.4
-#endif 
+#define TIME_TO_DUCK		0.4
 #define TIME_TO_UNDUCK		0.2
 #define TIME_TO_UNDUCK_MS	200.0f
 
@@ -788,16 +780,6 @@ enum
 //-----------------------------------------------------------------------------
 // Commentary Mode
 //-----------------------------------------------------------------------------
-#if defined(TF_DLL) || defined(TF_CLIENT_DLL)
-
-#if defined( SPROP_COORD )
-#undef SPROP_COORD
-#endif
-
-#define SPROP_COORD SPROP_COORD_MP
-
-#endif
-
 // The player's method of starting / stopping commentary
 #define COMMENTARY_BUTTONS		(IN_USE)
 
