@@ -58,6 +58,8 @@ void CTFWinPanel::ApplySettings( KeyValues *inResourceData )
 //-----------------------------------------------------------------------------
 void CTFWinPanel::Reset()
 {
+	// TFP3: FIXME! Is this correct?
+	SetVisible( false );
 }
 
 //-----------------------------------------------------------------------------
@@ -72,11 +74,6 @@ void CTFWinPanel::Init()
 	ListenForGameEvent( "tf_game_over" );
 
 	CHudElement::Init();
-}
-
-void CTFWinPanel::SetVisible( bool state )
-{
-	BaseClass::SetVisible( state );
 }
 
 //-----------------------------------------------------------------------------
@@ -312,7 +309,8 @@ void CTFWinPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 //-----------------------------------------------------------------------------
 bool CTFWinPanel::ShouldDraw()
 {
-	return CHudElement::ShouldDraw();
+	// TFP3: FIXME! Is this correct?
+	return IsVisible();
 }
 
 //-----------------------------------------------------------------------------

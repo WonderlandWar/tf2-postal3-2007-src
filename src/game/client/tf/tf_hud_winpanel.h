@@ -38,9 +38,6 @@ public:
 	virtual void FireGameEvent( IGameEvent * event );
 	virtual void OnThink();
 	virtual bool ShouldDraw( void );
-	virtual void SetVisible( bool state );
-
-	virtual int GetRenderGroupPriority() { return 70; }
 
 private:
 	EditablePanel *m_pTeamScorePanel;
