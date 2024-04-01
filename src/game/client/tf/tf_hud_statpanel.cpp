@@ -601,7 +601,7 @@ void CTFStatPanel::Show()
 	CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
 	if ( pWinPanel )
 	{
-		if ( !m_bDisplayAfterSpawn /*&& pWinPanel->m_bActive*/ )
+		if ( !m_bDisplayAfterSpawn && pWinPanel->IsVisible() )
 		{
 			bShow = false;
 		}

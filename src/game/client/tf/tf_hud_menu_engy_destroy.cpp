@@ -54,8 +54,6 @@ CHudMenuEngyDestroy::CHudMenuEngyDestroy( const char *pElementName ) : CHudEleme
 	}
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
-
-	RegisterForRenderGroup( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -297,12 +295,6 @@ void CHudMenuEngyDestroy::SetVisible( bool state )
 		SetDialogVariable( "lastinv", key );
 
 		//RecalculateBuildingState( ALL_BUILDINGS );
-
-		HideLowerPriorityHudElementsInGroup( "mid" );
-	}
-	else
-	{
-		UnhideLowerPriorityHudElementsInGroup( "mid" );
 	}
 
 	BaseClass::SetVisible( state );

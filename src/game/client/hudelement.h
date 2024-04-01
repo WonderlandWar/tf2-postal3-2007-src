@@ -95,14 +95,6 @@ public:
 
 	void SetNeedsRemove( bool needsremove );
 
-	void RegisterForRenderGroup( const char *pszName );
-	void UnregisterForRenderGroup( const char *pszGroupName );
-	void HideLowerPriorityHudElementsInGroup( const char *pszGroupName );
-	void UnhideLowerPriorityHudElementsInGroup( const char *pszGroupName );
-
-	// For now, CHUdElements declare a single priority value. They will only be hidden 
-	// by panels with a lower priority and will only lock out panels with a lower priority
-	virtual int	GetRenderGroupPriority();
 
 public: // IGameEventListener Interface
 	
@@ -120,31 +112,6 @@ private:
 	const char					*m_pElementName;
 	bool						m_bNeedsRemove;
 	bool						m_bIsParentedToClientDLLRootPanel;
-
-	CUtlVector< int >			m_HudRenderGroups;
-};
-
-#include "utlpriorityqueue.h"
-
-inline bool RenderGroupLessFunc( CHudElement * const &lhs, CHudElement * const &rhs )
-{
-	return ( lhs->GetRenderGroupPriority() < rhs->GetRenderGroupPriority() );
-}
-
-// hud elements declare themselves to be part of a hud render group, by name
-// we register with each hudelement a list of indeces of groups they are in
-// then they can query by index the state of their render group
-class CHudRenderGroup
-{
-public:
-	CHudRenderGroup()
-	{
-		m_pLockingElements.SetLessFunc( RenderGroupLessFunc );
-		bHidden = false;
-	}
-
-	bool bHidden;
-	CUtlPriorityQueue< CHudElement * >	m_pLockingElements;
 };
 
 #include "tier0/memdbgoff.h"

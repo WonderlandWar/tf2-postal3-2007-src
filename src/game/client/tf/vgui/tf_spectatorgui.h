@@ -50,12 +50,17 @@ public:
 	virtual void Update( void );
 	virtual bool NeedsUpdate( void );
 	virtual bool ShouldShowPlayerLabel( int specmode ) { return false; }
+	void		 UpdateTarget( void );
 	void		 UpdateReinforcements( void );
 	virtual void ShowPanel(bool bShow);
 	virtual Color GetBlackBarColor( void ) { return Color(52,48,45, 255); }
+	void ShowSpectatingTarget( bool bShow );
 
 	void		UpdateKeyLabels( void );
 protected:	
+
+	bool ShouldShowSpectatingTarget( void );
+
 	int		m_nLastSpecMode;
 	CBaseEntity	*m_nLastSpecTarget;
 	float	m_flNextTipChangeTime;		// time at which to next change the tip
@@ -68,6 +73,11 @@ protected:
 	int		m_nSpyBuilds_ypos;
 
 	vgui::Label				*m_pReinforcementsLabel;
+	vgui::Label				*m_pTargetNameLabel;
+	vgui::Label				*m_pSpectatingLabel;
+	CTFSpectatorGUIHealth	*m_pTargetHealth;
+
+	vgui::Label				*m_pClassOrTeamKeyLabel;
 	vgui::Label				*m_pClassOrTeamLabel;
 	vgui::Label				*m_pSwitchCamModeKeyLabel;
 	vgui::Label				*m_pCycleTargetFwdKeyLabel;

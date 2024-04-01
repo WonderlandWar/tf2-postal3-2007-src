@@ -36,7 +36,6 @@ CTFWinPanel::CTFWinPanel( const char *pElementName ) : EditablePanel( NULL, "Win
 {
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
-	m_bShouldBeVisible = false;
 	SetAlpha( 0 );
 	SetScheme( "ClientScheme" );
 
@@ -44,8 +43,6 @@ CTFWinPanel::CTFWinPanel( const char *pElementName ) : EditablePanel( NULL, "Win
 	m_flTimeUpdateTeamScore = 0;
 	m_iBlueTeamScore = 0;
 	m_iRedTeamScore = 0;
-
-	RegisterForRenderGroup( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -61,7 +58,6 @@ void CTFWinPanel::ApplySettings( KeyValues *inResourceData )
 //-----------------------------------------------------------------------------
 void CTFWinPanel::Reset()
 {
-	m_bShouldBeVisible = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -75,25 +71,11 @@ void CTFWinPanel::Init()
 	ListenForGameEvent( "teamplay_game_over" );
 	ListenForGameEvent( "tf_game_over" );
 
-	m_bShouldBeVisible = false;
-
 	CHudElement::Init();
 }
 
 void CTFWinPanel::SetVisible( bool state )
 {
-	if ( state == IsVisible() )
-		return;
-
-	if ( state )
-	{
-		HideLowerPriorityHudElementsInGroup( "mid" );
-	}
-	else
-	{
-		UnhideLowerPriorityHudElementsInGroup( "mid" );
-	}
-
 	BaseClass::SetVisible( state );
 }
 
@@ -106,15 +88,15 @@ void CTFWinPanel::FireGameEvent( IGameEvent * event )
 
 	if ( Q_strcmp( "teamplay_round_start", pEventName ) == 0 )
 	{
-		m_bShouldBeVisible = false;
+		SetVisible( false );
 	}
 	else if ( Q_strcmp( "teamplay_game_over", pEventName ) == 0 )
 	{
-		m_bShouldBeVisible = false;
+		SetVisible( false );
 	}
 	else if ( Q_strcmp( "tf_game_over", pEventName ) == 0 )
 	{
-		m_bShouldBeVisible = false;
+		SetVisible( false );
 	}
 	else if ( Q_strcmp( "teamplay_win_panel", pEventName ) == 0 )
 	{
@@ -280,30 +262,19 @@ void CTFWinPanel::FireGameEvent( IGameEvent * event )
 			if ( iRoundScore > 0 )
 				bShow = true;
 
-#if !defined( _X360 )
 			CAvatarImagePanel *pPlayerAvatar = dynamic_cast<CAvatarImagePanel *>( FindChildByName( CFmtStr( "Player%dAvatar", i ) ) );
-
-			if ( pPlayerAvatar )
-			{
-				if ( bShow )
-				{
-					CBasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
-					pPlayerAvatar->SetPlayer( pPlayer );
-				}
-
-				pPlayerAvatar->SetVisible( bShow );
-			}
-#endif
 			vgui::Label *pPlayerName = dynamic_cast<Label *>( FindChildByName( CFmtStr( "Player%dName", i ) ) );
 			vgui::Label *pPlayerClass = dynamic_cast<Label *>( FindChildByName( CFmtStr( "Player%dClass", i ) ) );
 			vgui::Label *pPlayerScore = dynamic_cast<Label *>( FindChildByName( CFmtStr( "Player%dScore", i ) ) );
 			
-			if ( !pPlayerName || !pPlayerClass || !pPlayerScore )
+			if ( !pPlayerAvatar || !pPlayerName || !pPlayerClass || !pPlayerScore )
 				return;
 
 			if ( bShow )
 			{
 				// set the player labels to team color
+				CBasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
+				pPlayerAvatar->SetPlayer( pPlayer );
 				Color clr = g_PR->GetTeamColor( g_PR->GetTeam( iPlayerIndex ) );				
 				pPlayerName->SetFgColor( clr );
 				pPlayerClass->SetFgColor( clr );
@@ -316,12 +287,13 @@ void CTFWinPanel::FireGameEvent( IGameEvent * event )
 			}
 
 			// show or hide labels for this player position
+			pPlayerAvatar->SetVisible( bShow );
 			pPlayerName->SetVisible( bShow );
 			pPlayerClass->SetVisible( bShow );
 			pPlayerScore->SetVisible( bShow );
 		}
 
-		m_bShouldBeVisible = true;
+		SetVisible( true );
 
 		MoveToFront();
 	}
@@ -340,9 +312,6 @@ void CTFWinPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 //-----------------------------------------------------------------------------
 bool CTFWinPanel::ShouldDraw()
 {
-	if ( !m_bShouldBeVisible )
-		return false;
-
 	return CHudElement::ShouldDraw();
 }
 

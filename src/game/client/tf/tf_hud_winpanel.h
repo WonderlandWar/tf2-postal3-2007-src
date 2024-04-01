@@ -48,8 +48,6 @@ private:
 	float	m_flTimeUpdateTeamScore;
 	int		m_iBlueTeamScore;
 	int		m_iRedTeamScore;
-
-	bool	m_bShouldBeVisible;
 };
 
 #endif //TFWINPANEL_H

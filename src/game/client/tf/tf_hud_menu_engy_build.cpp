@@ -52,8 +52,6 @@ CHudMenuEngyBuild::CHudMenuEngyBuild( const char *pElementName ) : CHudElement( 
 	}
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
-
-	RegisterForRenderGroup( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -302,12 +300,6 @@ void CHudMenuEngyBuild::SetVisible( bool state )
 				break;
 			}
 		}
-
-		HideLowerPriorityHudElementsInGroup( "mid" );
-	}
-	else
-	{
-		UnhideLowerPriorityHudElementsInGroup( "mid" );
 	}
 
 	BaseClass::SetVisible( state );

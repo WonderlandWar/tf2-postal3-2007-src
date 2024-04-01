@@ -95,11 +95,6 @@ void CTFTeamMenu::ShowPanel( bool bShow )
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
-	if ( !C_TFPlayer::GetLocalTFPlayer() )
-		return;
-	if ( !gameuifuncs || !gViewPortInterface || !engine )
-		return;
-
 	if ( bShow )
 	{
 		if ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN && 
@@ -151,31 +146,17 @@ void CTFTeamMenu::Update( void )
 
 	if ( pLocalPlayer && ( pLocalPlayer->GetTeamNumber() != TEAM_UNASSIGNED ) )
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "cancel", true );
-		}
-#else
 		if ( m_pCancelButton )
 		{
 			m_pCancelButton->SetVisible( true );
 		}
-#endif
 	}
 	else
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "cancel", false );
-		}
-#else
 		if ( m_pCancelButton && m_pCancelButton->IsVisible() )
 		{
 			m_pCancelButton->SetVisible( false );
 		}
-#endif
 	}
 	
 	CTFTeamButton *pButton = (CTFTeamButton*)FindChildByName( "teambutton2" );
@@ -210,9 +191,7 @@ void CTFTeamMenu::LoadMapPage( const char *mapName )
 //-----------------------------------------------------------------------------
 void CTFTeamMenu::OnKeyCodePressed( KeyCode code )
 {
-	if ( ( m_iTeamMenuKey != BUTTON_CODE_INVALID && m_iTeamMenuKey == code ) ||
-		   code == KEY_XBUTTON_BACK || 
-		   code == KEY_XBUTTON_B )
+	if ( ( m_iTeamMenuKey != BUTTON_CODE_INVALID && m_iTeamMenuKey == code ) )
 	{
 		C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
 
@@ -227,56 +206,6 @@ void CTFTeamMenu::OnKeyCodePressed( KeyCode code )
 
 		ShowPanel( false );
 		OnClose();
-	}
-	else if( code == KEY_XBUTTON_A || code == KEY_XBUTTON_RTRIGGER )
-	{
-		// select the active focus
-		if ( GetFocusNavGroup().GetCurrentFocus() )
-		{
-			ipanel()->SendMessage( GetFocusNavGroup().GetCurrentFocus()->GetVPanel(), new KeyValues( "PressButton" ), GetVPanel() );
-		}
-	}
-	else if( code == KEY_XBUTTON_RIGHT || code == KEY_XSTICK1_RIGHT )
-	{
-		CTFTeamButton *pButton;
-			
-		pButton = dynamic_cast< CTFTeamButton *> ( GetFocusNavGroup().GetCurrentFocus() );
-		if ( pButton )
-		{
-			pButton->OnCursorExited();
-			GetFocusNavGroup().RequestFocusNext( pButton->GetVPanel() );
-		}
-		else
-		{
-			GetFocusNavGroup().RequestFocusNext( NULL );
-		}
-
-		pButton = dynamic_cast< CTFTeamButton * > ( GetFocusNavGroup().GetCurrentFocus() );
-		if ( pButton )
-		{
-			pButton->OnCursorEntered();
-		}
-	}
-	else if( code == KEY_XBUTTON_LEFT || code == KEY_XSTICK1_LEFT )
-	{
-		CTFTeamButton *pButton;
-
-		pButton = dynamic_cast< CTFTeamButton *> ( GetFocusNavGroup().GetCurrentFocus() );
-		if ( pButton )
-		{
-			pButton->OnCursorExited();
-			GetFocusNavGroup().RequestFocusPrev( pButton->GetVPanel() );
-		}
-		else
-		{
-			GetFocusNavGroup().RequestFocusPrev( NULL );
-		}
-
-		pButton = dynamic_cast< CTFTeamButton * > ( GetFocusNavGroup().GetCurrentFocus() );
-		if ( pButton )
-		{
-			pButton->OnCursorEntered();
-		}
 	}
 	else if ( m_iScoreBoardKey != BUTTON_CODE_INVALID && m_iScoreBoardKey == code )
 	{

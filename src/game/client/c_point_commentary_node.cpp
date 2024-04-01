@@ -111,21 +111,6 @@ public:
 			StopLoopingSounds();
 			m_bRestartAfterRestore = true;
 		}
-
-		AddAndLockCommentaryHudGroup();
-	}
-
-	//-----------------------------------------------------------------------------
-	// Purpose: 
-	//-----------------------------------------------------------------------------
-	virtual void SetDormant( bool bDormant )
-	{
-		if ( !IsDormant() && bDormant )
-		{
-			RemoveAndUnlockCommentaryHudGroup();
-		}
-
-		BaseClass::SetDormant( bDormant );
 	}
 
 	//-----------------------------------------------------------------------------
@@ -133,8 +118,6 @@ public:
 	//-----------------------------------------------------------------------------
 	void UpdateOnRemove( void )
 	{
-		RemoveAndUnlockCommentaryHudGroup();
-
 		StopLoopingSounds();
 		BaseClass::UpdateOnRemove();
 	}
@@ -142,31 +125,6 @@ public:
 	void	StopLoopingSounds( void );
 
 	virtual bool TestCollision( const Ray_t &ray, unsigned int mask, trace_t& trace );
-
-	void AddAndLockCommentaryHudGroup( void )
-	{
-		if ( !g_CommentaryNodes.Count() )
-		{
-			int iRenderGroup = gHUD.LookupRenderGroupIndexByName( "commentary" );
-			gHUD.LockRenderGroup( iRenderGroup );
-		}
-
-		if ( g_CommentaryNodes.Find(this) == g_CommentaryNodes.InvalidIndex() )
-		{
-			g_CommentaryNodes.AddToTail( this );
-		}
-	}
-
-	void RemoveAndUnlockCommentaryHudGroup( void )
-	{
-		g_CommentaryNodes.FindAndRemove( this );
-
-		if ( !g_CommentaryNodes.Count() )
-		{
-			int iRenderGroup = gHUD.LookupRenderGroupIndexByName( "commentary" );
-			gHUD.UnlockRenderGroup( iRenderGroup );
-		}
-	}
 
 public:
 	// Data received from the server
@@ -217,11 +175,6 @@ void C_PointCommentaryNode::OnPreDataChanged( DataUpdateType_t updateType )
 void C_PointCommentaryNode::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
-
-	if ( updateType == DATA_UPDATE_CREATED )
-	{
-		AddAndLockCommentaryHudGroup();
-	}
 
 	if ( m_bWasActive == m_bActive && !m_bRestartAfterRestore )
 		return;

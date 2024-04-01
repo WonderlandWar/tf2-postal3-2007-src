@@ -40,7 +40,12 @@ CTFSpectatorGUI::CTFSpectatorGUI(IViewPort *pViewPort) : CSpectatorGUI(pViewPort
 	m_nEngBuilds_xpos = m_nEngBuilds_ypos = 0;
 	m_nSpyBuilds_xpos = m_nSpyBuilds_ypos = 0;
 
+	m_pTargetHealth = new CTFSpectatorGUIHealth( this, "SpectatorGUIHealth" );
+
 	m_pReinforcementsLabel = new Label( this, "ReinforcementsLabel", "" );
+	m_pTargetNameLabel = new Label ( this, "TargetNameLabel", "" );
+	m_pSpectatingLabel = new Label ( this, "SpectatingLabel", "" );
+	m_pClassOrTeamKeyLabel = new Label ( this, "ClassOrTeamKeyLabel", "" );
 	m_pClassOrTeamLabel = new Label( this, "ClassOrTeamLabel", "" );
 	m_pSwitchCamModeKeyLabel = new Label( this, "SwitchCamModeKeyLabel", "" );
 	m_pCycleTargetFwdKeyLabel = new Label( this, "CycleTargetFwdKeyLabel", "" );
@@ -75,6 +80,14 @@ bool CTFSpectatorGUI::NeedsUpdate( void )
 	if( IsVisible() )
 		return true;
 
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+		
+	if ( m_nLastSpecMode != pPlayer->GetObserverMode() )
+		return true;
+
+	if ( m_nLastSpecTarget != pPlayer->GetObserverTarget() )
+		return true;
+
 	return BaseClass::NeedsUpdate();
 }
 
@@ -84,8 +97,16 @@ bool CTFSpectatorGUI::NeedsUpdate( void )
 void CTFSpectatorGUI::Update()
 {
 	BaseClass::Update();
+	
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( pPlayer )
+	{
+		m_nLastSpecMode = pPlayer->GetObserverMode();
+		m_nLastSpecTarget = pPlayer->GetObserverTarget();
+	}
 
 	UpdateReinforcements();
+	UpdateTarget();
 	UpdateKeyLabels();
 }
 
@@ -112,11 +133,6 @@ void CTFSpectatorGUI::UpdateReinforcements( void )
 	if ( TFGameRules()->InStalemate() )
 	{
 		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), g_pVGuiLocalize->Find( "#game_respawntime_stalemate" ), 0 );
-	}
-	else if ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN )
-	{
-		// a team has won the round
-		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), g_pVGuiLocalize->Find( "#game_respawntime_next_round" ), 0 );
 	}
 	else
 	{
@@ -155,173 +171,78 @@ void CTFSpectatorGUI::UpdateReinforcements( void )
 //-----------------------------------------------------------------------------
 void CTFSpectatorGUI::UpdateKeyLabels( void )
 {
-	// get the desired player class
-	int iClass = TF_CLASS_UNDEFINED;
-	bool bIsHLTV = engine->IsHLTV();
-
-	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( pPlayer )
+	if ( m_pClassOrTeamKeyLabel && m_pClassOrTeamLabel )
 	{
-		iClass = pPlayer->m_Shared.GetDesiredPlayerClassIndex();
-	}
+		const char *pszBinding = NULL;
 
-	// if it's time to change the tip, or the player has changed desired class, update the tip
-	if ( ( gpGlobals->curtime >= m_flNextTipChangeTime ) || ( iClass != m_iTipClass ) )
-	{
-		if ( bIsHLTV )
-		{
-			const wchar_t *wzTip = g_pVGuiLocalize->Find( "#Tip_HLTV" );
-
-			if ( wzTip )
-			{
-				SetDialogVariable( "tip", wzTip );
-			}
-		}
-		else
-		{
-			wchar_t wzTipLabel[512]=L"";
-			const wchar_t *wzTip = g_TFTips.GetNextClassTip( iClass );
-			Assert( wzTip && wzTip[0] );
-			g_pVGuiLocalize->ConstructString( wzTipLabel, sizeof( wzTipLabel ), g_pVGuiLocalize->Find( "#Tip_Fmt" ), 1, wzTip );
-			SetDialogVariable( "tip", wzTipLabel );
-		}
-		
-		m_flNextTipChangeTime = gpGlobals->curtime + 10.0f;
-		m_iTipClass = iClass;
-	}
-
-	if ( m_pClassOrTeamLabel )
-	{
 		C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 		if ( pPlayer )
 		{
-			static wchar_t wzFinal[512] = L"";
-			const wchar_t *wzTemp = NULL;
+			const char *szTemp = NULL;
 
-			if ( bIsHLTV )
+			if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR )
 			{
-				wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_AutoDirector" );
-			}
-			else if ( pPlayer->GetTeamNumber() == TEAM_SPECTATOR )
-			{
-				wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_ChangeTeam" );
+				pszBinding = engine->Key_LookupBinding( "changeteam" );
+				szTemp = "#TF_Spectator_ChangeTeam";
 			}
 			else
 			{
-				wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_ChangeClass" );
+				pszBinding = engine->Key_LookupBinding( "changeclass" );
+				szTemp = "#TF_Spectator_ChangeClass";
 			}
 
-			if ( wzTemp )
-			{
-				UTIL_ReplaceKeyBindings( wzTemp, 0, wzFinal, sizeof( wzFinal ) );
-				m_pClassOrTeamLabel->SetText( wzFinal );
-			}
+			m_pClassOrTeamLabel->SetText( szTemp );
 		}
+
+		char szBinding[16];		
+		Q_snprintf( szBinding, sizeof( szBinding ), "%s", pszBinding );
+
+		wchar_t wBinding[16] = L"";
+		g_pVGuiLocalize->ConvertANSIToUnicode( szBinding, wBinding, sizeof( wBinding ) );
+		wchar_t *wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_ClassOrTeamKey" );
+
+		g_pVGuiLocalize->ConstructString( wzTemp, 512, wBinding, 1 );
+
+		m_pClassOrTeamKeyLabel->SetText( szBinding );
 	}
 
 	if ( m_pSwitchCamModeKeyLabel )
 	{
-		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) || mp_fadetoblack.GetBool() ) )
-		{
-			if ( m_pSwitchCamModeKeyLabel->IsVisible() )
-			{
-				m_pSwitchCamModeKeyLabel->SetVisible( false );
+		const char *pszKey = engine->Key_LookupBinding( "+jump" );
+		wchar_t wKey[16] = L"";
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszKey, wKey, sizeof( wKey ) );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "SwitchCamModeLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( false );
-				}
-			}
-		}
-		else
-		{
-			if ( !m_pSwitchCamModeKeyLabel->IsVisible() )
-			{
-				m_pSwitchCamModeKeyLabel->SetVisible( true );
+		wchar_t wLabel[256] = L"";
+		const wchar_t *wzTemp = g_pVGuiLocalize->Find( "TF_Spectator_SwitchCamModeKey" );		
+		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), wKey, sizeof ( wKey ), 1, wzTemp );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "SwitchCamModeLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( true );
-				}
-			}
-
-			wchar_t wLabel[256] = L"";
-			const wchar_t *wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_SwitchCamModeKey" );
-			UTIL_ReplaceKeyBindings( wzTemp, 0, wLabel, sizeof( wLabel ) );
-			m_pSwitchCamModeKeyLabel->SetText( wLabel );
-		}
+		m_pSwitchCamModeKeyLabel->SetText( wLabel );
 	}
 
 	if ( m_pCycleTargetFwdKeyLabel )
 	{
-		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( mp_fadetoblack.GetBool() || ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) ) )
-		{
-			if ( m_pCycleTargetFwdKeyLabel->IsVisible() )
-			{
-				m_pCycleTargetFwdKeyLabel->SetVisible( false );
+		const char *pszKey = engine->Key_LookupBinding( "+attack" );
+		wchar_t wKey[16] = L"";
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszKey, wKey, sizeof( wKey ) );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "CycleTargetFwdLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( false );
-				}
-			}
-		}
-		else
-		{
-			if ( !m_pCycleTargetFwdKeyLabel->IsVisible() )
-			{
-				m_pCycleTargetFwdKeyLabel->SetVisible( true );
+		wchar_t wLabel[256] = L"";
+		const wchar_t *wzTemp = g_pVGuiLocalize->Find( "TF_Spectator_CycleTargetFwdKey" );
+		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), wKey, sizeof ( wKey ), 1, wzTemp );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "CycleTargetFwdLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( true );
-				}
-			}
-
-			wchar_t wLabel[256] = L"";
-			const wchar_t *wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_CycleTargetFwdKey" );
-			UTIL_ReplaceKeyBindings( wzTemp, 0, wLabel, sizeof( wLabel ) );
-			m_pCycleTargetFwdKeyLabel->SetText( wLabel );
-		}
+		m_pCycleTargetFwdKeyLabel->SetText( wLabel );
 	}
 
 	if ( m_pCycleTargetRevKeyLabel )
 	{
-		if ( ( pPlayer && pPlayer->GetTeamNumber() > TEAM_SPECTATOR ) && ( mp_fadetoblack.GetBool() || ( mp_forcecamera.GetInt() == OBS_ALLOW_NONE ) ) )
-		{
-			if ( m_pCycleTargetRevKeyLabel->IsVisible() )
-			{
-				m_pCycleTargetRevKeyLabel->SetVisible( false );
+		const char *pszKey = engine->Key_LookupBinding( "+attack2" );
+		wchar_t wKey[16] = L"";
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszKey, wKey, sizeof( wKey ) );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "CycleTargetRevLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( false );
-				}
-			}
-		}
-		else
-		{
-			if ( !m_pCycleTargetRevKeyLabel->IsVisible() )
-			{
-				m_pCycleTargetRevKeyLabel->SetVisible( true );
+		wchar_t wLabel[256] = L"";
+		const wchar_t *wzTemp = g_pVGuiLocalize->Find( "TF_Spectator_CycleTargetRevKey" );		
+		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), wKey, sizeof ( wKey ), 1, wzTemp );
 
-				Label *pLabel = dynamic_cast<Label *>( FindChildByName( "CycleTargetRevLabel" ) );
-				if ( pLabel )
-				{
-					pLabel->SetVisible( true );
-				}
-			}
-
-			wchar_t wLabel[256] = L"";
-			const wchar_t *wzTemp = g_pVGuiLocalize->Find( "#TF_Spectator_CycleTargetRevKey" );
-			UTIL_ReplaceKeyBindings( wzTemp, 0, wLabel, sizeof( wLabel ) );
-			m_pCycleTargetRevKeyLabel->SetText( wLabel );
-		}
+		m_pCycleTargetRevKeyLabel->SetText( wLabel );
 	}
 
 	if ( m_pMapLabel )
@@ -389,6 +310,12 @@ void CTFSpectatorGUI::ShowPanel(bool bShow)
 				pSpyBuilds->SetPos( xPos, GetTopBarHeight() );
 			}	
 
+			CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
+
+			// TFP3: May not be accurate...
+			bool bShow = pWinPanel && !pWinPanel->IsVisible();			
+			ShowSpectatingTarget( bShow );
+
 			m_flNextTipChangeTime = 0;	// force a new tip immediately
 
 			InvalidateLayout();
@@ -415,4 +342,76 @@ void CTFSpectatorGUI::ShowPanel(bool bShow)
 	}
 
 	BaseClass::ShowPanel( bShow );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFSpectatorGUI::ShowSpectatingTarget( bool bShow )
+{
+	if ( m_pTargetNameLabel )
+		m_pTargetNameLabel->SetVisible( bShow );
+
+	if ( m_pSpectatingLabel )
+		m_pSpectatingLabel->SetVisible( bShow );
+  
+	if ( m_pTargetHealth )
+		m_pTargetHealth->SetVisible( bShow );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CTFSpectatorGUI::UpdateTarget( void )
+{
+	CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
+	if ( pWinPanel && pWinPanel->IsVisible() )
+	{
+		ShowSpectatingTarget( false );
+		return;
+	}
+
+	int iSpecTarget = GetSpectatorTarget();
+
+	CBaseEntity *pSpecTarget = ClientEntityList().GetBaseEntity( iSpecTarget );
+
+	if ( iSpecTarget <= 0 || iSpecTarget > gpGlobals->maxClients || pSpecTarget == C_BasePlayer::GetLocalPlayer() )
+	{
+		if ( m_pTargetNameLabel && m_pTargetNameLabel->IsVisible() )
+			ShowSpectatingTarget( false );
+
+		return;
+	}
+	
+	if ( m_pTargetNameLabel->IsVisible() && ShouldShowSpectatingTarget() )
+	{	
+		ShowSpectatingTarget( true );
+	}
+	
+	int iHealth = pSpecTarget->GetHealth();
+
+	if ( pSpecTarget->IsPlayer() )
+	{
+		C_BasePlayer *pPlayer = ToBasePlayer( pSpecTarget );
+		if ( pPlayer->IsObserver() )
+			iHealth = 0;
+	}
+
+	int iMaxBuffedHealth = 0;
+	
+	C_TFPlayer *pPlayer = ToTFPlayer( pSpecTarget );
+	if ( pPlayer )
+		iMaxBuffedHealth = pPlayer->m_Shared.GetMaxBuffedHealth();
+
+	m_pTargetHealth->SetHealth( iHealth, pSpecTarget->GetMaxHealth(), iMaxBuffedHealth );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CTFSpectatorGUI::ShouldShowSpectatingTarget( void )
+{
+	CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
+
+	return pWinPanel && !pWinPanel->IsVisible();
 }

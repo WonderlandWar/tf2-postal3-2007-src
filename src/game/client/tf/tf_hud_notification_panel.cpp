@@ -52,9 +52,6 @@ CHudNotificationPanel::CHudNotificationPanel( const char *pElementName ) : CHudE
 	m_pText = new Label( this, "Notification_Label", "" );
 	m_pIcon = new CIconPanel( this, "Notification_Icon" );
 	m_pBackground = new ImagePanel( this, "Notification_Background" );
-
-	RegisterForRenderGroup( "mid" );
-	RegisterForRenderGroup( "commentary" );
 }
 
 //-----------------------------------------------------------------------------

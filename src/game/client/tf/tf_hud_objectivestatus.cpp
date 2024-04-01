@@ -631,9 +631,6 @@ CTFHudObjectiveStatus::CTFHudObjectiveStatus( const char *pElementName ) : CHudE
 	m_pControlPointProgressBar = new CControlPointProgressBar( this );
 
 	SetHiddenBits( 0 );
-
-	RegisterForRenderGroup( "mid" );
-	RegisterForRenderGroup( "commentary" );
 }
 
 //-----------------------------------------------------------------------------

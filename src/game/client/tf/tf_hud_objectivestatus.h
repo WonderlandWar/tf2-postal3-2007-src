@@ -141,8 +141,6 @@ public:
 
 	bool	TimerIsVisible( void );
 
-	virtual int GetRenderGroupPriority( void ) { return 60; }	// higher than build menus
-
 	CControlPointProgressBar *GetControlPointProgressBar( void );
 
 private:

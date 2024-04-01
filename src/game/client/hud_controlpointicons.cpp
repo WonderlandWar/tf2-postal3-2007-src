@@ -1114,8 +1114,6 @@ void CControlPointProgressBar::ApplySchemeSettings( IScheme *pScheme )
 	m_pTeardropSide = dynamic_cast<CIconPanel *>( FindChildByName("TeardropSide") );
 	m_pBlocked = dynamic_cast<CIconPanel *>( FindChildByName("Blocked") );
 	m_iOrgHeight = GetTall();
-
-	m_iMidGroupIndex = gHUD.LookupRenderGroupIndexByName( "mid" );
 }
 
 //-----------------------------------------------------------------------------
@@ -1175,12 +1173,10 @@ void CControlPointProgressBar::PerformLayout( void )
 //-----------------------------------------------------------------------------
 bool CControlPointProgressBar::IsVisible( void )
 {
+#if 0
 	if ( IsInFreezeCam() == true )
 		return false;
-
-	if ( m_iMidGroupIndex != -1 && gHUD.IsRenderGroupLockedFor( NULL, m_iMidGroupIndex ) )
-		return false;
-
+#endif
 	return BaseClass::IsVisible();
 }
 

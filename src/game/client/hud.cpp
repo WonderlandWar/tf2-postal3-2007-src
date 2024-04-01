@@ -169,20 +169,7 @@ void CHudElement::SetHiddenBits( int iBits )
 //-----------------------------------------------------------------------------
 bool CHudElement::ShouldDraw( void )
 {
-	bool bShouldDraw = ( !gHUD.IsHidden( m_iHiddenBits ) );
-
-	if ( bShouldDraw )
-	{
-		// for each render group
-		int iNumGroups = m_HudRenderGroups.Count();
-		for ( int iGroupIndex = 0; iGroupIndex < iNumGroups; iGroupIndex++ )
-		{
-			if ( gHUD.IsRenderGroupLockedFor( this, m_HudRenderGroups.Element(iGroupIndex ) ) )
-				return false;
-		}
-	}
-
-	return bShouldDraw;
+	return !gHUD.IsHidden( m_iHiddenBits );
 }
 
 //-----------------------------------------------------------------------------
@@ -203,59 +190,6 @@ void CHudElement::SetParentedToClientDLLRootPanel( bool parented )
 	m_bIsParentedToClientDLLRootPanel = parented;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: We can register to be affected by multiple hud render groups
-//-----------------------------------------------------------------------------
-void CHudElement::RegisterForRenderGroup( const char *pszGroupName )
-{
-	int iGroupIndex = gHUD.RegisterForRenderGroup( pszGroupName );
-
-	// add group index to our list of registered groups
-	if ( m_HudRenderGroups.Find( iGroupIndex ) == m_HudRenderGroups.InvalidIndex() )
-	{
-		m_HudRenderGroups.AddToTail( iGroupIndex );
-	}
-}
-
-void CHudElement::UnregisterForRenderGroup( const char *pszGroupName )
-{
-	int iGroupIndex = gHUD.RegisterForRenderGroup( pszGroupName );
-
-	m_HudRenderGroups.FindAndRemove( iGroupIndex );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: We want to obscure other elements in this group
-//-----------------------------------------------------------------------------
-void CHudElement::HideLowerPriorityHudElementsInGroup( const char *pszGroupName )
-{
-	// look up the render group
-	int iGroupIndex = gHUD.LookupRenderGroupIndexByName( pszGroupName );
-
-	// lock the group
-	gHUD.LockRenderGroup( iGroupIndex, this );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Stop obscuring other elements in this group
-//-----------------------------------------------------------------------------
-void CHudElement::UnhideLowerPriorityHudElementsInGroup( const char *pszGroupName )
-{	
-	// look up the render group
-	int iGroupIndex = gHUD.LookupRenderGroupIndexByName( pszGroupName );
-
-	// unlock the group
-	gHUD.UnlockRenderGroup( iGroupIndex, this );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int	CHudElement::GetRenderGroupPriority( void )
-{
-	return 0;
-}
-
 CHud gHUD;  // global HUD object
 
 DECLARE_MESSAGE(gHUD, ResetHUD);
@@ -266,9 +200,6 @@ DECLARE_MESSAGE(gHUD, SendAudio);
 
 CHud::CHud()
 {
-	SetDefLessFunc( m_RenderGroups );
-
-	m_flScreenShotTime = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -402,15 +333,6 @@ void CHud::LevelInit( void )
 	{
 		m_HudList[i]->LevelInit();
 	}
-
-	// Unhide all render groups
-	int iCount = m_RenderGroups.Count();
-	for ( int i = 0; i < iCount; i++ )
-	{
-		CHudRenderGroup *group = m_RenderGroups[ i ];
-		group->bHidden = false;
-		group->m_pLockingElements.Purge();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -437,14 +359,6 @@ CHud::~CHud()
 		g_HudTextureMemoryPool.Free( tex );
 	}
 	m_Icons.Purge();
-
-	c = m_RenderGroups.Count();
-	for ( int i = c - 1; i >= 0; i-- )
-	{
-		CHudRenderGroup *group = m_RenderGroups[ i ];
-		m_RenderGroups.RemoveAt(i);
-		delete group;
-	}
 }
 
 void CHudTexture::Precache( void )
@@ -871,176 +785,6 @@ void CHud::ProcessInput( bool bActive )
 		// Weaponbits need to be sent down as a UserMsg now.
 		gHUD.Think();
 	}
-}
-
-int CHud::LookupRenderGroupIndexByName( const char *pszGroupName )
-{
-	int iIndex = m_RenderGroupNames.Find( pszGroupName );
-
-	Assert( m_RenderGroupNames.IsValidIndex( iIndex ) );
-
-	return iIndex;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: A hud element wants to lock this render group so other panels in the
-// group do not draw
-//-----------------------------------------------------------------------------
-bool CHud::LockRenderGroup( int iGroupIndex, CHudElement *pLocker /* = NULL */ )
-{
-	// does this index exist?
-	if ( !DoesRenderGroupExist(iGroupIndex) )
-		return false;
-
-	int i = m_RenderGroups.Find( iGroupIndex );
-
-	Assert( m_RenderGroups.IsValidIndex(i) );
-
-	CHudRenderGroup *group = m_RenderGroups.Element(i);
-
-	Assert( group );
-
-	if ( group )
-	{
-		// NULL pLocker means some higher power is globally hiding this group
-		if ( pLocker == NULL )
-		{
-			group->bHidden = true;
-		}
-		else
-		{
-			bool bFound = false;
-			// See if we have it locked already
-			int iNumLockers = group->m_pLockingElements.Count();
-			for ( int i=0;i<iNumLockers;i++ )
-			{
-				if ( pLocker == group->m_pLockingElements.Element(i) )
-				{
-					bFound = true;
-					break;
-				}
-			}
-
-			// otherwise lock us
-			if ( !bFound )
-				group->m_pLockingElements.Insert( pLocker );
-		}
-
-		return true;
-	}
-	
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: A hud element wants to release the lock on this render group 
-//-----------------------------------------------------------------------------
-bool CHud::UnlockRenderGroup( int iGroupIndex, CHudElement *pLocker /* = NULL */ )
-{
-	// does this index exist?
-	if ( !DoesRenderGroupExist(iGroupIndex) )
-		return false;
-
-	int i = m_RenderGroups.Find( iGroupIndex );
-
-	Assert( m_RenderGroups.IsValidIndex(i) );
-
-	CHudRenderGroup *group = m_RenderGroups.Element(i);
-
-	if ( group )
-	{
-		// NULL pLocker means some higher power is globally hiding this group
-		if ( group->bHidden && pLocker == NULL )
-		{
-			group->bHidden = false;
-			return true;
-		}
-
-		int iNumLockers = group->m_pLockingElements.Count();
-		for ( int i=0;i<iNumLockers;i++ )
-		{
-			if ( pLocker == group->m_pLockingElements.Element(i) )
-			{
-				group->m_pLockingElements.RemoveAt( i );
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: See if we should draw based on a hud render group
-//			Return true if this group is locked, hud elem will be hidden
-//-----------------------------------------------------------------------------
-bool CHud::IsRenderGroupLockedFor( CHudElement *pHudElement, int iGroupIndex )
-{
-	// does this index exist?
-	if ( !DoesRenderGroupExist(iGroupIndex) )
-		return false;
-
-	int i = m_RenderGroups.Find( iGroupIndex );
-
-	Assert( m_RenderGroups.IsValidIndex(i) );
-
-	CHudRenderGroup *group = m_RenderGroups.Element(i);
-
-	if ( !group )
-		return false;
-
-	// hidden for everyone!
-	if ( group->bHidden )
-		return true;
-
-	if ( group->m_pLockingElements.Count() == 0 )
-		return false;
-
-	if ( !pHudElement )
-		return true;
-
-	CHudElement *pLocker = group->m_pLockingElements.ElementAtHead();
-
-	return ( pLocker != pHudElement && pLocker->GetRenderGroupPriority() > pHudElement->GetRenderGroupPriority() );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: CHudElements can ask for the index of hud element render groups
-//			returns a group index
-//-----------------------------------------------------------------------------
-int CHud::RegisterForRenderGroup( const char *pszGroupName )
-{
-	int iGroupNameIndex = m_RenderGroupNames.Find( pszGroupName );
-
-	if ( iGroupNameIndex != m_RenderGroupNames.InvalidIndex() )
-	{	
-		return iGroupNameIndex;
-	}
-
-	// otherwise add the group
-	return AddHudRenderGroup( pszGroupName );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Create a new hud render group
-//			returns a group index
-//-----------------------------------------------------------------------------
-int CHud::AddHudRenderGroup( const char *pszGroupName )
-{
-	// we tried to register for a group but didn't find it, add a new one
-
-	int iGroupNameIndex = m_RenderGroupNames.AddToTail( pszGroupName );
-
-	CHudRenderGroup *group = new CHudRenderGroup();
-	return m_RenderGroups.Insert( iGroupNameIndex, group );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:  
-//-----------------------------------------------------------------------------
-bool CHud::DoesRenderGroupExist( int iGroupIndex )
-{
-	return ( m_RenderGroups.Find( iGroupIndex ) != m_RenderGroups.InvalidIndex() );
 }
 
 //-----------------------------------------------------------------------------

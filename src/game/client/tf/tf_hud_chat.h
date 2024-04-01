@@ -63,11 +63,6 @@ public:
 
 	virtual const char *GetDisplayedSubtitlePlayerName( int clientIndex );
 	virtual bool IsVisible();
-
-#if defined( _X360 )
-	// hide behind other panels ( stats , build menu ) in 360
-	virtual int		GetRenderGroupPriority( void ) { return 35; }	// less than statpanel
-#endif
 };
 
 #endif	//CS_HUD_CHAT_H

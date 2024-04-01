@@ -57,12 +57,6 @@ public:
 			}
 		}
 
-		CTFRichText *pRichText = dynamic_cast<CTFRichText *>(FindChildByName( "classInfo" ) );
-		if ( pRichText )
-		{
-			pRichText->InvalidateLayout( true, false );
-		}
-
 		BaseClass::SetVisible( state );
 	}
 };

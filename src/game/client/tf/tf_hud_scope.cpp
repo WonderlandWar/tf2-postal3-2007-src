@@ -180,9 +180,6 @@ void CHudScope::Init( void )
 	vgui::surface()->DrawSetTextureFile(m_iScopeTexture[1], "HUD/scope_sniper_ur", true, false);
 	vgui::surface()->DrawSetTextureFile(m_iScopeTexture[2], "HUD/scope_sniper_lr", true, false);
 	vgui::surface()->DrawSetTextureFile(m_iScopeTexture[3], "HUD/scope_sniper_ll", true, false);
-
-	// remove ourselves from the global group so the scoreboard doesn't hide us
-	UnregisterForRenderGroup( "global" );
 }
 
 //-----------------------------------------------------------------------------

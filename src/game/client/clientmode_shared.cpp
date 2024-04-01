@@ -139,15 +139,6 @@ static void __MsgFunc_VGUIMenu( bf_read &msg )
 		keys->deleteThis();
 	}
 
-	// is the server telling us to show the scoreboard (at the end of a map)?
-	if ( Q_stricmp( panelname, "scores" ) == 0 )
-	{
-		if ( hud_takesshots.GetBool() == true )
-		{
-			gHUD.SetScreenShotTime( gpGlobals->curtime + 1.0 ); // take a screenshot in 1 second
-		}
-	}
-
 	gViewPortInterface->ShowPanel( viewport, bShow );
 }
 

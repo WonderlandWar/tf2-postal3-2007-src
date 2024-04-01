@@ -27,7 +27,6 @@ public:
 	virtual void Activate( void );
 	virtual void Paint( void );
 	virtual void DoModal( void );
-	virtual void OnKeyCodeTyped( vgui::KeyCode code );
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
 	virtual void OnClose( void );
 	virtual void GetPanelPos( int &xpos, int &ypos );
@@ -41,8 +40,6 @@ public:
 	}
 
 	bool BeginPlayback( const char *pFilename );
-
-	void SetBlackBackground( bool bBlack ){ m_bBlackBackground = bBlack; }
 
 protected:
 
@@ -59,8 +56,6 @@ protected:
 
 	float			m_flU;	// U,V ranges for video on its sheet
 	float			m_flV;
-
-	bool			m_bBlackBackground;
 };
 
 

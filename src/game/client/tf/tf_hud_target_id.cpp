@@ -28,8 +28,6 @@ using namespace vgui;
 CTargetID::CTargetID( const char *pElementName ) :
 	CHudElement( pElementName ), BaseClass( NULL, pElementName )
 {
-	// TFP3: Nothing shows up in IDA
-#if 1
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
 
@@ -44,10 +42,6 @@ CTargetID::CTargetID( const char *pElementName ) :
 	m_pBGPanel = NULL;
 	m_pTargetHealth = new CTFSpectatorGUIHealth( this, "SpectatorGUIHealth" );
 	m_bLayoutOnUpdate = false;
-
-	RegisterForRenderGroup( "mid" );
-	RegisterForRenderGroup( "commentary" );
-#endif
 }
 
 //-----------------------------------------------------------------------------

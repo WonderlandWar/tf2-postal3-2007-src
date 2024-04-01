@@ -34,25 +34,11 @@ public:
 
 	int	HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
 
-	virtual int GetRenderGroupPriority( void ) { return 50; }
-
-private:
-	void SetSelectedItem( int iSlot );
-
-	void SelectDisguise( int iClass, int iTeam );
-	void ToggleDisguiseTeam( void );
-
 private:
 	EditablePanel *m_pClassItems_Red[9];
 	EditablePanel *m_pClassItems_Blue[9];
 
-	EditablePanel *m_pActiveSelection;
-
 	int m_iShowingTeam;
-	
-	int m_iSelectedItem;
-
-	bool m_bInConsoleMode;
 };
 
 #endif	// TF_HUD_MENU_SPY_DISGUISE_H

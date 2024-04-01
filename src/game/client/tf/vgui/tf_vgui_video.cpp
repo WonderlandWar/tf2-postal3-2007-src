@@ -28,8 +28,6 @@ CTFVideoPanel::CTFVideoPanel( vgui::Panel *parent, const char *panelName ) : Vid
 	SetProportional( true );
 	SetKeyBoardInputEnabled( false );
 
-	SetBlackBackground( false );
-
 	m_flDelay = 0.0f;
 }
 
@@ -46,8 +44,6 @@ CTFVideoPanel::~CTFVideoPanel()
 //-----------------------------------------------------------------------------
 void CTFVideoPanel::ReleaseVideo()
 {
-	enginesound->NotifyEndMoviePlayback();
-
 	// Destroy any previously allocated video
 	if ( m_BIKHandle != BIKHANDLE_INVALID )
 	{

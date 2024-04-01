@@ -180,10 +180,6 @@ void CTFClassMenu::ShowPanel( bool bShow )
 			}
 		}
 
-		// everything is off so just reset these for next time
-		g_lastButton = NULL;
-		g_lastPanel = NULL;
-
 		SetVisible( false );
 		SetMouseInputEnabled( false );
 	}
@@ -194,9 +190,7 @@ void CTFClassMenu::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 void CTFClassMenu::OnKeyCodePressed( KeyCode code )
 {
-	if ( ( m_iClassMenuKey != BUTTON_CODE_INVALID && m_iClassMenuKey == code ) ||
-		code == KEY_XBUTTON_BACK || 
-		code == KEY_XBUTTON_B )
+	if ( ( m_iClassMenuKey != BUTTON_CODE_INVALID && m_iClassMenuKey == code ) )
 	{
 		C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
 
@@ -225,25 +219,11 @@ void CTFClassMenu::Update()
 	// Force them to pick a class if they haven't picked one yet.
 	if ( ( pLocalPlayer && pLocalPlayer->m_Shared.GetDesiredPlayerClassIndex() != TF_CLASS_UNDEFINED ) )
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "cancel", true );
-		}
-#else
 		SetVisibleButton( "CancelButton", true );
-#endif
 	}
 	else
 	{
-#ifdef _X360
-		if ( m_pFooter )
-		{
-			m_pFooter->ShowButtonLabel( "cancel", false );
-		}
-#else
 		SetVisibleButton( "CancelButton", false );
-#endif
 	}
 }
 

@@ -50,16 +50,6 @@ CHudMenuSpyDisguise::CHudMenuSpyDisguise( const char *pElementName ) : CHudEleme
 	m_iShowingTeam = TF_TEAM_RED;
 
 	ListenForGameEvent( "spy_pda_reset" );
-
-	m_iSelectedItem = -1;
-
-	m_pActiveSelection = NULL;
-
-	InvalidateLayout( false, true );
-
-	m_bInConsoleMode = false;
-
-	RegisterForRenderGroup( "mid" );
 }
 
 ConVar tf_disguise_menu_controller_mode( "tf_disguise_menu_controller_mode", "0", FCVAR_ARCHIVE, "Use console controller disguise menus. 1 = ON, 0 = OFF." );
@@ -69,66 +59,28 @@ ConVar tf_disguise_menu_controller_mode( "tf_disguise_menu_controller_mode", "0"
 //-----------------------------------------------------------------------------
 void CHudMenuSpyDisguise::ApplySchemeSettings( IScheme *pScheme )
 {
-	bool b360Style = ( IsConsole() || tf_disguise_menu_controller_mode.GetBool() );
+	// load control settings...
+	LoadControlSettings( "resource/UI/disguise_menu/HudMenuSpyDisguise.res" );
 
-	if ( b360Style )
-	{
-		// load control settings...
-		LoadControlSettings( "resource/UI/disguise_menu_360/HudMenuSpyDisguise.res" );
+	m_pClassItems_Red[0]->LoadControlSettings( "resource/UI/disguise_menu/scout_red.res" );
+	m_pClassItems_Red[1]->LoadControlSettings( "resource/UI/disguise_menu/soldier_red.res" );
+	m_pClassItems_Red[2]->LoadControlSettings( "resource/UI/disguise_menu/pyro_red.res" );
+	m_pClassItems_Red[3]->LoadControlSettings( "resource/UI/disguise_menu/demoman_red.res" );
+	m_pClassItems_Red[4]->LoadControlSettings( "resource/UI/disguise_menu/heavy_red.res" );
+	m_pClassItems_Red[5]->LoadControlSettings( "resource/UI/disguise_menu/engineer_red.res" );
+	m_pClassItems_Red[6]->LoadControlSettings( "resource/UI/disguise_menu/medic_red.res" );
+	m_pClassItems_Red[7]->LoadControlSettings( "resource/UI/disguise_menu/sniper_red.res" );
+	m_pClassItems_Red[8]->LoadControlSettings( "resource/UI/disguise_menu/spy_red.res" );
 
-		m_pClassItems_Red[0]->LoadControlSettings( "resource/UI/disguise_menu_360/scout_red.res" );
-		m_pClassItems_Red[1]->LoadControlSettings( "resource/UI/disguise_menu_360/soldier_red.res" );
-		m_pClassItems_Red[2]->LoadControlSettings( "resource/UI/disguise_menu_360/pyro_red.res" );
-		m_pClassItems_Red[3]->LoadControlSettings( "resource/UI/disguise_menu_360/demoman_red.res" );
-		m_pClassItems_Red[4]->LoadControlSettings( "resource/UI/disguise_menu_360/heavy_red.res" );
-		m_pClassItems_Red[5]->LoadControlSettings( "resource/UI/disguise_menu_360/engineer_red.res" );
-		m_pClassItems_Red[6]->LoadControlSettings( "resource/UI/disguise_menu_360/medic_red.res" );
-		m_pClassItems_Red[7]->LoadControlSettings( "resource/UI/disguise_menu_360/sniper_red.res" );
-		m_pClassItems_Red[8]->LoadControlSettings( "resource/UI/disguise_menu_360/spy_red.res" );
-
-		m_pClassItems_Blue[0]->LoadControlSettings( "resource/UI/disguise_menu_360/scout_blue.res" );
-		m_pClassItems_Blue[1]->LoadControlSettings( "resource/UI/disguise_menu_360/soldier_blue.res" );
-		m_pClassItems_Blue[2]->LoadControlSettings( "resource/UI/disguise_menu_360/pyro_blue.res" );
-		m_pClassItems_Blue[3]->LoadControlSettings( "resource/UI/disguise_menu_360/demoman_blue.res" );
-		m_pClassItems_Blue[4]->LoadControlSettings( "resource/UI/disguise_menu_360/heavy_blue.res" );
-		m_pClassItems_Blue[5]->LoadControlSettings( "resource/UI/disguise_menu_360/engineer_blue.res" );
-		m_pClassItems_Blue[6]->LoadControlSettings( "resource/UI/disguise_menu_360/medic_blue.res" );
-		m_pClassItems_Blue[7]->LoadControlSettings( "resource/UI/disguise_menu_360/sniper_blue.res" );
-		m_pClassItems_Blue[8]->LoadControlSettings( "resource/UI/disguise_menu_360/spy_blue.res" );
-
-		m_pActiveSelection = dynamic_cast< EditablePanel * >( FindChildByName( "active_selection_bg" ) );
-
-		// Reposition the activeselection to the default position
-		m_iSelectedItem = -1;	// force reposition
-		SetSelectedItem( 5 );
-	}
-	else
-	{
-		// load control settings...
-		LoadControlSettings( "resource/UI/disguise_menu/HudMenuSpyDisguise.res" );
-
-		m_pClassItems_Red[0]->LoadControlSettings( "resource/UI/disguise_menu/scout_red.res" );
-		m_pClassItems_Red[1]->LoadControlSettings( "resource/UI/disguise_menu/soldier_red.res" );
-		m_pClassItems_Red[2]->LoadControlSettings( "resource/UI/disguise_menu/pyro_red.res" );
-		m_pClassItems_Red[3]->LoadControlSettings( "resource/UI/disguise_menu/demoman_red.res" );
-		m_pClassItems_Red[4]->LoadControlSettings( "resource/UI/disguise_menu/heavy_red.res" );
-		m_pClassItems_Red[5]->LoadControlSettings( "resource/UI/disguise_menu/engineer_red.res" );
-		m_pClassItems_Red[6]->LoadControlSettings( "resource/UI/disguise_menu/medic_red.res" );
-		m_pClassItems_Red[7]->LoadControlSettings( "resource/UI/disguise_menu/sniper_red.res" );
-		m_pClassItems_Red[8]->LoadControlSettings( "resource/UI/disguise_menu/spy_red.res" );
-
-		m_pClassItems_Blue[0]->LoadControlSettings( "resource/UI/disguise_menu/scout_blue.res" );
-		m_pClassItems_Blue[1]->LoadControlSettings( "resource/UI/disguise_menu/soldier_blue.res" );
-		m_pClassItems_Blue[2]->LoadControlSettings( "resource/UI/disguise_menu/pyro_blue.res" );
-		m_pClassItems_Blue[3]->LoadControlSettings( "resource/UI/disguise_menu/demoman_blue.res" );
-		m_pClassItems_Blue[4]->LoadControlSettings( "resource/UI/disguise_menu/heavy_blue.res" );
-		m_pClassItems_Blue[5]->LoadControlSettings( "resource/UI/disguise_menu/engineer_blue.res" );
-		m_pClassItems_Blue[6]->LoadControlSettings( "resource/UI/disguise_menu/medic_blue.res" );
-		m_pClassItems_Blue[7]->LoadControlSettings( "resource/UI/disguise_menu/sniper_blue.res" );
-		m_pClassItems_Blue[8]->LoadControlSettings( "resource/UI/disguise_menu/spy_blue.res" );
-
-		m_pActiveSelection = NULL;
-	}
+	m_pClassItems_Blue[0]->LoadControlSettings( "resource/UI/disguise_menu/scout_blue.res" );
+	m_pClassItems_Blue[1]->LoadControlSettings( "resource/UI/disguise_menu/soldier_blue.res" );
+	m_pClassItems_Blue[2]->LoadControlSettings( "resource/UI/disguise_menu/pyro_blue.res" );
+	m_pClassItems_Blue[3]->LoadControlSettings( "resource/UI/disguise_menu/demoman_blue.res" );
+	m_pClassItems_Blue[4]->LoadControlSettings( "resource/UI/disguise_menu/heavy_blue.res" );
+	m_pClassItems_Blue[5]->LoadControlSettings( "resource/UI/disguise_menu/engineer_blue.res" );
+	m_pClassItems_Blue[6]->LoadControlSettings( "resource/UI/disguise_menu/medic_blue.res" );
+	m_pClassItems_Blue[7]->LoadControlSettings( "resource/UI/disguise_menu/sniper_blue.res" );
+	m_pClassItems_Blue[8]->LoadControlSettings( "resource/UI/disguise_menu/spy_blue.res" );
 
 
 	BaseClass::ApplySchemeSettings( pScheme );
@@ -187,155 +139,57 @@ int	CHudMenuSpyDisguise::HudElementKeyInput( int down, ButtonCode_t keynum, cons
 		TF_CLASS_SPY
 	};
 
-	bool bController = ( IsConsole() || ( keynum >= JOYSTICK_FIRST ) );
-
-	if ( bController )
+	switch( keynum )
 	{
-		int iNewSelection = m_iSelectedItem;
-
-		switch( keynum )
+	case KEY_1:
+	case KEY_2:
+	case KEY_3:
+	case KEY_4:
+	case KEY_5:
+	case KEY_6:
+	case KEY_7:
+	case KEY_8:
+	case KEY_9:
 		{
-		case KEY_XBUTTON_UP:
-			// jump to last
-			iNewSelection = 9;
-			break;
+			int iClass = iRemapKeyToClass[ keynum - KEY_1 ];
+			int iTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? 1 : 0;
 
-		case KEY_XBUTTON_DOWN:
-			// jump to first
-			iNewSelection = 1;
-			break;
-
-		case KEY_XBUTTON_RIGHT:
-			// move selection to the right
-			iNewSelection++;
-			if ( iNewSelection > 9 )
-				iNewSelection = 1;
-			break;
-
-		case KEY_XBUTTON_LEFT:
-			// move selection to the right
-			iNewSelection--;
-			if ( iNewSelection < 1 )
-				iNewSelection = 9;
-			break;
-
-		case KEY_XBUTTON_RTRIGGER:
-		case KEY_XBUTTON_A:
+			CTFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
+			if ( pPlayer )
 			{
-				// select disguise
-				int iClass = iRemapKeyToClass[m_iSelectedItem-1];
-				int iTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? 1 : 0;
-
-				SelectDisguise( iClass, iTeam );
+				char szCmd[64];
+				Q_snprintf( szCmd, sizeof(szCmd), "disguise %d %d; lastinv", iClass, iTeam );
+				engine->ExecuteClientCmd( szCmd );
 			}
-			return 0;
-
-		case KEY_XBUTTON_Y:
-			ToggleDisguiseTeam();
-			return 0;
-
-		case KEY_XBUTTON_B:
-			// cancel, close the menu
-			engine->ExecuteClientCmd( "lastinv" );
-			return 0;
-
-		default:
-			return 1;	// key not handled
 		}
-
-		SetSelectedItem( iNewSelection );
-
 		return 0;
-	}
-	else
-	{
-		switch( keynum )
+
+	case KEY_MINUS:
 		{
-		case KEY_1:
-		case KEY_2:
-		case KEY_3:
-		case KEY_4:
-		case KEY_5:
-		case KEY_6:
-		case KEY_7:
-		case KEY_8:
-		case KEY_9:
-			{
-				int iClass = iRemapKeyToClass[ keynum - KEY_1 ];
-				int iTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? 1 : 0;
+		// flip the teams
+		m_iShowingTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? TF_TEAM_RED : TF_TEAM_BLUE;
 
-				SelectDisguise( iClass, iTeam );
-			}
-			return 0;
+		// show / hide the class items
+		bool bShowBlue = ( m_iShowingTeam == TF_TEAM_BLUE );
 
-		case KEY_MINUS:
-			ToggleDisguiseTeam();
-			return 0;
-
-		case KEY_0:
-			// cancel, close the menu
-			engine->ExecuteClientCmd( "lastinv" );
-			return 0;
-
-		default:
-			return 1;	// key not handled
+		for ( int i=0; i<9; i++ )
+		{
+			m_pClassItems_Red[i]->SetVisible( !bShowBlue );
+			m_pClassItems_Blue[i]->SetVisible( bShowBlue );
 		}
+		return 0;
+		}
+	case KEY_0:
+		// cancel, close the menu
+		engine->ExecuteClientCmd( "lastinv" );
+		return 0;
+
+	default:
+		return 1;	// key not handled
 	}
 	
 
 	return 1;	// key not handled
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CHudMenuSpyDisguise::SelectDisguise( int iClass, int iTeam )
-{
-	CTFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
-	if ( pPlayer )
-	{
-		char szCmd[64];
-		Q_snprintf( szCmd, sizeof(szCmd), "disguise %d %d; lastinv", iClass, iTeam );
-		engine->ExecuteClientCmd( szCmd );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CHudMenuSpyDisguise::ToggleDisguiseTeam( void )
-{
-	// flip the teams
-	m_iShowingTeam = ( m_iShowingTeam == TF_TEAM_BLUE ) ? TF_TEAM_RED : TF_TEAM_BLUE;
-
-	// show / hide the class items
-	bool bShowBlue = ( m_iShowingTeam == TF_TEAM_BLUE );
-
-	for ( int i=0; i<9; i++ )
-	{
-		m_pClassItems_Red[i]->SetVisible( !bShowBlue );
-		m_pClassItems_Blue[i]->SetVisible( bShowBlue );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CHudMenuSpyDisguise::SetSelectedItem( int iSlot )
-{
-	if ( m_iSelectedItem != iSlot )
-	{
-		m_iSelectedItem = iSlot;
-
-		// move the selection item to the new position
-		if ( m_pActiveSelection )
-		{
-			// move the selection background
-			int x, y;
-			m_pClassItems_Blue[m_iSelectedItem-1]->GetPos( x, y );
-			m_pActiveSelection->SetPos( x, y );	
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -374,17 +228,6 @@ void CHudMenuSpyDisguise::SetVisible( bool state )
 {
 	if ( state == true )
 	{
-		// close the weapon selection menu
-		engine->ClientCmd( "cancelselect" );
-
-		bool bConsoleMode = ( IsConsole() || tf_disguise_menu_controller_mode.GetBool() );
-			
-		if ( bConsoleMode != m_bInConsoleMode )
-		{
-			InvalidateLayout( true, true );
-			m_bInConsoleMode = bConsoleMode;
-		}
-
 		// set the %lastinv% dialog var to our binding
 		const char *key = engine->Key_LookupBinding( "lastinv" );
 		if ( !key )
@@ -393,12 +236,6 @@ void CHudMenuSpyDisguise::SetVisible( bool state )
 		}
 
 		SetDialogVariable( "lastinv", key );
-
-		HideLowerPriorityHudElementsInGroup( "mid" );
-	}
-	else
-	{
-		UnhideLowerPriorityHudElementsInGroup( "mid" );
 	}
 
 	BaseClass::SetVisible( state );

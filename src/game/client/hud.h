@@ -110,7 +110,6 @@ public:
 #include "hudtexturehandle.h"
 
 class CHudElement;
-class CHudRenderGroup;
 
 //-----------------------------------------------------------------------------
 // Purpose: Main hud manager
@@ -176,17 +175,6 @@ public:
 	void						MsgFunc_ResetHUD(bf_read &msg);
 	void 						MsgFunc_SendAudio(bf_read &msg);
 
-	// Hud Render group
-	int							LookupRenderGroupIndexByName( const char *pszGroupName );
-	bool						LockRenderGroup( int iGroupIndex, CHudElement *pLocker = NULL );
-	bool						UnlockRenderGroup( int iGroupIndex, CHudElement *pLocker = NULL );
-	bool						IsRenderGroupLockedFor( CHudElement *pHudElement, int iGroupIndex );
-	int							RegisterForRenderGroup( const char *pszGroupName );
-	int							AddHudRenderGroup( const char *pszGroupName );
-	bool						DoesRenderGroupExist( int iGroupIndex );
-
-	void						SetScreenShotTime( float flTime ){ m_flScreenShotTime = flTime; }
-
 public:
 
 	int							m_iKeyBits;
@@ -211,11 +199,6 @@ private:
 
 	// Global list of known icons
 	CUtlDict< CHudTexture *, int >		m_Icons;
-
-	CUtlVector< const char * >				m_RenderGroupNames;
-	CUtlMap< int, CHudRenderGroup * >		m_RenderGroups;
-
-	float						m_flScreenShotTime; // used to take end-game screenshots
 };
 
 extern CHud gHUD;

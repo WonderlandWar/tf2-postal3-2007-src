@@ -30,8 +30,6 @@ VideoPanel::VideoPanel( unsigned int nXPos, unsigned int nYPos, unsigned int nHe
 	// Must be passed in, off by default
 	m_szExitCommand[0] = '\0';
 
-	m_bBlackBackground = true;
-
 	SetKeyBoardInputEnabled( true );
 	SetMouseInputEnabled( false );
 
@@ -95,7 +93,7 @@ bool VideoPanel::BeginPlayback( const char *pFilename )
 
 	// We want to be the sole audio source
 	// FIXME: This may not always be true!
-	enginesound->NotifyBeginMoviePlayback();
+	enginesound->StopAllSounds( false );
 
 	int nWidth, nHeight;
 	bik->GetFrameSize( m_BIKHandle, &nWidth, &nHeight );
@@ -150,21 +148,6 @@ void VideoPanel::DoModal( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void VideoPanel::OnKeyCodeTyped( vgui::KeyCode code )
-{
-	if ( code == KEY_ESCAPE	)
-	{
-		OnClose();
-	}
-	else
-	{
-		BaseClass::OnKeyCodeTyped( code );
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Handle keys that should cause us to close
 //-----------------------------------------------------------------------------
 void VideoPanel::OnKeyCodePressed( vgui::KeyCode code )
@@ -173,13 +156,7 @@ void VideoPanel::OnKeyCodePressed( vgui::KeyCode code )
 	if ( code == KEY_ESCAPE || 
 		 code == KEY_BACKQUOTE || 
 		 code == KEY_SPACE || 
-		 code == KEY_ENTER ||
-		 code == KEY_XBUTTON_A || 
-		 code == KEY_XBUTTON_B ||
-		 code == KEY_XBUTTON_X || 
-		 code == KEY_XBUTTON_Y || 
-		 code == KEY_XBUTTON_START || 
-		 code == KEY_XBUTTON_BACK )
+		 code == KEY_ENTER )
 	{
 		OnClose();
 	}
@@ -194,7 +171,6 @@ void VideoPanel::OnKeyCodePressed( vgui::KeyCode code )
 //-----------------------------------------------------------------------------
 void VideoPanel::OnClose( void )
 {
-	enginesound->NotifyEndMoviePlayback();
 	BaseClass::OnClose();
 
 	if ( vgui::input()->GetAppModalSurface() == GetVPanel() )
@@ -247,12 +223,9 @@ void VideoPanel::Paint( void )
 	GetPanelPos( xpos, ypos );
 
 	// Black out the background (we could omit drawing under the video surface, but this is straight-forward)
-	if ( m_bBlackBackground )
-	{
-		vgui::surface()->DrawSetColor(  0, 0, 0, 255 );
-		vgui::surface()->DrawFilledRect( 0, 0, GetWide(), GetTall() );
-	}
-
+	vgui::surface()->DrawSetColor(  0, 0, 0, 255 );
+	vgui::surface()->DrawFilledRect( 0, 0, GetWide(), GetTall() );
+	
 	// Draw the polys to draw this out
 	CMatRenderContextPtr pRenderContext( materials );
 	
