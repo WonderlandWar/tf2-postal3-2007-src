@@ -119,7 +119,7 @@ void CTFGameStats::Event_LevelInit( void )
 {
 	CBaseGameStats::Event_LevelInit();
 
-	ClearCurrentGameData();
+	m_reportedStats.m_pCurrentMap = m_reportedStats.FindOrAddMapStats( STRING( gpGlobals->mapname ) );
 
 	// Get the host ip and port.
 	int nIPAddr = 0;
@@ -136,10 +136,7 @@ void CTFGameStats::Event_LevelInit( void )
 		nPort = hostport->GetInt();
 	}			
 
-	m_reportedStats.m_pCurrentGame->Init( STRING( gpGlobals->mapname ), nIPAddr, nPort, gpGlobals->curtime );
-
-	TF_Gamestats_LevelStats_t *map = m_reportedStats.FindOrAddMapStats( STRING( gpGlobals->mapname ) );
-	map->Init( STRING( gpGlobals->mapname ), nIPAddr, nPort, gpGlobals->curtime );
+	m_reportedStats.m_pCurrentMap->Init( STRING( gpGlobals->mapname ), nIPAddr, nPort, gpGlobals->curtime );
 }
 
 //-----------------------------------------------------------------------------
@@ -147,16 +144,13 @@ void CTFGameStats::Event_LevelInit( void )
 //-----------------------------------------------------------------------------
 void CTFGameStats::Event_LevelShutdown( float flElapsed )
 {
-	if ( m_reportedStats.m_pCurrentGame )
-	{
-		flElapsed = gpGlobals->curtime - m_reportedStats.m_pCurrentGame->m_flRoundStartTime;
-		m_reportedStats.m_pCurrentGame->m_Header.m_iTotalTime += (int) flElapsed;
-	}
-
-	// add current game data in to data for this level
-	AccumulateGameData();
-
 	CBaseGameStats::Event_LevelShutdown( flElapsed );
+
+	if ( m_reportedStats.m_pCurrentMap )
+	{
+		flElapsed = gpGlobals->curtime - m_reportedStats.m_pCurrentMap->m_flLevelStartTime;
+		m_reportedStats.m_pCurrentMap->m_Header.m_iTotalTime += (int) flElapsed;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -206,13 +200,7 @@ void CTFGameStats::IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int
 {
 	PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
 	stats.statsCurrentRound.m_iStat[statType] += iValue;
-	stats.statsAccumulated.m_iStat[statType] += iValue;	
-
-	// if this stat should get sent to client, mark it as dirty
-	if ( ShouldSendToClient( statType ) )
-	{
-		stats.iStatsChangedBits |= 1 << ( statType - TFSTAT_FIRST );
-	}
+	stats.statsAccumulated.m_iStat[statType] += iValue;
 }
 
 //-----------------------------------------------------------------------------
@@ -254,9 +242,9 @@ void CTFGameStats::AccumulateAndResetPerLifeStats( CTFPlayer *pPlayer )
 
 	// add score from previous life and reset current life stats
 	int iScore = TFGameRules()->CalcPlayerScore( &stats.statsCurrentLife );
-	if ( m_reportedStats.m_pCurrentGame != NULL )
+	if ( m_reportedStats.m_pCurrentMap != NULL )
 	{
-		m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iScore += iScore;
+		m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iScore += iScore;
 	}
 	stats.statsCurrentRound.m_iStat[TFSTAT_POINTSSCORED] += iScore;
 	stats.statsAccumulated.m_iStat[TFSTAT_POINTSSCORED] += iScore;
@@ -285,9 +273,9 @@ void CTFGameStats::Event_PlayerDisconnected( CBasePlayer *pPlayer )
 	if ( pPlayer->IsAlive() )
 	{
 		int iClass = pTFPlayer->GetPlayerClass()->GetClassIndex();
-		if ( m_reportedStats.m_pCurrentGame != NULL )
+		if ( m_reportedStats.m_pCurrentMap != NULL )
 		{
-			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pTFPlayer->GetSpawnTime() );
+			m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pTFPlayer->GetSpawnTime() );
 		}
 	}
 }
@@ -309,9 +297,9 @@ void CTFGameStats::Event_PlayerSpawned( CTFPlayer *pPlayer )
 	int iClass = pPlayer->GetPlayerClass()->GetClassIndex();
 	if ( TEAM_UNASSIGNED != iTeam && TEAM_SPECTATOR != iTeam )
 	{
-		if ( m_reportedStats.m_pCurrentGame != NULL )
+		if ( m_reportedStats.m_pCurrentMap != NULL )
 		{
-			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iSpawns++;
+			m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iSpawns++;
 		}
 	}
 }
@@ -328,9 +316,9 @@ void CTFGameStats::Event_PlayerForceRespawn( CTFPlayer *pPlayer )
 
 		// if player is alive before respawn, add time from this life to class stat
 		int iClass = pPlayer->GetPlayerClass()->GetClassIndex();
-		if ( m_reportedStats.m_pCurrentGame != NULL )
+		if ( m_reportedStats.m_pCurrentMap != NULL )
 		{
-			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pPlayer->GetSpawnTime() );
+			m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pPlayer->GetSpawnTime() );
 		}
 	}
 
@@ -376,16 +364,17 @@ void CTFGameStats::Event_AssistKill( CTFPlayer *pAttacker, CBaseEntity *pVictim 
 	IncrementStat( pAttacker, TFSTAT_KILLASSISTS, 1 );
 	// increment reported class stats
 	int iClass = pAttacker->GetPlayerClass()->GetClassIndex();
-	if ( m_reportedStats.m_pCurrentGame != NULL )
+	if ( m_reportedStats.m_pCurrentMap != NULL )
 	{
-		m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iAssists++;
+		m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iAssists++;
 	}
 
 	if ( pVictim->IsPlayer() )
 	{
 		// keep track of how many times every player kills every other player
 		CTFPlayer *pPlayerVictim = ToTFPlayer( pVictim );
-		TrackKillStats( pAttacker, pPlayerVictim );
+		m_aPlayerStats[pPlayerVictim->entindex()].statsKills.iNumKilledByUnanswered[pPlayerVictim->entindex()] = 0;
+
 	}
 }
 
@@ -478,9 +467,9 @@ void CTFGameStats::Event_PlayerFiredWeapon( CTFPlayer *pPlayer, bool bCritical )
 			// record shots fired in reported per-weapon stats
 			int iWeaponID = pTFWeapon->GetWeaponID();
 
-			if ( m_reportedStats.m_pCurrentGame != NULL )
+			if ( m_reportedStats.m_pCurrentMap != NULL )
 			{
-				TF_Gamestats_WeaponStats_t *pWeaponStats = &m_reportedStats.m_pCurrentGame->m_aWeaponStats[iWeaponID];
+				TF_Gamestats_WeaponStats_t *pWeaponStats = &m_reportedStats.m_pCurrentMap->m_aWeaponStats[iWeaponID];
 				pWeaponStats->iShotsFired++;
 				if ( bCritical )
 				{
@@ -567,9 +556,9 @@ void CTFGameStats::Event_PlayerDamage( CBasePlayer *pBasePlayer, const CTakeDama
 	if ( ( TFGameRules()->State_Get() == GR_STATE_RND_RUNNING ) && ( damage.iWeapon != TF_WEAPON_NONE  ) )
 	{
 		// record hits & damage in reported per-weapon stats
-		if ( m_reportedStats.m_pCurrentGame != NULL )
+		if ( m_reportedStats.m_pCurrentMap != NULL )
 		{
-			TF_Gamestats_WeaponStats_t *pWeaponStats = &m_reportedStats.m_pCurrentGame->m_aWeaponStats[damage.iWeapon];
+			TF_Gamestats_WeaponStats_t *pWeaponStats = &m_reportedStats.m_pCurrentMap->m_aWeaponStats[damage.iWeapon];
 			pWeaponStats->iHits++;
 			pWeaponStats->iTotalDamage += iDamageTaken;
 
@@ -624,9 +613,9 @@ void CTFGameStats::Event_PlayerDamage( CBasePlayer *pBasePlayer, const CTakeDama
 	damage.iKill = ( pTarget->GetHealth() <= 0 );
 
 	// add it to the list of damages
-	if ( m_reportedStats.m_pCurrentGame != NULL )
+	if ( m_reportedStats.m_pCurrentMap != NULL )
 	{
-		m_reportedStats.m_pCurrentGame->m_aPlayerDamage.AddToTail( damage );
+		m_reportedStats.m_pCurrentMap->m_aPlayerDamage.AddToTail( damage );
 	}	
 }
 
@@ -645,12 +634,17 @@ void CTFGameStats::Event_PlayerKilledOther( CBasePlayer *pAttacker, CBaseEntity 
 
 	// keep track of how many times every player kills every other player
 	CTFPlayer *pPlayerVictim = ToTFPlayer( pVictim );
-	TrackKillStats( pAttacker, pPlayerVictim );
 	
+	++m_aPlayerStats[pPlayerVictim->entindex()].statsKills.iNumKilledBy[pAttacker->entindex()];
+	++m_aPlayerStats[pPlayerVictim->entindex()].statsKills.iNumKilledByUnanswered[pAttacker->entindex()];
+
+	++m_aPlayerStats[pAttacker->entindex()].statsKills.iNumKilled[pPlayerVictim->entindex()];
+	m_aPlayerStats[pAttacker->entindex()].statsKills.iNumKilledByUnanswered[pPlayerVictim->entindex()] = 0;
+
 	int iClass = pPlayerAttacker->GetPlayerClass()->GetClassIndex();
-	if ( m_reportedStats.m_pCurrentGame != NULL )
+	if ( m_reportedStats.m_pCurrentMap != NULL )
 	{
-		m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iKills++;
+		m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iKills++;
 	}
 }
 
@@ -659,19 +653,14 @@ void CTFGameStats::Event_PlayerKilledOther( CBasePlayer *pAttacker, CBaseEntity 
 //-----------------------------------------------------------------------------
 void CTFGameStats::Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRoundTime )
 {
-	TF_Gamestats_LevelStats_t *map = m_reportedStats.m_pCurrentGame;
-	Assert( map );
-	if ( !map )
-		return;
-
-	m_reportedStats.m_pCurrentGame->m_Header.m_iTotalTime += (int) flRoundTime;
-	m_reportedStats.m_pCurrentGame->m_flRoundStartTime = gpGlobals->curtime;
-
 	// only record full rounds, not mini-rounds
 	if ( !bFullRound )
 		return;
 
+	TF_Gamestats_LevelStats_t *map = m_reportedStats.FindOrAddMapStats( gpGlobals->mapname.ToCStr() );
+
 	map->m_Header.m_iRoundsPlayed++;
+	map->m_Header.m_iTotalTime += (int) flRoundTime;
 	switch ( iWinningTeam )
 	{
 	case TF_TEAM_RED:
@@ -687,9 +676,6 @@ void CTFGameStats::Event_RoundEnd( int iWinningTeam, bool bFullRound, float flRo
 		Assert( false );
 		break;
 	}
-
-	// add current game data in to data for this level
-	AccumulateGameData();
 }
 
 //-----------------------------------------------------------------------------
@@ -701,9 +687,9 @@ void CTFGameStats::Event_PlayerCapturedPoint( CTFPlayer *pPlayer )
 	IncrementStat( pPlayer, TFSTAT_CAPTURES, 1 );
 	// increment reported stats
 	int iClass = pPlayer->GetPlayerClass()->GetClassIndex();
-	if ( m_reportedStats.m_pCurrentGame != NULL )
+	if ( m_reportedStats.m_pCurrentMap != NULL )
 	{
-		m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iCaptures++;
+		m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iCaptures++;
 	}	
 }
 
@@ -729,23 +715,6 @@ void CTFGameStats::Event_PlayerDominatedOther( CTFPlayer *pAttacker )
 void CTFGameStats::Event_PlayerRevenge( CTFPlayer *pAttacker )
 {
 	IncrementStat( pAttacker, TFSTAT_REVENGE, 1 );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFGameStats::Event_MaxSentryKills( CTFPlayer *pAttacker, int iMaxKills )
-{
-	// Max sentry kills is a little different from other stats, it is the most kills from
-	// any single sentry the player builds during his lifetime.  It does not increase monotonically
-	// so this is a little different than the other stat code.
-	PlayerStats_t &stats = m_aPlayerStats[pAttacker->entindex()];
-	int iCur = stats.statsCurrentRound.m_iStat[TFSTAT_MAXSENTRYKILLS];
-	if ( iCur != iMaxKills )
-	{
-		stats.statsCurrentRound.m_iStat[TFSTAT_MAXSENTRYKILLS] = iMaxKills;
-		stats.iStatsChangedBits |= ( 1 << ( TFSTAT_MAXSENTRYKILLS - TFSTAT_FIRST ) );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -804,111 +773,18 @@ void CTFGameStats::Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamageIn
 	death.iDistance = static_cast<unsigned short>( ( killerOrg - org ).Length() );
 
 	// add it to the list of deaths
-	TF_Gamestats_LevelStats_t *map = m_reportedStats.m_pCurrentGame;
+	TF_Gamestats_LevelStats_t *map = m_reportedStats.m_pCurrentMap;
 	if ( map )
 	{
 		map->m_aPlayerDeaths.AddToTail( death );
 		int iClass = ToTFPlayer( pPlayer )->GetPlayerClass()->GetClassIndex();
 
-		if ( m_reportedStats.m_pCurrentGame != NULL )
+		if ( m_reportedStats.m_pCurrentMap != NULL )
 		{
-			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iDeaths++;
-			m_reportedStats.m_pCurrentGame->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pTFPlayer->GetSpawnTime() );
+			m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iDeaths++;
+			m_reportedStats.m_pCurrentMap->m_aClassStats[iClass].iTotalTime += (int) ( gpGlobals->curtime - pTFPlayer->GetSpawnTime() );
 		}
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Per-frame handler
-//-----------------------------------------------------------------------------
-void CTFGameStats::FrameUpdatePostEntityThink()
-{
-	// see if any players have stat changes we need to send
-	for( int iPlayerIndex = 1 ; iPlayerIndex <= MAX_PLAYERS; iPlayerIndex++ )
-	{
-		CTFPlayer *pPlayer = ToTFPlayer( UTIL_PlayerByIndex( iPlayerIndex ) );
-		if ( pPlayer && pPlayer->IsConnected() && pPlayer->IsAlive() )
-		{
-			PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
-			// if there are any updated stats for this player and we haven't sent a stat update for this player in the last second,
-			// send one now.
-			if ( ( stats.iStatsChangedBits > 0 ) && ( gpGlobals->curtime >= stats.m_flTimeLastSend + 1.0f ) )
-			{
-				//SendStatsToPlayer( pPlayer, STATMSG_UPDATE );
-			}						
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Adds data from current game into accumulated data for this level.
-//-----------------------------------------------------------------------------
-void CTFGameStats::AccumulateGameData()
-{
-	// find or add a bucket for this level
-	TF_Gamestats_LevelStats_t *map = m_reportedStats.FindOrAddMapStats( STRING( gpGlobals->mapname ) );
-	// get current game data
-	TF_Gamestats_LevelStats_t *game = m_reportedStats.m_pCurrentGame;
-	if ( !map || !game )
-		return;
-	
-	// Sanity-check that this looks like real game play -- must have minimum # of players on both teams,
-	// minimum time and some damage to players must have occurred
-	if ( ( game->m_iPeakPlayerCount[TF_TEAM_RED] >= 3  ) && ( game->m_iPeakPlayerCount[TF_TEAM_BLUE] >= 3 ) &&
-		( game->m_Header.m_iTotalTime >= 4 * 60 ) && ( game->m_aPlayerDamage.Count() > 0 ) ) 
-	{
-		// if this looks like real game play, add it to stats
-		map->Accumulate( game );
-	}
-		
-	ClearCurrentGameData();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Clears data for current game
-//-----------------------------------------------------------------------------
-void CTFGameStats::ClearCurrentGameData()
-{
-	if ( m_reportedStats.m_pCurrentGame )
-	{
-		delete m_reportedStats.m_pCurrentGame;
-	}
-	m_reportedStats.m_pCurrentGame = new TF_Gamestats_LevelStats_t;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Returns whether this stat should be sent to the client
-//-----------------------------------------------------------------------------
-bool CTFGameStats::ShouldSendToClient( TFStatType_t statType )
-{
-	switch ( statType )
-	{
-	// don't need to send these
-	case TFSTAT_SHOTS_HIT:
-	case TFSTAT_SHOTS_FIRED:
-	case TFSTAT_DEATHS:
-		return false;
-	default:
-		return true;
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Updates the stats of who has killed whom
-//-----------------------------------------------------------------------------
-void CTFGameStats::TrackKillStats( CBasePlayer *pAttacker, CBasePlayer *pVictim )
-{
-	int iPlayerIndexAttacker = pAttacker->entindex();
-	int iPlayerIndexVictim = pVictim->entindex();
-
-	PlayerStats_t &statsAttacker = m_aPlayerStats[iPlayerIndexAttacker];
-	PlayerStats_t &statsVictim = m_aPlayerStats[iPlayerIndexVictim];
-
-	statsVictim.statsKills.iNumKilledBy[iPlayerIndexAttacker]++;
-	statsVictim.statsKills.iNumKilledByUnanswered[iPlayerIndexAttacker]++;
-	statsAttacker.statsKills.iNumKilled[iPlayerIndexVictim]++;
-	statsAttacker.statsKills.iNumKilledByUnanswered[iPlayerIndexVictim] = 0;
-
 }
 
 struct PlayerStats_t *CTFGameStats::FindPlayerStats( CBasePlayer *pPlayer )
@@ -921,7 +797,7 @@ struct PlayerStats_t *CTFGameStats::FindPlayerStats( CBasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 static void CC_ListDeaths( const CCommand &args )
 {
-	TF_Gamestats_LevelStats_t *map = CTF_GameStats.m_reportedStats.m_pCurrentGame;
+	TF_Gamestats_LevelStats_t *map = CTF_GameStats.m_reportedStats.m_pCurrentMap;
 	if ( !map )
 		return;
 

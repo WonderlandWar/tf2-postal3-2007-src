@@ -1943,7 +1943,7 @@ void CTFPlayer::TeamFortress_SetSpeed()
 	}
 
 	// Check for any reason why they can't move at all
-	if ( playerclass == TF_CLASS_UNDEFINED || GameRules()->InRoundRestart() )
+	if (  m_Shared.InCond( TF_COND_CANT_MOVE ) || playerclass == TF_CLASS_UNDEFINED || GameRules()->InRoundRestart() )
 	{
 		SetAbsVelocity( vec3_origin );
 		SetMaxSpeed( 1 );

@@ -1023,14 +1023,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\shared\GameStats.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\GameStats.h"
-				>
-			</File>
-			<File
 				RelativePath="..\shared\gamestringpool.cpp"
 				>
 			</File>
@@ -1772,6 +1764,14 @@
 			</File>
 			<File
 				RelativePath="..\shared\SpriteTrail.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\statgather.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\statgather.h"
 				>
 			</File>
 			<File

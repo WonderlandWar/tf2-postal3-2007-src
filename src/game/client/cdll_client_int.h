@@ -91,7 +91,7 @@ extern IXboxSystem *xboxsystem;	// Xbox 360 only
 extern IMatchmaking *matchmaking;
 extern IAvi *avi;
 extern IBik *bik;
-extern IUploadGameStats *gamestatsuploader;
+extern IUploadGameStats *g_pClientGameStatsUploader;
 extern CSteamAPIContext *steamapicontext;
 
 

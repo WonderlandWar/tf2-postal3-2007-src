@@ -1639,11 +1639,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\shared\GameStats.cpp"
+				RelativePath=".\gamestats.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\shared\GameStats.h"
+				RelativePath=".\gamestats.h"
 				>
 			</File>
 			<File
@@ -3595,14 +3595,6 @@
 				</File>
 				<File
 					RelativePath=".\tf\entity_game_text_tf.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\entity_grenadepack.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\entity_grenadepack.h"
 					>
 				</File>
 				<File

@@ -91,8 +91,7 @@
 #include "ipresence.h"
 #include "engine/imatchmaking.h"
 #include "cdll_bounded_cvars.h"
-#include "matsys_controls/matsyscontrols.h"
-#include "GameStats.h"
+#include "statgather.h"
 
 #ifdef PORTAL
 #include "PortalRender.h"
@@ -133,7 +132,7 @@ IXboxSystem *xboxsystem = NULL;	// Xbox 360 only
 IMatchmaking *matchmaking = NULL;
 IAvi *avi = NULL;
 IBik *bik = NULL;
-IUploadGameStats *gamestatsuploader = NULL;
+IUploadGameStats *g_pClientGameStatsUploader = NULL;
 
 
 IGameSystem *SoundEmitterSystem();
@@ -747,7 +746,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	if ( IsX360() && (matchmaking = (IMatchmaking *)appSystemFactory( VENGINE_MATCHMAKING_VERSION, NULL )) == NULL )
 		return false;
 #ifndef _XBOX
-	if ( ( gamestatsuploader = (IUploadGameStats *)appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL )) == NULL )
+	if ( ( g_pClientGameStatsUploader = (IUploadGameStats *)appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL )) == NULL )
 		return false;
 #endif
 	if (!g_pMatSystemSurface)
@@ -797,7 +796,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	if (!VGui_Startup( appSystemFactory ))
 		return false;
 
-	vgui::VGui_InitMatSysInterfacesList( "ClientDLL", &appSystemFactory, 1 );
+	//vgui::VGui_InitMatSysInterfacesList( "ClientDLL", &appSystemFactory, 1 );
 
 	// Add the client systems.	
 	

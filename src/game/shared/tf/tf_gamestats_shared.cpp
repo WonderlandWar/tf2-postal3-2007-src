@@ -43,17 +43,14 @@ const char *g_szStatEventParamName[] =
 TF_Gamestats_LevelStats_t::TF_Gamestats_LevelStats_t()
 {
 	m_bInitialized = false;
-	m_flRoundStartTime = 0.0f;	
+	m_flLevelStartTime = 0.0f;	
 	m_Header.m_iRoundsPlayed = 0;
 	m_Header.m_iTotalTime = 0;
 	m_Header.m_iBlueWins = 0;
 	m_Header.m_iRedWins = 0;
 	m_Header.m_iStalemates = 0;
-	m_Header.m_iBlueSuddenDeathWins = 0;
-	m_Header.m_iRedSuddenDeathWins = 0;
 	Q_memset( m_aClassStats, 0, sizeof( m_aClassStats ) );
 	Q_memset( m_aWeaponStats, 0, sizeof( m_aWeaponStats ) );
-	Q_memset( m_iPeakPlayerCount, 0, sizeof( m_iPeakPlayerCount ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -73,7 +70,7 @@ TF_Gamestats_LevelStats_t::~TF_Gamestats_LevelStats_t()
 TF_Gamestats_LevelStats_t::TF_Gamestats_LevelStats_t( const TF_Gamestats_LevelStats_t &stats )
 {
 	m_bInitialized		= stats.m_bInitialized;
-	m_flRoundStartTime	= stats.m_flRoundStartTime;
+	m_flLevelStartTime	= stats.m_flLevelStartTime;
 	m_Header			= stats.m_Header;
 	m_aPlayerDeaths		= stats.m_aPlayerDeaths;
 	m_aPlayerDamage		= stats.m_aPlayerDamage;
@@ -94,7 +91,7 @@ void TF_Gamestats_LevelStats_t::Init( const char *pszMapName, int nIPAddr, short
 	m_Header.m_nPort = nPort;
 	
 	// Start the level timer.
-	m_flRoundStartTime = flStartTime;
+	m_flLevelStartTime = flStartTime;
 }
 
 //-----------------------------------------------------------------------------
@@ -111,7 +108,7 @@ void TF_Gamestats_LevelStats_t::Shutdown( float flEndTime )
 TFReportedStats_t::TFReportedStats_t()
 {
 	Clear();
-	m_pCurrentGame = NULL;
+	m_pCurrentMap = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -119,11 +116,6 @@ TFReportedStats_t::TFReportedStats_t()
 //-----------------------------------------------------------------------------
 TFReportedStats_t::~TFReportedStats_t()
 {
-	if ( m_pCurrentGame )
-	{
-		delete m_pCurrentGame;
-		m_pCurrentGame = NULL;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -131,7 +123,7 @@ TFReportedStats_t::~TFReportedStats_t()
 //-----------------------------------------------------------------------------
 void TFReportedStats_t::Clear()
 {
-	m_pCurrentGame = NULL;
+	m_pCurrentMap = NULL;
 	m_dictMapStats.Purge();
 }
 
@@ -232,10 +224,10 @@ bool TFReportedStats_t::LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer )
 				if ( header.m_iTotalTime == 0 )
 					return false;
 
-				m_pCurrentGame = FindOrAddMapStats( header.m_szMapName );
-				if ( m_pCurrentGame )
+				m_pCurrentMap = FindOrAddMapStats( header.m_szMapName );
+				if ( m_pCurrentMap )
 				{
-					m_pCurrentGame->m_Header = header;
+					m_pCurrentMap->m_Header = header;
 				}
 				break; 
 			}
@@ -245,9 +237,9 @@ bool TFReportedStats_t::LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer )
 
 				playerDeaths.SetCount( iLumpCount );
 				CBaseGameStats::LoadLump( LoadBuffer, iLumpCount, sizeof( TF_Gamestats_LevelStats_t::PlayerDeathsLump_t ), static_cast<void*>( playerDeaths.Base() ) );
-				if ( m_pCurrentGame )
+				if ( m_pCurrentMap )
 				{
-					m_pCurrentGame->m_aPlayerDeaths = playerDeaths;
+					m_pCurrentMap->m_aPlayerDeaths = playerDeaths;
 				}
 				break;
 			}
@@ -257,25 +249,25 @@ bool TFReportedStats_t::LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer )
 
 				playerDamage.SetCount( iLumpCount );
 				CBaseGameStats::LoadLump( LoadBuffer, iLumpCount, sizeof( TF_Gamestats_LevelStats_t::PlayerDamageLump_t ), static_cast<void*>( playerDamage.Base() ) );
-				if ( m_pCurrentGame )
+				if ( m_pCurrentMap )
 				{
-					m_pCurrentGame->m_aPlayerDamage = playerDamage;
+					m_pCurrentMap->m_aPlayerDamage = playerDamage;
 				}
 				break;
 			}		
 		case TFSTATS_LUMP_CLASS:
 			{
-				Assert( m_pCurrentGame );
-				Assert ( iLumpCount == ARRAYSIZE( m_pCurrentGame->m_aClassStats ) );
-				if ( iLumpCount == ARRAYSIZE( m_pCurrentGame->m_aClassStats ) )
+				Assert( m_pCurrentMap );
+				Assert ( iLumpCount == ARRAYSIZE( m_pCurrentMap->m_aClassStats ) );
+				if ( iLumpCount == ARRAYSIZE( m_pCurrentMap->m_aClassStats ) )
 				{
-					CBaseGameStats::LoadLump( LoadBuffer, ARRAYSIZE( m_pCurrentGame->m_aClassStats ), sizeof( m_pCurrentGame->m_aClassStats[0] ), 
-						m_pCurrentGame->m_aClassStats );
+					CBaseGameStats::LoadLump( LoadBuffer, ARRAYSIZE( m_pCurrentMap->m_aClassStats ), sizeof( m_pCurrentMap->m_aClassStats[0] ), 
+						m_pCurrentMap->m_aClassStats );
 
 					// quick sanity check on some data -- we get some stat files that start out OK but are corrupted later in the file
-					for ( int i = 0; i < ARRAYSIZE( m_pCurrentGame->m_aClassStats ); i++ )
+					for ( int i = 0; i < ARRAYSIZE( m_pCurrentMap->m_aClassStats ); i++ )
 					{
-						TF_Gamestats_ClassStats_t &classStats = m_pCurrentGame->m_aClassStats[i];
+						TF_Gamestats_ClassStats_t &classStats = m_pCurrentMap->m_aClassStats[i];
 						if ( ( classStats.iSpawns < 0 ) || ( classStats.iSpawns > 10000 ) || ( classStats.iTotalTime < 0 ) || ( classStats.iTotalTime > 36000 * 20 ) ||
 							( classStats.iKills < 0 ) || ( classStats.iKills > 10000 ) )
 						{
@@ -292,16 +284,16 @@ bool TFReportedStats_t::LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer )
 			}
 		case TFSTATS_LUMP_WEAPON:
 			{
-				Assert( m_pCurrentGame );
-				Assert ( iLumpCount == ARRAYSIZE( m_pCurrentGame->m_aWeaponStats ) );
-				if ( iLumpCount == ARRAYSIZE( m_pCurrentGame->m_aWeaponStats ) )
+				Assert( m_pCurrentMap );
+				Assert ( iLumpCount == ARRAYSIZE( m_pCurrentMap->m_aWeaponStats ) );
+				if ( iLumpCount == ARRAYSIZE( m_pCurrentMap->m_aWeaponStats ) )
 				{
-					CBaseGameStats::LoadLump( LoadBuffer, ARRAYSIZE( m_pCurrentGame->m_aWeaponStats ), sizeof( m_pCurrentGame->m_aWeaponStats[0] ), 
-						m_pCurrentGame->m_aWeaponStats );
+					CBaseGameStats::LoadLump( LoadBuffer, ARRAYSIZE( m_pCurrentMap->m_aWeaponStats ), sizeof( m_pCurrentMap->m_aWeaponStats[0] ), 
+						m_pCurrentMap->m_aWeaponStats );
 
 					// quick sanity check on some data -- we get some stat files that start out OK but are corrupted later in the file
-					if ( ( m_pCurrentGame->m_aWeaponStats[TF_WEAPON_MEDIGUN].iShotsFired < 0 ) || ( m_pCurrentGame->m_aWeaponStats[TF_WEAPON_MEDIGUN].iShotsFired > 100000 )
-						|| ( m_pCurrentGame->m_aWeaponStats[TF_WEAPON_FLAMETHROWER_ROCKET].iShotsFired != 0 ) ) // check that unused weapon has 0 shots
+					if ( ( m_pCurrentMap->m_aWeaponStats[TF_WEAPON_MEDIGUN].iShotsFired < 0 ) || ( m_pCurrentMap->m_aWeaponStats[TF_WEAPON_MEDIGUN].iShotsFired > 100000 )
+						|| ( m_pCurrentMap->m_aWeaponStats[TF_WEAPON_FLAMETHROWER_ROCKET].iShotsFired != 0 ) ) // check that unused weapon has 0 shots
 					{
 						return false;
 					}

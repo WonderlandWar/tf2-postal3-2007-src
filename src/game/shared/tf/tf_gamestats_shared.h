@@ -110,17 +110,6 @@ struct TF_Gamestats_ClassStats_t
 	int iDeaths;												// total # of deaths by this class
 	int iAssists;												// total # of assists by this class
 	int iCaptures;												// total # of captures by this class
-
-	void Accumulate( TF_Gamestats_ClassStats_t &other )
-	{
-		iSpawns += other.iSpawns;
-		iTotalTime += other.iTotalTime;
-		iScore += other.iScore;
-		iKills += other.iKills;
-		iDeaths += other.iDeaths;
-		iAssists += other.iAssists;
-		iCaptures += other.iCaptures;
-	}
 };
 
 struct TF_Gamestats_WeaponStats_t
@@ -132,16 +121,6 @@ struct TF_Gamestats_WeaponStats_t
 	int iTotalDamage;
 	int iHitsWithKnownDistance;
 	int64 iTotalDistance;
-
-	void Accumulate( TF_Gamestats_WeaponStats_t &other )
-	{
-		iShotsFired += other.iShotsFired;
-		iCritShotsFired += other.iCritShotsFired;
-		iHits += other.iHits;
-		iTotalDamage += other.iTotalDamage;
-		iHitsWithKnownDistance += other.iHitsWithKnownDistance;
-		iTotalDistance += other.iTotalDistance;
-	}
 };
 
 //=============================================================================
@@ -159,23 +138,6 @@ public:
 	// Level start and end
 	void Init( const char *pszMapName, int nIPAddr, short nPort, float flStartTime );
 	void Shutdown( float flEndTime );
-
-	void Accumulate( TF_Gamestats_LevelStats_t *pOther )
-	{
-		m_Header.Accumulate( pOther->m_Header );
-		m_aPlayerDeaths.AddVectorToTail( pOther->m_aPlayerDeaths );
-		m_aPlayerDamage.AddVectorToTail( pOther->m_aPlayerDamage );
-		int i;
-		for ( i = 0; i < ARRAYSIZE( m_aClassStats ); i++ )
-		{
-			m_aClassStats[i].Accumulate( pOther->m_aClassStats[i] );
-		}
-		for ( i = 0; i < ARRAYSIZE( m_aWeaponStats ); i++ )
-		{
-			m_aWeaponStats[i].Accumulate( pOther->m_aWeaponStats[i] );
-		}
-
-	}
 public:
 
 	// Level header data.
@@ -190,19 +152,6 @@ public:
 		int				m_iBlueWins;								// # of blue team wins
 		int				m_iRedWins;									// # of red team wins
 		int				m_iStalemates;								// # of stalemates
-		int				m_iBlueSuddenDeathWins;						// # of blue team wins during sudden death
-		int				m_iRedSuddenDeathWins;						// # of red team wins during sudden death
-
-		void Accumulate( LevelHeader_t &other )
-		{
-			m_iRoundsPlayed += other.m_iRoundsPlayed;
-			m_iTotalTime += other.m_iTotalTime;
-			m_iBlueWins += other.m_iBlueWins;
-			m_iRedWins += other.m_iRedWins;
-			m_iStalemates += other.m_iStalemates;
-			m_iBlueSuddenDeathWins += other.m_iBlueSuddenDeathWins;
-			m_iRedSuddenDeathWins += other.m_iRedSuddenDeathWins;
-		}
 	};
 
 	// Player deaths.
@@ -239,8 +188,7 @@ public:
 	TF_Gamestats_WeaponStats_t		m_aWeaponStats[TF_WEAPON_COUNT];	// Vector of weapon data
 	// Temporary data.
 	bool							m_bInitialized;		// Has the map Map Stat Data been initialized.
-	float							m_flRoundStartTime;
-	int								m_iPeakPlayerCount[TF_TEAM_COUNT];
+	float							m_flLevelStartTime;
 };
 
 struct KillStats_t
@@ -289,8 +237,6 @@ struct PlayerStats_t
 	RoundStats_t	statsCurrentLife;
 	RoundStats_t	statsCurrentRound;
 	RoundStats_t	statsAccumulated;
-	int				iStatsChangedBits;			// bit mask of which stats have changed
-	float			m_flTimeLastSend;			// time we last sent stat update to this player
 
 	KillStats_t		statsKills;
 };
@@ -308,7 +254,7 @@ struct TFReportedStats_t
 	bool LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer );
 #endif 
 
-	TF_Gamestats_LevelStats_t								*m_pCurrentGame;
+	TF_Gamestats_LevelStats_t								*m_pCurrentMap;
 	CUtlDict<TF_Gamestats_LevelStats_t, unsigned short>		m_dictMapStats;
 };
 

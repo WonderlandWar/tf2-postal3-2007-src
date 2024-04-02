@@ -71,16 +71,9 @@ public:
 	void Event_PlayerDefendedPoint( CTFPlayer *pPlayer );
 	void Event_PlayerDominatedOther( CTFPlayer *pAttacker );
 	void Event_PlayerRevenge( CTFPlayer *pAttacker );
-	void Event_MaxSentryKills( CTFPlayer *pAttacker, int iMaxKills );
-
-	virtual void FrameUpdatePostEntityThink();
-
-	void AccumulateGameData();
-	void ClearCurrentGameData();
-	bool ShouldSendToClient( TFStatType_t statType );
 
 	// Utilities.
-	TF_Gamestats_LevelStats_t	*GetCurrentMap( void )			{ return m_reportedStats.m_pCurrentGame; }
+	TF_Gamestats_LevelStats_t	*GetCurrentMap( void )			{ return m_reportedStats.m_pCurrentMap; }
 
 	struct PlayerStats_t *		FindPlayerStats( CBasePlayer *pPlayer );
 	void						ResetPlayerStats( CTFPlayer *pPlayer );
@@ -90,7 +83,6 @@ protected:
 	void						IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int iValue );
 	void						SendStatsToPlayer( CTFPlayer *pPlayer, bool bIsAlive );
 	void						AccumulateAndResetPerLifeStats( CTFPlayer *pPlayer );
-	void						TrackKillStats( CBasePlayer *pAttacker, CBasePlayer *pVictim );
 
 protected:
 

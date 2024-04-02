@@ -12,7 +12,6 @@
 #include "tier1/utlstring.h"
 #include "filesystem.h"
 #include "tier1/utlbuffer.h"
-#include "fmtstr.h"
 
 #ifndef SWDS
 #include "iregistry.h"
@@ -20,10 +19,7 @@
 
 #include "tier1/utldict.h"
 #include "tier0/icommandline.h"
-#include <time.h>
-#ifdef GAME_DLL
 #include "vehicle_base.h"
-#endif 
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
@@ -43,54 +39,16 @@
 #endif
 */
 
+
 extern IUploadGameStats *gamestatsuploader;
-
-static char s_szPseudoUniqueID[20] = "";
-
-static inline char const *SafeString( char const *pStr )
-{
-	return ( pStr ) ? pStr : "?";
-}
+extern ConVar skill;
 
 static CBaseGameStats s_GameStats_Singleton;
 CBaseGameStats *gamestats = &s_GameStats_Singleton; //start out pointing at the basic version which does nothing by default
-extern ConVar skill;
-void OverWriteCharsWeHate( char *pStr );
 
+bool UserCmdChanged( const CUserCmd& lhs, const CUserCmd& rhs );
 bool StatsTrackingIsFullyEnabled( void );
 
-class CGamestatsData
-{
-public:
-	CGamestatsData()
-	{
-		m_pKVData = NULL;
-		m_bHaveData = false;
-		AllocData();
-	}
-
-	~CGamestatsData()
-	{
-		FreeData();
-	}
-
-	void AllocData()
-	{
-		FreeData();
-		m_pKVData = new KeyValues( "gamestats" );
-	}
-	void FreeData()
-	{
-		if ( m_pKVData != NULL )
-		{
-			m_pKVData->deleteThis();
-			m_pKVData = NULL;
-		}
-	}
-
-	KeyValues *m_pKVData;
-	bool m_bHaveData;
-};
 
 //used to drive most of the game stat event handlers as well as track basic stats under the hood of CBaseGameStats
 class CBaseGameStats_Driver : public CAutoGameSystemPerFrame
@@ -116,72 +74,6 @@ public:
 
 	void PossibleMapChange( void );
 
-	void CollectData( StatSendType_t sendType );
-	void SendData();
-	void ResetData();
-	bool AddBaseDataForSend( KeyValues *pKV, StatSendType_t sendType );
-
-	StatsBufferRecord_t m_StatsBuffer[STATS_WINDOW_SIZE];
-	bool m_bBufferFull;
-	int m_nWriteIndex;
-	float m_flLastRealTime;
-	float m_flLastSampleTime;
-	float m_flTotalTimeInLevels;
-	int m_iNumLevels;
-
-	template<class T> T AverageStat( T StatsBufferRecord_t::*field ) const
-	{
-		T sum = 0;
-		for( int i = 0; i < STATS_WINDOW_SIZE; i++ )
-			sum += m_StatsBuffer[i].*field;
-		return sum / STATS_WINDOW_SIZE;
-	}
-
-	template<class T> T MaxStat( T StatsBufferRecord_t::*field ) const
-	{
-		T maxsofar = -16000000;
-		for( int i = 0; i < STATS_WINDOW_SIZE; i++ )
-			maxsofar = max( maxsofar, m_StatsBuffer[i].*field );
-		return maxsofar;
-	}
-
-	template<class T> T MinStat( T StatsBufferRecord_t::*field ) const
-	{
-		T minsofar = 16000000;
-		for( int i = 0; i < STATS_WINDOW_SIZE; i++ )
-			minsofar = min( minsofar, m_StatsBuffer[i].*field );
-		return minsofar;
-	}
-
-	inline void AdvanceIndex( void )
-	{
-		m_nWriteIndex++;
-		if ( m_nWriteIndex == STATS_WINDOW_SIZE )
-		{
-			m_nWriteIndex = 0;
-			m_bBufferFull = true;
-		}
-	}
-
-	void UpdatePerfStats( void )
-	{
-		float flCurTime = Plat_FloatTime();
-		if (
-			( m_flLastSampleTime == -1 ) || 
-			( flCurTime - m_flLastSampleTime >= STATS_RECORD_INTERVAL ) )
-		{
-			if ( ( m_flLastRealTime > 0 ) && ( flCurTime > m_flLastRealTime ) )
-			{
-				float flFrameRate = 1.0 / ( flCurTime - m_flLastRealTime );
-				StatsBufferRecord_t &stat = m_StatsBuffer[m_nWriteIndex];
-				stat.m_flFrameRate = flFrameRate;
-				AdvanceIndex();
-				m_flLastSampleTime = flCurTime;
-			}
-		}
-		m_flLastRealTime = flCurTime;
-	}
-
 	CUtlString		m_PrevMapName; //used to track "OnMapChange" events
 	int				m_iLoadedVersion;
 	char			m_szLoadedUserID[ 17 ];	// GUID
@@ -194,20 +86,14 @@ public:
 
 	float			m_flLevelStartTime;
 
+
 	bool			m_bStationary;
 	float			m_flLastMovementTime;
 	CUserCmd		m_LastUserCmd;
 	bool			m_bGamePaused;
 	float			m_flPauseStartTime;
-
-	CGamestatsData	*m_pGamestatsData;
 };
 static CBaseGameStats_Driver CBGSDriver;
-
-void UpdatePerfStats( void )
-{
-	CBGSDriver.UpdatePerfStats();
-}
 
 CBaseGameStats_Driver::CBaseGameStats_Driver( void ) :
 	BaseClass( "CGameStats" ),
@@ -219,15 +105,7 @@ CBaseGameStats_Driver::CBaseGameStats_Driver( void ) :
 	m_flLevelStartTime( 0.0f ),
 	m_bStationary( false ),
 	m_flLastMovementTime( 0.0f ),
-	m_bGamePaused( false ),
-	m_pGamestatsData( NULL ),
-	m_bBufferFull( false ),
-	m_nWriteIndex( 0 ),
-	m_flLastRealTime( -1 ),
-	m_flLastSampleTime( -1 ),
-	m_flTotalTimeInLevels( 0 ),
-	m_iNumLevels( 0 )
-
+	m_bGamePaused( false )
 {
 	m_szLoadedUserID[0] = 0;;
 	m_tLastUpload = 0;
@@ -250,6 +128,7 @@ bool CBaseGameStats::StatTrackingAllowed( void )
 // Don't care about vcr hooks here...
 #undef localtime
 #undef asctime
+#undef time
 
 #include <time.h>
 
@@ -271,6 +150,7 @@ void CBaseGameStats::StatsLog( char const *fmt, ... )
 	time( &aclock );
 	struct tm *newtime = localtime( &aclock );
 
+	
 	char timeString[ 128 ];
 	Q_strncpy( timeString, asctime( newtime ), sizeof( timeString ) );
 	// Get rid of the \n.
@@ -302,6 +182,7 @@ void CBaseGameStats::StatsLog( char const *fmt, ... )
 
 static char s_szSaveFileName[256] = "";
 static char s_szStatUploadRegistryKeyName[256] = "";
+static char s_szPseudoUniqueID[20] = "";
 
 const char *CBaseGameStats::GetStatSaveFileName( void )
 {
@@ -323,7 +204,6 @@ const char *CBaseGameStats::GetUserPseudoUniqueID( void )
 
 void CBaseGameStats::Event_Init( void )
 {
-#ifdef GAME_DLL
 	SetHL2UnlockedChapterStatistic();
 	SetSteamStatistic( filesystem->IsSteam() );
 	SetCyberCafeStatistic( gamestatsuploader->IsCyberCafeUser() );
@@ -335,16 +215,13 @@ void CBaseGameStats::Event_Init( void )
 	++m_BasicStats.m_Summary.m_nCount;
 
 	StatsLog( "CBaseGameStats::Event_Init [%dth session]\n", m_BasicStats.m_Summary.m_nCount );
-#endif // GAME_DLL
 }
 
 void CBaseGameStats::Event_Shutdown( void )
 {
-#ifdef GAME_DLL
 	StatsLog( "CBaseGameStats::Event_Shutdown [%dth session]\n", m_BasicStats.m_Summary.m_nCount );
 
 	StatsLog( "\n====================================================================\n\n" );
-#endif
 }
 
 void CBaseGameStats::Event_MapChange( const char *szOldMapName, const char *szNewMapName )
@@ -354,7 +231,6 @@ void CBaseGameStats::Event_MapChange( const char *szOldMapName, const char *szNe
 
 void CBaseGameStats::Event_LevelInit( void )
 {
-#ifdef GAME_DLL
 	StatsLog( "CBaseGameStats::Event_LevelInit [%s]\n", CBGSDriver.m_PrevMapName.String() );
 
 	BasicGameStatsRecord_t *map = gamestats->m_BasicStats.FindOrAddRecordForMap( CBGSDriver.m_PrevMapName.String() );
@@ -373,35 +249,17 @@ void CBaseGameStats::Event_LevelInit( void )
 		SetSteamStatistic( filesystem->IsSteam() );
 		SetCyberCafeStatistic( gamestatsuploader->IsCyberCafeUser() );
 	}
-#endif // GAME_DLL
 }
 
 void CBaseGameStats::Event_LevelShutdown( float flElapsed )
 {
-#ifdef GAME_DLL
 	BasicGameStatsRecord_t *map = m_BasicStats.FindOrAddRecordForMap( CBGSDriver.m_PrevMapName.String() );
 	Assert( map );
 	map->m_nSeconds += (int)flElapsed;
 	gamestats->m_BasicStats.m_Summary.m_nSeconds += (int)flElapsed;
 
 	StatsLog( "CBaseGameStats::Event_LevelShutdown [%s] %.2f elapsed %d total\n", CBGSDriver.m_PrevMapName.String(), flElapsed, gamestats->m_BasicStats.m_Summary.m_nSeconds );
-#endif // GAME_DLL
 }
-
-void CBaseGameStats::Event_SaveGame( void )
-{
-	StatsLog( "CBaseGameStats::Event_SaveGame [%s]\n", CBGSDriver.m_PrevMapName.String() );
-}
-
-void CBaseGameStats::Event_LoadGame( void )
-{
-#ifdef GAME_DLL
-	char const *pchSaveFile = engine->GetMostRecentlyLoadedFileName();
-	StatsLog( "CBaseGameStats::Event_LoadGame [%s] from %s\n", CBGSDriver.m_PrevMapName.String(), pchSaveFile );
-#endif
-}
-
-#ifdef GAME_DLL
 
 void CBaseGameStats::Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamageInfo &info )
 {
@@ -420,6 +278,17 @@ void CBaseGameStats::Event_PlayerKilled( CBasePlayer *pPlayer, const CTakeDamage
 	}
 
 	StatsLog( "CBaseGameStats::Event_PlayerKilled [%s] [%dth death]\n", pPlayer->GetPlayerName(), m_BasicStats.m_Summary.m_nDeaths );
+}
+
+void CBaseGameStats::Event_SaveGame( void )
+{
+	StatsLog( "CBaseGameStats::Event_SaveGame [%s]\n", CBGSDriver.m_PrevMapName.String() );
+}
+
+void CBaseGameStats::Event_LoadGame( void )
+{
+	char const *pchSaveFile = engine->GetMostRecentlyLoadedFileName();
+	StatsLog( "CBaseGameStats::Event_LoadGame [%s] from %s\n", CBGSDriver.m_PrevMapName.String(), pchSaveFile );
 }
 
 void CBaseGameStats::Event_Commentary()
@@ -488,13 +357,9 @@ void CBaseGameStats::Event_PreSaveGameLoaded( char const *pSaveName, bool bInGam
 	StatsLog( "CBaseGameStats::Event_PreSaveGameLoaded [%s] %s\n", pSaveName, bInGame ? "in-game" : "at console" );
 }
 
-bool CBaseGameStats::SaveToFileNOW( bool bForceSyncWrite /* = false */ )
+bool CBaseGameStats::SaveToFileNOW( void )
 {
 	if ( !StatsTrackingIsFullyEnabled() )
-		return false;
-
-	// this code path is only for old format stats.  Products that use new format take a different path.
-	if ( !gamestats->UseOldFormat() )
 		return false;
 
 	CUtlBuffer buf;
@@ -526,7 +391,7 @@ bool CBaseGameStats::SaveToFileNOW( bool bForceSyncWrite /* = false */ )
 
 	// StatsLog( "SaveToFileNOW '%s'\n", fullpath );
 
-	if( CBGSDriver.m_bShuttingDown || bForceSyncWrite ) //write synchronously
+	if( CBGSDriver.m_bShuttingDown ) //write synchronously
 	{
 		filesystem->WriteFile( fullpath, GAMESTATS_PATHID, buf );
 
@@ -599,15 +464,25 @@ void CBaseGameStats::Event_IncrementCountedStatistic( const Vector& vecAbsOrigin
 
 bool CBaseGameStats::UploadStatsFileNOW( void )
 {
-	if( !StatsTrackingIsFullyEnabled() || !HaveValidData() || !gamestats->UseOldFormat() )
+	if( !StatsTrackingIsFullyEnabled() )
 		return false;
-
+	
 	if ( !filesystem->FileExists( gamestats->GetStatSaveFileName(), GAMESTATS_PATHID ) )
 	{
 		return false;
 	}
 
-	int curtime = Plat_FloatTime();
+	time_t curtime;
+	VCRHook_Time( reinterpret_cast<long*>(&curtime) );
+
+	// For now always send updates after every time they run the engine!!
+#if 0
+#if !defined( _DEBUG )
+	int elapsed = curtime - m_tLastUpload;
+	if ( elapsed < ONE_DAY_IN_SECONDS )
+		return;
+#endif
+#endif
 
 	CBGSDriver.m_tLastUpload = curtime;
 
@@ -730,8 +605,6 @@ bool CBaseGameStats::LoadFromFile( void )
 	return false;	
 }
 
-#endif // GAME_DLL
-
 bool CBaseGameStats_Driver::Init()
 {
 	const char *pGameDir = CommandLine()->ParmValue( "-game", "hl2" );
@@ -751,7 +624,23 @@ bool CBaseGameStats_Driver::Init()
 	Q_strncat( s_szStatUploadRegistryKeyName, szLoweredGameDir, sizeof( s_szStatUploadRegistryKeyName ) );
 
 	gamestats->m_bLoggingToFile = CommandLine()->FindParm( "-gamestatsloggingtofile" ) ? true : false;
-	gamestats->m_bLogging = CommandLine()->FindParm( "-gamestatslogging" ) ? true : false;
+	if ( gamestats->m_bLoggingToFile )
+	{
+		gamestats->m_bLogging = true;
+	}
+	else
+	{
+		gamestats->m_bLogging = CommandLine()->FindParm( "-gamestatslogging" ) ? true : false;
+	}
+
+#if 0
+	// This should only impact us internally!!!
+	if ( IsPC() && !filesystem->IsSteam() )
+	{
+		Warning( "Forcing gamestats logging to file, remove before shipping!!!\n" );
+		gamestats->m_bLoggingToFile = true;
+	}
+#endif
 
 	if ( gamestatsuploader )
 	{
@@ -762,9 +651,6 @@ bool CBaseGameStats_Driver::Init()
 		}
 	}
 
-	ResetData();
-
-#ifdef GAME_DLL
 	if ( StatsTrackingIsFullyEnabled() )
 	{
 		// FIXME: Load m_tLastUpload from registry and save it back out, too
@@ -774,24 +660,20 @@ bool CBaseGameStats_Driver::Init()
 		m_tLastUpload = reg->ReadInt( gamestats->GetStatUploadRegistryKeyName(), 0 );
 		ReleaseInstancedRegistry( reg );
 #endif
+
 		//load existing stats
 		gamestats->LoadFromFile();
 	}
-#endif // GAME_DLL
 		
 	if ( s_szPseudoUniqueID[ 0 ] != 0 )
 	{			
 		gamestats->Event_Init();
-#ifdef GAME_DLL
-		if ( gamestats->UseOldFormat() )
-		{
-			if( gamestats->AutoSave_OnInit() )
-				gamestats->SaveToFileNOW();
 
-			if( gamestats->AutoUpload_OnInit() )
-				gamestats->UploadStatsFileNOW();
-		}
-#endif
+		if( gamestats->AutoSave_OnInit() )
+			gamestats->SaveToFileNOW();
+
+		if( gamestats->AutoUpload_OnInit() )
+			gamestats->UploadStatsFileNOW();
 	}
 	else
 	{
@@ -801,51 +683,27 @@ bool CBaseGameStats_Driver::Init()
 	return true;
 }
 
-
 void CBaseGameStats_Driver::Shutdown()
 {
 	m_bShuttingDown = true;
 
 	gamestats->Event_Shutdown();
+	
+	if( gamestats->AutoSave_OnShutdown() )
+		gamestats->SaveToFileNOW();
 
-	if ( gamestats->UseOldFormat() )
-	{
-#ifdef GAME_DLL
-		if( gamestats->AutoSave_OnShutdown() )
-			gamestats->SaveToFileNOW();
+	if( gamestats->AutoUpload_OnShutdown() )
+		gamestats->UploadStatsFileNOW();
 
-		if( gamestats->AutoUpload_OnShutdown() )
-			gamestats->UploadStatsFileNOW();
-#endif // GAME_DLL
-	}
-	else
-	{
-		// code path for new format game stats
-		if ( gamestats->ShouldSendDataOnAppShutdown() )
-		{
-			CollectData( STATSEND_APPSHUTDOWN );
-			SendData();
-		}
-	}
 	if ( FILESYSTEM_INVALID_HANDLE != g_LogFileHandle )
 	{
 		filesystem->Close( g_LogFileHandle );
 		g_LogFileHandle = FILESYSTEM_INVALID_HANDLE;
 	}
-
-	if ( m_pGamestatsData != NULL )
-	{
-#ifdef CLIENT_DLL 
-		engine->SetGamestatsData( NULL );
-#endif
-		delete m_pGamestatsData;
-		m_pGamestatsData = NULL;
-	}
 }
 
 void CBaseGameStats_Driver::PossibleMapChange( void )
 {
-#ifdef GAME_DLL
 	//detect and copy map changes
 	if ( Q_stricmp( m_PrevMapName.String(), STRING( gpGlobals->mapname ) ) )
 	{
@@ -857,16 +715,12 @@ void CBaseGameStats_Driver::PossibleMapChange( void )
 
 		gamestats->Event_MapChange( PrevMapBackup.String(), STRING( gpGlobals->mapname ) );
 
-		if ( gamestats->UseOldFormat() )
-		{
-			if( gamestats->AutoSave_OnMapChange() )
-				gamestats->SaveToFileNOW();
+		if( gamestats->AutoSave_OnMapChange() )
+			gamestats->SaveToFileNOW();
 
-			if( gamestats->AutoUpload_OnMapChange() )
-				gamestats->UploadStatsFileNOW();
-		}
+		if( gamestats->AutoUpload_OnMapChange() )
+			gamestats->UploadStatsFileNOW();
 	}
-#endif
 }
 
 
@@ -876,26 +730,6 @@ void CBaseGameStats_Driver::LevelInitPreEntity()
 	m_bInLevel = true;
 	m_bFirstLevel = false;
 
-	if ( Q_stricmp( s_szPseudoUniqueID, "unknown" ) == 0 )
-	{
-		// "unknown" means this is a dedicated server and we weren't able to generate a unique ID (e.g. Linux server).
-		// Change the unique ID to be a hash of IP & port.  We couldn't do this earlier because IP is not known until level
-		// init time.
-		ConVar *hostip = cvar->FindVar( "hostip" );
-		ConVar *hostport = cvar->FindVar( "hostport" );
-		if ( hostip && hostport )
-		{
-			int crcInput[2];
-			crcInput[0] = hostip->GetInt();
-			crcInput[1] = hostport->GetInt();
-			if ( crcInput[0] && crcInput[1] )
-			{
-				CRC32_t crc = CRC32_ProcessSingleBuffer( crcInput, sizeof( crcInput ) );
-				Q_snprintf( s_szPseudoUniqueID, ARRAYSIZE( s_szPseudoUniqueID ), "H:%x", crc );
-			}
-		}
-	}
-
 	PossibleMapChange();
 
 	m_flPauseStartTime = 0.0f;
@@ -903,16 +737,11 @@ void CBaseGameStats_Driver::LevelInitPreEntity()
 
 	gamestats->Event_LevelInit();
 
-#ifdef GAME_DLL
-	if ( gamestats->UseOldFormat() )
-	{
-		if( gamestats->AutoSave_OnLevelInit() )
-			gamestats->SaveToFileNOW();
+	if( gamestats->AutoSave_OnLevelInit() )
+		gamestats->SaveToFileNOW();
 
-		if( gamestats->AutoUpload_OnLevelInit() )
-			gamestats->UploadStatsFileNOW();
-	}
-#endif
+	if( gamestats->AutoUpload_OnLevelInit() )
+		gamestats->UploadStatsFileNOW();
 }
 
 
@@ -928,37 +757,16 @@ void CBaseGameStats_Driver::LevelShutdownPreEntity()
 	}
 
 	//Assert( m_bInLevel ); //so, apparently shutdowns can happen before inits
-
-#ifdef GAME_DLL
 	if ( m_bInLevel && ( gpGlobals->eLoadType != MapLoad_Background ) )
-#else
-	if ( m_bInLevel )
-#endif
 	{
-		m_flTotalTimeInLevels += flElapsed;
-		m_iNumLevels ++;
-
 		gamestats->Event_LevelShutdown( flElapsed );
 
-		if ( gamestats->UseOldFormat() )
-		{
-#ifdef GAME_DLL
-			if( gamestats->AutoSave_OnLevelShutdown() )
-				gamestats->SaveToFileNOW( true );
+		if( gamestats->AutoSave_OnLevelShutdown() )
+			gamestats->SaveToFileNOW();
 
-			if( gamestats->AutoUpload_OnLevelShutdown() )
-				gamestats->UploadStatsFileNOW();
-#endif
-		}
-		else
-		{
-			// code path for new format game stats
-			CollectData( STATSEND_LEVELSHUTDOWN );
-			if ( gamestats->ShouldSendDataOnLevelShutdown() )
-			{
-				SendData();
-			}	
-		}
+		if( gamestats->AutoUpload_OnLevelShutdown() )
+			gamestats->UploadStatsFileNOW();
+
 		m_bInLevel = false;	
 	}
 }
@@ -968,188 +776,6 @@ void CBaseGameStats_Driver::OnSave()
 	gamestats->Event_SaveGame();
 }
 
-
-void CBaseGameStats_Driver::CollectData( StatSendType_t sendType )
-{
-	CGamestatsData *pGamestatsData = NULL;
-#ifdef GAME_DLL
-	// for server, check with the engine to see if there already a gamestats data container registered.  (There will be if there is a client
-	// running in the same process.)
-	pGamestatsData = engine->GetGamestatsData();
-	if ( pGamestatsData )
-	{
-		// use the registered gamestats container, so free the one we allocated
-		if ( m_pGamestatsData != NULL )
-		{
-			delete m_pGamestatsData;
-			m_pGamestatsData = NULL;
-		}
-	}
-	else
-	{
-		pGamestatsData = m_pGamestatsData;
-	}
-#else
-	pGamestatsData = m_pGamestatsData;
-#endif
-	Assert( pGamestatsData );
-	KeyValues *pKV = pGamestatsData->m_pKVData;
-
-	int iAppID = engine->GetAppID();
-	pKV->SetInt( "appid", iAppID );
-
-	switch ( sendType )
-	{
-	case STATSEND_LEVELSHUTDOWN:
-		{
-			// make a map node in the KeyValues to use for this level
-			char szMap[MAX_PATH+1]="";
-#ifdef CLIENT_DLL	
-			Q_FileBase( engine->GetLevelName(), szMap, ARRAYSIZE( szMap ) );
-#else
-			Q_strncpy( szMap, gpGlobals->mapname.ToCStr(), ARRAYSIZE( szMap ) );
-#endif // CLIENT_DLL
-			if ( !szMap[0] )
-				return;
-			KeyValues *pKVMap = new KeyValues( "map" );
-			pKV->AddSubKey( pKVMap );
-			pKVMap->SetString( "mapname", szMap );
-			pKV = pKVMap;
-
-		}
-		break;
-	case STATSEND_APPSHUTDOWN:
-		break;
-	default:
-		Assert( false );
-		break;
-	}
-
-	// add common data
-	pGamestatsData->m_bHaveData |= AddBaseDataForSend( pKV, sendType );
-	// add game-specific data
-	pGamestatsData->m_bHaveData |= gamestats->AddDataForSend( pKV, sendType );	
-}
-
-
-void CBaseGameStats_Driver::SendData()
-{
-	// if we don't own the data container or there's no valid data, nothing to do
-	if ( !m_pGamestatsData || !m_pGamestatsData->m_bHaveData )
-		return;
-
-	// save the data to a buffer
-	CUtlBuffer buf( 0, 0, CUtlBuffer::TEXT_BUFFER );
-	m_pGamestatsData->m_pKVData->RecursiveSaveToFile( buf, 0 );
-
-	if ( CommandLine()->FindParm( "-gamestatsfileoutputonly" ) )
-	{
-		// write file for debugging
-		const char szFileName[] = "gamestats.dat";
-		filesystem->WriteFile( szFileName, GAMESTATS_PATHID, buf );
-	}
-	else
-	{
-		// upload the file to Steam
-		if ( gamestatsuploader )
-			gamestatsuploader->UploadGameStats( "", 1, buf.TellPut(), buf.Base() );
-	}	
-
-	ResetData();
-}
-
-bool CBaseGameStats_Driver::AddBaseDataForSend( KeyValues *pKV, StatSendType_t sendType )
-{
-	switch ( sendType )
-	{
-	case STATSEND_APPSHUTDOWN:
-#ifdef CLIENT_DLL
-		if ( m_iNumLevels > 0 )
-		{
-			// add playtime data
-			KeyValues *pKVData = new KeyValues( "playtime" );
-			pKVData->SetInt( "TotalLevelTime", m_flTotalTimeInLevels );
-			pKVData->SetInt( "NumLevels", m_iNumLevels );
-			pKV->AddSubKey( pKVData );
-			return true;
-		}
-#endif
-		break;
-	case STATSEND_LEVELSHUTDOWN:
-#ifdef CLIENT_DLL
-		if ( m_bBufferFull )
-		{
-			// add perf data
-			KeyValues *pKVPerf = new KeyValues( "perfdata" );
-			float flAverageFrameRate = AverageStat( &StatsBufferRecord_t::m_flFrameRate );
-			float flMinFrameRate = MinStat( &StatsBufferRecord_t::m_flFrameRate );
-			float flMaxFrameRate = MaxStat( &StatsBufferRecord_t::m_flFrameRate );
-
-			pKVPerf->SetFloat( "AvgFPS", flAverageFrameRate );
-			pKVPerf->SetFloat( "MinFPS", flMinFrameRate );
-			pKVPerf->SetFloat( "MaxFPS", flMaxFrameRate );
-
-			pKV->AddSubKey( pKVPerf );
-
-			return true;
-		}
-#endif
-		break;
-	}
-
-	return false;
-}
-
-
-void CBaseGameStats_Driver::ResetData()
-{
-#ifdef GAME_DLL
-	// on the server, if there is a gamestats data container registered (by a client in the same process), they're in charge of resetting it, nothing for us to do
-	if ( engine->GetGamestatsData() != NULL )
-		return;
-#endif
-
-	if ( m_pGamestatsData != NULL )
-	{
-		delete m_pGamestatsData;
-		m_pGamestatsData = NULL;
-	}
-
-	m_pGamestatsData = new CGamestatsData();
-	KeyValues *pKV = m_pGamestatsData->m_pKVData;
-
-	pKV->SetInt( "version", GAMESTATS_VERSION );
-	pKV->SetString( "srcid", s_szPseudoUniqueID );
-
-#ifdef CLIENT_DLL
-	const CPUInformation &cpu = GetCPUInformation();
-	OverWriteCharsWeHate( cpu.m_szProcessorID );
-	pKV->SetString( "CPUID", cpu.m_szProcessorID );
-	pKV->SetFloat( "CPUGhz", cpu.m_Speed * ( 1.0 / 1.0e9 ) );
-	pKV->SetInt( "NumCores", cpu.m_nPhysicalProcessors );
-
-	MaterialAdapterInfo_t gpu;
-	materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), gpu );
-
-	CMatRenderContextPtr pRenderContext( materials );
-	int dest_width,dest_height;
-	pRenderContext->GetRenderTargetDimensions( dest_width, dest_height );
-
-	if ( gpu.m_pDriverName )
-	{
-		OverWriteCharsWeHate( gpu.m_pDriverName );
-	}
-	pKV->SetString( "GPUDrv", SafeString( gpu.m_pDriverName ) );
-	pKV->SetInt( "GPUVendor", gpu.m_VendorID );
-	pKV->SetInt( "GPUDeviceID", gpu.m_DeviceID );
-	pKV->SetString( "GPUDriverVersion", CFmtStr( "%d.%d", gpu.m_nDriverVersionHigh, gpu.m_nDriverVersionLow ) );
-	pKV->SetInt( "DxLvl", g_pMaterialSystemHardwareConfig->GetDXSupportLevel() );
-	pKV->SetInt( "Width", dest_width );
-	pKV->SetInt( "Height", dest_height );
-
-	engine->SetGamestatsData( m_pGamestatsData );
-#endif
-}
 
 void CBaseGameStats_Driver::OnRestore()
 {
@@ -1196,6 +822,31 @@ void CBaseGameStats_Driver::FrameUpdatePostEntityThink()
 	}
 }
 
+bool UserCmdChanged( const CUserCmd& lhs, const CUserCmd& rhs )
+{
+	if ( lhs.viewangles	!= rhs.viewangles )
+		return true;
+	if ( lhs.forwardmove != rhs.forwardmove )
+		return true;
+	if ( lhs.sidemove != rhs.sidemove )
+		return true;
+	if ( lhs.upmove	!= rhs.upmove )
+		return true;
+	if ( lhs.buttons != rhs.buttons )
+		return true;
+	if ( lhs.impulse != rhs.impulse )
+		return true;
+	if ( lhs.weaponselect != rhs.weaponselect )
+		return true;
+	if ( lhs.weaponsubtype != rhs.weaponsubtype )
+		return true;
+	if ( lhs.mousedx != rhs.mousedx )
+		return true;
+	if ( lhs.mousedy != rhs.mousedy )
+		return true;
+	return false;
+}
+
 bool StatsTrackingIsFullyEnabled( void )
 {
 	return CBGSDriver.m_bEnabled && gamestats->StatTrackingEnabledForMod();
@@ -1203,34 +854,8 @@ bool StatsTrackingIsFullyEnabled( void )
 
 void CBaseGameStats::Clear( void )
 {
-#ifdef GAME_DLL
 	gamestats->m_BasicStats.Clear();
-#endif
 }
-
-//-----------------------------------------------------------------------------
-// Nukes any dangerous characters and replaces w/space char
-//-----------------------------------------------------------------------------
-void OverWriteCharsWeHate( char *pStr )
-{
-	while( *pStr )
-	{
-		switch( *pStr )
-		{
-		case '\n':
-		case '\r':
-		case '\\':
-		case '\"':
-		case '\'':
-		case '\032':
-		case ';':
-			*pStr = ' ';
-		}
-		pStr++;
-	}
-}
-
-#ifdef GAME_DLL
 
 void CBaseGameStats::SetSteamStatistic( bool bUsingSteam )
 {
@@ -1368,6 +993,8 @@ static void CC_ResetGameStats( const CCommand &args )
 
 static ConCommand resetGameStats("_resetgamestats", CC_ResetGameStats, "Erases current game stats and writes out a blank stats file", 0 );
 
+
+
 class CPointGamestatsCounter : public CPointEntity
 {
 public:
@@ -1447,5 +1074,3 @@ void CPointGamestatsCounter::InputDisable( inputdata_t &inputdata )
 {
 	m_bDisabled = true;
 }
-
-#endif // GAME_DLL
