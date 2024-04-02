@@ -429,10 +429,8 @@ void CTFPlayerShared::OnConditionRemoved( int nCond )
 		break;
 
 	case TF_COND_HEALTH_BUFF:
-#ifdef GAME_DLL
 		m_flHealFraction = 0;
 		m_flDisguiseHealFraction = 0;
-#endif
 		break;
 
 	case TF_COND_STEALTHED:
