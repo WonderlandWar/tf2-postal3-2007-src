@@ -379,10 +379,8 @@ void CTFPlayerShared::OnConditionAdded( int nCond )
 	switch( nCond )
 	{
 	case TF_COND_HEALTH_BUFF:
-#ifdef GAME_DLL
 		m_flHealFraction = 0;
 		m_flDisguiseHealFraction = 0;
-#endif
 		break;
 
 	case TF_COND_STEALTHED:
@@ -407,17 +405,6 @@ void CTFPlayerShared::OnConditionAdded( int nCond )
 
 	case TF_COND_DISGUISED:
 		OnAddDisguised();
-		break;
-
-	case TF_COND_TAUNTING:
-		{
-			CTFWeaponBase *pWpn = m_pOuter->GetActiveTFWeapon();
-			if ( pWpn )
-			{
-				// cancel any reload in progress.
-				pWpn->AbortReload();
-			}
-		}
 		break;
 
 	default:
