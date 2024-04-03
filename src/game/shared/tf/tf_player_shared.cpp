@@ -581,7 +581,7 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 					}
 					else
 					{
-						CTF_GameStats.Event_PlayerLeachedHealth( m_pOuter, m_aHealers[i].bDispenserHeal, nHealthToAdd * ( m_aHealers[i].flAmount / fTotalHealAmount ) );
+						CTF_GameStats.Event_PlayerLeachedHealth( m_pOuter, nHealthToAdd * ( m_aHealers[i].flAmount / fTotalHealAmount ) );
 					}
 				}
 			}

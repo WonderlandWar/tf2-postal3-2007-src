@@ -48,7 +48,7 @@ public:
 	virtual void ApplySchemeSettings( vgui::IScheme *scheme );
 	virtual bool IsVisible( void );
 
-	void PlayRivalrySounds( int iKillerIndex, int iVictimIndex, int iType  );
+	void PlayRivalrySounds( int iKillerIndex, int iVictimIndex, int iAssistIndex, int iType  );
 
 protected:	
 	virtual void OnGameEvent( IGameEvent *event, DeathNoticeItem &msg );
@@ -57,6 +57,8 @@ protected:
 private:
 	void AddAdditionalMsg( int iKillerID, int iVictimID, const char *pMsgKey );
 
+	CHudTexture		*m_iconBlueCapture;
+	CHudTexture		*m_iconRedCapture;
 	CHudTexture		*m_iconDomination;
 
 	CPanelAnimationVar( Color, m_clrBlueText, "TeamBlue", "153 204 255 255" );
@@ -70,6 +72,8 @@ void CTFHudDeathNotice::ApplySchemeSettings( vgui::IScheme *scheme )
 {
 	BaseClass::ApplySchemeSettings( scheme );
 
+	m_iconBlueCapture = gHUD.GetIcon( "progress_bar_blu" );
+	m_iconRedCapture = gHUD.GetIcon( "progress_bar_red" );
 	m_iconDomination = gHUD.GetIcon( "leaderboard_dominated" );
 }
 
@@ -81,13 +85,22 @@ bool CTFHudDeathNotice::IsVisible( void )
 	return BaseClass::IsVisible();
 }
 
-void CTFHudDeathNotice::PlayRivalrySounds( int iKillerIndex, int iVictimIndex, int iType )
+void CTFHudDeathNotice::PlayRivalrySounds( int iKillerIndex, int iVictimIndex, int iAssistIndex, int iType )
 {
 	int iLocalPlayerIndex = GetLocalPlayerIndex();
 
 	//We're not involved in this kill
-	if ( iKillerIndex != iLocalPlayerIndex && iVictimIndex != iLocalPlayerIndex )
+	if ( iKillerIndex != iLocalPlayerIndex && iVictimIndex != iLocalPlayerIndex && iAssistIndex != iLocalPlayerIndex )
 		return;
+
+	if ( iAssistIndex == iLocalPlayerIndex )
+	{
+		C_TFPlayer *pVictim = ToTFPlayer( UTIL_PlayerByIndex( iVictimIndex ) );
+		if ( pVictim && pVictim->m_Shared.IsPlayerDominated( iAssistIndex ) )
+		{
+			iKillerIndex = iAssistIndex;
+		}
+	}
 
 	const char *pszSoundName = NULL;
 
@@ -150,22 +163,22 @@ void CTFHudDeathNotice::OnGameEvent( IGameEvent *event, DeathNoticeItem &msg )
 			if ( event->GetInt( "dominated" ) > 0 )
 			{
 				AddAdditionalMsg( iKillerID, iVictimID, "#Msg_Dominating" );
-				PlayRivalrySounds( iKillerID, iVictimID, TF_DEATH_DOMINATION );
+				PlayRivalrySounds( iKillerID, iVictimID, iAssisterID, TF_DEATH_DOMINATION );
 			}
 			if ( event->GetInt( "assister_dominated" ) > 0 && ( iAssisterID > 0 ) )
 			{
 				AddAdditionalMsg( iAssisterID, iVictimID, "#Msg_Dominating" );
-				PlayRivalrySounds( iAssisterID, iVictimID, TF_DEATH_DOMINATION );
+				PlayRivalrySounds( iAssisterID, iVictimID, iAssisterID, TF_DEATH_DOMINATION );
 			}
 			if ( event->GetInt( "revenge" ) > 0 ) 
 			{
 				AddAdditionalMsg( iKillerID, iVictimID, "#Msg_Revenge" );
-				PlayRivalrySounds( iKillerID, iVictimID, TF_DEATH_REVENGE );
+				PlayRivalrySounds( iKillerID, iVictimID, iAssisterID, TF_DEATH_REVENGE );
 			}
 			if ( event->GetInt( "assister_revenge" ) > 0 && ( iAssisterID > 0 ) ) 
 			{
 				AddAdditionalMsg( iAssisterID, iVictimID, "#Msg_Revenge" );
-				PlayRivalrySounds( iAssisterID, iVictimID, TF_DEATH_REVENGE );
+				PlayRivalrySounds( iAssisterID, iVictimID, iAssisterID, TF_DEATH_REVENGE );
 			}
 		}
 		else
@@ -273,7 +286,7 @@ void CTFHudDeathNotice::AddAdditionalMsg( int iKillerID, int iVictimID, const ch
 	}
 	msg2.iconDeath = m_iconDomination;
 	int iLocalPlayerIndex = GetLocalPlayerIndex();
-	if ( iLocalPlayerIndex == iVictimID || iLocalPlayerIndex == iKillerID )
+	if ( iLocalPlayerIndex == iKillerID )
 	{
 		msg2.bLocalPlayerInvolved = true;
 	}

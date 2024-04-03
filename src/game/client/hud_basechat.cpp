@@ -1271,22 +1271,16 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 			}
 			else
 			{
-				c = GetDefaultTextColor();
+				c = g_ColorYellow;
 			}
 		}
 		break;
 
 	default:
-		c = GetDefaultTextColor();
+		c = g_ColorYellow;
 	}
 
 	return Color( c[0], c[1], c[2], 255 );
-}
-
-//-----------------------------------------------------------------------------
-Color CBaseHudChat::GetDefaultTextColor( void )
-{
-	return g_ColorYellow;
 }
 
 //-----------------------------------------------------------------------------
@@ -1589,7 +1583,7 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 
 	if ( iFilter != CHAT_FILTER_NONE )
 	{
-		if ( !(iFilter & GetFilterFlags() ) )
+		if ( !(iFilter & m_iFilterFlags ) )
 			return;
 	}
 

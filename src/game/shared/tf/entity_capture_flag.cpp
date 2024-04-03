@@ -607,38 +607,21 @@ void CCaptureFlag::Capture( CTFPlayer *pPlayer, int nCapturePoint )
 
 	if ( m_nGameType == TF_FLAGTYPE_CTF )
 	{
-		bool bNotify = true;
-
-		// don't play any sounds if this is going to win the round for one of the teams (victory sound will be played instead)
-		if ( tf_flag_caps_per_round.GetInt() > 0 )
+		for ( int iTeam = TF_TEAM_RED; iTeam < TF_TEAM_COUNT; ++iTeam )
 		{
-			int nCaps = TFTeamMgr()->GetFlagCaptures( pPlayer->GetTeamNumber() );
-
-			if ( ( nCaps >= 0 ) && ( tf_flag_caps_per_round.GetInt() - nCaps <= 1 ) )
+			if ( iTeam != pPlayer->GetTeamNumber() )
 			{
-				// this cap is going to win, so don't play a sound
-				bNotify = false;
+				CTeamRecipientFilter filter( iTeam, true );
+				EmitSound( filter, entindex(), TF_CTF_ENEMY_CAPTURED );
+
+				TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_YOUR_FLAG_CAPTURED );
 			}
-		}
-
-		if ( bNotify )
-		{
-			for ( int iTeam = TF_TEAM_RED; iTeam < TF_TEAM_COUNT; ++iTeam )
+			else
 			{
-				if ( iTeam != pPlayer->GetTeamNumber() )
-				{
-					CTeamRecipientFilter filter( iTeam, true );
-					EmitSound( filter, entindex(), TF_CTF_ENEMY_CAPTURED );
+				CTeamRecipientFilter filter( iTeam, true );
+				EmitSound( filter, entindex(), TF_CTF_TEAM_CAPTURED );
 
-					TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_YOUR_FLAG_CAPTURED );
-				}
-				else
-				{
-					CTeamRecipientFilter filter( iTeam, true );
-					EmitSound( filter, entindex(), TF_CTF_TEAM_CAPTURED );
-
-					TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_ENEMY_FLAG_CAPTURED );
-				}
+				TFGameRules()->SendHudNotification( filter, HUD_NOTIFY_ENEMY_FLAG_CAPTURED );
 			}
 		}
 
@@ -742,21 +725,6 @@ void CCaptureFlag::Capture( CTFPlayer *pPlayer, int nCapturePoint )
 
 	m_bCaptured = true;
 	SetNextThink( gpGlobals->curtime + TF_FLAG_THINK_TIME );
-
-	if ( TFGameRules()->InStalemate() )
-	{
-		// whoever capped the flag is the winner, give them enough caps to win
-		CTFTeam *pTeam = pPlayer->GetTFTeam();
-		if ( !pTeam )
-			return;
-
-		// if we still need more caps to trigger a win, give them to us
-		if ( pTeam->GetFlagCaptures() < tf_flag_caps_per_round.GetInt() )
-		{
-			pTeam->SetFlagCaptures( tf_flag_caps_per_round.GetInt() );
-		}	
-	}
-
 #endif
 }
 

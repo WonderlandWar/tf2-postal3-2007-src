@@ -98,15 +98,6 @@ void CHudChat::Init( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Hides us when our render group is hidden
-// move render group to base chat when its safer
-//-----------------------------------------------------------------------------
-bool CHudChat::ShouldDraw( void )
-{
-	return CHudElement::ShouldDraw();
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Overrides base reset to not cancel chat at round restart
 //-----------------------------------------------------------------------------
 void CHudChat::Reset( void )

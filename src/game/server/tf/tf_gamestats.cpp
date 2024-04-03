@@ -107,14 +107,6 @@ void CTFGameStats::LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-bool CTFGameStats::Init( void )
-{
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void CTFGameStats::Event_LevelInit( void )
 {
 	CBaseGameStats::Event_LevelInit();
@@ -199,6 +191,7 @@ void CTFGameStats::ResetRoundStats()
 void CTFGameStats::IncrementStat( CTFPlayer *pPlayer, TFStatType_t statType, int iValue )
 {
 	PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
+	stats.statsCurrentLife.m_iStat[statType] += iValue;
 	stats.statsCurrentRound.m_iStat[statType] += iValue;
 	stats.statsAccumulated.m_iStat[statType] += iValue;
 }
@@ -328,22 +321,8 @@ void CTFGameStats::Event_PlayerForceRespawn( CTFPlayer *pPlayer )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFGameStats::Event_PlayerLeachedHealth( CTFPlayer *pPlayer, bool bDispenserHeal, float amount ) 
+void CTFGameStats::Event_PlayerLeachedHealth( CTFPlayer *pPlayer, float amount ) 
 {
-	if ( !bDispenserHeal )
-	{
-		// If this was a heal by enemy medic and the first such heal that the server is aware of for this player,
-		// send an achievement event to client.  On the client, it will award achievement if player doesn't have it yet
-		PlayerStats_t &stats = m_aPlayerStats[pPlayer->entindex()];
-		if ( 0 == stats.statsAccumulated.m_iStat[TFSTAT_HEALTHLEACHED] )
-		{
-			CSingleUserRecipientFilter filter( pPlayer );
-			UserMessageBegin( filter, "AchievementEvent" );
-			WRITE_BYTE( ACHIEVEMENT_TF_GET_HEALED_BYENEMY );
-			MessageEnd();
-		}
-	}
-
 	IncrementStat( pPlayer, TFSTAT_HEALTHLEACHED, (int) amount );
 }
 

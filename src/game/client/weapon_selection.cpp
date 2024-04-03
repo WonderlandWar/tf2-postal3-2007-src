@@ -247,17 +247,6 @@ int	CBaseHudWeaponSelection::KeyInput( int down, ButtonCode_t keynum, const char
 		return 0;
 	}
 
-	//Tony; check 0 as well, otherwise you have to have 0 bound to slot10 no matter what.
-	if ( down >= 1 && keynum >= KEY_0 && keynum <= KEY_9 )
-	{
-		//Tony; 0 is actually '10' (slot10)
-		if (keynum == KEY_0)
-			keynum = KEY_A; //Dealing with button codes, so just use KEY_A, which is equal to 11  anyway.
-
-		if ( HandleHudMenuInput( keynum - 1 ) )
-			return 0;
-	}
-
 	// let someone else handle it
 	return 1;
 }
@@ -373,20 +362,6 @@ bool CBaseHudWeaponSelection::IsHudMenuTakingInput()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: returns true if the CHudMenu handles the slot command
-//-----------------------------------------------------------------------------
-bool CBaseHudWeaponSelection::HandleHudMenuInput( int iSlot )
-{
-	CHudMenu *pHudMenu = GET_HUDELEMENT( CHudMenu );
-	if ( !pHudMenu || !pHudMenu->IsMenuOpen() )
-		return false;
-
-	pHudMenu->SelectMenuItem( iSlot );
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: returns true if the weapon selection hud should be hidden because
 //          the CHudMenu is open
 //-----------------------------------------------------------------------------
@@ -406,8 +381,10 @@ bool CBaseHudWeaponSelection::IsHudMenuPreventingWeaponSelection()
 void CBaseHudWeaponSelection::SelectSlot( int iSlot )
 {
 	// A menu may be overriding weapon selection commands
-	if ( HandleHudMenuInput( iSlot ) )
-	{
+	CHudMenu *pHudMenu = GET_HUDELEMENT( CHudMenu );
+	if ( pHudMenu && IsHudMenuTakingInput() )	
+	{ 
+		pHudMenu->SelectMenuItem( iSlot );  // slots are one off the key numbers
 		return;
 	}
 

@@ -1387,9 +1387,6 @@ void CTeamplayRoundBasedRules::SetWinningTeam( int team, int iWinReason, bool bF
 		GetGlobalTeam( team )->AddScore( TEAMPLAY_ROUND_WIN_SCORE );
 	}
 
-	// this was a sudden death win if we were in stalemate then a team won it
-	bool bWasSuddenDeath = ( InStalemate() && m_iWinningTeam >= FIRST_GAME_TEAM );
-
 	State_Transition( GR_STATE_TEAM_WIN );
 
 	IGameEvent *event = gameeventmanager->CreateEvent( "teamplay_round_win" );
@@ -1398,7 +1395,6 @@ void CTeamplayRoundBasedRules::SetWinningTeam( int team, int iWinReason, bool bF
 		event->SetInt( "team", team );
 		event->SetBool( "full_round", bForceMapReset );
 		event->SetFloat( "round_time", gpGlobals->curtime - m_flMapResetTime );
-		event->SetBool( "was_sudden_death", bWasSuddenDeath );
 		// let derived classes add more fields to the event
 		gameeventmanager->FireEvent( event );
 	}

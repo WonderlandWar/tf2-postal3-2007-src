@@ -81,8 +81,6 @@ public:
 	virtual bool IsHudMenuTakingInput();
 	virtual bool IsHudMenuPreventingWeaponSelection();
 
-	bool HandleHudMenuInput( int iSlot );
-
 	static CBaseHudWeaponSelection *GetInstance();
 
 	// these functions are exposed as virtual so that the tf_hints system can redraw the weapon selection

@@ -313,23 +313,3 @@ int	ClientModeTFNormal::HudElementKeyInput( int down, ButtonCode_t keynum, const
 
 	return BaseClass::HudElementKeyInput( down, keynum, pszCurrentBinding );
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: See if spectator input occurred. Return 0 if the key is swallowed.
-//-----------------------------------------------------------------------------
-int ClientModeTFNormal::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
-{
-#if defined( _X360 )
-	// On X360 when we have scoreboard up in spectator menu we cannot
-	// steal any input because gamertags must be selectable and gamercards
-	// must be accessible.
-	// We cannot rely on any keybindings in this case since user could have
-	// remapped everything.
-	if ( m_pScoreboard && m_pScoreboard->IsVisible() )
-	{
-		return 1;
-	}
-#endif
-
-	return BaseClass::HandleSpectatorKeyInput( down, keynum, pszCurrentBinding );
-}

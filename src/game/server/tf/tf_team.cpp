@@ -105,21 +105,6 @@ int CTFTeamManager::Create( const char *pName, color32 color )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-int CTFTeamManager::GetFlagCaptures( int iTeam )
-{
-	if ( !IsValidTeam( iTeam ) )
-		return -1;
-
-	CTFTeam *pTeam = GetGlobalTFTeam( iTeam );
-	if ( !pTeam )
-		return -1;
-
-	return pTeam->GetFlagCaptures();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
 void CTFTeamManager::IncrementFlagCaptures( int iTeam )
 {
 	if ( !IsValidTeam( iTeam ) )

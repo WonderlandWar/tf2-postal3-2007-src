@@ -19,7 +19,19 @@ public:
 
 	CTFPlayerClass();
 	~CTFPlayerClass();
+
+	void Engineer_RemoveBuildings( void );
+	bool Engineer_HasBuilding( int );
+	bool Engineer_IsBuilding( void );
+
 private:
+	
+	bool m_bIsBuilding;
+    CHandle<CBaseEntity> m_Building;
+    float m_flBuildingWaitTime;
+    class CHandle<CBaseEntity> real_owner;
+    unsigned int m_fBuildings;
+
 };
 
 #endif // TF_PLAYERCLASS_H

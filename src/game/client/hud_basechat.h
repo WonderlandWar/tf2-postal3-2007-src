@@ -250,11 +250,9 @@ public:
 	CBaseHudChatInputLine	*GetChatInput( void ) { return m_pChatInput; }
 	CHudChatFilterPanel		*GetChatFilterPanel( void );
 
-	virtual int				GetFilterFlags( void ) { return m_iFilterFlags; }
+	int						GetFilterFlags( void ) { return m_iFilterFlags; }
 	void					SetFilterFlag( int iFilter );
 
-	//-----------------------------------------------------------------------------
-	virtual Color	GetDefaultTextColor( void );
 	virtual Color	GetTextColorForClient( TextColor colorNum, int clientIndex );
 	virtual Color	GetClientColor( int clientIndex );
 

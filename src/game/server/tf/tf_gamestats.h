@@ -42,8 +42,6 @@ public:
 	virtual void AppendCustomDataToSaveBuffer( CUtlBuffer &SaveBuffer );
 	virtual void LoadCustomDataFromBuffer( CUtlBuffer &LoadBuffer );
 
-	virtual bool Init();
-
 	// Events.
 	virtual void Event_LevelInit( void );
 	virtual void Event_LevelShutdown( float flElapsed );
@@ -54,7 +52,7 @@ public:
 	void Event_PlayerChangedClass( CTFPlayer *pPlayer );
 	void Event_PlayerSpawned( CTFPlayer *pPlayer );
 	void Event_PlayerForceRespawn( CTFPlayer *pPlayer );
-	void Event_PlayerLeachedHealth( CTFPlayer *pPlayer, bool bDispenserHeal, float amount );
+	void Event_PlayerLeachedHealth( CTFPlayer *pPlayer, float amount );
 	void Event_PlayerHealedOther( CTFPlayer *pPlayer, float amount );
 	void Event_AssistKill( CTFPlayer *pPlayer, CBaseEntity *pVictim );
 	void Event_PlayerInvulnerable( CTFPlayer *pPlayer );

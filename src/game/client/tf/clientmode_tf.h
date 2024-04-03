@@ -52,7 +52,6 @@ public:
 	virtual void	CreateMove( float flInputSampleTime, CUserCmd *cmd );
 
 	virtual int		HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
-	virtual int		HandleSpectatorKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
 	
 private:
 	

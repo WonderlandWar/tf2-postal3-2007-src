@@ -11,6 +11,11 @@
 //-----------------------------------------------------------------------------
 CTFPlayerClass::CTFPlayerClass()
 {
+	m_bIsBuilding = false;
+	m_Building = NULL;
+	m_flBuildingWaitTime = 0.0;
+	real_owner = NULL;
+	m_fBuildings = 0;
 }
 
 //-----------------------------------------------------------------------------

@@ -76,7 +76,6 @@ public:
 	void AddTeamScore( int iTeam, int iScoreToAdd );
 
 	void IncrementFlagCaptures( int iTeam );
-	int GetFlagCaptures( int iTeam );
 
 	// Screen prints.
 	void PlayerCenterPrint( CBasePlayer *pPlayer, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
