@@ -2913,14 +2913,6 @@
 					RelativePath="..\shared\tf\tf_viewmodel.h"
 					>
 				</File>
-				<File
-					RelativePath=".\tf\tf_viewrender.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\tf_viewrender.h"
-					>
-				</File>
 				<Filter
 					Name="Weapon"
 					>

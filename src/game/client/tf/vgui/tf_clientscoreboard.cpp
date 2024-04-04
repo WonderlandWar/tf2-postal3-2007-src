@@ -305,8 +305,6 @@ void CTFClientScoreBoardDialog::UpdatePlayerList()
 
 	int localteam = pLocalPlayer->GetTeamNumber();
 
-	bool bMadeSelection = false;
-
 	for( int playerIndex = 1 ; playerIndex <= MAX_PLAYERS; playerIndex++ )
 	{
 		if( g_PR->IsConnected( playerIndex ) )
@@ -413,10 +411,8 @@ void CTFClientScoreBoardDialog::UpdatePlayerList()
 			// Update their avatar
 			
 			// TFP3: SteamFriends() and SteamUtils() doesn't exist in the 2007 SDK, instead we're going to use CSteamAPIContext
-			CSteamAPIContext SteamAPIContext;
-			SteamAPIContext.Init();
-			ISteamFriends *pSteamFriends = SteamAPIContext.SteamFriends();
-			ISteamUtils *pSteamUtils = SteamAPIContext.SteamUtils();
+			ISteamFriends *pSteamFriends = steamapicontext->SteamFriends();
+			ISteamUtils *pSteamUtils = steamapicontext->SteamUtils();
 
 			if ( pKeyValues && pSteamFriends && pSteamUtils )
 			{
@@ -462,24 +458,10 @@ void CTFClientScoreBoardDialog::UpdatePlayerList()
 
 			if ( GetLocalPlayerIndex() == playerIndex )
 			{
-				bMadeSelection = true;
 				pPlayerList->SetSelectedItem( itemID );
 			}
 
 			pKeyValues->deleteThis();
-		}
-	}
-
-	// If we're on spectator, find a default selection
-	if ( !bMadeSelection )
-	{
-		if ( m_pPlayerListBlue->GetItemCount() > 0 )
-		{
-			m_pPlayerListBlue->SetSelectedItem( 0 );
-		}
-		else if ( m_pPlayerListRed->GetItemCount() > 0 )
-		{
-			m_pPlayerListRed->SetSelectedItem( 0 );
 		}
 	}
 }
@@ -671,7 +653,7 @@ void CTFClientScoreBoardDialog::FireGameEvent( IGameEvent *event )
 		wchar_t wzHostName[256];
 		wchar_t wzServerLabel[256];
 		g_pVGuiLocalize->ConvertANSIToUnicode( hostname, wzHostName, sizeof( wzHostName ) );
-		g_pVGuiLocalize->ConstructString( wzServerLabel, sizeof(wzServerLabel), g_pVGuiLocalize->Find( "#Scoreboard_Server" ), 1, wzHostName );
+		g_pVGuiLocalize->ConstructString( wzServerLabel, sizeof(wzServerLabel), g_pVGuiLocalize->Find( "#TF_Scoreboard_server" ), 1, wzHostName );
 		SetDialogVariable( "server", wzServerLabel );
 	}
 
@@ -680,178 +662,3 @@ void CTFClientScoreBoardDialog::FireGameEvent( IGameEvent *event )
 		Update();
 	}
 }
-
-#if defined ( _X360 )
-
-//-----------------------------------------------------------------------------
-// Purpose: Event handler
-//-----------------------------------------------------------------------------
-int	CTFClientScoreBoardDialog::HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
-{
-	if ( !IsVisible() )
-		return 1;
-
-	if ( !down )
-	{
-		return 1;
-	}
-
-	SectionedListPanel *pList = GetSelectedPlayerList();
-
-	switch( keynum )
-	{
-	case KEY_XBUTTON_UP:
-		{
-			if ( pList )
-			{
-				pList->MoveSelectionUp();
-			}			
-		}
-		return 0;
-
-	case KEY_XBUTTON_DOWN:
-		{
-			if ( pList )
-			{
-				pList->MoveSelectionDown();
-			}		
-		}
-		return 0;
-
-	case KEY_XBUTTON_RIGHT:
-		{
-			if ( m_pPlayerListRed->GetItemCount() == 0 )
-				return 0;
-
-			// move to the red list
-
-			// get the row we're in now
-			int iSelectedBlueItem = m_pPlayerListBlue->GetSelectedItem();
-
-			m_pPlayerListBlue->ClearSelection();
-
-			if ( iSelectedBlueItem >= 0 )
-			{
-				int row = m_pPlayerListBlue->GetRowFromItemID( iSelectedBlueItem );
-
-				if ( row >= 0 )
-				{
-					int iNewItem = m_pPlayerListRed->GetItemIDFromRow( row );
-
-					if ( iNewItem >= 0 )
-					{
-						m_pPlayerListRed->SetSelectedItem( iNewItem );
-					}
-					else
-					{
-						// we have fewer items. Select the last one
-						int iLastRow = m_pPlayerListRed->GetItemCount()-1;
-
-						iNewItem = m_pPlayerListRed->GetItemIDFromRow( iLastRow );
-
-						if ( iNewItem >= 0 )
-						{
-							m_pPlayerListRed->SetSelectedItem( iNewItem );
-						}
-					}
-				}
-			}
-		}
-		return 0;
-
-	case KEY_XBUTTON_LEFT:
-		{
-			if ( m_pPlayerListBlue->GetItemCount() == 0 )
-				return 0;
-
-			// move to the blue list
-
-			// get the row we're in now
-			int iSelectedRedItem = m_pPlayerListRed->GetSelectedItem();
-
-			if ( iSelectedRedItem < 0 )
-				iSelectedRedItem = 0;
-
-			m_pPlayerListRed->ClearSelection();
-
-			if ( iSelectedRedItem >= 0 )
-			{
-				int row = m_pPlayerListRed->GetRowFromItemID( iSelectedRedItem );
-
-				if ( row >= 0 )
-				{
-					int iNewItem = m_pPlayerListBlue->GetItemIDFromRow( row );
-
-					if ( iNewItem >= 0 )
-					{
-						m_pPlayerListBlue->SetSelectedItem( iNewItem );
-					}
-					else
-					{
-						// we have fewer items. Select the last one
-						int iLastRow = m_pPlayerListBlue->GetItemCount()-1;
-
-						iNewItem = m_pPlayerListBlue->GetItemIDFromRow( iLastRow );
-
-						if ( iNewItem >= 0 )
-						{
-							m_pPlayerListBlue->SetSelectedItem( iNewItem );
-						}
-					}
-				}
-			}
-		}
-		return 0;
-
-	case KEY_XBUTTON_B:
-		{
-			ShowPanel( false );
-		}
-		return 0;
-
-	case KEY_XBUTTON_A:	// Show GamerCard for the selected player
-		{
-			if ( pList )
-			{
-				int iSelectedItem = pList->GetSelectedItem();
-
-				if ( iSelectedItem >= 0 )
-				{
-					KeyValues *pInfo = pList->GetItemData( iSelectedItem );
-
-					DevMsg( 1, "XShowGamerCardUI for player '%s'\n", pInfo->GetString( "name" ) );
-
-					uint64 xuid = matchmaking->PlayerIdToXuid( pInfo->GetInt( "playerIndex" ) );
-					XShowGamerCardUI( XBX_GetPrimaryUserId(), xuid );
-				}
-			}
-		}
-		return 0;
-
-	case KEY_XBUTTON_X:	// Show player review for the selected player
-		{
-			if ( pList )
-			{
-				int iSelectedItem = pList->GetSelectedItem();
-
-				if ( iSelectedItem >= 0 )
-				{
-					KeyValues *pInfo = pList->GetItemData( iSelectedItem );
-
-					DevMsg( 1, "XShowPlayerReviewUI for player '%s'\n", pInfo->GetString( "name" ) );
-
-					uint64 xuid = matchmaking->PlayerIdToXuid( pInfo->GetInt( "playerIndex" ) );
-					XShowPlayerReviewUI( XBX_GetPrimaryUserId(), xuid );
-				}
-			}
-		}
-		return 0;
-	
-	default:
-		break;
-	}
-
-	return 1;
-}
-
-#endif //_X360
