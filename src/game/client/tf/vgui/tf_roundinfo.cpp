@@ -186,7 +186,7 @@ void CTFRoundInfo::Update()
 	Q_FileBase( engine->GetLevelName(), szMapName, sizeof(szMapName) );
 	Q_strlower( szMapName );
 
-	SetDialogVariable( "mapname", GetMapDisplayName( szMapName ) );
+	SetDialogVariable( "mapname", szMapName );
 
 	if ( m_pMapImage )
 	{

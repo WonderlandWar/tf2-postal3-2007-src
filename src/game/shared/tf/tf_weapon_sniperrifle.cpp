@@ -140,25 +140,6 @@ bool CTFSniperRifle::Reload( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CTFSniperRifle::CanHolster( void )
-{
- 	CTFPlayer *pPlayer = GetTFPlayerOwner();
- 	if ( pPlayer )
-	{
-		// don't allow us to holster this weapon if we're in the process of zooming and 
-		// we've just fired the weapon (next primary attack is only 1.5 seconds after firing)
-		if ( ( pPlayer->GetFOV() < pPlayer->GetDefaultFOV() ) && ( m_flNextPrimaryAttack > gpGlobals->curtime ) )
-		{
-			return false;
-		}
-	}
-
-	return BaseClass::CanHolster();
-}
-
-//-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
 bool CTFSniperRifle::Holster( CBaseCombatWeapon *pSwitchingTo )
@@ -181,13 +162,6 @@ bool CTFSniperRifle::Holster( CBaseCombatWeapon *pSwitchingTo )
 	return BaseClass::Holster( pSwitchingTo );
 }
 
-void CTFSniperRifle::WeaponReset( void )
-{
-	BaseClass::WeaponReset();
-
-	ZoomOut();
-}
-
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
@@ -197,18 +171,6 @@ void CTFSniperRifle::HandleZooms( void )
 	CTFPlayer *pPlayer = ToTFPlayer( GetOwner() );
 	if ( !pPlayer )
 		return;
-
-	// Handle the zoom when taunting.
-	if ( pPlayer->m_Shared.InCond( TF_COND_TAUNTING ) )
-	{
-		if ( pPlayer->m_Shared.InCond( TF_COND_AIMING ) )
-		{
-			ToggleZoom();
-		}
-
-		//Don't rezoom in the middle of a taunt.
-		ResetTimers();
-	}
 
 	if ( m_flUnzoomTime > 0 && gpGlobals->curtime > m_flUnzoomTime )
 	{
@@ -237,7 +199,7 @@ void CTFSniperRifle::HandleZooms( void )
 	if ( ( pPlayer->m_nButtons & IN_ATTACK2 ) && ( m_flNextSecondaryAttack <= gpGlobals->curtime ) )
 	{
 		// If we're in the process of rezooming, just cancel it
-		if ( m_flRezoomTime > 0 || m_flUnzoomTime > 0 )
+		if ( m_flRezoomTime > 0 )
 		{
 			// Prevent them from rezooming in less time than they would have
 			m_flNextSecondaryAttack = m_flRezoomTime + TF_WEAPON_SNIPERRIFLE_ZOOM_TIME;

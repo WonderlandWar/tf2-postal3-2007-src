@@ -89,7 +89,6 @@ public:
 	void		 ResetTimers( void );
 
 	virtual bool Reload( void );
-	virtual bool CanHolster( void );
 	virtual bool Holster( CBaseCombatWeapon *pSwitchingTo );
 
 	void		 HandleZooms( void );
@@ -97,8 +96,6 @@ public:
 	virtual bool Lower( void );
 	virtual float GetProjectileDamage( void );
 	virtual int	GetDamageType() const;
-
-	virtual void WeaponReset( void );
 
 #ifdef CLIENT_DLL
 	float GetHUDDamagePerc( void );

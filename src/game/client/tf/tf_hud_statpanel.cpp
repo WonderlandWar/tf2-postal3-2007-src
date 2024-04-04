@@ -271,6 +271,8 @@ void CTFStatPanel::UpdateStats( int iClass, RoundStats_t &stats, bool bShowNow )
 		}
 		WriteStats();
 	}
+
+	GStatsSummaryPanel()->SetStats( m_aClassStats );
 }
 
 //-----------------------------------------------------------------------------
@@ -406,20 +408,9 @@ bool CTFStatPanel::ReadStats( void )
 #endif
 	}
 
-	char	szFilename[_MAX_PATH];
-
-	if ( IsX360() )
-	{
-		Q_snprintf( szFilename, sizeof( szFilename ), "cfg:/tf2_playerstats.dmx" );
-	}
-	else
-	{
-		Q_snprintf( szFilename, sizeof( szFilename ), "tf2_playerstats.dmx" );
-	}
-
 	MEM_ALLOC_CREDIT();
 
-	bool bOk = UnserializeDMX( szFilename, "MOD", true, &pPlayerStats );
+	bool bOk = UnserializeDMX( "tf2_playerstats.dmx", "MOD", true, &pPlayerStats );
 
 	if ( !bOk )
 		return false;
@@ -449,6 +440,8 @@ bool CTFStatPanel::ReadStats( void )
 	}
 
 	CleanupDMX( pPlayerStats );
+
+	GStatsSummaryPanel()->SetStats( m_aClassStats );
 
 	m_bStatsChanged = false;
 

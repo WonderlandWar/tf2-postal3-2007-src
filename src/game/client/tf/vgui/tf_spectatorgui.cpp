@@ -27,8 +27,6 @@ using namespace vgui;
 
 extern ConVar _cl_classmenuopen;
 
-const char *GetMapDisplayName( const char *mapName );
-
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -253,7 +251,6 @@ void CTFSpectatorGUI::UpdateKeyLabels( void )
 
 		char tempname[128];
 		Q_FileBase( engine->GetLevelName(), tempname, sizeof( tempname ) );
-		Q_strlower( tempname );
 
 		if ( IsX360() )
 		{
@@ -264,12 +261,32 @@ void CTFSpectatorGUI::UpdateKeyLabels( void )
 			}
 		}
 
-		Q_strncpy( szMapName, GetMapDisplayName( tempname ), sizeof( szMapName ) );
+		Q_strncpy( szMapName, tempname, sizeof( szMapName ) );
 
 		g_pVGuiLocalize->ConvertANSIToUnicode( szMapName, wMapName, sizeof(wMapName));
 		g_pVGuiLocalize->ConstructString( wLabel, sizeof( wLabel ), g_pVGuiLocalize->Find( "#Spec_Map" ), 1, wMapName );
 
 		m_pMapLabel->SetText( wLabel ); 
+	}
+
+	int iClass = TF_CLASS_UNDEFINED;
+	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( pPlayer )
+	{
+		iClass = pPlayer->m_Shared.GetDesiredPlayerClassIndex();
+	}
+
+	// if it's time to change the tip, or the player has changed desired class, update the tip
+	if ( ( gpGlobals->curtime >= m_flNextTipChangeTime ) || ( iClass != m_iTipClass ) )
+	{
+		wchar_t wzTipLabel[512]=L"";
+		const wchar_t *wzTip = g_TFTips.GetNextClassTip( iClass );
+		Assert( wzTip && wzTip[0] );
+		g_pVGuiLocalize->ConstructString( wzTipLabel, sizeof( wzTipLabel ), g_pVGuiLocalize->Find( "#Tip_Fmt" ), 1, wzTip );
+		SetDialogVariable( "tip", wzTipLabel );
+				
+		m_flNextTipChangeTime = gpGlobals->curtime + 10.0f;
+		m_iTipClass = iClass;
 	}
 }
 

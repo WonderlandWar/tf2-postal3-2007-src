@@ -26,8 +26,6 @@
 
 using namespace vgui;
 
-const char *GetMapDisplayName( const char *mapName );
-
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -368,7 +366,23 @@ void CTFMapInfoMenu::LoadMapPage( const char *mapName )
 //-----------------------------------------------------------------------------
 void CTFMapInfoMenu::SetMapTitle()
 {
-	SetDialogVariable( "mapname", GetMapDisplayName( m_szMapName ) );
+	const char *pszSrc;
+	// we haven't found a "friendly" map name, so let's just clean up what we have
+	if ( !Q_strncmp( m_szMapName, "CP_", 3 ) ||
+		 !Q_strncmp( m_szMapName, "TC_", 3 ) )
+	{
+		pszSrc = m_szMapName + 3;
+	}
+	else if ( !Q_strncmp( m_szMapName, "CTF_", 4 ) )
+	{
+		pszSrc = m_szMapName + 4;
+	}
+	else
+	{
+		pszSrc = m_szMapName;
+	}
+
+	SetDialogVariable( "mapname", pszSrc );
 }
 
 //-----------------------------------------------------------------------------
@@ -420,82 +434,4 @@ void CTFMapInfoMenu::PerformLayout( void )
 
 	if ( m_pContinue )
 		m_pContinue->RequestFocus( 0 );
-}
-
-struct s_MapInfo
-{
-	const char	*pDiskName;
-	const char	*pDisplayName;
-	const char	*pGameType;
-};
-
-static s_MapInfo s_Maps[] = {
-	{	"ctf_2fort",	"2Fort",		"#Gametype_CTF",		},
-	{	"cp_dustbowl",	"Dustbowl",		"#TF_AttackDefend",		},
-	{	"cp_granary",	"Granary",		"#Gametype_CP",			},
-	{	"cp_well",		"Well (CP)",	"#Gametype_CP",			},
-	{	"cp_gravelpit", "Gravel Pit",	"#TF_AttackDefend",		},
-	{	"tc_hydro",		"Hydro",		"#TF_TerritoryControl",	},
-	{	"ctf_well",		"Well (CTF)",	"#Gametype_CTF",		},
-};
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-const char *GetMapDisplayName( const char *mapName )
-{
-	static char szDisplayName[256];
-	char szTempName[256];
-	const char *pszSrc = NULL;
-
-	szDisplayName[0] = '\0';
-
-	if ( !mapName )
-		return szDisplayName;
-/*
-	// check the worldspawn entity to see if the map author has specified a name
-	if ( GetClientWorldEntity() )
-	{
-		const char *pszMapDescription = GetClientWorldEntity()->m_iszMapDescription;
-		if ( Q_strlen( pszMapDescription ) > 0 )
-		{
-			Q_strncpy( szDisplayName, pszMapDescription, sizeof( szDisplayName ) );
-			Q_strupr( szDisplayName );
-			
-			return szDisplayName;
-		}
-	}
-*/
-	// check our lookup table
-	Q_strncpy( szTempName, mapName, sizeof( szTempName ) );
-	Q_strlower( szTempName );
-
-	for ( int i = 0; i < ARRAYSIZE( s_Maps ); ++i )
-	{
-		if ( !Q_stricmp( s_Maps[i].pDiskName, szTempName ) )
-		{
-			return s_Maps[i].pDisplayName;
-		}
-	}
-
-	// we haven't found a "friendly" map name, so let's just clean up what we have
-	if ( !Q_strncmp( szTempName, "cp_", 3 ) ||
-		 !Q_strncmp( szTempName, "tc_", 3 ) ||
-		 !Q_strncmp( szTempName, "ad_", 3 ) )
-	{
-		pszSrc = szTempName + 3;
-	}
-	else if ( !Q_strncmp( szTempName, "ctf_", 4 ) )
-	{
-		pszSrc = szTempName + 4;
-	}
-	else
-	{
-		pszSrc = szTempName;
-	}
-
-	Q_strncpy( szDisplayName, pszSrc, sizeof( szDisplayName ) );
-	Q_strupr( szDisplayName );
-
-	return szDisplayName;
 }

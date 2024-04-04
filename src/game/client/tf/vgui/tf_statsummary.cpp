@@ -73,10 +73,9 @@ CTFStatsSummaryPanel::CTFStatsSummaryPanel() : vgui::EditablePanel( NULL, "TFSta
 	m_pBarChartComboBoxA = new vgui::ComboBox( m_pInteractiveHeaders, "BarChartComboA", 10, false );
 	m_pBarChartComboBoxB = new vgui::ComboBox( m_pInteractiveHeaders, "BarChartComboB", 10, false );
 	m_pClassComboBox = new vgui::ComboBox( m_pInteractiveHeaders, "ClassCombo", 10, false );	
-	m_pTipLabel = new vgui::Label( this, "TipLabel", "" );
-	m_pTipText = new vgui::Label( this, "TipText", "" );
 
 	m_pNextTipButton = new vgui::Button( this, "NextTipButton", "" );	
+	m_pResetStatsButton = new vgui::Button( this, "ResetStatsButton", "" );
 	m_pCloseButton = new vgui::Button( this, "CloseButton", "" );	
 
 	m_pBarChartComboBoxA->AddActionSignalTarget( this );
@@ -103,32 +102,6 @@ void CTFStatsSummaryPanel::ShowModal()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFStatsSummaryPanel::PerformLayout()
-{
-	BaseClass::PerformLayout();
-
-#ifndef _X360
-	if ( m_pTipLabel && m_pTipText )
-	{
-		m_pTipLabel->SizeToContents();
-		int width = m_pTipLabel->GetWide();
-
-		int x, y, w, t;
-		m_pTipText->GetBounds( x, y, w, t );
-		m_pTipText->SetBounds( x + width, y, w - width, t );
-		m_pTipText->InvalidateLayout( false, true ); // have it re-layout the contents so it's wrapped correctly now that we've changed the size
-	}
-
-	if ( m_pNextTipButton )
-	{
-		m_pNextTipButton->SizeToContents();
-	}
-#endif
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Command handler
 //-----------------------------------------------------------------------------
 void CTFStatsSummaryPanel::OnCommand( const char *command )
@@ -140,6 +113,18 @@ void CTFStatsSummaryPanel::OnCommand( const char *command )
 		SetVisible( false );
 		SetParent( (VPANEL) NULL );
 		SetDefaultSelections();
+	}
+	else if ( 0 == Q_stricmp( command, "resetstatsbutton" ) )
+	{
+		vgui::QueryBox *pBox = new vgui::QueryBox( "#TF_Confirm", "#TF_ConfirmResetStats" );
+		if ( pBox )
+		{
+			KeyValues *pKV = new KeyValues( "DoResetStats" );
+			pBox->SetOKCommand( pKV );
+			pBox->AddActionSignalTarget( this );
+			pBox->MoveToFront();
+			pBox->DoModal();
+		}
 	}
 	else if ( 0 == Q_stricmp( command, "nexttip" ) )
 	{
@@ -236,24 +221,6 @@ void CTFStatsSummaryPanel::ApplySchemeSettings(vgui::IScheme *pScheme)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CTFStatsSummaryPanel::OnKeyCodePressed( KeyCode code )
-{
-	if ( IsX360() )
-	{
-		if ( code == KEY_XBUTTON_A )
-		{
-			OnCommand(  "nexttip" )	;
-		}
-		else if ( code == KEY_XBUTTON_B )
-		{
-			OnCommand( "vguicancel" );
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Sets stats to use
 //-----------------------------------------------------------------------------
 void CTFStatsSummaryPanel::SetStats( CUtlVector<ClassStats_t> &vecClassStats ) 
@@ -262,20 +229,6 @@ void CTFStatsSummaryPanel::SetStats( CUtlVector<ClassStats_t> &vecClassStats )
 	if ( m_bControlsLoaded )
 	{
 		UpdateDialog();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Updates the dialog
-//-----------------------------------------------------------------------------
-void CTFStatsSummaryPanel::ClearMapLabel()
-{
-	SetDialogVariable( "maplabel", "" );
-
-	vgui::Label *pLabel = dynamic_cast<Label *>( FindChildByName( "OnYourWayLabel" ) );
-	if ( pLabel && pLabel->IsVisible() )
-	{
-		pLabel->SetVisible( false );
 	}
 }
 
@@ -308,7 +261,7 @@ void CTFStatsSummaryPanel::UpdateDialog()
 		}
 	}
 
-	ClearMapLabel();
+	SetDialogVariable( "maplabel", "" );
 
 	// fill out bar charts
 	UpdateBarCharts();
@@ -492,10 +445,8 @@ void CTFStatsSummaryPanel::UpdateControls()
 	m_pPlayerData->SetVisible( bShowPlayerData );
 	m_pInteractiveHeaders->SetVisible( m_bInteractive );
 	m_pNonInteractiveHeaders->SetVisible( !m_bInteractive );
-	m_pTipText->SetVisible( bShowPlayerData );
-	m_pTipLabel->SetVisible( bShowPlayerData );
-
 	m_pNextTipButton->SetVisible( m_bInteractive );
+	m_pResetStatsButton->SetVisible( m_bInteractive );
 	m_pCloseButton->SetVisible( m_bInteractive );
 }
 
@@ -709,6 +660,14 @@ int __cdecl CTFStatsSummaryPanel::CompareClassStats( const ClassStats_t *pStats0
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Fire command to reset stats
+//-----------------------------------------------------------------------------
+void CTFStatsSummaryPanel::DoResetStats( void )
+{
+	engine->ClientCmd( "resetplayerstats" );
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Called when text changes in combo box
 //-----------------------------------------------------------------------------
 void CTFStatsSummaryPanel::OnTextChanged( KeyValues *data )
@@ -792,8 +751,6 @@ const char *CTFStatsSummaryPanel::RenderValue( float flValue, TFStatType_t statT
 	return szValue;
 }
 
-extern const char *GetMapDisplayName( const char *mapName );
-
 //-----------------------------------------------------------------------------
 // Purpose: Event handler
 //-----------------------------------------------------------------------------
@@ -809,26 +766,13 @@ void CTFStatsSummaryPanel::FireGameEvent( IGameEvent *event )
 			const char *pMapName = event->GetString( "mapname" );
 			if ( pMapName )
 			{
-				// If we're loading a background map, don't display anything
-				// HACK: Client doesn't get gpGlobals->eLoadType, so just do string compare for now.
-				if ( Q_stristr( pMapName, "background") )
-				{
-					ClearMapLabel();
-				}
-				else
-				{
-					// set the map name in the UI
-					wchar_t wzMapName[255]=L"";
-					g_pVGuiLocalize->ConvertANSIToUnicode( GetMapDisplayName( pMapName ), wzMapName, sizeof( wzMapName ) );
+				// set the map name in the UI
+				wchar_t wzMapName[255]=L"";
+				g_pVGuiLocalize->ConvertANSIToUnicode( pMapName, wzMapName, sizeof( wzMapName ) );
 
-					SetDialogVariable( "maplabel", wzMapName );
+				g_pVGuiLocalize->ConstructString( wzMapName, sizeof( wzMapName ), g_pVGuiLocalize->Find( "#LoadingMap" ), 1, wzMapName );
 
-					vgui::Label *pLabel = dynamic_cast<Label *>( FindChildByName( "OnYourWayLabel" ) );
-					if ( pLabel && !pLabel->IsVisible() )
-					{
-						pLabel->SetVisible( true );
-					}
-				}
+				SetDialogVariable( "maplabel", wzMapName );
 			}	
 		}
 	}
@@ -839,7 +783,7 @@ void CTFStatsSummaryPanel::FireGameEvent( IGameEvent *event )
 //-----------------------------------------------------------------------------
 void CTFStatsSummaryPanel::OnActivate()
 {
-	ClearMapLabel();
+	SetDialogVariable( "maplabel", "" );
 	UpdateDialog();
 }
 
@@ -848,7 +792,7 @@ void CTFStatsSummaryPanel::OnActivate()
 //-----------------------------------------------------------------------------
 void CTFStatsSummaryPanel::OnDeactivate()
 {
-	ClearMapLabel();
+	SetDialogVariable( "maplabel", "" );
 }
 
 CON_COMMAND( showstatsdlg, "Shows the player stats dialog" )

@@ -24,8 +24,6 @@ public:
 
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 	virtual void OnCommand( const char *command );
-	virtual void OnKeyCodePressed( KeyCode code );
-	virtual void PerformLayout();
 	void SetStats( CUtlVector<ClassStats_t> &vecClassStats );
 	void ShowModal();
 
@@ -48,7 +46,6 @@ private:
 	void UpdateClassDetails();
 	void UpdateTip();
 	void UpdateControls();
-	void ClearMapLabel();
 	void InitBarChartComboBox( vgui::ComboBox *pComboBox );
 	void SetValueAsClass( const char *pDialogVariable, int iValue, int iPlayerClass );
 	void DisplayBarValue( int iChart, int iClass, ClassStats_t &stats, TFStatType_t statType, StatDisplay_t flags, float flMaxValue );	
@@ -56,6 +53,7 @@ private:
 	const char *RenderValue( float flValue, TFStatType_t statType, StatDisplay_t statDisplay );
 	static float SafeCalcFraction( float flNumerator, float flDemoninator );
 	static int __cdecl CompareClassStats( const ClassStats_t *pStats0, const ClassStats_t *pStats1 );
+	MESSAGE_FUNC( DoResetStats, "DoResetStats" );
 	MESSAGE_FUNC_PARAMS( OnTextChanged, "TextChanged", data );
 
 	vgui::EditablePanel *m_pPlayerData;
@@ -65,11 +63,10 @@ private:
 	vgui::ComboBox *m_pBarChartComboBoxA;
 	vgui::ComboBox *m_pBarChartComboBoxB;
 	vgui::ComboBox *m_pClassComboBox;
-	vgui::Label		*m_pTipLabel;
-	vgui::Label		*m_pTipText;
 
 	vgui::Button *m_pNextTipButton;
 	vgui::Button *m_pCloseButton;
+	vgui::Button *m_pResetStatsButton;	
 
 	bool m_bInteractive;							// are we in interactive mode
 	bool m_bControlsLoaded;							// have we loaded controls yet

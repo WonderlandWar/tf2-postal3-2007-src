@@ -140,8 +140,8 @@ void CTFGameStats::Event_LevelShutdown( float flElapsed )
 
 	if ( m_reportedStats.m_pCurrentMap )
 	{
-		flElapsed = gpGlobals->curtime - m_reportedStats.m_pCurrentMap->m_flLevelStartTime;
-		m_reportedStats.m_pCurrentMap->m_Header.m_iTotalTime += (int) flElapsed;
+		// TFP3: TODO: Is this accurate?
+		m_reportedStats.m_pCurrentMap->Shutdown( gpGlobals->curtime );
 	}
 }
 
