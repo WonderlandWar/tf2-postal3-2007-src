@@ -96,11 +96,11 @@ void CObjectTeleporter_Entrance::TeleporterSend( CTFPlayer *pPlayer )
 	{
 	case TF_TEAM_RED:
 		DispatchParticleEffect( "teleported_red", GetAbsOrigin(), vec3_angle );
-		DispatchParticleEffect( "player_sparkles_red", GetAbsOrigin(), vec3_angle );
+		DispatchParticleEffect( "player_sparkles_red", GetAbsOrigin(), vec3_angle, pPlayer );
 		break;
 	case TF_TEAM_BLUE:
 		DispatchParticleEffect( "teleported_blue", GetAbsOrigin(), vec3_angle );
-		DispatchParticleEffect( "player_sparkles_blue", GetAbsOrigin(), vec3_angle );
+		DispatchParticleEffect( "player_sparkles_blue", GetAbsOrigin(), vec3_angle, pPlayer );
 		break;
 	default:
 		break;
@@ -584,15 +584,12 @@ void CObjectTeleporter::TeleporterThink( void )
 			// move the player
 			if ( pTeleportingPlayer )
 			{
-				CUtlVector<CBaseEntity*> hPlayersToKill;
-				bool bClear = true;
-
 				// Telefrag any players in the way
-				int numEnts = UTIL_EntitiesInBox( pEnts, 256, mins,	maxs, 0 );
+				int numEnts = UTIL_EntitiesInBox( pEnts, 256, mins,	maxs, FL_CLIENT );
 				if ( numEnts )
 				{
 					//Iterate through the list and check the results
-					for ( int i = 0; i < numEnts && bClear; i++ )
+					for ( int i = 0; i < numEnts; i++ )
 					{
 						if ( pEnts[i] == NULL )
 							continue;
@@ -605,56 +602,34 @@ void CObjectTeleporter::TeleporterThink( void )
 						{
 							if ( !pTeleportingPlayer->InSameTeam(pEnts[i]) )
 							{
-								hPlayersToKill.AddToTail( pEnts[i] );
+								// Telefrag all enemy players we've found
+								pEnts[i]->TakeDamage( CTakeDamageInfo( pTeleportingPlayer, this, 1000, DMG_CRUSH ) );
+								
 							}
 							continue;
 						}
-
-						if ( pEnts[i]->IsBaseObject() )
-							continue;
-
-						// Solid entities will prevent a teleport
-						if ( pEnts[i]->IsSolid() && pEnts[i]->ShouldCollide( pTeleportingPlayer->GetCollisionGroup(), MASK_ALL ) &&
-							 g_pGameRules->ShouldCollide( pTeleportingPlayer->GetCollisionGroup(), pEnts[i]->GetCollisionGroup() ) )
-						{
-							// We're going to teleport into something solid. Abort & destroy this exit.
-							bClear = false;
-						}
 					}
 				}
 
-				if ( bClear )
+				pTeleportingPlayer->Teleport( &newPosition, &(GetAbsAngles()), &vec3_origin );
+
+				// Unzoom if we are a sniper zoomed!
+				if ( ( pTeleportingPlayer->GetPlayerClass()->GetClassIndex() == TF_CLASS_SNIPER ) &&
+					pTeleportingPlayer->m_Shared.InCond( TF_COND_AIMING ) )
 				{
-					// Telefrag all enemy players we've found
-					for ( int player = 0; player < hPlayersToKill.Count(); player++ )
+					CTFWeaponBase *pWpn = pTeleportingPlayer->GetActiveTFWeapon();
+
+					if ( pWpn && pWpn->GetWeaponID() == TF_WEAPON_SNIPERRIFLE )
 					{
-						hPlayersToKill[player]->TakeDamage( CTakeDamageInfo( pTeleportingPlayer, this, 1000, DMG_CRUSH ) );
+						CTFSniperRifle *pRifle = static_cast<CTFSniperRifle*>( pWpn );
+						pRifle->ToggleZoom();
 					}
-
-					pTeleportingPlayer->Teleport( &newPosition, &(GetAbsAngles()), &vec3_origin );
-
-					// Unzoom if we are a sniper zoomed!
-					if ( ( pTeleportingPlayer->GetPlayerClass()->GetClassIndex() == TF_CLASS_SNIPER ) &&
-						pTeleportingPlayer->m_Shared.InCond( TF_COND_AIMING ) )
-					{
-						CTFWeaponBase *pWpn = pTeleportingPlayer->GetActiveTFWeapon();
-
-						if ( pWpn && pWpn->GetWeaponID() == TF_WEAPON_SNIPERRIFLE )
-						{
-							CTFSniperRifle *pRifle = static_cast<CTFSniperRifle*>( pWpn );
-							pRifle->ToggleZoom();
-						}
-					}
-
-					pTeleportingPlayer->SetFOV( pTeleportingPlayer, 0, tf_teleporter_fov_time.GetFloat(), tf_teleporter_fov_start.GetInt() );
-
-					color32 fadeColor = {255,255,255,100};
-					UTIL_ScreenFade( pTeleportingPlayer, fadeColor, 0.25, 0.4, FFADE_IN );
 				}
-				else
-				{
-					DetonateObject();
-				}
+
+				pTeleportingPlayer->SetFOV( pTeleportingPlayer, 0, tf_teleporter_fov_time.GetFloat(), tf_teleporter_fov_start.GetInt() );
+
+				color32 fadeColor = {255,255,255,100};
+				UTIL_ScreenFade( pTeleportingPlayer, fadeColor, 0.25, 0.4, FFADE_IN );
 			}			
 
 			SetState( TELEPORTER_STATE_RECEIVING_RELEASE );
