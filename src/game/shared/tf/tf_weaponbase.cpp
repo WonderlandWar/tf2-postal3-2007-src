@@ -1442,25 +1442,6 @@ void CTFWeaponBase::OnDataChanged( DataUpdateType_t type )
 	{
 		WeaponReset();
 	}
-
-	//Here we go...
-	//Since we can't get a repro for the invisible weapon thing, I'll fix it right up here:
-	CTFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
-
-	//Our owner is alive
-	if ( pOwner && pOwner->IsAlive() == true )
-	{
-		//And he is NOT taunting
-		if ( pOwner->m_Shared.InCond ( TF_COND_TAUNTING ) == false )
-		{
-			//Then why the hell am I NODRAW?
-			if ( pOwner->GetActiveWeapon() == this && IsEffectActive( EF_NODRAW ) )
-			{
-				RemoveEffects( EF_NODRAW );
-				UpdateVisibility();
-			}
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2083,17 +2064,6 @@ bool CTFWeaponBase::OnFireEvent( C_BaseViewModel *pViewModel, const Vector& orig
 	}
 
 	return BaseClass::OnFireEvent( pViewModel, origin, angles, event, options );
-}
-
-ShadowType_t CTFWeaponBase::ShadowCastType( void )
-{
-	if ( IsEffectActive( EF_NODRAW | EF_NOSHADOW ) )
-		return SHADOWS_NONE;
-
-	if ( m_iState == WEAPON_IS_CARRIED_BY_PLAYER )
-		return SHADOWS_NONE;
-
-	return BaseClass::ShadowCastType();
 }
 
 //-----------------------------------------------------------------------------
