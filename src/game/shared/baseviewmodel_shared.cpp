@@ -428,24 +428,18 @@ void CBaseViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& o
 		Vector vDifference;
 		VectorSubtract( forward, m_vecLastFacing, vDifference );
 
-		float flSpeed = 5.0f;
-
-		// If we start to lag too far behind, we'll increase the "catch up" speed.  Solves the problem with fast cl_yawspeed, m_yaw or joysticks
-		//  rotating quickly.  The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
-		float flDiff = vDifference.Length();
-		if ( (flDiff > g_fMaxViewModelLag) && (g_fMaxViewModelLag > 0.0f) )
+		if ( fabs( vDifference.x ) > g_fMaxViewModelLag ||
+			 fabs( vDifference.y ) > g_fMaxViewModelLag ||
+			 fabs( vDifference.z ) > g_fMaxViewModelLag )
 		{
-			float flScale = flDiff / g_fMaxViewModelLag;
-			flSpeed *= flScale;
+			m_vecLastFacing = forward;
 		}
 
 		// FIXME:  Needs to be predictable?
-		VectorMA( m_vecLastFacing, flSpeed * gpGlobals->frametime, vDifference, m_vecLastFacing );
+		VectorMA( m_vecLastFacing, 5.0f * gpGlobals->frametime, vDifference, m_vecLastFacing );
 		// Make sure it doesn't grow out of control!!!
 		VectorNormalize( m_vecLastFacing );
-		VectorMA( origin, 5.0f, vDifference * -1.0f, origin );
-
-		Assert( m_vecLastFacing.IsValid() );
+		VectorMA( origin, 5, vDifference * -1, origin );
 	}
 
 	Vector right, up;

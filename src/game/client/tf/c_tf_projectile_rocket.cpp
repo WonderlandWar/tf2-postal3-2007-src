@@ -47,9 +47,6 @@ void C_TFProjectile_Rocket::OnDataChanged(DataUpdateType_t updateType)
 //-----------------------------------------------------------------------------
 void C_TFProjectile_Rocket::CreateRocketTrails( void )
 {
-	if ( IsDormant() )
-		return;
-
 	if ( enginetrace->GetPointContents( GetAbsOrigin() ) & MASK_WATER )
 	{
 		ParticleProp()->Create( "rockettrail_underwater", PATTACH_POINT_FOLLOW, "trail" );

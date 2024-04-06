@@ -61,12 +61,6 @@ ConVar tf_spy_cloak_consume_rate( "tf_spy_cloak_consume_rate", "10.0", FCVAR_DEV
 ConVar tf_spy_cloak_regen_rate( "tf_spy_cloak_regen_rate", "3.3", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "cloak to regen per second, up to 100 max" );		// 30 seconds to full charge
 ConVar tf_spy_cloak_no_attack_time( "tf_spy_cloak_no_attack_time", "2.0", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "time after uncloaking that the spy is prohibited from attacking" );
 
-//ConVar tf_spy_stealth_blink_time( "tf_spy_stealth_blink_time", "0.3", FCVAR_DEVELOPMENTONLY, "time after being hit the spy blinks into view" );
-//ConVar tf_spy_stealth_blink_scale( "tf_spy_stealth_blink_scale", "0.85", FCVAR_DEVELOPMENTONLY, "percentage visible scalar after being hit the spy blinks into view" );
-
-#define TF_SPY_STEALTH_BLINKTIME   0.3f
-#define TF_SPY_STEALTH_BLINKSCALE  0.85f
-
 #define TF_PLAYER_CONDITION_CONTEXT	"TFPlayerConditionContext"
 
 #define MAX_DAMAGE_EVENTS		128
@@ -690,14 +684,7 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::ConditionThink( void )
 {
-	bool bIsLocalPlayer = false;
-#ifdef CLIENT_DLL
-	bIsLocalPlayer = m_pOuter->IsLocalPlayer();
-#else
-	bIsLocalPlayer = true;
-#endif
-
-	if ( m_pOuter->IsPlayerClass( TF_CLASS_SPY ) && bIsLocalPlayer )
+	if ( m_pOuter->IsPlayerClass( TF_CLASS_SPY ) )
 	{
 		if ( InCond( TF_COND_STEALTHED ) )
 		{
@@ -885,11 +872,6 @@ void CTFPlayerShared::OnRemoveBurning( void )
 		m_pOuter->m_pBurningEffect = NULL;
 	}
 
-	if ( m_pOuter->IsLocalPlayer() )
-	{
-		view->SetScreenOverlayMaterial( NULL );
-	}
-
 	m_pOuter->m_flBurnEffectStartTime = 0;
 	m_pOuter->m_flBurnEffectEndTime = 0;
 #else
@@ -1016,15 +998,6 @@ void CTFPlayerShared::OnAddBurning( void )
 		m_pOuter->m_flBurnEffectStartTime = gpGlobals->curtime;
 		m_pOuter->m_flBurnEffectEndTime = gpGlobals->curtime + TF_BURNING_FLAME_LIFE;
 	}
-	// set the burning screen overlay
-	if ( m_pOuter->IsLocalPlayer() )
-	{
-		IMaterial *pMaterial = materials->FindMaterial( "effects/imcookin", TEXTURE_GROUP_CLIENT_EFFECTS, false );
-		if ( !IsErrorMaterial( pMaterial ) )
-		{
-			view->SetScreenOverlayMaterial( pMaterial );
-		}
-	}
 #endif
 
 	/*
@@ -1113,62 +1086,53 @@ void CTFPlayerShared::FadeInvis( float flInvisFadeTime )
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::InvisibilityThink( void )
 {
-	float v8;
-	float v10;
+	float flTargetInvis = 0.0;
 	if ( InCond( TF_COND_STEALTHED ) )
 	{
-		float v2 = gpGlobals->curtime - m_flLastStealthExposeTime;
+		float flTimeSinceExposed = gpGlobals->curtime - m_flLastStealthExposeTime;
 		float v3 = 0.0;
 
-		float v4;
-		float v5;
-		if (v2 >= 0.0)
+#define RANDOM_MAGIC_NUMBER 0.75
+		
+		flTargetInvis = 1.0;
+		if ( flTimeSinceExposed >= 0.0 )
 		{
-			if (v2 >= 0.75)
+			if ( flTimeSinceExposed >= RANDOM_MAGIC_NUMBER )
 			{
-				v10 = 1.0;
-				v8 = 0.0;
 				goto LABEL_11;
 			}
-			v4 = 0.75;
-			v3 = v2;
-			v5 = 0.0;
+			v3 = flTimeSinceExposed;
 		}
-		else
-		{
-			v4 = 0.75;
-			v5 = 0.0;
-		}
-		v8 = v5;
-		float v9 = 1.0 - (v4 - v3) * 1.3333334 * 0.4;
-		v10 = 1.0;
-		if (v9 <= 1.0)
-		{
-			v10 = v9;
-			if (v9 < v8)
-				v10 = 0.0;
-		}
-	}
-	else
-	{
-		v8 = 0.0;
-		v10 = 0.0;
-	}
-LABEL_11:
-	float v1 = 1.0;
-	if (gpGlobals->curtime < m_flInvisChangeCompleteTime )
-	{
-		v1 = gpGlobals->frametime / m_flInvisChangeTotalTime;
-		float v11 = ( m_flInvisibility - v10 )
-			/ ( m_flInvisChangeCompleteTime.m_Value - gpGlobals->curtime )
-			* gpGlobals->frametime;
-		if (v11 > v1)
-			v1 = v11;
-	}
-	if (v10 >= v8)
-		v8 = v10;
 
-	m_flInvisibility = Approach(v8, m_flInvisibility, v1);
+		float v9 = 1.0 - ( RANDOM_MAGIC_NUMBER - v3 ) * 1.3333334 * 0.4;
+		if ( v9 <= 1.0 )
+		{
+			if ( v9 < 0.0 )
+				v9 = 0.0;
+
+			flTargetInvis = v9;
+		}
+	}
+
+LABEL_11:
+	float speed = 1.0;
+	if ( gpGlobals->curtime < m_flInvisChangeCompleteTime )
+	{
+		speed = gpGlobals->frametime / m_flInvisChangeTotalTime;
+		float minspeed = ( m_flInvisibility - flTargetInvis )
+			/ ( m_flInvisChangeCompleteTime - gpGlobals->curtime )
+			* gpGlobals->frametime;
+
+		if ( minspeed > speed )
+			speed = minspeed;
+
+		//speed = min( speed, minspeed );
+	}
+
+	if ( flTargetInvis < 0.0 )
+		flTargetInvis = 0.0;
+
+	m_flInvisibility = Approach( flTargetInvis, m_flInvisibility, speed );
 }
 
 
@@ -1337,12 +1301,7 @@ void CTFPlayerShared::RecalcDisguiseWeapon( void )
 	Assert( pDisguiseWeaponInfo != NULL && "Cannot find slot 0 primary weapon for desired disguise class\n" );
 
 	m_pDisguiseWeaponInfo = pDisguiseWeaponInfo;
-	m_iDisguiseWeaponModelIndex = -1;
-
-	if ( pDisguiseWeaponInfo )
-	{
-		m_iDisguiseWeaponModelIndex = modelinfo->GetModelIndex( pDisguiseWeaponInfo->szWorldModel );
-	}
+	m_iDisguiseWeaponModelIndex = modelinfo->GetModelIndex( pDisguiseWeaponInfo->szWorldModel );
 }
 
 

@@ -109,9 +109,6 @@ bool CHudMenuEngyBuild::ShouldDraw( void )
 	if ( pPlayer != pWpn->GetOwner() )
 		return false;
 
-	if ( !CHudElement::ShouldDraw() )
-		return false;
-
 	return ( pWpn->GetWeaponID() == TF_WEAPON_PDA_ENGINEER_BUILD );
 }
 

@@ -28,18 +28,13 @@
 
 class CTakeDamageInfo;
 
-//Tony; Compromise! in episodic single player, inherit CBaseCombatCharacter for the barnacle interaction, otherwise this will never get called.
-class CBaseGrenade : 
-	#if defined( HL2_EPISODIC )
-		public CBaseCombatCharacter
-	#else
-		public CBaseAnimating
-	#endif
-	#if defined( GAME_DLL )
-		, public CDefaultPlayerPickupVPhysics
-	#endif
-{		//Tony; the ugliest class definition ever, but it saves characters, or something. Should I be shot for this?
-	DECLARE_CLASS( CBaseGrenade, CBaseAnimating );
+#if !defined( CLIENT_DLL )
+class CBaseGrenade : public CBaseCombatCharacter, public CDefaultPlayerPickupVPhysics
+#else
+class CBaseGrenade : public CBaseCombatCharacter
+#endif
+{
+	DECLARE_CLASS( CBaseGrenade, CBaseCombatCharacter );
 public:
 
 	CBaseGrenade(void);
@@ -104,13 +99,6 @@ public:
 
 	CBaseCombatCharacter *GetThrower( void );
 	void				  SetThrower( CBaseCombatCharacter *pThrower );
-	CBaseEntity *GetOriginalThrower() { return m_hOriginalThrower; }
-
-	// added for entity info so that certain classes can override this, without screwing up the normal GetOwnerEntity()
-	virtual CBaseEntity	*GetTrueOwnerEntity()
-	{
-		return dynamic_cast<CBaseEntity *>( GetThrower() );
-	}
 
 #if !defined( CLIENT_DLL )
 	// Allow +USE pickup
@@ -129,7 +117,6 @@ public:
 	bool				m_bHasWarnedAI;				// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 	CNetworkVar( bool, m_bIsLive );					// Is this grenade live, or can it be picked up?
 	CNetworkVar( float, m_DmgRadius );				// How far do I do damage?
-	CNetworkVar( float, m_flNextAttack );			// Added into grenade itself now that it's no longer CBaseCombatCharacter
 	float				m_flDetonateTime;			// Time at which to detonate.
 	float				m_flWarnAITime;				// Time at which to warn the AI
 
@@ -140,7 +127,6 @@ protected:
 
 private:
 	CNetworkHandle( CBaseEntity, m_hThrower );					// Who threw this grenade
-	EHANDLE			m_hOriginalThrower;							// Who was the original thrower of this grenade
 
 	CBaseGrenade( const CBaseGrenade & ); // not defined, not accessible
 
