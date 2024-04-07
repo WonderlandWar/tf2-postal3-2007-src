@@ -817,4 +817,4 @@ static void CC_ListDeaths( const CCommand &args )
 	Msg( "listed %d damages\n\n", map->m_aPlayerDamage.Count() );
 }
 
-static ConCommand listDeaths("listdeaths", CC_ListDeaths, "lists player deaths", FCVAR_DEVELOPMENTONLY );
+static ConCommand listDeaths("listdeaths", CC_ListDeaths, "lists player deaths", FCVAR_NONE );

@@ -56,7 +56,6 @@ END_NETWORK_TABLE()
 
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA( CTFPipebombLauncher )
-	DEFINE_FIELD(  m_flChargeBeginTime, FIELD_FLOAT )
 END_PREDICTION_DATA()
 #endif
 

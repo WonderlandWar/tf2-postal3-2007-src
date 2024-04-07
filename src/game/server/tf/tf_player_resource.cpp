@@ -54,8 +54,23 @@ void CTFPlayerResource::UpdatePlayerData( void )
 		if ( pPlayer && pPlayer->IsConnected() )
 		{			
 			PlayerStats_t *pPlayerStats = CTF_GameStats.FindPlayerStats( pPlayer );
+			
+			RoundStats_t *pAliveStats = &pPlayerStats->statsCurrentLife;
 			if ( pPlayerStats ) 
 			{
+			
+			m_iTeleports.Set( i, pAliveStats->m_iStat[TFSTAT_TELEPORTS] );
+			m_iHealPoints.Set( i, pAliveStats->m_iStat[TFSTAT_HEALING] ); // TFP3: This is probably incorrect, fix me later...
+			m_iInvulns.Set( i, pAliveStats->m_iStat[TFSTAT_INVULNS] );
+			m_iKillAssists.Set( i, pAliveStats->m_iStat[TFSTAT_KILLASSISTS] );
+			m_iCaptures.Set( i, pAliveStats->m_iStat[TFSTAT_CAPTURES] );
+			m_iDefenses.Set( i, pAliveStats->m_iStat[TFSTAT_DEFENSES] );
+			m_iDominations.Set( i, pAliveStats->m_iStat[TFSTAT_DOMINATIONS] );
+			m_iRevenge.Set( i, pAliveStats->m_iStat[TFSTAT_REVENGE] );
+			m_iBuildingsDestroyed.Set( i, pAliveStats->m_iStat[TFSTAT_BUILDINGSDESTROYED] );
+			m_iHeadshots.Set( i, pAliveStats->m_iStat[TFSTAT_HEADSHOTS] );
+			m_iBackstabs.Set( i, pAliveStats->m_iStat[TFSTAT_BACKSTABS] );
+			
 			m_iMaxHealth.Set( i, pPlayer->GetPlayerClass()->GetMaxHealth() );
 			m_iPlayerClass.Set( i, pPlayer->GetPlayerClass()->GetClassIndex() );
 				int iTotalScore = CTFGameRules::CalcPlayerScore( &pPlayerStats->statsAccumulated );
@@ -72,6 +87,11 @@ void CTFPlayerResource::Spawn( void )
 	for ( i = 0; i < MAX_PLAYERS + 1; i++ )
 	{
 		m_iTotalScore.Set( i, 0 );
+		m_iHealPoints.Set( i, 0 );
+		m_iTeleports.Set( i, 0 );
+		m_iResupplyPoints.Set( i, 0 );
+		m_iKillAssists.Set( i, 0 );
+		m_iCaptures.Set( i, 0 );
 		m_iMaxHealth.Set( i, TF_HEALTH_UNDEFINED );
 		m_iPlayerClass.Set( i, TF_CLASS_UNDEFINED );
 	}

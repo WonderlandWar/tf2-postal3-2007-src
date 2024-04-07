@@ -854,10 +854,11 @@ void CTFFlameEntity::FlameThink( void )
 void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 {
 	if ( pOther->m_takedamage == DAMAGE_NO )
-		return;
-	else if ( !engine->IndexOfEdict( pOther->edict() ) )
 	{
-		UTIL_Remove( this );
+		if ( !pOther->entindex() )
+		{
+			UTIL_Remove( this );
+		}
 		return;
 	}
 
@@ -871,7 +872,7 @@ void CTFFlameEntity::OnCollide( CBaseEntity *pOther )
 	m_hEntitiesBurnt.AddToTail( pOther );
 
 	float flDistance = GetAbsOrigin().DistTo( m_vecInitialPos );
-	float flMultiplier = RemapValClamped( flDistance, tf_flamethrower_maxdamagedist.GetFloat()/2, tf_flamethrower_maxdamagedist.GetFloat(), 1.0, 0.25 );
+	float flMultiplier = RemapValClamped( flDistance, tf_flamethrower_maxdamagedist.GetFloat()/2, tf_flamethrower_maxdamagedist.GetFloat(), 1.0, 0.0 );
 
 	float flDamage = m_flDmgAmount * flMultiplier;
 	flDamage = max( flDamage, 1.0 );
