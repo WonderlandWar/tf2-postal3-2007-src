@@ -37,8 +37,6 @@ public:
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_REVOLVER; }
 
-	virtual bool DefaultReload( int iClipSize1, int iClipSize2, int iActivity );
-
 private:
 
 	CTFRevolver( const CTFRevolver & ) {}
