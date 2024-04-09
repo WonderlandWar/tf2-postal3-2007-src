@@ -2494,6 +2494,7 @@ int C_TFPlayer::GetSkin()
 	}
 	else if ( m_Shared.InCond( TF_COND_DISGUISED ) && !IsEnemyPlayer() )
 	{
+		// TFP3: This may not be accurate, investigate later
 		nSkin += 4 + ( ( m_Shared.GetDisguiseClass() - TF_FIRST_NORMAL_CLASS ) * 2 );
 	}
 
@@ -2596,7 +2597,7 @@ void C_TFPlayer::CreateSaveMeEffect( void )
 	ParticleProp()->Create( "speech_mediccall", PATTACH_POINT_FOLLOW, "head" );
 
 	// If the local player is a medic, add this player to our list of medic callers
-	if ( pLocalPlayer && pLocalPlayer->IsPlayerClass( TF_CLASS_MEDIC ) && pLocalPlayer->IsAlive() == true )
+	if ( pLocalPlayer && pLocalPlayer->IsPlayerClass( TF_CLASS_MEDIC ) )
 	{
 		Vector vecPos;
 		if ( GetAttachmentLocal( LookupAttachment( "head" ), vecPos ) )
@@ -2731,8 +2732,10 @@ void C_TFPlayer::InitializePoseParams( void )
 
 	CStudioHdr *hdr = GetModelPtr();
 	Assert( hdr );
-	if ( !hdr )
-		return;
+
+	// TFP3: This check isn't in IDA, so removing this for now
+	//if ( !hdr )
+	//	return;
 
 	for ( int i = 0; i < hdr->GetNumPoseParameters() ; i++ )
 	{
@@ -2802,6 +2805,29 @@ void C_TFPlayer::FireEvent( const Vector& origin, const QAngle& angles, int even
 		Vector vel;
 		EstimateAbsVelocity( vel );
 		UpdateStepSound( GetGroundSurface(), GetAbsOrigin(), vel );
+	
+		if ( (UTIL_PointContents( origin ) & CONTENTS_WATER) != 0 )
+		{
+			CEffectData data;
+			Vector vecEnd = origin + Vector(0,0,512);
+			trace_t tr;
+
+			UTIL_TraceLine( origin, vecEnd, MASK_WATER, NULL, 0, &tr );
+			if ( tr.fractionleftsolid == 0.0 )
+			{
+				data.m_vOrigin = origin;
+			}
+			else
+			{
+				data.m_vOrigin = origin;
+				data.m_vOrigin.z = tr.fractionleftsolid * 1024 + origin.z;
+			}
+
+			data.m_vNormal = Vector( 0, 0, 1 );
+			data.m_flMagnitude = RandomFloat( 4.0, 5.0 );
+
+			DispatchEffect( "tf_watersplash", data );
+		}		
 	}
 	else if ( event == AE_WPN_HIDE )
 	{
