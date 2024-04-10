@@ -451,6 +451,15 @@ void C_TFRagdoll::CreateTFRagdoll()
 		}
 
 		InitAsClientRagdoll( boneDelta0, boneDelta1, currentBones, boneDt );
+		
+		if ( pPlayer->GetTeamNumber() == TF_TEAM_RED )
+		{
+			m_nSkin = 0;
+		}
+		else
+		{
+			m_nSkin = 1;
+		}
 	}
 	else
 	{
