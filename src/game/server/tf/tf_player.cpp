@@ -147,9 +147,9 @@ public:
 
 	CTFRagdoll()
 	{
-		m_iPlayerIndex.Set( TF_PLAYER_INDEX_NONE );
+		m_hPlayer = NULL;
 		m_bGib = false;
-		m_bBurning = false;
+		m_flBurnEffectStartTime = 0.0;
 		m_vecRagdollOrigin.Init();
 		m_vecRagdollVelocity.Init();
 	}
@@ -160,27 +160,24 @@ public:
 		return SetTransmitState( FL_EDICT_ALWAYS );
 	}
 
-	CNetworkVar( int, m_iPlayerIndex );
+	CNetworkHandle( CBaseEntity, m_hPlayer );
 	CNetworkVector( m_vecRagdollVelocity );
 	CNetworkVector( m_vecRagdollOrigin );
 	CNetworkVar( bool, m_bGib );
-	CNetworkVar( bool, m_bBurning );
-	CNetworkVar( int, m_iTeam );
-	CNetworkVar( int, m_iClass );
+	CNetworkVar( float, m_flBurnEffectStartTime );
 };
 
 LINK_ENTITY_TO_CLASS( tf_ragdoll, CTFRagdoll );
 
 IMPLEMENT_SERVERCLASS_ST_NOBASE( CTFRagdoll, DT_TFRagdoll )
 	SendPropVector( SENDINFO( m_vecRagdollOrigin ), -1,  SPROP_COORD ),
-	SendPropInt( SENDINFO( m_iPlayerIndex ), 7, SPROP_UNSIGNED ),
+	SendPropEHandle( SENDINFO( m_hPlayer ) ),
+	SendPropInt( SENDINFO( m_nModelIndex ) ),
+	SendPropInt( SENDINFO( m_nForceBone ) ),
 	SendPropVector	( SENDINFO(m_vecForce), -1, SPROP_NOSCALE ),
 	SendPropVector( SENDINFO( m_vecRagdollVelocity ), 13, SPROP_ROUNDDOWN, -2048.0f, 2048.0f ),
-	SendPropInt( SENDINFO( m_nForceBone ) ),
 	SendPropBool( SENDINFO( m_bGib ) ),
-	SendPropBool( SENDINFO( m_bBurning ) ),
-	SendPropInt( SENDINFO( m_iTeam ), 3, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_iClass ), 4, SPROP_UNSIGNED ),	
+	SendPropFloat( SENDINFO( m_flBurnEffectStartTime ) ),
 END_SEND_TABLE()
 
 // -------------------------------------------------------------------------------- //
@@ -638,9 +635,9 @@ void CTFPlayer::PrecachePlayerModels( void )
 	
 	if ( TFGameRules() && TFGameRules()->IsBirthday() )
 	{
-		for ( i = 1; i < ARRAYSIZE(g_pszBDayGibs); i++ )
+		for ( i = 1; i <= 4; i++ )
 		{
-			PrecacheModel( g_pszBDayGibs[i] );
+			PrecacheModel( UTIL_VarArgs( "models/effects/bday_gib0%d.mdl", i ) );
 		}
 		PrecacheModel( "models/effects/bday_hat.mdl" );
 	}
@@ -819,12 +816,12 @@ void CTFPlayer::RemoveNemesisRelationships()
 {
 	for ( int i = 1 ; i <= gpGlobals->maxClients ; i++ )
 	{
+		// set this player to be not dominating anyone else
+		m_Shared.SetPlayerDominated( i, false );
+
 		CTFPlayer *pTemp = ToTFPlayer( UTIL_PlayerByIndex( i ) );
 		if ( pTemp && pTemp != this )
 		{
-			// set this player to be not dominating anyone else
-			m_Shared.SetPlayerDominated( pTemp->entindex(), false );
-
 			// set no one else to be dominating this player
 			pTemp->m_Shared.SetPlayerDominated( entindex(), false );
 		}
@@ -1451,14 +1448,6 @@ void CTFPlayer::HandleCommand_JoinClass( const char *pClassName )
 	}
 
 	SetDesiredPlayerClassIndex( iClass );
-	IGameEvent * event = gameeventmanager->CreateEvent( "player_changeclass" );
-	if ( event )
-	{
-		event->SetInt( "userid", GetUserID() );
-		event->SetInt( "class", iClass );
-
-		gameeventmanager->FireEvent( event );
-	}
 
 	// are they TF_CLASS_RANDOM and trying to select the class they're currently playing as (so they can stay this class)?
 	if ( iClass == GetPlayerClass()->GetClassIndex() )
@@ -1540,8 +1529,6 @@ void CTFPlayer::HandleCommand_JoinClass( const char *pClassName )
 bool CTFPlayer::ClientCommand( const CCommand &args )
 {
 	const char *pcmd = args[0];
-	
-	m_flLastAction = gpGlobals->curtime;
 
 #ifdef _DEBUG
 	if ( FStrEq( pcmd, "addcond" ) )
@@ -1871,27 +1858,6 @@ void CTFPlayer::DetonateOwnedObjectsOfType( int iType )
 		{
 			SpeakConceptIfAllowed( MP_CONCEPT_DETONATED_OBJECT, pObj->GetResponseRulesModifier() );
 			pObj->DetonateObject();
-
-			const CObjectInfo *pInfo = GetObjectInfo( iType );
-
-			if ( pInfo )
-			{
-				UTIL_LogPrintf( "\"%s<%i><%s><%s>\" triggered \"killedobject\" (object \"%s\") (weapon \"%s\") (objectowner \"%s<%i><%s><%s>\") (attacker_position \"%d %d %d\")\n",   
-					GetPlayerName(),
-					GetUserID(),
-					GetNetworkIDString(),
-					GetTeam()->GetName(),
-					pInfo->m_pObjectName,
-					"pda_engineer",
-					GetPlayerName(),
-					GetUserID(),
-					GetNetworkIDString(),
-					GetTeam()->GetName(),
-					(int)GetAbsOrigin().x, 
-					(int)GetAbsOrigin().y,
-					(int)GetAbsOrigin().z );
-			}
-
 			return;
 		}
 	}
@@ -2314,14 +2280,13 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 			{
 				float flMin = 0.25;
 				float flMax = 0.75;
-				float flCenter = 0.5;
 
 				if ( bitsDamage & DMG_USEDISTANCEMOD )
 				{
 					float flDistance = max( 1.0, (WorldSpaceCenter() - info.GetAttacker()->WorldSpaceCenter()).Length() );
 					float flOptimalDistance = 512.0;
 
-					flCenter = RemapValClamped( flDistance / flOptimalDistance, 0.0, 2.0, 1.0, 0.0 );
+					float flCenter = RemapValClamped( flDistance / flOptimalDistance, 0.0, 2.0, 1.0, 0.0 );
 					if ( bitsDamage & DMG_NOCLOSEDISTANCEMOD )
 					{
 						if ( flCenter > 0.5 )
@@ -2352,10 +2317,7 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 			}
 
 			// Burn sounds are handled in ConditionThink()
-			if ( !(bitsDamage & DMG_BURN ) )
-			{
-				SpeakConceptIfAllowed( MP_CONCEPT_HURT );
-			}
+			SpeakConceptIfAllowed( MP_CONCEPT_HURT );
 		}
 
 		info.SetDamage( flDamage );
@@ -2965,7 +2927,19 @@ void CTFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	// Create the ragdoll entity.
 	if ( bGib || bRagdoll )
 	{
-		CreateRagdollEntity( bGib, bBurning );
+		CreateRagdollEntity( bGib );
+
+		if ( bRagdoll )
+		{
+			if ( bBurning )
+			{
+				CTFRagdoll *pRagdoll = dynamic_cast<CTFRagdoll*>( m_hRagdoll.Get() );
+				if ( pRagdoll )
+				{
+					pRagdoll->m_flBurnEffectStartTime = m_Shared.m_flFlameRemoveTime - TF_BURNING_FLAME_LIFE;
+				}
+			}
+		}
 	}
 
 	// Don't overflow the value for this.
@@ -3565,11 +3539,7 @@ bool CTFPlayer::SetObserverMode(int mode)
 	// Skip over OBS_MODE_ROAMING for dead players
 	if( GetTeamNumber() > TEAM_SPECTATOR )
 	{
-		if ( IsDead() && ( mode > OBS_MODE_FIXED ) && mp_fadetoblack.GetBool() )
-		{
-			mode = OBS_MODE_CHASE;
-		}
-		else if ( mode == OBS_MODE_ROAMING )
+		if ( mode == OBS_MODE_ROAMING )
 		{
 			mode = OBS_MODE_IN_EYE;
 		}
@@ -3582,7 +3552,6 @@ bool CTFPlayer::SetObserverMode(int mode)
 	}
 
 	m_iObserverMode = mode;
-	m_flLastAction = gpGlobals->curtime;
 
 	switch ( mode )
 	{
@@ -3727,7 +3696,7 @@ void CTFPlayer::StateThinkDYING( void )
 		if ( GetObserverMode() == OBS_MODE_FREEZECAM )
 		{
 			// If we're in freezecam, and we want out, abort.  (only if server is not using mp_fadetoblack)
-			if ( m_bAbortFreezeCam && !mp_fadetoblack.GetBool() )
+			if ( m_bAbortFreezeCam )
 			{
 				if ( m_hObserverTarget == NULL )
 				{
@@ -3761,7 +3730,9 @@ void CTFPlayer::StateThinkDYING( void )
 
 void CTFPlayer::StateEnterWATCHINGROUNDINFO( void )
 {
-	if ( m_Shared.m_iDesiredPlayerClass == TF_CLASS_UNDEFINED )
+	TFGameRules()->ShowRoundInfoPanel( this );
+
+	if ( TFGameRules()->State_Get() == GR_STATE_PREGAME || m_Shared.m_iDesiredPlayerClass == TF_CLASS_UNDEFINED )
 		StateTransition( TF_STATE_OBSERVER );
 	else
 		ForceRespawn();
@@ -4388,13 +4359,13 @@ void CTFPlayer::RemoveTeleportEffect( void )
 //-----------------------------------------------------------------------------
 void CTFPlayer::CreateRagdollEntity( void )
 {
-	CreateRagdollEntity( false, false );
+	CreateRagdollEntity( false );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Create a ragdoll entity to pass to the client.
 //-----------------------------------------------------------------------------
-void CTFPlayer::CreateRagdollEntity( bool bGib, bool bBurning )
+void CTFPlayer::CreateRagdollEntity( bool bGib )
 {
 	// If we already have a ragdoll destroy it.
 	CTFRagdoll *pRagdoll = dynamic_cast<CTFRagdoll*>( m_hRagdoll.Get() );
@@ -4409,16 +4380,14 @@ void CTFPlayer::CreateRagdollEntity( bool bGib, bool bBurning )
 	pRagdoll = dynamic_cast<CTFRagdoll*>( CreateEntityByName( "tf_ragdoll" ) );
 	if ( pRagdoll )
 	{
+		pRagdoll->m_hPlayer.Set( this );
 		pRagdoll->m_vecRagdollOrigin = GetAbsOrigin();
 		pRagdoll->m_vecRagdollVelocity = GetAbsVelocity();
 		pRagdoll->m_vecForce = m_vecTotalBulletForce;
+		pRagdoll->m_nModelIndex = m_nModelIndex;
 		pRagdoll->m_nForceBone = m_nForceBone;
-		Assert( entindex() >= 1 && entindex() <= MAX_PLAYERS );
-		pRagdoll->m_iPlayerIndex.Set( entindex() );
 		pRagdoll->m_bGib = bGib;
-		pRagdoll->m_bBurning = bBurning;
-		pRagdoll->m_iTeam = GetTeamNumber();
-		pRagdoll->m_iClass = GetPlayerClass()->GetClassIndex();
+		Assert( entindex() >= 1 && entindex() <= MAX_PLAYERS );
 	}
 
 	// Turn off the player.
@@ -4799,8 +4768,6 @@ bool CTFPlayer::SetObserverTarget(CBaseEntity *target)
 		JumptoPosition( target->GetAbsOrigin(), target->EyeAngles() );
 		SetFOV( pObsPoint, pObsPoint->m_flFOV );
 	}
-
-	m_flLastAction = gpGlobals->curtime;
 
 	return true;
 }
@@ -5239,7 +5206,8 @@ bool CTFPlayer::CanHearAndReadChatFrom( CBasePlayer *pPlayer )
 	//Everyone can chat like normal when the round/game ends
 	if ( pPlayer->m_lifeState != LIFE_ALIVE && m_lifeState == LIFE_ALIVE )
 	{
-		return true;
+		if ( TFGameRules()->State_Get() == GR_STATE_TEAM_WIN || TFGameRules()->State_Get() == GR_STATE_GAME_OVER )
+			return true;
 	}
 
 	return BaseClass::CanHearAndReadChatFrom( pPlayer);

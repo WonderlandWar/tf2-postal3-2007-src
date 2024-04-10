@@ -151,9 +151,10 @@ END_RECV_TABLE()
 // ----------------------------------------------------------------------------- //
 // Client ragdoll entity.
 // ----------------------------------------------------------------------------- //
+
+ConVar cl_low_violence( "cl_low_violence", "0" );
 ConVar cl_ragdoll_physics_enable( "cl_ragdoll_physics_enable", "1", 0, "Enable/disable ragdoll physics." );
 ConVar cl_ragdoll_fade_time( "cl_ragdoll_fade_time", "15", FCVAR_CLIENTDLL );
-ConVar cl_ragdoll_forcefade( "cl_ragdoll_forcefade", "0", FCVAR_CLIENTDLL );
 ConVar cl_ragdoll_pronecheck_distance( "cl_ragdoll_pronecheck_distance", "64", FCVAR_GAMEDLL );
 
 class C_TFRagdoll : public C_BaseFlex
@@ -168,25 +169,16 @@ public:
 
 	virtual void OnDataChanged( DataUpdateType_t type );
 
+	int GetPlayerEntIndex() const;
 	IRagdoll* GetIRagdoll() const;
 
 	void ImpactTrace( trace_t *pTrace, int iDamageType, char *pCustomImpactName );
 
 	void ClientThink( void );
 	void StartFadeOut( float fDelay );
-	void EndFadeOut();
-
-	EHANDLE GetPlayerHandle( void ) 	
-	{
-		if ( m_iPlayerIndex == TF_PLAYER_INDEX_NONE )
-			return NULL;
-		return cl_entitylist->GetNetworkableHandle( m_iPlayerIndex );
-	}
 
 	bool IsRagdollVisible();
 	float GetBurnStartTime() { return m_flBurnEffectStartTime; }
-
-	virtual void SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeightCount, float *pFlexWeights, float *pFlexDelayedWeights );
 
 private:
 	
@@ -194,32 +186,29 @@ private:
 
 	void Interp_Copy( C_BaseAnimatingOverlay *pSourceEntity );
 
+	void CreateLowViolenceRagdoll();
 	void CreateTFRagdoll();
 	void CreateTFGibs( void );
 private:
 
+	EHANDLE m_hPlayer;
 	CNetworkVector( m_vecRagdollVelocity );
 	CNetworkVector( m_vecRagdollOrigin );
-	int	  m_iPlayerIndex;
 	float m_fDeathTime;
 	bool  m_bFadingOut;
 	bool  m_bGib;
-	bool  m_bBurning;
-	int	  m_iTeam;
-	int	  m_iClass;
 	float m_flBurnEffectStartTime;	// start time of burning, or 0 if not burning
 };
 
 IMPLEMENT_CLIENTCLASS_DT_NOBASE( C_TFRagdoll, DT_TFRagdoll, CTFRagdoll )
 	RecvPropVector( RECVINFO(m_vecRagdollOrigin) ),
-	RecvPropInt( RECVINFO( m_iPlayerIndex ) ),
+	RecvPropEHandle( RECVINFO( m_hPlayer ) ),
+	RecvPropInt( RECVINFO( m_nModelIndex ) ),
+	RecvPropInt( RECVINFO( m_nForceBone ) ),
 	RecvPropVector( RECVINFO(m_vecForce) ),
 	RecvPropVector( RECVINFO(m_vecRagdollVelocity) ),
-	RecvPropInt( RECVINFO( m_nForceBone ) ),
 	RecvPropBool( RECVINFO( m_bGib ) ),
-	RecvPropBool( RECVINFO( m_bBurning ) ),
-	RecvPropInt( RECVINFO( m_iTeam ) ),
-	RecvPropInt( RECVINFO( m_iClass ) ),
+	RecvPropFloat( RECVINFO( m_flBurnEffectStartTime ) ),
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -228,15 +217,11 @@ END_RECV_TABLE()
 //-----------------------------------------------------------------------------
 C_TFRagdoll::C_TFRagdoll()
 {
-	m_iPlayerIndex = TF_PLAYER_INDEX_NONE;
+	m_hPlayer = NULL;
 	m_fDeathTime = -1;
 	m_bFadingOut = false;
 	m_bGib = false;
-	m_bBurning = false;
 	m_flBurnEffectStartTime = 0.0f;
-	m_iTeam = -1;
-	m_iClass = -1;
-	m_nForceBone = -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -277,23 +262,6 @@ void C_TFRagdoll::Interp_Copy( C_BaseAnimatingOverlay *pSourceEntity )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Setup vertex weights for drawing
-//-----------------------------------------------------------------------------
-void C_TFRagdoll::SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeightCount, float *pFlexWeights, float *pFlexDelayedWeights )
-{
-	// While we're dying, we want to mimic the facial animation of the player. Once they're dead, we just stay as we are.
-	EHANDLE hPlayer = GetPlayerHandle();
-	if ( ( hPlayer && hPlayer->IsAlive()) || !hPlayer )
-	{
-		BaseClass::SetupWeights( pBoneToWorld, nFlexWeightCount, pFlexWeights, pFlexDelayedWeights );
-	}
-	else if ( hPlayer )
-	{
-		hPlayer->SetupWeights( pBoneToWorld, nFlexWeightCount, pFlexWeights, pFlexDelayedWeights );
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pTrace - 
 //			iDamageType - 
@@ -330,6 +298,54 @@ void C_TFRagdoll::ImpactTrace( trace_t *pTrace, int iDamageType, char *pCustomIm
 	m_pRagdoll->ResetRagdollSleepAfterTime();
 }
 
+// TFP3: Not in IDA, but was copied from DOD:S and was most likely a function that never got called
+void C_TFRagdoll::CreateLowViolenceRagdoll()
+{
+	// Just play a death animation.
+	// Find a death anim to play.
+	int iMinDeathAnim = 9999, iMaxDeathAnim = -9999;
+	for ( int iAnim=1; iAnim < 100; iAnim++ )
+	{
+		char str[512];
+		Q_snprintf( str, sizeof( str ), "death%d", iAnim );
+		if ( LookupSequence( str ) == -1 )
+			break;
+		
+		iMinDeathAnim = min( iMinDeathAnim, iAnim );
+		iMaxDeathAnim = max( iMaxDeathAnim, iAnim );
+	}
+
+	if ( iMinDeathAnim == 9999 )
+	{
+		CreateTFRagdoll();
+	}
+	else
+	{
+		int iDeathAnim = RandomInt( iMinDeathAnim, iMaxDeathAnim );
+		char str[512];
+		Q_snprintf( str, sizeof( str ), "death%d", iDeathAnim );
+
+		SetSequence( LookupSequence( str ) );
+		ForceClientSideAnimationOn();
+
+		SetNetworkOrigin( m_vecRagdollOrigin );
+		SetAbsOrigin( m_vecRagdollOrigin );
+		SetAbsVelocity( m_vecRagdollVelocity );
+
+		C_TFPlayer *pPlayer = dynamic_cast< C_TFPlayer* >( m_hPlayer.Get() );
+		if ( pPlayer && !pPlayer->IsDormant() )
+		{
+			// move my current model instance to the ragdoll's so decals are preserved.
+			pPlayer->SnatchModelInstance( this );
+
+			SetAbsAngles( pPlayer->GetRenderAngles() );
+			SetNetworkAngles( pPlayer->GetRenderAngles() );
+		}
+	
+		Interp_Reset( GetVarMapping() );
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  :  - 
@@ -337,28 +353,7 @@ void C_TFRagdoll::ImpactTrace( trace_t *pTrace, int iDamageType, char *pCustomIm
 void C_TFRagdoll::CreateTFRagdoll()
 {
 	// Get the player.
-	C_TFPlayer *pPlayer = NULL;
-	EHANDLE hPlayer = GetPlayerHandle();
-	if ( hPlayer )
-	{
-		pPlayer = dynamic_cast<C_TFPlayer*>( hPlayer.Get() );
-	}
-
-	TFPlayerClassData_t *pData = GetPlayerClassData( m_iClass );
-	if ( pData )
-	{
-		int nModelIndex = modelinfo->GetModelIndex( pData->m_szModelName );
-		SetModelIndex( nModelIndex );	
-
-		if ( m_iTeam == TF_TEAM_RED )
-		{
-			m_nSkin = 0;
-		}
-		else
-		{
-			m_nSkin = 1;
-		}
-	}
+	C_TFPlayer *pPlayer = dynamic_cast<C_TFPlayer*>( m_hPlayer.Get() );
 
 #ifdef _DEBUG
 	DevMsg( 2, "CreateTFRagdoll %d %d\n", gpGlobals->framecount, pPlayer ? pPlayer->entindex() : 0 );
@@ -462,18 +457,17 @@ void C_TFRagdoll::CreateTFRagdoll()
 		ClientLeafSystem()->SetRenderGroup( GetRenderHandle(), RENDER_GROUP_TRANSLUCENT_ENTITY );
 	}		
 
-	if ( m_bBurning )
+	if ( m_flBurnEffectStartTime > 0.0 )
 	{
-		m_flBurnEffectStartTime = gpGlobals->curtime;
 		ParticleProp()->Create( "burningplayer_corpse", PATTACH_ABSORIGIN_FOLLOW );
 	}
 
 	// Fade out the ragdoll in a while
 	StartFadeOut( cl_ragdoll_fade_time.GetFloat() );
-	SetNextClientThink( gpGlobals->curtime + cl_ragdoll_fade_time.GetFloat() * 0.33f );
+	SetNextClientThink( gpGlobals->curtime + 5.0f );
 
 	// Birthday mode.
-	if ( pPlayer && TFGameRules() && TFGameRules()->IsBirthday() )
+	if ( pPlayer )
 	{
 		AngularImpulse angularImpulse( RandomFloat( 0.0f, 120.0f ), RandomFloat( 0.0f, 120.0f ), 0.0 );
 		breakablepropparams_t breakParams( m_vecRagdollOrigin, GetRenderAngles(), m_vecRagdollVelocity, angularImpulse );
@@ -487,12 +481,8 @@ void C_TFRagdoll::CreateTFRagdoll()
 //-----------------------------------------------------------------------------
 void C_TFRagdoll::CreateTFGibs( void )
 {
-	C_TFPlayer *pPlayer = NULL;
-	EHANDLE hPlayer = GetPlayerHandle();
-	if ( hPlayer )
-	{
-		pPlayer = dynamic_cast<C_TFPlayer*>( hPlayer.Get() );
-	}
+	C_TFPlayer *pPlayer = dynamic_cast<C_TFPlayer*>( m_hPlayer.Get() );
+
 	if ( pPlayer && ( pPlayer->m_hFirstGib == NULL ) )
 	{
 		Vector vecVelocity = m_vecForce + m_vecRagdollVelocity;
@@ -507,7 +497,7 @@ void C_TFRagdoll::CreateTFGibs( void )
 		C_BaseEntity::EmitSound( "Game.HappyBirthday" );
 	}
 
-	EndFadeOut();
+	Release();
 }
 
 //-----------------------------------------------------------------------------
@@ -519,31 +509,12 @@ void C_TFRagdoll::OnDataChanged( DataUpdateType_t type )
 	BaseClass::OnDataChanged( type );
 
 	if ( type == DATA_UPDATE_CREATED )
-	{
-		bool bCreateRagdoll = true;
-
-		// Get the player.
-		EHANDLE hPlayer = GetPlayerHandle();
-		if ( hPlayer )
+	{		
+		if ( cl_low_violence.GetInt() )
 		{
-			// If we're getting the initial update for this player (e.g., after resetting entities after
-			//  lots of packet loss, then don't create gibs, ragdolls if the player and it's gib/ragdoll
-			//  both show up on same frame.
-			if ( abs( hPlayer->GetCreationTick() - gpGlobals->tickcount ) < TIME_TO_TICKS( 1.0f ) )
-			{
-				bCreateRagdoll = false;
-			}
+			//CreateLowViolenceRagdoll();
 		}
-		else if ( C_BasePlayer::GetLocalPlayer() )
-		{
-			// Ditto for recreation of the local player
-			if ( abs( C_BasePlayer::GetLocalPlayer()->GetCreationTick() - gpGlobals->tickcount ) < TIME_TO_TICKS( 1.0f ) )
-			{
-				bCreateRagdoll = false;
-			}
-		}
-
-		if ( bCreateRagdoll )
+		else
 		{
 			if ( m_bGib )
 			{
@@ -615,7 +586,7 @@ void C_TFRagdoll::ClientThink( void )
 
 		if ( iAlpha == 0 )
 		{
-			EndFadeOut(); // remove clientside ragdoll
+			Release();
 		}
 
 		return;
@@ -624,44 +595,21 @@ void C_TFRagdoll::ClientThink( void )
 	// if the player is looking at us, delay the fade
 	if ( IsRagdollVisible() )
 	{
-		if ( cl_ragdoll_forcefade.GetBool() )
-		{
-			m_bFadingOut = true;
-			float flDelay = cl_ragdoll_fade_time.GetFloat() * 0.33f;
-			m_fDeathTime = gpGlobals->curtime + flDelay;
-
-			// If we were just fully healed, remove all decals
-			RemoveAllDecals();
-		}
-
-		StartFadeOut( cl_ragdoll_fade_time.GetFloat() * 0.33f );
+		StartFadeOut( 5.0 );
 		return;
 	}
 
 	if ( m_fDeathTime > gpGlobals->curtime )
 		return;
 
-	EndFadeOut(); // remove clientside ragdoll
+	Release(); // Die
 }
 
 void C_TFRagdoll::StartFadeOut( float fDelay )
 {
-	if ( !cl_ragdoll_forcefade.GetBool() )
-	{
-		m_fDeathTime = gpGlobals->curtime + fDelay;
-	}
+	m_fDeathTime = gpGlobals->curtime + fDelay;
 	SetNextClientThink( CLIENT_THINK_ALWAYS );
 }
-
-
-void C_TFRagdoll::EndFadeOut()
-{
-	SetNextClientThink( CLIENT_THINK_NEVER );
-	ClearRagdoll();
-	SetRenderMode( kRenderNone );
-	UpdateVisibility();
-}
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Used for spy invisiblity material
@@ -2308,9 +2256,9 @@ void C_TFPlayer::InitPlayerGibs( void )
 	{
 		for ( int i = 0; i < m_aGibs.Count(); i++ )
 		{
-			if ( RandomFloat(0,1) < 0.75 )
+			if ( RandomFloat(0,1) < 0.2 )
 			{
-				Q_strncpy( m_aGibs[i].modelName, g_pszBDayGibs[ RandomInt(0,ARRAYSIZE(g_pszBDayGibs)-1) ] , sizeof(m_aGibs[i].modelName) );
+				Q_strncpy( m_aGibs[i].modelName, VarArgs( "models/effects/bday_gib0%d.mdl", RandomInt(1,4) ) , sizeof(m_aGibs[i].modelName) );
 			}
 		}
 	}
