@@ -149,6 +149,11 @@ int g_iScopeDustTextureID = 0;
 
 #endif
 
+ConVar tf_damage_critical_chance( "tf_damage_critical_chance", "0.05", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_critical_chance_rapid( "tf_damage_critical_chance_rapid", "0.05", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_critical_duration_rapid( "tf_damage_critical_duration_rapid", "2.0", FCVAR_REPLICATED| FCVAR_DEVELOPMENTONLY );
+
+
 //=============================================================================
 //
 // TFWeaponBase shared functions.
@@ -503,9 +508,9 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		m_flLastCritCheckTime = gpGlobals->curtime;
 
 		// get the total crit chance (ratio of total shots fired we want to be crits)
-		float flTotalCritChance = clamp( TF_DAMAGE_CRIT_CHANCE_RAPID * flPlayerCritMult, 0.01f, 0.99f );
+		float flTotalCritChance = clamp( tf_damage_critical_chance_rapid.GetFloat() * flPlayerCritMult, 0.01f, 0.99f );
 		// get the fixed amount of time that we start firing crit shots for	
-		float flCritDuration = TF_DAMAGE_CRIT_DURATION_RAPID;
+		float flCritDuration = tf_damage_critical_duration_rapid.GetFloat();
 		// calculate the amount of time, on average, that we want to NOT fire crit shots for in order to achive the total crit chance we want
 		float flNonCritDuration = ( flCritDuration / flTotalCritChance ) - flCritDuration;
 		// calculate the chance per second of non-crit fire that we should transition into critting such that on average we achieve the total crit chance we want
@@ -515,7 +520,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 		int iRandom = RandomInt( 0, WEAPON_RANDOM_RANGE-1 );
 		if ( iRandom <= flStartCritChance * WEAPON_RANDOM_RANGE )
 		{
-			m_flCritTime = gpGlobals->curtime + TF_DAMAGE_CRIT_DURATION_RAPID;
+			m_flCritTime = gpGlobals->curtime + tf_damage_critical_duration_rapid.GetFloat();
 			return true;
 		}
 		
@@ -524,7 +529,7 @@ bool CTFWeaponBase::CalcIsAttackCriticalHelper()
 	else
 	{
 		// single-shot weapon, just use random pct per shot
-		return ( RandomInt( 0.0, WEAPON_RANDOM_RANGE-1 ) < ( TF_DAMAGE_CRIT_CHANCE * flPlayerCritMult ) * WEAPON_RANDOM_RANGE );
+		return ( RandomInt( 0.0, WEAPON_RANDOM_RANGE-1 ) < ( tf_damage_critical_chance.GetFloat() * flPlayerCritMult ) * WEAPON_RANDOM_RANGE );
 	}
 }
 

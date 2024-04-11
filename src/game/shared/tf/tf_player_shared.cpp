@@ -50,10 +50,11 @@ ConVar tf_boost_drain_time( "tf_boost_drain_time", "15.0", FCVAR_DEVELOPMENTONLY
 ConVar tf_debug_bullets( "tf_debug_bullets", "0", FCVAR_DEVELOPMENTONLY, "Visualize bullet traces." );
 ConVar tf_damage_events_track_for( "tf_damage_events_track_for", "30",  FCVAR_DEVELOPMENTONLY );
 
-ConVar tf_damage_criticalmod_mintime( "tf_damage_criticalmod_mintime", "2", FCVAR_NONE );
-ConVar tf_damage_criticalmod_maxtime( "tf_damage_criticalmod_maxtime", "20", FCVAR_NONE );
-ConVar tf_damage_criticalmod_maxmult( "tf_damage_criticalmod_maxmult", "4", FCVAR_NONE );
-ConVar tf_damage_criticalmod_damage( "tf_damage_criticalmod_damage", "800", FCVAR_NONE );
+ConVar tf_damage_criticalmod_mintime( "tf_damage_criticalmod_mintime", "2", FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_criticalmod_maxtime( "tf_damage_criticalmod_maxtime", "20", FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_criticalmod_maxmult( "tf_damage_criticalmod_maxmult", "4", FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_criticalmod_damage( "tf_damage_criticalmod_damage", "800", FCVAR_DEVELOPMENTONLY );
+ConVar tf_damage_critical_mult( "tf_damage_critical_mult", "3.0", FCVAR_DEVELOPMENTONLY );
 #endif
 
 ConVar tf_useparticletracers( "tf_useparticletracers", "1", FCVAR_DEVELOPMENTONLY | FCVAR_REPLICATED, "Use particle tracers instead of old style ones." );
@@ -64,32 +65,6 @@ ConVar tf_spy_cloak_no_attack_time( "tf_spy_cloak_no_attack_time", "2.0", FCVAR_
 #define TF_PLAYER_CONDITION_CONTEXT	"TFPlayerConditionContext"
 
 #define MAX_DAMAGE_EVENTS		128
-
-const char *g_pszBDayGibs[22] = 
-{
-	"models/effects/bday_gib01.mdl",
-	"models/effects/bday_gib02.mdl",
-	"models/effects/bday_gib03.mdl",
-	"models/effects/bday_gib04.mdl",
-	"models/player/gibs/gibs_balloon.mdl",
-	"models/player/gibs/gibs_burger.mdl",
-	"models/player/gibs/gibs_boot.mdl",
-	"models/player/gibs/gibs_bolt.mdl",
-	"models/player/gibs/gibs_can.mdl",
-	"models/player/gibs/gibs_clock.mdl",
-	"models/player/gibs/gibs_fish.mdl",
-	"models/player/gibs/gibs_gear1.mdl",
-	"models/player/gibs/gibs_gear2.mdl",
-	"models/player/gibs/gibs_gear3.mdl",
-	"models/player/gibs/gibs_gear4.mdl",
-	"models/player/gibs/gibs_gear5.mdl",
-	"models/player/gibs/gibs_hubcap.mdl",
-	"models/player/gibs/gibs_licenseplate.mdl",
-	"models/player/gibs/gibs_spring1.mdl",
-	"models/player/gibs/gibs_spring2.mdl",
-	"models/player/gibs/gibs_teeth.mdl",
-	"models/player/gibs/gibs_tire.mdl"
-};
 
 //=============================================================================
 //
@@ -188,7 +163,6 @@ CTFPlayerShared::CTFPlayerShared()
 	m_bAirDash = false;
 	m_flStealthNoAttackExpire = 0.0f;
 	m_flCritMult = 0;
-	m_flInvisibility = 0.0f;
 
 #ifdef CLIENT_DLL
 	m_iDisguiseWeaponModelIndex = -1;
@@ -931,19 +905,19 @@ void CTFPlayerShared::OnRemoveStealthed( void )
 //-----------------------------------------------------------------------------
 void CTFPlayerShared::OnRemoveDisguising( void )
 {
-#ifdef CLIENT_DLL
-	if ( m_pOuter->m_pDisguisingEffect )
-	{
-//		m_pOuter->ParticleProp()->StopEmission( m_pOuter->m_pDisguisingEffect );
-		m_pOuter->m_pDisguisingEffect = NULL;
-	}
-#else
 	m_nDesiredDisguiseTeam = TF_SPY_UNDEFINED;
 
 	// Do not reset this value, we use the last desired disguise class for the
 	// 'lastdisguise' command
 
 	//m_nDesiredDisguiseClass = TF_CLASS_UNDEFINED;
+
+#ifdef CLIENT_DLL
+	if ( m_pOuter->m_pDisguisingEffect )
+	{
+//		m_pOuter->ParticleProp()->StopEmission( m_pOuter->m_pDisguisingEffect );
+		m_pOuter->m_pDisguisingEffect = NULL;
+	}
 #endif
 }
 
@@ -1623,7 +1597,7 @@ void CTFPlayerShared::RecordDamageEvent( const CTakeDamageInfo &info, bool bKill
 	// Don't count critical damage
 	if ( info.GetDamageType() & DMG_CRITICAL )
 	{
-		m_DamageEvents[iIndex].flDamage /= TF_DAMAGE_CRIT_MULTIPLIER;
+		m_DamageEvents[iIndex].flDamage /= tf_damage_critical_mult.GetFloat();
 	}
 }
 
@@ -2027,7 +2001,7 @@ int CTFPlayer::CanBuild( int iObjectType )
 	int iObjectCount = GetNumObjects( iObjectType );
 
 	// Make sure we haven't hit maximum number
-	if ( iObjectCount >= GetObjectInfo( iObjectType )->m_nMaxObjects && GetObjectInfo( iObjectType )->m_nMaxObjects != -1 )
+	if ( iObjectCount >= GetObjectInfo( iObjectType )->m_nMaxObjects )
 	{
 		return CB_LIMIT_REACHED;
 	}

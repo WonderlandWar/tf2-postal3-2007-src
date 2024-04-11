@@ -66,6 +66,7 @@ extern ConVar	sk_player_leg;
 extern ConVar	tf_spy_invis_time;
 extern ConVar	tf_spy_invis_unstealth_time;
 extern ConVar	tf_stalematechangeclasstime;
+extern ConVar	tf_damage_critical_mult;
 
 EHANDLE g_pLastSpawnPoints[TF_TEAM_COUNT];
 
@@ -2242,7 +2243,7 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 				Warning( "    CRITICAL!\n");
 			}
 
-			flDamage = info.GetDamage() * TF_DAMAGE_CRIT_MULTIPLIER;
+			flDamage = info.GetDamage() * tf_damage_critical_mult.GetFloat();
 
 			// Show the attacker, unless the target is a disguised spy
 			if ( info.GetAttacker() && info.GetAttacker()->IsPlayer() && !m_Shared.InCond( TF_COND_DISGUISED ) )

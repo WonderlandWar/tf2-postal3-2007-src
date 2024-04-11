@@ -19,6 +19,8 @@
 #include "c_tf_player.h"
 #endif
 
+ConVar tf_damage_critical_chance_melee( "tf_damage_critical_chance_melee", "0.15", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
+
 //=============================================================================
 //
 // TFWeaponBase Melee tables.
@@ -360,5 +362,5 @@ bool CTFWeaponBaseMelee::CalcIsAttackCriticalHelper( void )
 
 	float flPlayerCritMult = pPlayer->GetCritMult();
 
-	return ( RandomInt( 0, WEAPON_RANDOM_RANGE-1 ) <= ( TF_DAMAGE_CRIT_CHANCE_MELEE * flPlayerCritMult ) * WEAPON_RANDOM_RANGE );
+	return ( RandomInt( 0, WEAPON_RANDOM_RANGE-1 ) <= ( tf_damage_critical_chance_melee.GetFloat() * flPlayerCritMult ) * WEAPON_RANDOM_RANGE );
 }

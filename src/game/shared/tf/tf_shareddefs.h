@@ -50,17 +50,6 @@ enum
 };
 
 //-----------------------------------------------------------------------------
-// CVar replacements
-//-----------------------------------------------------------------------------
-#define TF_DAMAGE_CRIT_CHANCE				0.05f
-#define TF_DAMAGE_CRIT_CHANCE_RAPID			0.05f
-#define TF_DAMAGE_CRIT_DURATION_RAPID		2.0f
-#define TF_DAMAGE_CRIT_CHANCE_MELEE			0.15f
-
-#define TF_DAMAGE_CRIT_MULTIPLIER			3.0f
-
-
-//-----------------------------------------------------------------------------
 // TF-specific viewport panels
 //-----------------------------------------------------------------------------
 #define PANEL_CLASS_BLUE		"class_blue"
