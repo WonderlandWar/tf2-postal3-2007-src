@@ -190,7 +190,8 @@ void CTFStatPanel::Init()
 	
 	Hide();
 
-	CHudElement::Init();
+	// TFP3: Doesn't show in IDA
+	//CHudElement::Init();
 }
 
 //-----------------------------------------------------------------------------
@@ -220,7 +221,14 @@ void CTFStatPanel::UpdateStats( int iClass, RoundStats_t &stats, bool bShowNow )
 
 	ClassStats_t &classStats = m_aClassStats[i];
 	
-	ResetDisplayedStat();
+	classStats.accumulated.m_iStat[TFSTAT_MAXSENTRYKILLS] = 0;
+	m_flTimeHide = 0.0;
+	m_iCurStatValue = 0;
+	m_iCurStatTeam = 0;
+	m_statType = TFSTAT_UNDEFINED;
+	m_recordBreakType = RECORDBREAK_NONE;
+	m_bDisplayAfterSpawn = false;
+	m_iCurStatClassIndex = i;
 		
 	// run through all stats we keep records for, update the max value, and if a record is set,
 	// remember the highest priority record
@@ -451,9 +459,9 @@ bool CTFStatPanel::ReadStats( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFStatPanel::ShowStatPanel( int iClass, int iTeam, int iCurStatValue, TFStatType_t statType, RecordBreakType_t recordBreakType )
+void CTFStatPanel::ShowStatPanel( int iClassIndex, int iTeam, int iCurStatValue, TFStatType_t statType, RecordBreakType_t recordBreakType )
 {
-	ClassStats_t &classStats = m_aClassStats[iClass];
+	ClassStats_t &classStats = m_aClassStats[iClassIndex];
 	vgui::Label *pLabel = dynamic_cast<Label *>( FindChildByName( "summaryLabel" ) );
 	if ( !pLabel )
 		return;
@@ -489,25 +497,25 @@ void CTFStatPanel::ShowStatPanel( int iClass, int iTeam, int iCurStatValue, TFSt
 	SetDialogVariable( "statdesc", g_pVGuiLocalize->Find( CFmtStr( "%s_%s", g_szLocalizedRecordText[statType], 
 		pRecordTextSuffix[recordBreakType] ) ) );
 
-	// Set the class name. We can't use a dialog variable because it's a string that's already
-	// been set using a dialog variable, and apparently we don't support nested dialog variables.
-	wchar_t szOriginalSummary[ 256 ];
-	wchar_t szSummary[ 256 ];
+	iClassIndex = classStats.iPlayerClass;
 
-	// This is the field that "statdesc" completed for us
-	pLabel->GetText( szOriginalSummary, sizeof( szOriginalSummary ) );
-	const wchar_t *pszPlayerClass = L"undefined";
-
-	if ( ( iClass >= TF_FIRST_NORMAL_CLASS ) && ( iClass <= TF_LAST_NORMAL_CLASS ) )
+	if ( ( iClassIndex >= TF_FIRST_NORMAL_CLASS ) && ( iClassIndex <= TF_LAST_NORMAL_CLASS ) )
 	{
-		pszPlayerClass = g_pVGuiLocalize->Find( g_aPlayerClassNames[ iClass ] );
+		// Set the class name. We can't use a dialog variable because it's a string that's already
+		// been set using a dialog variable, and apparently we don't support nested dialog variables.
+		wchar_t szOriginalSummary[ 256 ];
+		wchar_t szSummary[ 256 ];
+
+		// This is the field that "statdesc" completed for us
+		pLabel->GetText( szOriginalSummary, sizeof( szOriginalSummary ) );
+		const wchar_t *pszPlayerClass = g_pVGuiLocalize->Find( g_aPlayerClassNames[ iClassIndex ] );
 		g_pVGuiLocalize->ConstructString( szSummary, sizeof( szSummary ), szOriginalSummary, 1, pszPlayerClass );
 		pLabel->SetText( szSummary );	
 	}
 
 	if ( m_pClassImage )
 	{
-		m_pClassImage->SetClass( iTeam, iClass, 0 );
+		m_pClassImage->SetClass( iTeam, iClassIndex, 0 );
 	}
 
 	Show();
@@ -527,8 +535,20 @@ void CTFStatPanel::FireGameEvent( IGameEvent * event )
 		if ( !C_TFPlayer::GetLocalTFPlayer() || ( C_TFPlayer::GetLocalTFPlayer()->GetUserID() != iUserID ) )
 			return;
 
-		// hide panel if we're currently showing it
-		Hide();
+		// TFP3: Is m_bDisplayAfterSpawn correct?
+		if ( m_bDisplayAfterSpawn )
+		{
+			// show the panel now if dead or very recently spawned
+			vgui::ivgui()->AddTickSignal( GetVPanel(), 1000 );
+			ShowStatPanel( m_iCurStatClassIndex, m_iCurStatTeam, m_iCurStatValue, m_statType, m_recordBreakType );
+			m_flTimeHide = gpGlobals->curtime + 12.0f;
+			m_bDisplayAfterSpawn = false; // TFP3: Is m_bDisplayAfterSpawn correct?
+		}
+		else
+		{
+			// hide panel if we're currently showing it
+			Hide();
+		}
 	}
 	else if ( Q_strcmp( "teamplay_stat_panel", pEventName ) == 0 )
 	{
@@ -562,6 +582,10 @@ void CTFStatPanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 	LoadControlSettings( "resource/UI/StatPanel_Base.res" );
 
+	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
+	if ( !pLocalPlayer )
+		return;
+
 	vgui::Panel *pStatBox = FindChildByName("StatBox");
 	if ( pStatBox )
 	{
@@ -592,12 +616,9 @@ void CTFStatPanel::Show()
 {
 	bool bShow = true;
 	CTFWinPanel *pWinPanel = GET_HUDELEMENT( CTFWinPanel );
-	if ( pWinPanel )
+	if ( !m_bDisplayAfterSpawn && pWinPanel && pWinPanel->IsVisible() )
 	{
-		if ( !m_bDisplayAfterSpawn && pWinPanel->IsVisible() )
-		{
-			bShow = false;
-		}
+		bShow = false;
 	}
 
 	SetVisible( bShow );
