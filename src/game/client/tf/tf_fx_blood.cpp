@@ -26,8 +26,12 @@
 //-----------------------------------------------------------------------------
 // Purpose: Intercepts the blood spray message.
 //-----------------------------------------------------------------------------
-void TFBloodSprayCallback( Vector vecOrigin, Vector vecNormal, ClientEntityHandle_t hEntity )
+void TFBloodSprayCallback( const CEffectData &data )
 {
+	Vector vecOrigin = data.m_vOrigin;
+	Vector vecNormal = data.m_vNormal;
+	ClientEntityHandle_t hEntity = data.m_hEntity;
+	
 	QAngle	vecAngles;
 	VectorAngles( -vecNormal, vecAngles );
 
@@ -104,59 +108,4 @@ void TFBloodSprayCallback( Vector vecOrigin, Vector vecNormal, ClientEntityHandl
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-class C_TETFBlood : public C_BaseTempEntity
-{
-public:
-	DECLARE_CLASS( C_TETFBlood, C_BaseTempEntity );
-
-	DECLARE_CLIENTCLASS();
-
-	C_TETFBlood( void );
-
-	virtual void	PostDataUpdate( DataUpdateType_t updateType );
-
-public:
-	Vector		m_vecOrigin;
-	Vector		m_vecNormal;
-	ClientEntityHandle_t m_hEntity;
-};
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-C_TETFBlood::C_TETFBlood( void )
-{
-	m_vecOrigin.Init();
-	m_vecNormal.Init();
-	m_hEntity = INVALID_EHANDLE_INDEX;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void C_TETFBlood::PostDataUpdate( DataUpdateType_t updateType )
-{
-	VPROF( "C_TETFBlood::PostDataUpdate" );
-
-	TFBloodSprayCallback( m_vecOrigin, m_vecNormal, m_hEntity );
-}
-
-static void RecvProxy_BloodEntIndex( const CRecvProxyData *pData, void *pStruct, void *pOut )
-{
-	int nEntIndex = pData->m_Value.m_Int;
-	((C_TETFBlood*)pStruct)->m_hEntity = (nEntIndex < 0) ? INVALID_EHANDLE_INDEX : ClientEntityList().EntIndexToHandle( nEntIndex );
-}
-
-IMPLEMENT_CLIENTCLASS_EVENT_DT(C_TETFBlood, DT_TETFBlood, CTETFBlood)
-	RecvPropFloat( RECVINFO( m_vecOrigin[0] ) ),
-	RecvPropFloat( RECVINFO( m_vecOrigin[1] ) ),
-	RecvPropFloat( RECVINFO( m_vecOrigin[2] ) ),
-	RecvPropVector( RECVINFO(m_vecNormal)),
-	RecvPropInt( "entindex", 0, SIZEOF_IGNORE, 0, RecvProxy_BloodEntIndex ),
-END_RECV_TABLE()
-
-
-
+DECLARE_CLIENT_EFFECT( "tf_bloodimpact", TFBloodSprayCallback );

@@ -3682,14 +3682,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tf\te_tfblood.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\te_tfblood.h"
-					>
-				</File>
-				<File
 					RelativePath=".\tf\tf_ammo_pack.cpp"
 					>
 				</File>

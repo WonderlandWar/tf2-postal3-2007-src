@@ -44,7 +44,6 @@
 #include "triggers.h"
 #include "tf_weapon_medigun.h"
 #include "hl2orange.spa.h"
-#include "te_tfblood.h"
 #include "activitylist.h"
 #include "steam/steam_api.h"
 #include "cdll_int.h"
@@ -2630,17 +2629,7 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	}
 
 	//No bleeding while invul or disguised.
-	bool bBleed = ( m_Shared.InCond( TF_COND_DISGUISED ) == false && m_Shared.InCond( TF_COND_INVULNERABLE ) == false );
-	if ( bBleed && pAttacker->IsPlayer() )
-	{
-		CTFWeaponBase *pWeapon = ToTFPlayer( pAttacker )->GetActiveTFWeapon();
-		if ( pWeapon && pWeapon->GetWeaponID() == TF_WEAPON_FLAMETHROWER )
-		{
-			bBleed = false;
-		}
-	}
-
-	if ( bBleed )
+	if ( m_Shared.InCond( TF_COND_DISGUISED ) == false && m_Shared.InCond( TF_COND_INVULNERABLE ) == false )
 	{
 		Vector vDamagePos = info.GetDamagePosition();
 
@@ -2649,8 +2638,14 @@ int CTFPlayer::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			vDamagePos = WorldSpaceCenter();
 		}
 
-		CPVSFilter filter( vDamagePos );
-		TE_TFBlood( filter, 0.0, vDamagePos, -vecDir, entindex() );
+		CEffectData data;
+		data.m_vOrigin = vDamagePos;
+		data.m_vNormal = -vecDir;
+		data.m_fFlags = 255;
+		data.m_flScale = 4.0;
+		data.m_flMagnitude = info.GetDamage();
+		data.m_nEntIndex = entindex();
+		DispatchEffect( "tf_bloodimpact", data );
 	}
 
 	// Done.
