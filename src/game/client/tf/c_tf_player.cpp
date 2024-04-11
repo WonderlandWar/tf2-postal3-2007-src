@@ -112,14 +112,7 @@ public:
 		VPROF( "C_TEPlayerAnimEvent::PostDataUpdate" );
 
 		// Create the effect.
-		if ( m_iPlayerIndex == TF_PLAYER_INDEX_NONE )
-			return;
-
-		EHANDLE hPlayer = cl_entitylist->GetNetworkableHandle( m_iPlayerIndex );
-		if ( !hPlayer )
-			return;
-
-		C_TFPlayer *pPlayer = dynamic_cast< C_TFPlayer* >( hPlayer.Get() );
+		C_TFPlayer *pPlayer = dynamic_cast< C_TFPlayer* >( m_hPlayer.Get() );
 		if ( pPlayer && !pPlayer->IsDormant() )
 		{
 			pPlayer->DoAnimationEvent( (PlayerAnimEvent_t)m_iEvent.Get(), m_nData );
@@ -127,7 +120,7 @@ public:
 	}
 
 public:
-	CNetworkVar( int, m_iPlayerIndex );
+	CNetworkHandle( C_BasePlayer, m_hPlayer );
 	CNetworkVar( int, m_iEvent );
 	CNetworkVar( int, m_nData );
 };
@@ -138,7 +131,7 @@ IMPLEMENT_CLIENTCLASS_EVENT( C_TEPlayerAnimEvent, DT_TEPlayerAnimEvent, CTEPlaye
 // Data tables and prediction tables.
 //-----------------------------------------------------------------------------
 BEGIN_RECV_TABLE_NOBASE( C_TEPlayerAnimEvent, DT_TEPlayerAnimEvent )
-	RecvPropInt( RECVINFO( m_iPlayerIndex ) ),
+	RecvPropEHandle( RECVINFO( m_hPlayer ) ),
 	RecvPropInt( RECVINFO( m_iEvent ) ),
 	RecvPropInt( RECVINFO( m_nData ) )
 END_RECV_TABLE()

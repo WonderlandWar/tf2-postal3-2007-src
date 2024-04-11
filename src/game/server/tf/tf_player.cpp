@@ -99,16 +99,16 @@ public:
 
 	CTEPlayerAnimEvent( const char *name ) : CBaseTempEntity( name )
 	{
-		m_iPlayerIndex = TF_PLAYER_INDEX_NONE;
+		m_hPlayer = NULL;
 	}
 
-	CNetworkVar( int, m_iPlayerIndex );
+	CNetworkHandle( CBasePlayer, m_hPlayer );
 	CNetworkVar( int, m_iEvent );
 	CNetworkVar( int, m_nData );
 };
 
 IMPLEMENT_SERVERCLASS_ST_NOBASE( CTEPlayerAnimEvent, DT_TEPlayerAnimEvent )
-	SendPropInt( SENDINFO( m_iPlayerIndex ), 7, SPROP_UNSIGNED ),
+	SendPropEHandle( SENDINFO( m_hPlayer ) ),
 	SendPropInt( SENDINFO( m_iEvent ), Q_log2( PLAYERANIMEVENT_COUNT ) + 1, SPROP_UNSIGNED ),
 	// BUGBUG:  ywb  we assume this is either 0 or an animation sequence #, but it could also be an activity, which should fit within this limit, but we're not guaranteed.
 	SendPropInt( SENDINFO( m_nData ), ANIMATION_SEQUENCE_BITS ),
@@ -126,7 +126,7 @@ void TE_PlayerAnimEvent( CBasePlayer *pPlayer, PlayerAnimEvent_t event, int nDat
 	}
 
 	Assert( pPlayer->entindex() >= 1 && pPlayer->entindex() <= MAX_PLAYERS );
-	g_TEPlayerAnimEvent.m_iPlayerIndex = pPlayer->entindex();
+	g_TEPlayerAnimEvent.m_hPlayer = pPlayer;
 	g_TEPlayerAnimEvent.m_iEvent = event;
 	Assert( nData < (1<<ANIMATION_SEQUENCE_BITS) );
 	Assert( (1<<ANIMATION_SEQUENCE_BITS) >= ActivityList_HighestIndex() );
