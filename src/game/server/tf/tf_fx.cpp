@@ -34,7 +34,6 @@ public:
 	CNetworkVar( int, m_iMode );
 	CNetworkVar( int, m_iSeed );
 	CNetworkVar( float, m_flSpread );
-	CNetworkVar( bool, m_bCritical );
 
 };
 
@@ -62,7 +61,6 @@ SendPropInt( SENDINFO( m_iMode ), 1, SPROP_UNSIGNED ),
 SendPropInt( SENDINFO( m_iSeed ), NUM_BULLET_SEED_BITS, SPROP_UNSIGNED ),
 SendPropInt( SENDINFO( m_iPlayer ), 6, SPROP_UNSIGNED ), 	// max 64 players, see MAX_PLAYERS
 SendPropFloat( SENDINFO( m_flSpread ), 8, 0, 0.0f, 1.0f ),	
-SendPropBool( SENDINFO( m_bCritical ) ),
 END_SEND_TABLE()
 
 // Singleton
@@ -72,7 +70,7 @@ static CTEFireBullets g_TEFireBullets( "Fire Bullets" );
 // Purpose:
 //-----------------------------------------------------------------------------
 void TE_FireBullets( int iPlayerIndex, const Vector &vOrigin, const QAngle &vAngles, 
-					 int iWeaponID, int	iMode, int iSeed, float flSpread, bool bCritical )
+					 int iWeaponID, int	iMode, int iSeed, float flSpread )
 {
 	CPASFilter filter( vOrigin );
 	filter.UsePredictionRules();
@@ -84,7 +82,6 @@ void TE_FireBullets( int iPlayerIndex, const Vector &vOrigin, const QAngle &vAng
 	g_TEFireBullets.m_flSpread = flSpread;
 	g_TEFireBullets.m_iMode = iMode;
 	g_TEFireBullets.m_iWeaponID = iWeaponID;
-	g_TEFireBullets.m_bCritical = bCritical;
 
 	Assert( iSeed < (1 << NUM_BULLET_SEED_BITS) );
 

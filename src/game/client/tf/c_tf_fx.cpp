@@ -28,7 +28,6 @@ public:
 	int		m_iMode;
 	int		m_iSeed;
 	float	m_flSpread;
-	bool	m_bCritical;
 };
 
 IMPLEMENT_CLIENTCLASS_EVENT( C_TEFireBullets, DT_TEFireBullets, CTEFireBullets );
@@ -42,7 +41,6 @@ RecvPropInt( RECVINFO( m_iMode ) ),
 RecvPropInt( RECVINFO( m_iSeed ) ),
 RecvPropInt( RECVINFO( m_iPlayer ) ),
 RecvPropFloat( RECVINFO( m_flSpread ) ),
-RecvPropInt( RECVINFO( m_bCritical ) ),
 END_RECV_TABLE()
 
 void C_TEFireBullets::PostDataUpdate( DataUpdateType_t updateType )
@@ -51,5 +49,5 @@ void C_TEFireBullets::PostDataUpdate( DataUpdateType_t updateType )
 
 	// Create the effect.
 	m_vecAngles.z = 0;
-	FX_FireBullets( m_iPlayer+1, m_vecOrigin, m_vecAngles, m_iWeaponID, m_iMode, m_iSeed, m_flSpread, -1, m_bCritical );
+	FX_FireBullets( m_iPlayer+1, m_vecOrigin, m_vecAngles, m_iWeaponID, m_iMode, m_iSeed, m_flSpread, -1 );
 }

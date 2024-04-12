@@ -250,8 +250,7 @@ void CTFWeaponBaseGun::FireBullet( CTFPlayer *pPlayer )
 		m_iWeaponMode,
 		CBaseEntity::GetPredictionRandomSeed() & 255,
 		GetWeaponSpread(),
-		GetProjectileDamage(),
-		IsCurrentAttackACrit() );
+		GetProjectileDamage() );
 }
 
 class CTraceFilterIgnoreTeammates : public CTraceFilterSimple

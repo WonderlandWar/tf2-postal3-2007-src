@@ -2518,10 +2518,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\tf\c_tf_fx.h"
-					>
-				</File>
-				<File
 					RelativePath=".\tf\c_tf_objective_resource.cpp"
 					>
 				</File>

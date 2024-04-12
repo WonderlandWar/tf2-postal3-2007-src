@@ -109,7 +109,7 @@ void EndGroupingSounds() {}
 // only does the damage calculations.  On the client, it does all the effects.
 //-----------------------------------------------------------------------------
 void FX_FireBullets( int iPlayer, const Vector &vecOrigin, const QAngle &vecAngles,
-					 int iWeapon, int iMode, int iSeed, float flSpread, float flDamage /* = -1.0f */, bool bCritical /* = false*/ )
+					 int iWeapon, int iMode, int iSeed, float flSpread, float flDamage /* = -1.0f */ )
 {
 	// Get the weapon information.
 	const char *pszWeaponAlias = WeaponIdToAlias( iWeapon );
@@ -145,8 +145,7 @@ void FX_FireBullets( int iPlayer, const Vector &vecOrigin, const QAngle &vecAngl
 	bDoEffects = true;
 
 	// The minigun has custom sound & animation code to deal with its windup/down.
-	if ( !pPlayer->IsLocalPlayer() 
-		&& iWeapon != TF_WEAPON_MINIGUN )
+	if ( iWeapon != TF_WEAPON_MINIGUN )
 	{
 		// Fire the animation event.
 		if ( pPlayer && !pPlayer->IsDormant() )
@@ -168,7 +167,7 @@ void FX_FireBullets( int iPlayer, const Vector &vecOrigin, const QAngle &vecAngl
 #else
 	// If this is server code, send the effect over to client as temp entity and 
 	// dispatch one message for all the bullet impacts and sounds.
-	TE_FireBullets( pPlayer->entindex(), vecOrigin, vecAngles, iWeapon, iMode, iSeed, flSpread, bCritical );
+	TE_FireBullets( pPlayer->entindex(), vecOrigin, vecAngles, iWeapon, iMode, iSeed, flSpread );
 
 	// Let the player remember the usercmd he fired a weapon on. Assists in making decisions about lag compensation.
 	pPlayer->NoteWeaponFired();
@@ -210,7 +209,7 @@ void FX_FireBullets( int iPlayer, const Vector &vecOrigin, const QAngle &vecAngl
 	if ( pWeapon )
 	{
 		nDamageType	= pWeapon->GetDamageType();
-		if ( pWeapon->IsCurrentAttackACrit() || bCritical )
+		if ( pWeapon->IsCurrentAttackACrit() )
 		{
 			nDamageType |= DMG_CRITICAL;
 		}
