@@ -284,10 +284,6 @@ void CTFTeamMenu::OnTick()
 	if ( !pRed || !pBlue )
 		return;
 
-	// set our team counts
-	SetDialogVariable( "bluecount", pBlue->Get_Number_Players() );
-	SetDialogVariable( "redcount", pRed->Get_Number_Players() );
-
 	C_TFPlayer *pLocalPlayer = C_TFPlayer::GetLocalTFPlayer();
 
 	if ( !pLocalPlayer )

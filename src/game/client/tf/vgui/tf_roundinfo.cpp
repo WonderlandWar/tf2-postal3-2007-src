@@ -243,10 +243,7 @@ void CTFRoundInfo::OnKeyCodeReleased( KeyCode code )
 //-----------------------------------------------------------------------------
 void CTFRoundInfo::OnKeyCodePressed( KeyCode code )
 {
-	if( code == KEY_SPACE ||
-		code == KEY_ENTER ||
-		code == KEY_XBUTTON_A ||
-		code == KEY_XBUTTON_B )
+	if( code == KEY_SPACE )
 	{
 		OnCommand( "continue" );
 	}
@@ -307,6 +304,8 @@ void CTFRoundInfo::FireGameEvent( IGameEvent *event )
 {
 	if ( Q_strcmp( event->GetName(), "game_newmap" ) == 0 )
 	{
+		// TFP3:
+		// FIXME: This is incorrect!
 		Update();
 	}
 }

@@ -550,9 +550,8 @@ bool CModelPanel::SetSequence( const char *pszName )
 			int sequence = m_hModel->LookupSequence( pszAnim );
 			if ( sequence != ACT_INVALID )
 			{
-				m_hModel->ResetSequence( sequence );
-				m_hModel->SetCycle( 0 );
-
+				m_hModel->SetSequence( sequence );
+				
 				bRetVal = true;
 			}
 		}

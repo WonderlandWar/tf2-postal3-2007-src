@@ -154,9 +154,6 @@ void CTFStatsSummaryPanel::SetDefaultSelections()
 	m_displayBarGraph[0]= SHOW_MAX;
 	m_statBarGraph[1] = TFSTAT_PLAYTIME;
 	m_displayBarGraph[1] = SHOW_TOTAL;
-
-	m_pBarChartComboBoxA->ActivateItemByRow( 0 );
-	m_pBarChartComboBoxB->ActivateItemByRow( 10 );
 }
 
 //-----------------------------------------------------------------------------
@@ -200,13 +197,16 @@ void CTFStatsSummaryPanel::ApplySchemeSettings(vgui::IScheme *pScheme)
 	InitBarChartComboBox( m_pBarChartComboBoxA );
 	InitBarChartComboBox( m_pBarChartComboBoxB );
 
+	m_pBarChartComboBoxA->ActivateItemByRow( 0 );
+	m_pBarChartComboBoxB->ActivateItemByRow( 10 );
+
 	// fill the class names in the class combo box
 	HFont hFont = scheme()->GetIScheme( GetScheme() )->GetFont( "ScoreboardSmall", true );
 	m_pClassComboBox->SetFont( hFont );
 	m_pClassComboBox->RemoveAll();
 	KeyValues *pKeyValues = new KeyValues( "data" );
 	pKeyValues->SetInt( "class", TF_CLASS_UNDEFINED );
-	m_pClassComboBox->AddItem( "#StatSummary_Label_AsAnyClass", pKeyValues );
+	m_pClassComboBox->AddItem( "As any class", pKeyValues );
 	for ( int iClass = TF_FIRST_NORMAL_CLASS; iClass <= TF_LAST_NORMAL_CLASS; iClass++ )
 	{
 		pKeyValues = new KeyValues( "data" );
@@ -215,7 +215,6 @@ void CTFStatsSummaryPanel::ApplySchemeSettings(vgui::IScheme *pScheme)
 	}
 	m_pClassComboBox->ActivateItemByRow( 0 );
 
-	SetDefaultSelections();
 	UpdateDialog();
 	SetVisible( false );
 }

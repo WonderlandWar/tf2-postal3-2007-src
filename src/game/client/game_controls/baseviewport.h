@@ -40,7 +40,7 @@ public:
 
 	virtual void ShowPanel( const char *pName, bool state );
 	virtual void ShowPanel( IViewPortPanel* pPanel, bool state );
-	virtual bool AddNewPanel( IViewPortPanel* pPanel, char const *pchDebugName );
+	virtual bool AddNewPanel( IViewPortPanel* pPanel );
 	virtual void CreateDefaultPanels( void );
 	virtual void UpdateAllPanels( void );
 	virtual void PostMessageToPanel( const char *pName, KeyValues *pKeyValues );

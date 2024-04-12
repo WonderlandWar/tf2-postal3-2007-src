@@ -56,6 +56,8 @@ CTFIntroMenu::CTFIntroMenu( IViewPort *pViewPort ) : CIntroMenu( pViewPort )
 	LoadControlSettings( "Resource/UI/IntroMenu.res" );
 
 	m_flThink = -1;
+	m_pVideo = 0;
+	m_pModel = 0;
 	m_iAction = INTRO_NONE;
 
 	vgui::ivgui()->AddTickSignal( GetVPanel() );
@@ -133,32 +135,7 @@ void CTFIntroMenu::OnTick()
 		else if ( m_iAction == INTRO_CONTINUE )
 		{
 			m_pViewPort->ShowPanel( this, false );
-
-			if ( GetLocalPlayerTeam() == TEAM_UNASSIGNED )
-			{
-				m_pViewPort->ShowPanel( PANEL_TEAM, true );
-			}
-			else
-			{
-				C_TFPlayer *pPlayer =  C_TFPlayer::GetLocalTFPlayer();
-
-				// only open the class menu if they're not on team Spectator and they haven't already picked a class
-				if (  pPlayer && 
-					( GetLocalPlayerTeam() != TEAM_SPECTATOR ) && 
-					( pPlayer->GetPlayerClass()->GetClassIndex() == TF_CLASS_UNDEFINED ) )
-				{
-					switch( GetLocalPlayerTeam() )
-					{
-					case TF_TEAM_RED:
-						m_pViewPort->ShowPanel( PANEL_CLASS_RED, true );
-						break;
-
-					case TF_TEAM_BLUE:
-						m_pViewPort->ShowPanel( PANEL_CLASS_BLUE, true );
-						break;
-					}
-				}
-			}
+			m_pViewPort->ShowPanel( PANEL_TEAM, true );
 		}
 
 		// reset our think

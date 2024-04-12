@@ -39,8 +39,6 @@ public:
 		
 	int GetDeathMessageStartHeight( void );
 
-	virtual void OnScreenSizeChanged( int iOldWide, int iOldTall );
-
 private:
 	void CenterWindow( vgui::Frame *win );
 

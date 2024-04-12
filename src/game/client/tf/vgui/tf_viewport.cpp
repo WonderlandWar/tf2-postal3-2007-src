@@ -262,12 +262,12 @@ IViewPortPanel* TFViewport::CreatePanelByName(const char *szPanelName)
 
 void TFViewport::CreateDefaultPanels( void )
 {
-	AddNewPanel( CreatePanelByName( PANEL_MAPINFO ), "PANEL_MAPINFO" );
-	AddNewPanel( CreatePanelByName( PANEL_TEAM ), "PANEL_TEAM" );
-	AddNewPanel( CreatePanelByName( PANEL_CLASS_RED ), "PANEL_CLASS_RED" );
-	AddNewPanel( CreatePanelByName( PANEL_CLASS_BLUE ), "PANEL_CLASS_BLUE" );
-	AddNewPanel( CreatePanelByName( PANEL_INTRO ), "PANEL_INTRO" );
-	AddNewPanel( CreatePanelByName( PANEL_ROUNDINFO ), "PANEL_ROUNDINFO" );
+	AddNewPanel( CreatePanelByName( PANEL_MAPINFO ) );
+	AddNewPanel( CreatePanelByName( PANEL_TEAM ) );
+	AddNewPanel( CreatePanelByName( PANEL_CLASS_RED ) );
+	AddNewPanel( CreatePanelByName( PANEL_CLASS_BLUE ) );
+	AddNewPanel( CreatePanelByName( PANEL_INTRO ) );
+	AddNewPanel( CreatePanelByName( PANEL_ROUNDINFO ) );
 
 	BaseClass::CreateDefaultPanels();
 }
@@ -287,39 +287,4 @@ int TFViewport::GetDeathMessageStartHeight( void )
 	}
 
 	return y;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void TFViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
-{
-	BaseClass::OnScreenSizeChanged( iOldWide, iOldTall );
-
-	// we've changed resolution, let's try to figure out if we need to show any of our menus
-	if ( !gViewPortInterface )
-		return;
-
-	C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
-
-	if ( pPlayer )
-	{
-		// are we on a team yet?
-		if ( pPlayer->GetTeamNumber() == TEAM_UNASSIGNED )
-		{
-			engine->ClientCmd( "show_motd" );
-		}
-		else if ( ( pPlayer->GetTeamNumber() != TEAM_SPECTATOR ) && ( pPlayer->m_Shared.GetDesiredPlayerClassIndex() == TF_CLASS_UNDEFINED ) )
-		{
-			switch( pPlayer->GetTeamNumber() )
-			{
-			case TF_TEAM_RED:
-				gViewPortInterface->ShowPanel( PANEL_CLASS_RED, true );
-				break;
-			case TF_TEAM_BLUE:
-				gViewPortInterface->ShowPanel( PANEL_CLASS_BLUE, true );
-				break;
-			}
-		}
-	}
 }
