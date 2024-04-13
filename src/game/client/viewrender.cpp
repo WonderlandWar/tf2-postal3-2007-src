@@ -1162,41 +1162,6 @@ void CViewRender::PerformScreenOverlay( int x, int y, int w, int h )
 	}
 }
 
-void CViewRender::DrawUnderwaterOverlay( void )
-{
-	IMaterial *pOverlayMat = m_UnderWaterOverlayMaterial;
-
-	if ( pOverlayMat )
-	{
-		CMatRenderContextPtr pRenderContext( materials );
-
-		int x, y, w, h;
-
-		pRenderContext->GetViewport( x, y, w, h );
-		if ( pOverlayMat->NeedsFullFrameBufferTexture() )
-		{
-			DrawScreenEffectMaterial( pOverlayMat, x, y, w, h );
-		}
-		else if ( pOverlayMat->NeedsPowerOfTwoFrameBufferTexture() )
-		{
-			// First copy the FB off to the offscreen texture
-			UpdateRefractTexture( x, y, w, h, true );
-
-			// Now draw the entire screen using the material...
-			CMatRenderContextPtr pRenderContext( materials );
-			ITexture *pTexture = GetPowerOfTwoFrameBufferTexture( );
-			int sw = pTexture->GetActualWidth();
-			int sh = pTexture->GetActualHeight();
-			pRenderContext->DrawScreenSpaceRectangle( pOverlayMat, x, y, w, h,
-													  0, 0, sw-1, sh-1, sw, sh );
-		}
-		else
-		{
-			pRenderContext->DrawScreenSpaceRectangle( pOverlayMat, x, y, w, h,
-													  0, 0, 1, 1, 1, 1 );
-		}
-	}
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns the min/max fade distances
@@ -1526,7 +1491,7 @@ static float GetFogEnd( void )
 }
 
 // TFP3: Note: This was copied from Source 2006, revisit if necessary
-static bool GetFogEnable()
+static bool GetFogEnable( void )
 {
 	C_BasePlayer *pbp = C_BasePlayer::GetLocalPlayer();
 	if( !pbp )
@@ -1760,12 +1725,10 @@ void CViewRender::SetupMain3DView( const CViewSetup &view, int &nClearFlags )
 	// FIXME: I really want these fields removed from CViewSetup 
 	// and passed in as independent flags
 	// Clear the color here if requested.
-
-	int nDepthStencilFlags = nClearFlags & ( VIEW_CLEAR_DEPTH | VIEW_CLEAR_STENCIL );
-	nClearFlags &= ~( nDepthStencilFlags ); // Clear these flags
+	nClearFlags &= ~VIEW_CLEAR_DEPTH;
 	if ( nClearFlags & VIEW_CLEAR_COLOR )
 	{
-		nClearFlags |= nDepthStencilFlags; // Add them back in if we're clearing color
+		nClearFlags |= VIEW_CLEAR_DEPTH;
 	}
 
 	// If we are using HDR, we render to the HDR full frame buffer texture
@@ -1780,7 +1743,7 @@ void CViewRender::SetupMain3DView( const CViewSetup &view, int &nClearFlags )
 	}
 
 	// If we didn't clear the depth here, we'll need to clear it later
-	nClearFlags ^= nDepthStencilFlags; // Toggle these bits
+	nClearFlags ^= VIEW_CLEAR_DEPTH;
 	if ( nClearFlags & VIEW_CLEAR_COLOR )
 	{
 		// If we cleared the color here, we don't need to clear it later
@@ -1840,8 +1803,6 @@ void CViewRender::FreezeFrame( float flFreezeTime )
 // This renders the entire 3D view.
 void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw )
 {
-	m_UnderWaterOverlayMaterial.Shutdown();					// underwater view will set
-
 	m_CurrentView = view;
 
 	C_BaseAnimating::AutoAllowBoneAccess boneaccess( true, true );
@@ -1948,8 +1909,6 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 
 		// Now actually draw the viewmodel
 		DrawViewModels( view, whatToDraw & RENDERVIEW_DRAWVIEWMODEL );
-
-		DrawUnderwaterOverlay();
 
 		PixelVisibility_EndScene();
 
@@ -2134,6 +2093,7 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 	info.m_bReflectEntities = false;
 	info.m_bDrawWaterSurface = false;
 	info.m_bOpaqueWater = true;
+	info.m_bDrawScreenOverlay = false;
 
 
 
@@ -2141,6 +2101,20 @@ void CViewRender::DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVol
 	if (( fogVolumeInfo.m_nVisibleFogVolume == -1 ) || !pWaterMaterial )
 		return;
 
+	if (engine->GetDXSupportLevel() >= 90 )					// screen voerlays underwater are a dx9 feature
+	{
+		IMaterialVar *pScreenOverlayVar = pWaterMaterial->FindVar( "$underwateroverlay", NULL, false );
+		if ( pScreenOverlayVar && ( pScreenOverlayVar->IsDefined() ) )
+		{
+			char const *pOverlayName = pScreenOverlayVar->GetStringValue();
+			if ( pOverlayName[0] != '0' )						// fixme!!!
+			{
+				IMaterial *pOverlayMaterial = materials->FindMaterial( pOverlayName,  TEXTURE_GROUP_OTHER );
+				info.m_UnderWaterOverlayMaterial.Init( pOverlayMaterial );
+				info.m_bDrawScreenOverlay = true;
+			}
+		}
+	}
 
 	// Use cheap water if mat_drawwater is set
 	info.m_bDrawWaterSurface = mat_drawwater.GetBool();
@@ -4515,8 +4489,8 @@ bool CSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibil
 	// At this point, we've cleared everything we need to clear
 	// The next path will need to clear depth, though.
 	m_ClearFlags = *pClearFlags;
-	*pClearFlags &= ~( VIEW_CLEAR_COLOR | VIEW_CLEAR_DEPTH | VIEW_CLEAR_STENCIL | VIEW_CLEAR_FULL_TARGET );
-	*pClearFlags |= VIEW_CLEAR_DEPTH; // Need to clear depth after rednering the skybox
+	*pClearFlags &= ~(VIEW_CLEAR_COLOR | VIEW_CLEAR_DEPTH | VIEW_CLEAR_FULL_TARGET);
+	*pClearFlags |= VIEW_CLEAR_DEPTH;
 
 	m_DrawFlags = DF_RENDER_UNDERWATER | DF_RENDER_ABOVEWATER | DF_RENDER_WATER;
 	if( r_skybox.GetBool() )
@@ -4850,7 +4824,7 @@ void CBaseWorldView::PushView( float waterHeight )
 		return;
 	}
 
-	if ( m_ClearFlags & ( VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR | VIEW_CLEAR_STENCIL ) )
+	if ( m_ClearFlags & (VIEW_CLEAR_DEPTH | VIEW_CLEAR_COLOR) )
 	{
 		if ( m_ClearFlags & VIEW_CLEAR_OBEY_STENCIL )
 		{
@@ -4858,7 +4832,7 @@ void CBaseWorldView::PushView( float waterHeight )
 		}
 		else
 		{
-			pRenderContext->ClearBuffers( m_ClearFlags & VIEW_CLEAR_COLOR, m_ClearFlags & VIEW_CLEAR_DEPTH, m_ClearFlags & VIEW_CLEAR_STENCIL );
+			pRenderContext->ClearBuffers( m_ClearFlags & VIEW_CLEAR_COLOR, m_ClearFlags & VIEW_CLEAR_DEPTH );
 		}
 	}
 
@@ -5418,20 +5392,6 @@ void CUnderWaterView::Setup( const CViewSetup &view, bool bDrawSkybox, const Vis
 
 	CalcWaterEyeAdjustments( fogInfo, m_waterHeight, m_waterZAdjust, m_bSoftwareUserClipPlane );
 
-	IMaterial *pWaterMaterial = fogInfo.m_pFogVolumeMaterial;
-	if (engine->GetDXSupportLevel() >= 90 )					// screen voerlays underwater are a dx9 feature
-	{
-		IMaterialVar *pScreenOverlayVar = pWaterMaterial->FindVar( "$underwateroverlay", NULL, false );
-		if ( pScreenOverlayVar && ( pScreenOverlayVar->IsDefined() ) )
-		{
-			char const *pOverlayName = pScreenOverlayVar->GetStringValue();
-			if ( pOverlayName[0] != '0' )						// fixme!!!
-			{
-				IMaterial *pOverlayMaterial = materials->FindMaterial( pOverlayName,  TEXTURE_GROUP_OTHER );
-				m_pMainView->SetWaterOverlayMaterial( pOverlayMaterial );
-			}
-		}
-	}
 	// NOTE: We're not drawing the 2d skybox under water since it's assumed to not be visible.
 
 	// render the world underwater
@@ -5496,8 +5456,37 @@ void CUnderWaterView::Draw()
 	}
 	pRenderContext->ClearColor4ub( 0, 0, 0, 255 );
 
-}
+	IMaterial *pOverlayMat = m_waterInfo.m_UnderWaterOverlayMaterial;
 
+	if ( pOverlayMat )
+	{
+		int x, y, w, h;
+
+		pRenderContext->GetViewport( x, y, w, h );
+		if ( pOverlayMat->NeedsFullFrameBufferTexture() )
+		{
+			DrawScreenEffectMaterial( pOverlayMat, x, y, w, h );
+		}
+		else if ( pOverlayMat->NeedsPowerOfTwoFrameBufferTexture() )
+		{
+			// First copy the FB off to the offscreen texture
+			UpdateRefractTexture( x, y, w, h, true );
+
+			// Now draw the entire screen using the material...
+			CMatRenderContextPtr pRenderContext( materials );
+			ITexture *pTexture = GetPowerOfTwoFrameBufferTexture( );
+			int sw = pTexture->GetActualWidth();
+			int sh = pTexture->GetActualHeight();
+			pRenderContext->DrawScreenSpaceRectangle( pOverlayMat, x, y, w, h,
+													  0, 0, sw-1, sh-1, sw, sh );
+		}
+		else
+		{
+			pRenderContext->DrawScreenSpaceRectangle( pOverlayMat, x, y, w, h,
+													  0, 0, 1, 1, 1, 1 );
+		}
+	}
+}
 
 
 //-----------------------------------------------------------------------------

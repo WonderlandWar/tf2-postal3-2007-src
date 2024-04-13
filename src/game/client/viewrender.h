@@ -147,12 +147,14 @@ struct ViewCustomVisibility_t
 //-----------------------------------------------------------------------------
 struct WaterRenderInfo_t
 {
+	CMaterialReference	m_UnderWaterOverlayMaterial;
 	bool m_bCheapWater : 1;
 	bool m_bReflect : 1;
 	bool m_bRefract : 1;
 	bool m_bReflectEntities : 1;
 	bool m_bDrawWaterSurface : 1;
 	bool m_bOpaqueWater : 1;
+	bool m_bDrawScreenOverlay : 1;
 
 };
 
@@ -397,10 +399,6 @@ public:
 
 	void			FreezeFrame( float flFreezeTime );
 
-	void SetWaterOverlayMaterial( IMaterial *pMaterial )
-	{
-		m_UnderWaterOverlayMaterial.Init( pMaterial );
-	}
 private:
 	int				m_BuildWorldListsNumber;
 
@@ -424,8 +422,6 @@ private:
 	void			SetScreenOverlayMaterial( IMaterial *pMaterial );
 	IMaterial		*GetScreenOverlayMaterial( );
 	void			PerformScreenOverlay( int x, int y, int w, int h );
-
-	void DrawUnderwaterOverlay( void );
 
 	// Water-related methods
 	void			DrawWorldAndEntities( bool drawSkybox, const CViewSetup &view, int nClearFlags, ViewCustomVisibility_t *pCustomVisibility = NULL );
@@ -464,7 +460,6 @@ private:
 	CMaterialReference	m_TranslucentSingleColor;
 	CMaterialReference	m_ModulateSingleColor;
 	CMaterialReference	m_ScreenOverlayMaterial;
-	CMaterialReference m_UnderWaterOverlayMaterial;
 
 	Vector			m_vecLastFacing;
 	float			m_flCheapWaterStartDistance;

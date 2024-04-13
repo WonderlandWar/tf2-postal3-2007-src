@@ -519,6 +519,7 @@ float CViewRender::GetZFar()
 		if( pPlayer )
 		{
 			CPlayerLocalData *local = &pPlayer->m_Local;
+
 			if ( local->m_fog.farz > 0 )
 			{
 				farZ = local->m_fog.farz;
@@ -815,7 +816,7 @@ void CViewRender::Render( vrect_t *rect )
 	m_View.height			= vr.height * flViewportScale;
 	m_View.m_flAspectRatio	= ( engineAspectRatio > 0.0f ) ? engineAspectRatio : ( (float)m_View.width / (float)m_View.height );
 
-	int nClearFlags = VIEW_CLEAR_DEPTH | VIEW_CLEAR_STENCIL;
+	int nClearFlags = VIEW_CLEAR_DEPTH;
 
 	if( gl_clear_randomcolor.GetBool() )
 	{
