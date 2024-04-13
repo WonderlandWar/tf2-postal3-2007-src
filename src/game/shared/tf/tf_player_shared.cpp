@@ -20,7 +20,6 @@
 #ifdef CLIENT_DLL
 #include "c_tf_player.h"
 #include "c_te_effect_dispatch.h"
-#include "c_tf_fx.h"
 #include "soundenvelope.h"
 #include "c_tf_playerclass.h"
 #include "iviewrender.h"
