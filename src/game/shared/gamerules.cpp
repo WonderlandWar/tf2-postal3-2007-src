@@ -68,23 +68,14 @@ END_NETWORK_TABLE()
 
 CGameRulesProxy::CGameRulesProxy()
 {
-	// allow map placed proxy entities to overwrite the static one
-	if ( s_pGameRulesProxy )
-	{
-#ifndef CLIENT_DLL
-		UTIL_Remove( s_pGameRulesProxy );
-#endif
-		s_pGameRulesProxy = NULL;
-	}
+	Assert( !s_pGameRulesProxy );
 	s_pGameRulesProxy = this;
 }
 
 CGameRulesProxy::~CGameRulesProxy()
 {
-	if ( s_pGameRulesProxy == this )
-	{
-		s_pGameRulesProxy = NULL;
-	}
+	Assert( s_pGameRulesProxy );
+	s_pGameRulesProxy = NULL;
 }
 
 int CGameRulesProxy::UpdateTransmitState()
@@ -812,14 +803,6 @@ void CGameRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 		}
 		
 		pPlayer->SetPlayerName( pszName );
-	}
-
-	const char *pszFov = engine->GetClientConVarValue( pPlayer->entindex(), "fov_desired" );
-	if ( pszFov )
-	{
-		int iFov = atoi(pszFov);
-		iFov = clamp( iFov, 75, 90 );
-		pPlayer->SetDefaultFOV( iFov );
 	}
 }
 

@@ -967,7 +967,7 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, int iScale )
 	VPROF_BUDGET( "FX_DustImpact", VPROF_BUDGETGROUP_PARTICLE_RENDERING );
 	Vector	offset;
 	float	spread = 0.2f;
-
+	
 	CSmartPtr<CDustParticle> pSimple = CDustParticle::Create( "dust" );
 	pSimple->SetSortOrigin( origin );
 	pSimple->GetBinding().SetBBox( origin - ( Vector( 32, 32, 32 ) * iScale ), origin + ( Vector( 32, 32, 32 ) * iScale ) );
@@ -996,31 +996,31 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, int iScale )
 
 			pParticle->m_vecVelocity.Random( -spread, spread );
 			pParticle->m_vecVelocity += ( tr->plane.normal * random->RandomFloat( 1.0f, 6.0f ) );
-
+			
 			VectorNormalize( pParticle->m_vecVelocity );
 
 			float	fForce = random->RandomFloat( 250, 500 ) * i;
 
 			// scaled
 			pParticle->m_vecVelocity *= fForce * iScale;
-
+			
 			colorRamp = random->RandomFloat( 0.75f, 1.25f );
 
 			pParticle->m_uchColor[0]	= min( 1.0f, color[0] * colorRamp ) * 255.0f;
 			pParticle->m_uchColor[1]	= min( 1.0f, color[1] * colorRamp ) * 255.0f;
 			pParticle->m_uchColor[2]	= min( 1.0f, color[2] * colorRamp ) * 255.0f;
-
+			
 			// scaled
 			pParticle->m_uchStartSize	= iScale * random->RandomInt( 3, 4 ) * (i+1);
 
 			// scaled
 			pParticle->m_uchEndSize		= iScale * pParticle->m_uchStartSize * 4;
-
+			
 			pParticle->m_uchStartAlpha	= random->RandomInt( 32, 255 );
 			pParticle->m_uchEndAlpha	= 0;
-
+			
 			pParticle->m_flRoll			= random->RandomInt( 0, 360 );
-
+			
 			if ( i == 3 )
 			{
 				pParticle->m_flRollDelta = random->RandomFloat( -0.1f, 0.1f );
@@ -1047,29 +1047,24 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, int iScale )
 		pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.0f );
 
 		pParticle->m_vecVelocity.Init();
-
+				
 		colorRamp = random->RandomFloat( 0.75f, 1.25f );
 		pParticle->m_uchColor[0]	= min( 1.0f, color[0] * colorRamp ) * 255.0f;
 		pParticle->m_uchColor[1]	= min( 1.0f, color[1] * colorRamp ) * 255.0f;
 		pParticle->m_uchColor[2]	= min( 1.0f, color[2] * colorRamp ) * 255.0f;
-
+		
 		pParticle->m_uchStartSize	= random->RandomInt( 4, 8 );
 		pParticle->m_uchEndSize		= pParticle->m_uchStartSize * 4;
-
+		
 		pParticle->m_uchStartAlpha	= random->RandomInt( 32, 64 );
 		pParticle->m_uchEndAlpha	= 0;
-
+		
 		pParticle->m_flRoll			= random->RandomInt( 0, 360 );
 		pParticle->m_flRollDelta	= random->RandomFloat( -1.0f, 1.0f );
 	}
 
 #else
-	FX_DustImpact( origin, tr, (float)iScale );
-#endif // _XBOX
-}
 
-void FX_DustImpact( const Vector &origin, trace_t *tr, float flScale )
-{
 	//
 	// PC version
 	//
@@ -1106,7 +1101,7 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, float flScale )
 			float	fForce = random->RandomFloat( 250, 500 ) * i;
 
 			// scaled
-			pParticle->m_vecVelocity *= fForce * flScale;
+			pParticle->m_vecVelocity *= fForce * iScale;
 			
 			colorRamp = random->RandomFloat( 0.75f, 1.25f );
 
@@ -1115,10 +1110,10 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, float flScale )
 			pParticle->m_uchColor[2]	= min( 1.0f, color[2] * colorRamp ) * 255.0f;
 			
 			// scaled
-			pParticle->m_uchStartSize	= ( unsigned char )( flScale * random->RandomInt( 3, 4 ) * (i+1) );
+			pParticle->m_uchStartSize	= iScale * random->RandomInt( 3, 4 ) * (i+1);
 
 			// scaled
-			pParticle->m_uchEndSize		= ( unsigned char )( flScale * pParticle->m_uchStartSize * 4 );
+			pParticle->m_uchEndSize		= iScale * pParticle->m_uchStartSize * 4;
 			
 			pParticle->m_uchStartAlpha	= random->RandomInt( 32, 255 );
 			pParticle->m_uchEndAlpha	= 0;
@@ -1205,6 +1200,7 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, float flScale )
 			pParticle->m_flRollDelta	= random->RandomFloat( -16.0f, 16.0f );
 		}
 	}			
+#endif // _XBOX
 }
 
 #ifdef _XBOX

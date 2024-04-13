@@ -17,7 +17,6 @@
 #include "ParticleSphereRenderer.h"
 #include "smartptr.h"
 #include "particles_simple.h"
-#include "tier1/utlobjectreference.h"
 
 
 //-----------------------------------------------------------------------------
@@ -27,9 +26,7 @@ class CNewParticleEffect : public IParticleEffect, public CParticleCollection, p
 {
 public:
 	DECLARE_CLASS_NOBASE( CNewParticleEffect );
-	DECLARE_REFERENCED_CLASS( CNewParticleEffect );
 
-public:
 	friend class CRefCountAccessor;
 
 	// list management
@@ -319,12 +316,6 @@ inline CSmartPtr<CNewParticleEffect> CNewParticleEffect::Create( CBaseEntity *pO
 	pRet->SetDynamicallyAllocated( true );
 	return pRet;
 }
-
-//--------------------------------------------------------------------------------
-// If you use an HPARTICLEFFECT instead of a cnewparticleeffect *, you get a pointer
-// which will go to null when the effect is deleted
-//--------------------------------------------------------------------------------
-typedef CUtlReference<CNewParticleEffect> HPARTICLEFFECT;
 
 
 #endif // PARTICLES_NEW_H

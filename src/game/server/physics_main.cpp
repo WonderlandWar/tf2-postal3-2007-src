@@ -28,11 +28,11 @@
 #include "ispatialpartition.h"
 #include "tier0/vprof.h"
 #include "movevars_shared.h"
+#include "movetype_push.h"
 #include "hierarchy.h"
 #include "trains.h"
 #include "vphysicsupdateai.h"
 #include "tier0/vcrmode.h"
-#include "pushentity.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -95,16 +95,126 @@ static void PhysicsCheckSweep( CBaseEntity *pEntity, const Vector& vecAbsStart, 
 	Physics_TraceEntity( pEntity, vecAbsStart, vecAbsEnd, mask, pTrace );
 }
 
-CPhysicsPushedEntities s_PushedEntities;
-CPhysicsPushedEntities *g_pPushedEntities = &s_PushedEntities;
+
+//-----------------------------------------------------------------------------
+// Purpose: Keeps track of original positions of any entities that are being possibly pushed
+//  and handles restoring positions for those objects if the push is aborted
+//-----------------------------------------------------------------------------
+class CPhysicsPushedEntities
+{
+public:
+	CPhysicsPushedEntities( void );
+
+	// Purpose: Tries to rotate an entity hierarchy, returns the blocker if any
+	CBaseEntity *PerformRotatePush( CBaseEntity *pRoot, float movetime );
+
+	// Purpose: Tries to linearly push an entity hierarchy, returns the blocker if any
+	CBaseEntity *PerformLinearPush( CBaseEntity *pRoot, float movetime );
+
+	int			CountMovedEntities() { return m_rgMoved.Count(); }
+	void		StoreMovedEntities( physicspushlist_t &list );
+	void		BeginPush( CBaseEntity *pRootEntity );
+
+private:
+	// describes the per-frame incremental motion of a rotating MOVETYPE_PUSH
+	struct RotatingPushMove_t
+	{
+		Vector		origin;
+		matrix3x4_t	startLocalToWorld;
+		matrix3x4_t	endLocalToWorld;
+		QAngle		amove;		// delta orientation
+	};
+
+	// Pushers + their original positions also (for touching triggers)
+	struct PhysicsPusherInfo_t
+	{
+		CBaseEntity			*m_pEntity;
+		Vector				m_vecStartAbsOrigin;
+	};
+
+	// Pushed entities + various state related to them being pushed
+	struct PhysicsPushedInfo_t
+	{
+		CBaseEntity			*m_pEntity;
+		Vector				m_vecStartAbsOrigin;
+		trace_t				m_Trace;
+		bool				m_bBlocked;
+		bool				m_bPusherIsGround;
+	};
+
+	// Adds the specified entity to the list
+	void	AddEntity( CBaseEntity *ent );
+
+	// If a move fails, restores all entities to their original positions
+	void	RestoreEntities( );
+
+	// Compute the direction to move the rotation blocker
+	void	ComputeRotationalPushDirection( CBaseEntity *pBlocker, const RotatingPushMove_t &rotPushMove, Vector *pMove, CBaseEntity *pRoot );
+
+	// Speculatively checks to see if all entities in this list can be pushed
+	bool	SpeculativelyCheckPush( PhysicsPushedInfo_t &info, const Vector &vecAbsPush, bool bRotationalPush );
+
+	// Speculatively checks to see if all entities in this list can be pushed
+	bool	SpeculativelyCheckRotPush( const RotatingPushMove_t &rotPushMove, CBaseEntity *pRoot );
+
+	// Speculatively checks to see if all entities in this list can be pushed
+	bool	SpeculativelyCheckLinearPush( const Vector &vecAbsPush );
+
+	// Registers a blockage
+	CBaseEntity *RegisterBlockage();
+
+	// Some fixup for objects pushed by rotating objects
+	void	FinishRotPushedEntity( CBaseEntity *pPushedEntity, const RotatingPushMove_t &rotPushMove );
+
+	// Commits the speculative movement
+	void	FinishPush( bool bIsRotPush = false, const RotatingPushMove_t *pRotPushMove = NULL );
+
+	// Generates a list of all entities potentially blocking all pushers
+	void	GenerateBlockingEntityList();
+	void	GenerateBlockingEntityListAddBox( const Vector &vecMoved );
+
+	// Purpose: Gets a list of all entities hierarchically attached to the root 
+	void	SetupAllInHierarchy( CBaseEntity *pParent );
+
+	// Unlink + relink the pusher list so we can actually do the push
+	void	UnlinkPusherList( int *pPusherHandles );
+	void	RelinkPusherList( int *pPusherHandles );
+
+	// Causes all entities in the list to touch triggers from their prev position
+	void	FinishPushers();
+
+	// Purpose: Rotates the root entity, fills in the pushmove structure
+	void	RotateRootEntity( CBaseEntity *pRoot, float movetime, RotatingPushMove_t &rotation );
+
+	// Purpose: Linearly moves the root entity
+	void	LinearlyMoveRootEntity( CBaseEntity *pRoot, float movetime, Vector *pAbsPushVector );
+
+	bool	IsPushedPositionValid( CBaseEntity *pBlocker );
+
+private:
+	CUtlVector<PhysicsPusherInfo_t>	m_rgPusher;
+	CUtlVector<PhysicsPushedInfo_t>	m_rgMoved;
+	int								m_nBlocker;
+	bool							m_bIsUnblockableByPlayer;
+	Vector							m_rootPusherStartLocalOrigin;
+	QAngle							m_rootPusherStartLocalAngles;
+	float							m_rootPusherStartLocaltime;
+
+	friend class CPushBlockerEnum;
+};
+
+
+// Handles saving moved entities list
+static CPhysicsPushedEntities s_PushedEntities;
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 CPhysicsPushedEntities::CPhysicsPushedEntities( void ) : m_rgPusher(8, 8), m_rgMoved(32, 32)
 {
-	m_flMoveTime = -1.0f;
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Store off entity and copy original origin to temporary array
@@ -176,6 +286,37 @@ void CPhysicsPushedEntities::ComputeRotationalPushDirection( CBaseEntity *pBlock
 	VectorSubtract( end, start, *pMove );
 }
 
+class CTraceFilterPushMove : public CTraceFilterSimple
+{
+	DECLARE_CLASS( CTraceFilterPushMove, CTraceFilterSimple );
+
+public:
+	CTraceFilterPushMove( CBaseEntity *pEntity, int nCollisionGroup ) 
+		: CTraceFilterSimple( pEntity, nCollisionGroup )
+	{
+		m_pRootParent = pEntity->GetRootMoveParent();
+	}
+
+	bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
+	{
+		Assert( dynamic_cast<CBaseEntity*>(pHandleEntity) );
+		CBaseEntity *pTestEntity = static_cast<CBaseEntity*>(pHandleEntity);
+
+		if ( UTIL_EntityHasMatchingRootParent( m_pRootParent, pTestEntity ) )
+			return false;
+
+		if ( pTestEntity->GetMoveType() == MOVETYPE_VPHYSICS && 
+			pTestEntity->VPhysicsGetObject() && pTestEntity->VPhysicsGetObject()->IsMoveable() )
+			return false;
+
+		return BaseClass::ShouldHitEntity( pHandleEntity, contentsMask );
+	}
+
+private:
+
+	CBaseEntity *m_pRootParent;
+};
+
 class CTraceFilterPushFinal : public CTraceFilterSimple
 {
 	DECLARE_CLASS( CTraceFilterPushFinal, CTraceFilterSimple );
@@ -221,7 +362,7 @@ bool CPhysicsPushedEntities::SpeculativelyCheckPush( PhysicsPushedInfo_t &info, 
 
 	// See if it's possible to move the entity, but disable all pushers in the hierarchy first
 	int *pPusherHandles = (int*)stackalloc( m_rgPusher.Count() * sizeof(int) );
-	UnlinkPusherList( pPusherHandles );
+	UnlinkPusherList(pPusherHandles);
 	CTraceFilterPushMove pushFilter(pBlocker, pBlocker->GetCollisionGroup() );
 
 	Vector pushDestPosition = pBlocker->GetAbsOrigin() + vecAbsPush;
@@ -539,9 +680,6 @@ public:
 		m_collisionGroupCount = 0;
 		for ( int i = m_pPushedEntities->m_rgPusher.Count(); --i >= 0; )
 		{
-			if ( !m_pPushedEntities->m_rgPusher[i].m_pEntity->IsSolid() )
-				continue;
-
 			m_pushersOnly.AddEntityToHit( m_pPushedEntities->m_rgPusher[i].m_pEntity );
 			int collisionGroup = m_pPushedEntities->m_rgPusher[i].m_pEntity->GetCollisionGroup();
 			AddCollisionGroup(collisionGroup);
@@ -828,6 +966,7 @@ CBaseEntity *CPhysicsPushedEntities::PerformRotatePush( CBaseEntity *pRoot, floa
 	return NULL;
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Linearly moves the root entity
 //-----------------------------------------------------------------------------
@@ -852,9 +991,6 @@ void CPhysicsPushedEntities::LinearlyMoveRootEntity( CBaseEntity *pRoot, float m
 CBaseEntity *CPhysicsPushedEntities::PerformLinearPush( CBaseEntity *pRoot, float movetime )
 {
 	VPROF("CPhysicsPushedEntities::PerformLinearPush");
-
-	m_flMoveTime = movetime;
-
 	m_bIsUnblockableByPlayer = (pRoot->GetFlags() & FL_UNBLOCKABLE_BY_PLAYER) ? true : false;
 	// Build a list of this entity + all its children because we're going to try to move them all
 	// This will also make sure each entity is linked in the appropriate place
@@ -1284,7 +1420,7 @@ CBaseEntity *CBaseEntity::PhysicsPushMove( float movetime )
 	}
 
 	// Now check that the entire hierarchy can rotate into the new location
-	CBaseEntity *pBlocker = g_pPushedEntities->PerformLinearPush( this, movetime );
+	CBaseEntity *pBlocker = s_PushedEntities.PerformLinearPush( this, movetime );
 	if ( pBlocker )
 	{
 		IncrementLocalTime( -movetime );
@@ -1311,7 +1447,7 @@ CBaseEntity *CBaseEntity::PhysicsPushRotate( float movetime )
 	}
 
 	// Now check that the entire hierarchy can rotate into the new location
-	CBaseEntity *pBlocker = g_pPushedEntities->PerformRotatePush( this, movetime );
+	CBaseEntity *pBlocker = s_PushedEntities.PerformRotatePush( this, movetime );
 	if ( pBlocker )
 	{
 		IncrementLocalTime( -movetime );
@@ -1330,7 +1466,7 @@ void CBaseEntity::PerformPush( float movetime )
 	// NOTE: Use handle index because the previous blocker could have been deleted
 	int hPrevBlocker = m_pBlocker.ToInt();
 	CBaseEntity *pBlocker;
-	g_pPushedEntities->BeginPush( this );
+	s_PushedEntities.BeginPush( this );
 	if (movetime > 0)
 	{
 		if ( GetLocalAngularVelocity() != vec3_angle )
@@ -1406,7 +1542,7 @@ void CBaseEntity::PerformPush( float movetime )
 	{
 		// store the list of moved entities for later
 		// if you actually did an unblocked push that moved entities, and you're using physics (which may block later)
-		if ( movetime > 0 && !m_pBlocker && GetSolid() == SOLID_VPHYSICS && g_pPushedEntities->CountMovedEntities() > 0 )
+		if ( movetime > 0 && !m_pBlocker && GetSolid() == SOLID_VPHYSICS && s_PushedEntities.CountMovedEntities() > 0 )
 		{
 			// UNDONE: Any reason to want to call this twice before physics runs?
 			// If so, maybe just append to the list?
@@ -1414,7 +1550,7 @@ void CBaseEntity::PerformPush( float movetime )
 			physicspushlist_t *pList = (physicspushlist_t *)CreateDataObject( PHYSICSPUSHLIST );
 			if ( pList )
 			{
-				g_pPushedEntities->StoreMovedEntities( *pList );
+				s_PushedEntities.StoreMovedEntities( *pList );
 			}
 		}
 	}

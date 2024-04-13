@@ -1222,9 +1222,6 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 
 	vieweffects->LevelInit();
 	
-	//Tony; loadup per-map manifests.
-	ParseParticleEffectsMap( pMapName, true );
-	
 	// Tell mode manager that map is changing
 	modemanager->LevelInit( pMapName );
 	ParticleMgr()->LevelInit();

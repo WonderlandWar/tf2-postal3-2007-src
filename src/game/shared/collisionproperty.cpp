@@ -10,7 +10,6 @@
 #include "igamesystem.h"
 #include "utlvector.h"
 #include "tier0/threadtools.h"
-#include "tier0/tslist.h"
 
 #ifdef CLIENT_DLL
 
@@ -52,29 +51,11 @@ public:
 	void AddEntity( CBaseEntity *pEntity );
 	
 	~CDirtySpatialPartitionEntityList();
-	void LockPartitionForRead()
-	{
-		if ( m_readLockCount == 0 )
-		{
-			m_partitionMutex.LockForRead();
-		}
-		m_readLockCount++;
-	}
-	void UnlockPartitionForRead()
-	{
-		m_readLockCount--;
-		if ( m_readLockCount == 0 )
-		{
-			m_partitionMutex.UnlockRead();
-		}
-	}
 
 
 private:
-	CTSListWithFreeList<CBaseHandle> m_DirtyEntities;
-	CThreadSpinRWLock	 m_partitionMutex;
-	uint32			 m_partitionWriteId;
-	CThreadLocalInt<>	 m_readLockCount;
+	CUtlVector< CBaseHandle > m_DirtyEntities;
+	CThreadFastMutex m_mutex;
 };
 
 
@@ -106,7 +87,6 @@ void UpdateDirtySpatialPartitionEntities()
 CDirtySpatialPartitionEntityList::CDirtySpatialPartitionEntityList( char const *name ) : CAutoGameSystem( name )
 {
 	m_DirtyEntities.Purge();
-	m_readLockCount = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -137,7 +117,8 @@ void CDirtySpatialPartitionEntityList::Shutdown()
 //-----------------------------------------------------------------------------
 void CDirtySpatialPartitionEntityList::AddEntity( CBaseEntity *pEntity )
 {
-	m_DirtyEntities.PushItem( pEntity->GetRefEHandle() );
+	AUTO_LOCK( m_mutex );
+	m_DirtyEntities.AddToTail( pEntity->GetRefEHandle() );
 }
 
 
@@ -156,78 +137,61 @@ void CDirtySpatialPartitionEntityList::LevelShutdownPostEntity()
 void CDirtySpatialPartitionEntityList::OnPreQuery( SpatialPartitionListMask_t listMask )
 {
 #ifdef CLIENT_DLL
-	const int validMask = PARTITION_CLIENT_GAME_EDICTS;
-#else
-	const int validMask = PARTITION_SERVER_GAME_EDICTS;
-#endif
-
-	if ( !( listMask & validMask ) )
+	if ( !( listMask & PARTITION_CLIENT_GAME_EDICTS ) )
 		return;
 
-	if ( m_partitionWriteId != 0 && m_partitionWriteId == ThreadGetCurrentId() )
-		return;
-
-#ifdef CLIENT_DLL
 	// FIXME: This should really be an assertion... feh!
 	if ( !C_BaseEntity::IsAbsRecomputationsEnabled() )
 	{
-		LockPartitionForRead();
+		m_mutex.Lock();
 		return;
 	}
+
+#else
+	if ( !( listMask & PARTITION_SERVER_GAME_EDICTS ) )
+		return;
 #endif
 
-	// if you're holding a read lock, then these are entities that were still dirty after your trace started
-	// or became dirty due to some other thread or callback. Updating them may cause corruption further up the
-	// stack (e.g. partition iterator).  Ignoring the state change should be safe since it happened after the 
-	// trace was requested or was unable to be resolved in a previous attempt (still dirty).
-	if ( m_DirtyEntities.Count() && !m_readLockCount )
+	m_mutex.Lock();
+
+	CUtlVector< CBaseHandle > vecStillDirty;
+
+	int nDirtyEntityCount = m_DirtyEntities.Count();
+	while ( nDirtyEntityCount > 0 )
 	{
-		CUtlVector< CBaseHandle > vecStillDirty;
-		m_partitionMutex.LockForWrite();
-		m_partitionWriteId = ThreadGetCurrentId();
-		CTSListWithFreeList<CBaseHandle>::Node_t *pCurrent, *pNext;
-		while ( ( pCurrent = m_DirtyEntities.Detach() ) != NULL )
-		{
-			while ( pCurrent )
-			{
-				CBaseHandle handle = pCurrent->elem;
-				pNext = (CTSListWithFreeList<CBaseHandle>::Node_t *)pCurrent->Next;
-				m_DirtyEntities.FreeNode( pCurrent );
-				pCurrent = pNext;
+		CBaseHandle handle;
+		handle = m_DirtyEntities[nDirtyEntityCount-1];
 
 #ifndef CLIENT_DLL
-				CBaseEntity *pEntity = gEntList.GetBaseEntity( handle );
+		CBaseEntity *pEntity = gEntList.GetBaseEntity( handle );
 #else
-				CBaseEntity *pEntity = cl_entitylist->GetBaseEntityFromHandle( handle );
+		CBaseEntity *pEntity = cl_entitylist->GetBaseEntityFromHandle( handle );
 #endif
+		
+		m_DirtyEntities.FastRemove( nDirtyEntityCount-1 );
 
-				if ( pEntity )
-				{
-					// If an entity is in the middle of bone setup, don't call UpdatePartition
-					//  which can cause it to redo bone setup on the same frame causing a recursive
-					//  call to bone setup.
-					if ( !pEntity->IsEFlagSet( EFL_SETTING_UP_BONES ) )
-					{
-						pEntity->CollisionProp()->UpdatePartition();
-					}
-					else
-					{
-						vecStillDirty.AddToTail( handle );
-					}
-				}
-			}
-		}
-		if ( vecStillDirty.Count() > 0 )
+		if ( pEntity )
 		{
-			for ( int i = 0; i < vecStillDirty.Count(); i++ )
+			// If an entity is in the middle of bone setup, don't call UpdatePartition
+			//  which can cause it to redo bone setup on the same frame causing a recursive
+			//  call to bone setup.
+			if ( !pEntity->IsEFlagSet( EFL_SETTING_UP_BONES ) )
 			{
-				m_DirtyEntities.PushItem( vecStillDirty[i] );
+				pEntity->CollisionProp()->UpdatePartition();
+			}
+			else
+			{
+				vecStillDirty.AddToTail( handle );
 			}
 		}
-		m_partitionWriteId = 0;
-		m_partitionMutex.UnlockWrite();
+
+		nDirtyEntityCount = m_DirtyEntities.Count();
 	}
-	LockPartitionForRead();
+
+	if ( vecStillDirty.Count() > 0 )
+	{
+		m_DirtyEntities = vecStillDirty;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -243,10 +207,7 @@ void CDirtySpatialPartitionEntityList::OnPostQuery( SpatialPartitionListMask_t l
 		return;
 #endif
 
-	if ( m_partitionWriteId != 0 )
-		return;
-
-	UnlockPartitionForRead();
+	m_mutex.Unlock();
 }
 
 

@@ -14,10 +14,6 @@
 #include "shake.h"				// For screen fade constants
 #include "engine/IEngineSound.h"
 
-#ifdef HL2MP
-#include "hl2mp_player.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -377,9 +373,6 @@ bool CMoveHelperServer::PlayerFallingDamage( void )
 void CMoveHelperServer::PlayerSetAnimation( PLAYER_ANIM eAnim )
 {
 	m_pHostPlayer->SetAnimation( eAnim );
-#ifdef HL2MP
-	ToHL2MPPlayer(m_pHostPlayer)->DoAnimationEvent( PLAYERANIMEVENT_JUMP );
-#endif
 }
 
 bool CMoveHelperServer::IsWorldEntity( const CBaseHandle &handle )

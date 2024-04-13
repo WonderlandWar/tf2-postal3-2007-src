@@ -23,8 +23,7 @@
 #include "tier0/icommandline.h"
 #include "c_world.h"
 
-//Tony; add the SDK into this as well by default.
-#if defined(DOD_DLL) || defined(CSTRIKE_DLL) || defined( SDK_DLL )
+#if defined(DOD_DLL) || defined(CSTRIKE_DLL)
 #define USE_DETAIL_SHAPES
 #endif
 

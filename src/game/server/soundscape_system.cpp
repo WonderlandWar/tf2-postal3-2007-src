@@ -91,11 +91,8 @@ void CSoundscapeSystem::AddSoundscapeFile( const char *filename )
 	pKeyValuesData->deleteThis();
 }
 
-CON_COMMAND( sv_soundscape_printdebuginfo, "print soundscapes" )
+CON_COMMAND(sv_soundscape_printdebuginfo, "print soundscapes")
 {
-	if ( !UTIL_IsCommandIssuedByServerAdmin() )
-		return;
-
 	g_SoundscapeSystem.PrintDebugInfo();
 }
 

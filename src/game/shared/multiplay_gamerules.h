@@ -198,8 +198,6 @@ public:
 
 	void HaveAllPlayersSpeakConceptIfAllowed( int iConcept );
 
-	virtual void GetTaggedConVarList( KeyValues *pCvarTagList );
-
 public:
 
 	struct ResponseRules_t

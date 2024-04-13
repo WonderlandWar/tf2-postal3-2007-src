@@ -75,15 +75,12 @@ typedef enum
 	AE_CL_ENABLE_BODYGROUP,
 	AE_CL_DISABLE_BODYGROUP,
 	AE_CL_BODYGROUP_SET_VALUE,
-	AE_CL_BODYGROUP_SET_VALUE_CMODEL_WPN,
 
 	AE_WPN_PRIMARYATTACK,	// Used by weapons that want their primary attack to occur during an attack anim (i.e. grenade throwing)
 	AE_WPN_INCREMENTAMMO,
 
 	AE_WPN_HIDE,		// Used to hide player weapons
 	AE_WPN_UNHIDE,		// Used to unhide player weapons
-
-	AE_WPN_PLAYWPNSOUND,	// Play a weapon sound from the weapon script file
 
 	LAST_SHARED_ANIMEVENT,
 } Animevent;

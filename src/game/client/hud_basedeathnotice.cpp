@@ -18,9 +18,7 @@
 #include "clientmode_shared.h"
 #include "c_baseplayer.h"
 #include "c_team.h"
-#if defined ( TF_CLIENT_DLL )
 #include "tf_shareddefs.h"
-#endif
 
 #include "hud_basedeathnotice.h"
 
@@ -42,6 +40,7 @@ CHudBaseDeathNotice::CHudBaseDeathNotice( const char *pElementName ) :
 	vgui::Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
 
+	SetHiddenBits( HIDEHUD_MISCSTATUS );
 }
 
 //-----------------------------------------------------------------------------
@@ -270,26 +269,16 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 	int iMsg = AddDeathNoticeItem();
 	int iLocalPlayerIndex = GetLocalPlayerIndex();
 
-	bool bPlayerDeath = FStrEq( pszEventName, "player_death" );
-	bool bObjectDeath = FStrEq( pszEventName, "object_destroyed" );
-
-	if ( bPlayerDeath || bObjectDeath )
+	if ( FStrEq( pszEventName, "player_death" ) || FStrEq( pszEventName, "object_destroyed" ) )
 	{
 		int victim = engine->GetPlayerForUserID( event->GetInt( "userid" ) );
 		int killer = engine->GetPlayerForUserID( event->GetInt( "attacker" ) );
 		const char *killedwith = event->GetString( "weapon" );
-		const char *killedwithweaponlog = event->GetString( "weapon_logclassname" );
-
-		if ( bObjectDeath && victim == 0 )
-		{
-			// for now, no death notices of map placed objects
-			m_DeathNotices.Remove( iMsg );
-			return;
-		}
 
 		// Get the names of the players
 		const char *killer_name = g_PR->GetPlayerName( killer );
 		const char *victim_name = g_PR->GetPlayerName( victim );
+
 		if ( !killer_name )
 		{
 			killer_name = "";
@@ -350,11 +339,7 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		{
 			Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s killed %s", m_DeathNotices[iMsg].Killer.szName, m_DeathNotices[iMsg].Victim.szName );
 
-			if ( killedwithweaponlog && killedwithweaponlog[0] && ( killedwithweaponlog[0] > 13 ) )
-			{
-				Q_strncat( sDeathMsg, VarArgs( " with %s.", killedwithweaponlog ), sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
-			}
-			else if ( m_DeathNotices[iMsg].szIcon[0] && ( m_DeathNotices[iMsg].szIcon[0] > 13 ) )
+			if ( m_DeathNotices[iMsg].szIcon[0] && ( m_DeathNotices[iMsg].szIcon[0] > 13 ) )
 			{
 				Q_strncat( sDeathMsg, VarArgs( " with %s.", &m_DeathNotices[iMsg].szIcon[2] ), sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
 			}
@@ -419,8 +404,6 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		// print a log message
 		Msg( "%s defended %s for team #%d\n", m_DeathNotices[iMsg].Killer.szName, m_DeathNotices[iMsg].Victim.szName, m_DeathNotices[iMsg].Killer.iTeam );
 	}
-//Tony; this is tf2 specific, it should be moved to hud_tfdeathnotice!!
-#if defined ( TF_CLIENT_DLL )
 	else if ( FStrEq( "teamplay_flag_event", pszEventName ) )
 	{
 		const char *pszMsgKey = NULL;
@@ -466,7 +449,6 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		if ( iLocalPlayerIndex == iPlayerIndex )
 			m_DeathNotices[iMsg].bLocalPlayerInvolved = true;
 	}
-#endif
 
 	OnGameEvent( event, m_DeathNotices[iMsg] );
 
@@ -482,12 +464,8 @@ void CHudBaseDeathNotice::FireGameEvent( IGameEvent *event )
 		m_DeathNotices[iMsg].iconDeath = GetIcon( m_DeathNotices[iMsg].szIcon, bInverted );
 		if ( !m_DeathNotices[iMsg].iconDeath )
 		{
-			// Can't find it, so use the default skull & crossbones icon
-#if defined ( TF_CLIENT_DLL )
+			// Can't find it, so use the default skull & crossbones icon			
 			m_DeathNotices[iMsg].iconDeath = GetIcon( "d_skull_tf", m_DeathNotices[iMsg].bLocalPlayerInvolved );
-#else
-			m_DeathNotices[iMsg].iconDeath = GetIcon( "d_skull", m_DeathNotices[iMsg].bLocalPlayerInvolved );
-#endif
 		}
 	}
 }

@@ -87,7 +87,6 @@ public:
 
 #define TIME_TO_DUCK		0.4
 #define TIME_TO_UNDUCK		0.2
-#define TIME_TO_UNDUCK_MS	200.0f
 
 #define MAX_WEAPON_SLOTS		6	// hud item selection slots
 #define MAX_WEAPON_POSITIONS	20	// max number of items within a slot
@@ -147,9 +146,6 @@ public:
 //  and have a good answer for a bunch of perf question related to player simulation, thinking logic, tracelines, networking overhead, etc.
 // But if you are brave or are doing something interesting, go for it...   ywb 9/22/03
 
-//You might be wondering why these aren't multiple of 2. Well the reason is that if servers decide to have HLTV enabled we need the extra slot.
-//This is ok since MAX_PLAYERS is used for code specific things like arrays and loops, but it doesn't really means that this is the max number of players allowed
-//Since this is decided by the gamerules (and it can be whatever number as long as its less than MAX_PLAYERS).
 #if defined( CSTRIKE_DLL )
 	#define MAX_PLAYERS				64  // Absolute max players supported
 #else
@@ -385,14 +381,9 @@ enum {
 
 #define LAST_PLAYER_OBSERVERMODE	OBS_MODE_ROAMING
 
-// Force Camera Restrictions with mp_forcecamera
-enum {
-	OBS_ALLOW_ALL = 0,	// allow all modes, all targets
-	OBS_ALLOW_TEAM,		// allow only own team & first person, no PIP
-	OBS_ALLOW_NONE,		// don't allow any spectating after death (fixed & fade to black)
-
-	OBS_ALLOW_NUM_MODES,
-};
+#define OBS_ALLOW_ALL			0	// allow all modes, all targets
+#define OBS_ALLOW_TEAM			1	// allow only own team & first person, no PIP
+#define OBS_ALLOW_NONE			2	// don't allow any spectating after death (fixed & fade to black)
 
 enum
 {
@@ -503,7 +494,8 @@ enum
 	EFL_DIRTY_ABSANGVELOCITY =	(1<<13),
 	EFL_DIRTY_SURROUNDING_COLLISION_BOUNDS	= (1<<14),
 	EFL_DIRTY_SPATIAL_PARTITION = (1<<15),
-	EFL_PLUGIN_BASED_BOT		= (1<<16),		//this is set on plugin bots, so that if any games include their own bot code, they won't affect plugin bots.
+//	UNUSED						= (1<<16),
+
 	EFL_IN_SKYBOX =				(1<<17),	// This is set if the entity detects that it's in the skybox.
 											// This forces it to pass the "in PVS" for transmission.
 	EFL_USE_PARTITION_WHEN_NOT_SOLID = (1<<18),	// Entities with this flag set show up in the partition even when not solid
@@ -749,13 +741,6 @@ struct EmitSound_t
 // Score added to the team score for a round win
 #define TEAMPLAY_ROUND_WIN_SCORE	1
 
-enum
-{
-	CP_WARN_NORMAL = 0,
-	CP_WARN_FINALCAP,
-	CP_WARN_NO_ANNOUNCEMENTS
-};
-
 // YWB:  3/12/2007
 // Changing the following #define for Prediction Error checking (See gamemovement.cpp for overview) will to 1 or 2 enables the system, 0 turns it off
 // Level 1 enables it, but doesn't force "full precision" networking, so you can still get lots of errors in position/velocity/etc.
@@ -783,36 +768,4 @@ enum
 // The player's method of starting / stopping commentary
 #define COMMENTARY_BUTTONS		(IN_USE)
 
-enum tprbGameInfo_e
-{
-	// Teamplay Roundbased Game rules shared
-	TPRBGAMEINFO_GAMESTATE = 1,					//gets the state of the current game (waiting for players, setup, active, overtime, stalemate, roundreset)
-	TPRBGAMEINFO_RESERVED1,
-	TPRBGAMEINFO_RESERVED2,
-	TPRBGAMEINFO_RESERVED3,
-	TPRBGAMEINFO_RESERVED4,
-	TPRBGAMEINFO_RESERVED5,
-	TPRBGAMEINFO_RESERVED6,
-	TPRBGAMEINFO_RESERVED7,
-	TPRBGAMEINFO_RESERVED8,
-
-	TPRBGAMEINFO_LASTGAMEINFO,
-};
-// Mark it off so valvegame_plugin_def.h ignores it, if both headers are included in a plugin.
-#define TPRBGAMEINFO_x 1
-
-//Tony; (t)eam(p)lay(r)ound(b)ased gamerules -- Game Info values
-#define TPRB_STATE_WAITING				(1<<0)
-#define TPRB_STATE_SETUP				(1<<1)
-#define TPRB_STATE_ACTIVE				(1<<2)
-#define TPRB_STATE_ROUNDWON				(1<<3)
-#define TPRB_STATE_OVERTIME				(1<<4)
-#define TPRB_STATE_STALEMATE			(1<<5)
-#define TPRB_STATE_ROUNDRESET			(1<<6)
-#define TPRB_STATE_WAITINGREADYSTART	(1<<7)
-
-//Tony; including sdk_shareddefs.h because I use it in a _lot_ of places that needs to be seen before many other things.
-#ifdef SDK_DLL
-#include "sdk_shareddefs.h"
-#endif
 #endif // SHAREDDEFS_H

@@ -22,10 +22,6 @@
 #include <vgui_controls/Panel.h>
 #include <KeyValues.h>
 #include "FileSystem.h"
-#include "matsys_controls/matsyscontrols.h"
-//Tony; so we can load localization at initialize
-#include <vgui/ILocalize.h>
-#include <tier3/tier3.h>
 
 using namespace vgui;
 
@@ -127,9 +123,6 @@ bool VGui_Startup( CreateInterfaceFn appSystemFactory )
 	if ( !vgui::VGui_InitInterfacesList( "CLIENT", &appSystemFactory, 1 ) )
 		return false;
 
-	if ( !vgui::VGui_InitMatSysInterfacesList( "CLIENT", &appSystemFactory, 1 ) )
-		return false;
-
 	g_InputInternal = (IInputInternal *)appSystemFactory( VGUI_INPUTINTERNAL_INTERFACE_VERSION,  NULL );
 	if ( !g_InputInternal )
 	{
@@ -147,16 +140,6 @@ bool VGui_Startup( CreateInterfaceFn appSystemFactory )
 	{
 		return false;
 	}
-
-		//Tony; add localization for the specific SDK.
-#if defined( SP_SDK )
-	g_pVGuiLocalize->AddFile( "resource/ep2_%language%.txt", "GAME" );
-#elif defined( MP_SDK )
-	g_pVGuiLocalize->AddFile( "resource/hl2mp_%language%.txt", "GAME" );
-#elif defined ( SDK_DLL )
-	//Tony; for the sdk template, just check for SDK_DLL
-	g_pVGuiLocalize->AddFile( "resource/sdktemplate_%language%.txt", "MOD" );
-#endif
 	return true;
 }
 

@@ -874,7 +874,7 @@ void CAI_NetworkManager::BuildNetworkGraph( void )
 }
 
 //------------------------------------------------------------------------------
-bool g_bAIDisabledByUser = false;
+extern bool g_bAIDisabledByUser;
 
 void CAI_NetworkManager::InitializeAINetworks()
 {

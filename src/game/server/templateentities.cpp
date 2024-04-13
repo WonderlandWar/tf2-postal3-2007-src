@@ -335,19 +335,9 @@ char *Templates_GetEntityIOFixedMapData( int iIndex )
 		Q_strncpy( g_Templates[iIndex]->pszFixedMapData, g_Templates[iIndex]->pszMapData, g_Templates[iIndex]->iMapDataLength );
 	}
 
-	int iFixupSize = Q_strlen(ENTITYIO_FIXUP_STRING);
-
-	// iFixupSize needs to be 1 size bigger in linux ie: if strlen returns 5, it needs to be 6, GCC must be doing something funky.                            
-	// if it's not, in linux the operations below fail on linux dedicated when using a template with name fixup, where it targets itself.
-	// I don't honestly know why. I even added null termination to make sure there is no garbage at the end as well, but it _will not_ work
-	// the way it does in windows, in GCC if it's kept the same length. Anyone else have any ideas?
-#ifdef LINUX
-	iFixupSize += 1;
-#endif
-
-	char *sOurFixup = new char[iFixupSize+1]; //Increase by 1 for null termination
+	int iFixupSize = strlen(ENTITYIO_FIXUP_STRING);
+	char *sOurFixup = new char[iFixupSize];
 	Q_snprintf( sOurFixup, iFixupSize, "%c%.4d", ENTITYIO_FIXUP_STRING[0], g_iCurrentTemplateInstance );
-	sOurFixup[iFixupSize] = NULL; // Null terminate it
 
 	// Now rip through the map data string and replace any instances of the fixup string with our unique identifier
 	char *c = g_Templates[iIndex]->pszFixedMapData;
@@ -371,7 +361,7 @@ char *Templates_GetEntityIOFixedMapData( int iIndex )
 			// Stomp it with our unique string
 			if ( bValid )
 			{
-				Q_memcpy( c, sOurFixup, iFixupSize );
+				memcpy( c, sOurFixup, iFixupSize );
 				c += iFixupSize;
 			}
 		}

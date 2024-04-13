@@ -344,11 +344,9 @@ void ScreenToWorld( int mousex, int mousey, float fov,
 	// Invert Y
 	dy = c_y - (float)mousey;
 
-	//Tony; fix for 2008 express. why this is an issue, is unbeknownst to me. - http://developer.valvesoftware.com/cgi-bin/bugzilla/show_bug.cgi?id=214
 	// Convert view plane distance
-	//dist = c_x / tan( M_PI * scaled_fov / 360.0 );
-	float dist_denom = tan(M_PI * scaled_fov / 360.0f); 
-	dist = c_x / dist_denom;
+	dist = c_x / tan( M_PI * scaled_fov / 360.0 );
+
 	// Decompose view angles
 	AngleVectors( vecRenderAngles, &vpn, &vright, &vup );
 

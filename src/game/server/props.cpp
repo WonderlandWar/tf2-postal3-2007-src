@@ -5840,49 +5840,41 @@ void CC_Prop_Physics_Create( const CCommand &args )
 	if ( args.ArgC() != 2 )
 		return;
 
+	MDLCACHE_CRITICAL_SECTION();
+
 	char pModelName[512];
 	Q_snprintf( pModelName, sizeof(pModelName), "models/%s", args[1] );
 	Q_DefaultExtension( pModelName, ".mdl", sizeof(pModelName) );
+	MDLHandle_t h = mdlcache->FindMDL( pModelName );
+	if ( h == MDLHANDLE_INVALID )
+		return;
+
+	// Must have vphysics to place as a physics prop
+	studiohdr_t *pStudioHdr = mdlcache->GetStudioHdr( h );
+	if ( !pStudioHdr )
+		return;
+
+	// Must have vphysics to place as a physics prop
+	if ( !mdlcache->GetVCollide( h ) )
+		return;
 
 	// Figure out where to place it
 	CBasePlayer* pPlayer = UTIL_GetCommandClient();
 	Vector forward;
 	pPlayer->EyeVectors( &forward );
 
-	CreatePhysicsProp( pModelName, pPlayer->EyePosition(), pPlayer->EyePosition() + forward * MAX_TRACE_LENGTH, pPlayer, true );
-}
-
-static ConCommand prop_physics_create("prop_physics_create", CC_Prop_Physics_Create, "Creates a physics prop with a specific .mdl aimed away from where the player is looking.\n\tArguments: {.mdl name}", FCVAR_CHEAT);
-
-
-CPhysicsProp* CreatePhysicsProp( const char *pModelName, const Vector &vTraceStart, const Vector &vTraceEnd, const IHandleEntity *pTraceIgnore, bool bRequireVCollide, const char *pClassName )
-{
-	MDLCACHE_CRITICAL_SECTION();
-
-	MDLHandle_t h = mdlcache->FindMDL( pModelName );
-	if ( h == MDLHANDLE_INVALID )
-		return NULL;
-
-	// Must have vphysics to place as a physics prop
-	studiohdr_t *pStudioHdr = mdlcache->GetStudioHdr( h );
-	if ( !pStudioHdr )
-		return NULL;
-
-	// Must have vphysics to place as a physics prop
-	if ( bRequireVCollide && !mdlcache->GetVCollide( h ) )
-		return NULL;
-
 	QAngle angles( 0.0f, 0.0f, 0.0f );
 	Vector vecSweepMins = pStudioHdr->hull_min;
 	Vector vecSweepMaxs = pStudioHdr->hull_max;
 
 	trace_t tr;
-	UTIL_TraceHull( vTraceStart, vTraceEnd,
-		vecSweepMins, vecSweepMaxs, MASK_NPCSOLID, pTraceIgnore, COLLISION_GROUP_NONE, &tr );
+	UTIL_TraceHull( pPlayer->EyePosition(),
+		pPlayer->EyePosition() + forward * MAX_TRACE_LENGTH, 
+		vecSweepMins, vecSweepMaxs, MASK_NPCSOLID, pPlayer, COLLISION_GROUP_NONE, &tr );
 		    
 	// No hit? We're done.
-	if ( (tr.fraction == 1.0 && (vTraceEnd-vTraceStart).Length() > 0.01) || tr.allsolid )
-		return NULL;
+	if ( tr.fraction == 1.0 || tr.allsolid )
+		return;
 		    
 	VectorMA( tr.endpos, 1.0f, tr.plane.normal, tr.endpos );
 
@@ -5890,7 +5882,7 @@ CPhysicsProp* CreatePhysicsProp( const char *pModelName, const Vector &vTraceSta
 	CBaseEntity::SetAllowPrecache( true );
 				  
 	// Try to create entity
-	CPhysicsProp *pProp = dynamic_cast< CPhysicsProp * >( CreateEntityByName( pClassName ) );
+	CPhysicsProp *pProp = dynamic_cast< CPhysicsProp * >( CreateEntityByName( "physics_prop" ) );
 	if ( pProp )
 	{
 		char buf[512];
@@ -5910,9 +5902,9 @@ CPhysicsProp* CreatePhysicsProp( const char *pModelName, const Vector &vTraceSta
 		pProp->Activate();
 	}
 	CBaseEntity::SetAllowPrecache( bAllowPrecache );
-
-	return pProp;
 }
+
+static ConCommand prop_physics_create("prop_physics_create", CC_Prop_Physics_Create, "Creates a physics prop with a specific .mdl aimed away from where the player is looking.\n\tArguments: {.mdl name}", FCVAR_CHEAT);
 
 
 //------------------------------------------------------------------------------

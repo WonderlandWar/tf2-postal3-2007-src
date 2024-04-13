@@ -25,8 +25,6 @@ ConVar props_break_max_pieces( "props_break_max_pieces", "-1", 0, "Maximum prop 
 ConVar props_break_max_pieces_perframe( "props_break_max_pieces_perframe", "-1", FCVAR_REPLICATED, "Maximum prop breakable piece count per frame (-1 = model default)" );
 #ifdef GAME_DLL
 extern ConVar breakable_multiplayer;
-#else
-ConVar cl_burninggibs( "cl_burninggibs", "0", 0, "A burning player that gibs has burning gibs." );
 #endif // GAME_DLL
 
 extern bool PropBreakableCapEdictsOnCreateAll(int modelindex, IPhysicsObject *pPhysics, const breakablepropparams_t &params, CBaseEntity *pEntity, int iPrecomputedBreakableCount = -1 );
@@ -1279,7 +1277,7 @@ void BuildGibList( CUtlVector<breakmodel_t> &list, int modelindex, float defBurs
 //			bIgnoreGibLImit - 
 //			defaultLocation - 
 //-----------------------------------------------------------------------------
-CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex, IPhysicsObject *pPhysics, const breakablepropparams_t &params, CBaseEntity *pEntity, int iPrecomputedBreakableCount, bool bIgnoreGibLimit, bool defaultLocation, CUtlVector<EHANDLE> *pGibList, bool bBurning )
+CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex, IPhysicsObject *pPhysics, const breakablepropparams_t &params, CBaseEntity *pEntity, int iPrecomputedBreakableCount, bool bIgnoreGibLimit, bool defaultLocation, CUtlVector<EHANDLE> *pGibList )
 {
     // Check for prop breakable count reset. 
 	int nPropCount = props_break_max_pieces_perframe.GetInt(); 
@@ -1478,13 +1476,6 @@ CBaseEntity *CreateGibsFromList( CUtlVector<breakmodel_t> &list, int modelindex,
 				if ( GetGibManager() )
 				{
 					GetGibManager()->AddGibToLRU( pBreakable->GetBaseAnimating() );
-				}
-#endif
-
-#ifndef GAME_DLL
-				if ( bBurning && cl_burninggibs.GetBool() )
-				{
-					pBreakable->ParticleProp()->Create( "burninggibs", PATTACH_POINT_FOLLOW, "bloodpoint" );
 				}
 #endif
 				if ( pOwnerEntity && pOwnerEntity->IsEffectActive( EF_NOSHADOW ) )

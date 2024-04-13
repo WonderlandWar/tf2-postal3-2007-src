@@ -637,17 +637,14 @@ void CAI_BaseNPC::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bo
 	BaseClass::Ignite( flFlameLifetime, bNPCOnly, flSize, bCalledByLevelDesigner );
 
 #ifdef HL2_EPISODIC
-	if ( AI_IsSinglePlayer() )
+	CBasePlayer *pPlayer = AI_GetSinglePlayer();
+	if ( pPlayer->IRelationType( this ) != D_LI )
 	{
-		CBasePlayer *pPlayer = AI_GetSinglePlayer();
-		if ( pPlayer->IRelationType( this ) != D_LI )
-		{
-			CNPC_Alyx *alyx = CNPC_Alyx::GetAlyx();
+		CNPC_Alyx *alyx = CNPC_Alyx::GetAlyx();
 
-			if ( alyx )
-			{
-				alyx->EnemyIgnited( this );
-			}
+		if ( alyx )
+		{
+			alyx->EnemyIgnited( this );
 		}
 	}
 #endif
@@ -992,8 +989,7 @@ void CAI_BaseNPC::NotifyFriendsOfDamage( CBaseEntity *pAttackerEntity )
 				{
 					if ( (originNpc.AsVector2D() - origin.AsVector2D()).LengthSqr() < NEAR_XY_SQ )
 					{
-						//Tony; add a check to make sure this doesn't get called if the npc isn't in a squad
-						if ( (pNpc->GetSquad() == GetSquad() && !(pNpc->GetSquad() == NULL || GetSquad() == NULL) ) || IRelationType( pNpc ) == D_LI )
+						if ( pNpc->GetSquad() == GetSquad() || IRelationType( pNpc ) == D_LI )
 							pNpc->OnFriendDamaged( this, pAttacker );
 					}
 				}

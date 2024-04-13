@@ -1811,9 +1811,6 @@ void CTempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int type,
 
 	// UNDONE: These need their own effects/sprites.  For now use the pistol
 	// SMG1
-#if defined ( HL2MP )		//  HACK for hl2mp, make the default muzzleflash the smg muzzleflash for weapons like the RPG that are using 'type 0'
-	default:
-#endif // HL2MP
 	case MUZZLEFLASH_SMG1:
 		if ( firstPerson )
 		{
@@ -1850,12 +1847,11 @@ void CTempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int type,
 			MuzzleFlash_Combine_NPC( hEntity, 1 );
 		}
 		break;
-#if !defined ( HL2MP )	//  HACK for hl2mp, make the default muzzleflash the smg muzzleflash for weapons like the RPG that are using 'type 0'
+	
 	default:
 		// There's no supported muzzle flash for the type specified!
 		Assert(0);
 		break;
-#endif // HL2MP
 	}
 
 #endif
@@ -2375,7 +2371,7 @@ void CTempEnts::LevelInit()
 	m_pShells[0] = (model_t *) engine->LoadModel( "models/weapons/shell.mdl" );
 	m_pShells[1] = (model_t *) engine->LoadModel( "models/weapons/rifleshell.mdl" );
 	m_pShells[2] = (model_t *) engine->LoadModel( "models/weapons/shotgun_shell.mdl" );
-
+	
 #if defined( HL1_CLIENT_DLL )
 	m_pHL1Shell			= (model_t *)engine->LoadModel( "models/shell.mdl" );
 	m_pHL1ShotgunShell	= (model_t *)engine->LoadModel( "models/shotgunshell.mdl" );

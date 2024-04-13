@@ -324,13 +324,6 @@ void SharedVehicleViewSmoothing(CBasePlayer *pPlayer,
 	// UNDONE: *pOrigin would already be correct in single player if the HandleView() on the server ran after vphysics
 	MatrixGetColumn( newCameraToWorld, 3, *pAbsOrigin );
 
-	float flDefaultFOV;
-#ifdef CLIENT_DLL
-	flDefaultFOV = default_fov.GetFloat();
-#else
-	flDefaultFOV = pPlayer->GetDefaultFOV();
-#endif
-
 	// If we're playing an entry or exit animation...
 	if ( bRunningAnim || pData->bRunningEnterExit )
 	{
@@ -385,10 +378,13 @@ void SharedVehicleViewSmoothing(CBasePlayer *pPlayer,
 			
 			if ( pFOV != NULL )
 			{
-				if ( pData->flFOV > flDefaultFOV )
-				{
-					*pFOV = Lerp( flFracFOV, pData->flFOV, flDefaultFOV );
-				}
+				float flDefaultFOV;
+#ifdef CLIENT_DLL
+				flDefaultFOV = default_fov.GetFloat();
+#else
+				flDefaultFOV = pPlayer->GetDefaultFOV();
+#endif
+				*pFOV = Lerp( flFracFOV, pData->flFOV, flDefaultFOV );
 			}
 		}
 		else
@@ -398,19 +394,19 @@ void SharedVehicleViewSmoothing(CBasePlayer *pPlayer,
 			
 			if ( pFOV != NULL )
 			{
-				if ( pData->flFOV > flDefaultFOV )
-				{
-					*pFOV = Lerp( flFracFOV, flDefaultFOV, pData->flFOV );
-				}
+				float flDefaultFOV;
+#ifdef CLIENT_DLL
+				flDefaultFOV = default_fov.GetFloat();
+#else
+				flDefaultFOV = pPlayer->GetDefaultFOV();
+#endif
+				*pFOV = Lerp( flFracFOV, flDefaultFOV, pData->flFOV );
 			}
 		}
 	}
 	else if ( pFOV != NULL )
 	{
-		if ( pData->flFOV > flDefaultFOV )
-		{
-			// Not running an entry/exit anim. Just use the vehicle's FOV.
-			*pFOV = pData->flFOV;
-		}
+		// Not running an entry/exit anim. Just use the vehicle's FOV.
+		*pFOV = pData->flFOV;
 	}
 }

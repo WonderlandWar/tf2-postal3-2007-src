@@ -787,10 +787,7 @@ bool CFourWheelVehiclePhysics::Think()
 	#define STEER_DAMPING	0.8
 	float flSteer = GetPoseParameter( m_poseParameters[VEH_STEER] );
 	float flPhysicsSteer = carState.steeringAngle / vehicleData.steering.degreesSlow;
-	float value = (STEER_DAMPING * flSteer) + ((1 - STEER_DAMPING) * flPhysicsSteer);
-	if (!IsFinite(value))
-		value = 0;
-	SetPoseParameter( m_poseParameters[VEH_STEER], value );
+	SetPoseParameter( m_poseParameters[VEH_STEER], (STEER_DAMPING * flSteer) + ((1 - STEER_DAMPING) * flPhysicsSteer) );
 
 	m_actionValue += m_actionSpeed * m_actionScale * gpGlobals->frametime;
 	SetPoseParameter( m_poseParameters[VEH_ACTION], m_actionValue );

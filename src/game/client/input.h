@@ -18,8 +18,6 @@
 #include "ehandle.h"
 #include "inputsystem/AnalogCode.h"
 
-typedef unsigned long CRC32_t;
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -142,8 +140,6 @@ private:
 	// Called once per frame to allow convar overrides to acceleration settings when mouse is active
 	void		CheckMouseAcclerationVars();
 
-	void		ValidateUserCmd( CUserCmd *usercmd, int sequence_number );
-
 // Private Data
 private:
 	typedef struct
@@ -233,16 +229,7 @@ private:
 
 	float		m_flLastForwardMove;
 
-
-	class CVerifiedUserCmd
-	{
-	public:
-		CUserCmd	m_cmd;
-		CRC32_t		m_crc;
-	};
-				
 	CUserCmd	*m_pCommands;
-	CVerifiedUserCmd *m_pVerifiedCommands;
 
 	CameraThirdData_t	*m_pCameraThirdData;
 

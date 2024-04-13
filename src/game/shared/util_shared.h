@@ -533,6 +533,5 @@ private:
 	float Now( void ) const;		// work-around since client header doesn't like inlined gpGlobals->curtime
 };
 
-int UTIL_StringFieldToInt( const char *szValue, const char **pValueStrings, int iNumStrings );
 
 #endif // UTIL_SHARED_H

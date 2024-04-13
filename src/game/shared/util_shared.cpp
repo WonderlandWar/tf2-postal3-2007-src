@@ -14,7 +14,6 @@
 #include "mathlib/IceKey.H"
 #include "checksum_crc.h"
 #include "particle_parse.h"
-#include "KeyValues.h"
 
 #ifdef CLIENT_DLL
 	#include "c_te_effect_dispatch.h"
@@ -1033,19 +1032,4 @@ unsigned short UTIL_GetAchievementEventMask( void )
 	CRC32_Final( &mapCRC );
 
 	return ( mapCRC & 0xFFFF );
-}
-
-int UTIL_StringFieldToInt( const char *szValue, const char **pValueStrings, int iNumStrings )
-{
-	if ( !szValue || !szValue[0] )
-		return -1;
-
-	for ( int i = 0; i < iNumStrings; i++ )
-	{
-		if ( FStrEq(szValue, pValueStrings[i]) )
-			return i;
-	}
-
-	Assert(0);
-	return -1;
 }

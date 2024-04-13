@@ -22,7 +22,7 @@ extern CAI_Node*	FindPickerAINode( CBasePlayer* pPlayer, NodeType_e nNodeType );
 extern void			SetDebugBits( CBasePlayer* pPlayer, const char *name, int bit );
 extern CBaseEntity *FindPickerEntity( CBasePlayer *pPlayer );
 
-extern bool g_bAIDisabledByUser;
+bool g_bAIDisabledByUser = false;
 
 
 //------------------------------------------------------------------------------

@@ -245,11 +245,7 @@ void CLagCompensationManager::FrameUpdatePostEntityThink()
 
 		if ( !pPlayer )
 		{
-			if ( track->Count() > 0 )
-			{
-				track->RemoveAll();
-			}
-
+			track->RemoveAll();
 			continue;
 		}
 

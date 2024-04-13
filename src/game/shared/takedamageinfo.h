@@ -28,20 +28,12 @@ public:
 
 					CTakeDamageInfo();
 					CTakeDamageInfo( CBaseEntity *pInflictor, CBaseEntity *pAttacker, float flDamage, int bitsDamageType, int iKillType = 0 );
-					CTakeDamageInfo( CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, float flDamage, int bitsDamageType, int iKillType = 0 );
 					CTakeDamageInfo( CBaseEntity *pInflictor, CBaseEntity *pAttacker, const Vector &damageForce, const Vector &damagePosition, float flDamage, int bitsDamageType, int iKillType = 0, Vector *reportedPosition = NULL );
-					CTakeDamageInfo( CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, const Vector &damageForce, const Vector &damagePosition, float flDamage, int bitsDamageType, int iKillType = 0, Vector *reportedPosition = NULL );
 	
 
 	// Inflictor is the weapon or rocket (or player) that is dealing the damage.
 	CBaseEntity*	GetInflictor() const;
 	void			SetInflictor( CBaseEntity *pInflictor );
-
-	// Weapon is the weapon that did the attack.
-	// For hitscan weapons, it'll be the same as the inflictor. For projectile weapons, the projectile 
-	// is the inflictor, and this contains the weapon that created the projectile.
-	CBaseEntity*	GetWeapon() const;
-	void			SetWeapon( CBaseEntity *pWeapon );
 
 	// Attacker is the character who originated the attack (like a player or an AI).
 	CBaseEntity*	GetAttacker() const;
@@ -81,9 +73,7 @@ public:
 	const char *	GetAmmoName() const;
 
 	void			Set( CBaseEntity *pInflictor, CBaseEntity *pAttacker, float flDamage, int bitsDamageType, int iKillType = 0 );
-	void			Set( CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, float flDamage, int bitsDamageType, int iKillType = 0 );
 	void			Set( CBaseEntity *pInflictor, CBaseEntity *pAttacker, const Vector &damageForce, const Vector &damagePosition, float flDamage, int bitsDamageType, int iKillType = 0, Vector *reportedPosition = NULL );
-	void			Set( CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, const Vector &damageForce, const Vector &damagePosition, float flDamage, int bitsDamageType, int iKillType = 0, Vector *reportedPosition = NULL );
 
 	void			AdjustPlayerDamageInflictedForSkillLevel();
 	void			AdjustPlayerDamageTakenForSkillLevel();
@@ -97,14 +87,13 @@ public:
 	void			CopyDamageToBaseDamage();
 
 protected:
-	void			Init( CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, const Vector &damageForce, const Vector &damagePosition, const Vector &reportedPosition, float flDamage, int bitsDamageType, int iKillType );
+	void			Init( CBaseEntity *pInflictor, CBaseEntity *pAttacker, const Vector &damageForce, const Vector &damagePosition, const Vector &reportedPosition, float flDamage, int bitsDamageType, int iKillType );
 
 	Vector			m_vecDamageForce;
 	Vector			m_vecDamagePosition;
 	Vector			m_vecReportedPosition;	// Position players are told damage is coming from
 	EHANDLE			m_hInflictor;
 	EHANDLE			m_hAttacker;
-	EHANDLE			m_hWeapon;
 	float			m_flDamage;
 	float			m_flMaxDamage;
 	float			m_flBaseDamage;			// The damage amount before skill leve adjustments are made. Used to get uniform damage forces.
@@ -129,7 +118,7 @@ public:
 	CBaseEntity		*GetTarget() const;
 	void			SetTarget( CBaseEntity *pTarget );
 
-	void			Init( CBaseEntity *pTarget, CBaseEntity *pInflictor, CBaseEntity *pAttacker, CBaseEntity *pWeapon, const Vector &damageForce, const Vector &damagePosition, const Vector &reportedPosition, float flDamage, int bitsDamageType, int iKillType );
+	void			Init( CBaseEntity *pTarget, CBaseEntity *pInflictor, CBaseEntity *pAttacker, const Vector &damageForce, const Vector &damagePosition, const Vector &reportedPosition, float flDamage, int bitsDamageType, int iKillType );
 
 protected:
 	EHANDLE			m_hTarget;
@@ -179,17 +168,6 @@ inline CBaseEntity* CTakeDamageInfo::GetAttacker() const
 inline void CTakeDamageInfo::SetAttacker( CBaseEntity *pAttacker )
 {
 	m_hAttacker = pAttacker;
-}
-
-inline CBaseEntity* CTakeDamageInfo::GetWeapon() const
-{
-	return m_hWeapon;
-}
-
-
-inline void CTakeDamageInfo::SetWeapon( CBaseEntity *pWeapon )
-{
-	m_hWeapon = pWeapon;
 }
 
 

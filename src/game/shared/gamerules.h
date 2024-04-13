@@ -177,8 +177,7 @@ public:
 	virtual bool IsBonusChallengeTimeBased( void );
 	
 #else
-
-	virtual void GetTaggedConVarList( KeyValues *pCvarTagList ) {}
+	
 
 
 // CBaseEntity overrides.
@@ -371,7 +370,6 @@ public:
 
 	virtual const char *GetGameTypeName( void ){ return NULL; }
 	virtual int GetGameType( void ){ return 0; }
-
 };
 
 

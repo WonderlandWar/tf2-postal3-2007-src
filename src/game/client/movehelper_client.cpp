@@ -12,10 +12,6 @@
 #include "engine/IEngineTrace.h"
 #include "engine/ivmodelinfo.h"
 
-#ifdef HL2MP
-#include "c_hl2mp_player.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -276,11 +272,7 @@ bool CMoveHelperClient::PlayerFallingDamage(void)
 //-----------------------------------------------------------------------------
 void CMoveHelperClient::PlayerSetAnimation( PLAYER_ANIM eAnim )
 {
-
-#ifdef HL2MP
-	C_HL2MP_Player::GetLocalHL2MPPlayer()->DoAnimationEvent( PLAYERANIMEVENT_JUMP );
-#endif
-
+	 // Do nothing on the client. Animations are set on the server.
 }
 
 bool CMoveHelperClient::IsWorldEntity( const CBaseHandle &handle )

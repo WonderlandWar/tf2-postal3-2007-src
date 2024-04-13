@@ -83,7 +83,6 @@
 #include "particle_parse.h"
 #include "steam/steam_api.h"
 #include "tier3/tier3.h"
-#include "serverbenchmark_base.h"
 
 #ifdef CSTRIKE_DLL // BOTPORT: TODO: move these ifdefs out
 #include "bot/bot.h"
@@ -897,9 +896,6 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 		UpdateRichPresence();
 	}
 
-	//Tony; parse custom manifest if exists!
-	ParseParticleEffectsMap( pMapName, false );
-
 	// IGameSystem::LevelInitPreEntityAllSystems() is called when the world is precached
 	// That happens either in LoadGameState() or in MapEntity_ParseAllEntities()
 	if ( loadGame )
@@ -964,8 +960,6 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 		g_MapEntityRefs.Purge();
 		CMapLoadEntityFilter filter;
 		MapEntity_ParseAllEntities( pMapEntities, &filter );
-
-		g_pServerBenchmark->StartBenchmark();
 
 		// Now call the mod specific parse
 		LevelInit_ParseAllEntities( pMapEntities );
@@ -1117,8 +1111,6 @@ void CServerGameDLL::GameFrame( bool simulating )
 
 	gamestatsuploader->UpdateConnection();
 #endif
-
-	g_pServerBenchmark->UpdateBenchmark();
 
 	Physics_RunThinkFunctions( simulating );
 	
@@ -3086,8 +3078,5 @@ EXPOSE_SINGLE_INTERFACE( CServerDLLSharedAppSystems, IServerDLLSharedAppSystems,
 //-----------------------------------------------------------------------------
 void CServerGameTags::GetTaggedConVarList( KeyValues *pCvarTagList )
 {
-	if ( pCvarTagList && g_pGameRules )
-	{
-		g_pGameRules->GetTaggedConVarList( pCvarTagList );
-	}
+	//TFP3: Do nothing
 }

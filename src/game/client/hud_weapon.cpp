@@ -89,8 +89,6 @@ void CHudWeapon::Paint( void )
 	if ( !player )
 		return;
 
-	MDLCACHE_CRITICAL_SECTION();
-
 	C_BaseCombatWeapon *pWeapon = player->GetActiveWeapon();
 	
 	if ( pWeapon )

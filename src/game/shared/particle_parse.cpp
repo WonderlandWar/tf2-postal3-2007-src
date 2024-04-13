@@ -100,53 +100,7 @@ void ParseParticleEffects( bool bLoadSheets )
 
 	g_pParticleSystemMgr->DecommitTempMemory();
 }
-//-----------------------------------------------------------------------------
-// Purpose: loads per-map manifest!
-//-----------------------------------------------------------------------------
-void ParseParticleEffectsMap( const char *pMapName, bool bLoadSheets )
-{
-	MEM_ALLOC_CREDIT();
 
-	g_pParticleSystemMgr->ShouldLoadSheets( bLoadSheets );
-
-	CUtlVector<CUtlString> files;
-
-	const char *mapManifestFilename = NULL;
-	if ( pMapName && *pMapName )
-	{
-#ifdef CLIENT_DLL
-#define UTIL_VarArgs VarArgs //Tony; goddamnit.
-#endif
-		mapManifestFilename = UTIL_VarArgs( "particles/particles_%s.txt", pMapName );
-	}
-
-	// Open the manifest file, and read the particles specified inside it
-	KeyValues *manifest = new KeyValues( mapManifestFilename );
-	if ( manifest->LoadFromFile( filesystem, mapManifestFilename, "GAME" ) )
-	{
-		for ( KeyValues *sub = manifest->GetFirstSubKey(); sub != NULL; sub = sub->GetNextKey() )
-		{
-			if ( !Q_stricmp( sub->GetName(), "file" ) )
-			{
-				files.AddToTail( sub->GetString() );
-				continue;
-			}
-
-			Warning( "CParticleMgr::LevelInit:  Manifest '%s' with bogus file type '%s', expecting 'file'\n", mapManifestFilename, sub->GetName() );
-		}
-	}
-	else
-		//Tony; don't print a warning, and don't proceed any further if the file doesn't exist!
-		return;
-
-	int nCount = files.Count();
-	for ( int i = 0; i < nCount; ++i )
-	{
-		g_pParticleSystemMgr->ReadParticleConfigFile( files[i], true, true );
-	}
-
-	g_pParticleSystemMgr->DecommitTempMemory();
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

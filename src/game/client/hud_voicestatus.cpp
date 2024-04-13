@@ -7,26 +7,17 @@
 #include "cbase.h"
 #include "hudelement.h"
 #include <vgui_controls/Panel.h>
-#include <vgui/IScheme.h>
+#include <vgui/isurface.h>
 #include <vgui/ILocalize.h>
-#include <vgui/ISurface.h>
-#include <vgui/IVGui.h>
-#include <vgui_controls/ImageList.h>
 #include "c_baseplayer.h"
 #include "voice_status.h"
 #include "clientmode_shared.h"
 #include "c_playerresource.h"
 #include "voice_common.h"
-#include <igameresources.h>
 
-#include "vgui_avatarimage.h"
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
 
 ConVar *sv_alltalk = NULL;
 
-using namespace vgui;
 //=============================================================================
 // Icon for the local player using voice
 //=============================================================================
@@ -73,8 +64,6 @@ void CHudVoiceSelfStatus::ApplySchemeSettings(vgui::IScheme *pScheme)
 #ifdef HL2MP
 	SetBgColor( Color( 0, 0, 0, 0 ) );
 #endif
-
-	SetPaintBackgroundEnabled( false );
 }
 
 void CHudVoiceSelfStatus::VidInit( void )
@@ -108,15 +97,7 @@ public:
 	DECLARE_CLASS_SIMPLE( CHudVoiceStatus, vgui::Panel );
 
 	CHudVoiceStatus( const char *name );
-	~CHudVoiceStatus()
-	{
-		if ( NULL != m_pImageList )
-		{
-			delete m_pImageList;
-			m_pImageList = NULL;
-		}
-	};
-	virtual void PostApplySchemeSettings( vgui::IScheme *pScheme );
+
 	virtual bool ShouldDraw();	
 	virtual void Paint();
 	virtual void VidInit();
@@ -125,13 +106,7 @@ public:
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 
 private:
-
-	//Tony; display avatars instead of an icon.
-	vgui::ImageList				*m_pImageList;
-	int							m_iImageAvatars[MAX_PLAYERS+1];
-
-	int							m_iPlayerAvatar[MAX_PLAYERS+1];
-	CUtlMap<int,int>			m_mapAvatarsToImageList;
+	CHudTexture *m_pVoiceIcon;
 	int m_iDeadImageID;
 
 	Color	m_clrIcon;
@@ -157,16 +132,13 @@ private:
 
 DECLARE_HUDELEMENT( CHudVoiceStatus );
 
-extern bool AvatarIndexLessFunc( const int &lhs, const int &rhs );
+
 CHudVoiceStatus::CHudVoiceStatus( const char *pName ) :
 	vgui::Panel( NULL, "HudVoiceStatus" ), CHudElement( pName )
 {
 	SetParent( g_pClientMode->GetViewport() );
-	m_pImageList = NULL;
 
-	m_mapAvatarsToImageList.SetLessFunc( AvatarIndexLessFunc );
-	m_mapAvatarsToImageList.RemoveAll();
-	memset( &m_iImageAvatars, 0, sizeof(int) * (MAX_PLAYERS+1) );
+	m_pVoiceIcon = NULL;
 
 	SetHiddenBits( 0 );
 
@@ -183,31 +155,11 @@ CHudVoiceStatus::CHudVoiceStatus( const char *pName ) :
 
 void CHudVoiceStatus::ApplySchemeSettings(vgui::IScheme *pScheme)
 {
-
-	if ( m_pImageList )
-		delete m_pImageList;
-	m_pImageList = new ImageList( false );
-
-	m_mapAvatarsToImageList.RemoveAll();
-	memset( &m_iImageAvatars, 0, sizeof(int) * (MAX_PLAYERS+1) );
-
 	BaseClass::ApplySchemeSettings( pScheme );
 
 #ifdef HL2MP
 	SetBgColor( Color( 0, 0, 0, 0 ) );
 #endif
-
-	SetPaintBackgroundEnabled( false );
-}
-void CHudVoiceStatus::PostApplySchemeSettings( vgui::IScheme *pScheme )
-{
-	// resize the images to our resolution
-	for (int i = 0; i < m_pImageList->GetImageCount(); i++ )
-	{
-		int wide, tall;
-		m_pImageList->GetImage(i)->GetSize(wide, tall);
-		m_pImageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(),wide), scheme()->GetProportionalScaledValueEx( GetScheme(),tall));
-	}
 }
 
 void CHudVoiceStatus::Init( void )
@@ -217,59 +169,14 @@ void CHudVoiceStatus::Init( void )
 
 void CHudVoiceStatus::VidInit( void )
 {
+	m_pVoiceIcon = gHUD.GetIcon( "voice_player" );
 }
 
 void CHudVoiceStatus::OnThink( void )
 {
-	//Tony; don't update if local player aint here!
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if (!player)
-		return;
-
 	for( int i=1;i<=gpGlobals->maxClients;i++ )
 	{
 		bool bTalking = GetClientVoiceMgr()->IsPlayerSpeaking(i);
-		
-		//Tony; update avatars.
-		if ( steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
-		{
-			player_info_t pi;
-			if ( engine->GetPlayerInfo( i, &pi ) )
-			{
-				if ( pi.friendsID )
-				{
-					CSteamID steamIDForPlayer( pi.friendsID, 1, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
-
-					// See if the avatar's changed
-					int iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( steamIDForPlayer );
-					if ( m_iImageAvatars[i] != iAvatar )
-					{
-						m_iImageAvatars[i] = iAvatar;
-
-						// Now see if we already have that avatar in our list
-						int iIndex = m_mapAvatarsToImageList.Find( iAvatar );
-						if ( iIndex == m_mapAvatarsToImageList.InvalidIndex() )
-						{
-							CAvatarImage *pImage = new CAvatarImage();
-							pImage->SetAvatarSteamID( steamIDForPlayer );
-							pImage->SetSize( 32, 32 );	// Deliberately non scaling
-							int iImageIndex = m_pImageList->AddImage( pImage );
-
-							m_mapAvatarsToImageList.Insert( iAvatar, iImageIndex );
-						}
-					}
-
-					int iIndex = m_mapAvatarsToImageList.Find( iAvatar );
-
-					m_iPlayerAvatar[i] = -1; //Default it.
-					if ( iIndex != m_mapAvatarsToImageList.InvalidIndex() )
-					{
-						//Tony; copy the avatar over.
-						m_iPlayerAvatar[i] = m_mapAvatarsToImageList[iIndex];
-					}
-				}
-			}
-		}
 
 		// if they are in the list and not talking, remove them
 		if( !bTalking )
@@ -298,6 +205,9 @@ bool CHudVoiceStatus::ShouldDraw()
 
 void CHudVoiceStatus::Paint()
 {
+   	if( !m_pVoiceIcon )
+		return;
+	
 	int x, y, w, h;
 	GetBounds( x, y, w, h );
 
@@ -394,24 +304,9 @@ void CHudVoiceStatus::Paint()
 
 			iDeathIconWidth = icon_wide;
 		}
-		// Draw the voice icon
-		int imageIndex = m_iPlayerAvatar[playerIndex];
-		if (m_pImageList->IsValidIndex(imageIndex))
-		{
-			// 0 is always the blank image
-			if (imageIndex > 0)
-			{
-				IImage *image = m_pImageList->GetImage(imageIndex);
-				if (image)
-				{
-					image->SetPos( xpos + icon_xpos + iDeathIconWidth, ypos + icon_ypos );
-					image->SetSize(icon_wide, icon_tall);
-					image->Paint();
-				}
-			}
-		}
 
-		
+		// Draw the voice icon
+		m_pVoiceIcon->DrawSelf( xpos + icon_xpos + iDeathIconWidth, ypos + icon_ypos, icon_wide, icon_tall, m_clrIcon );
 
 		// Draw the player's name
 		surface()->DrawSetTextPos( xpos + text_xpos + iDeathIconWidth, ypos + ( item_tall / 2 ) - ( iFontHeight / 2 ) );

@@ -2747,10 +2747,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\serverbenchmark_base.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ServerNetworkProperty.cpp"
 				>
 			</File>

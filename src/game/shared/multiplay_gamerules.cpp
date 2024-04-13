@@ -1346,17 +1346,6 @@ bool CMultiplayRules::Init()
 		}
 	}
 
-	void CMultiplayRules::GetTaggedConVarList( KeyValues *pCvarTagList )
-	{
-		BaseClass::GetTaggedConVarList( pCvarTagList );
-
-		KeyValues *pGravity = new KeyValues( "sv_gravity" );
-		pGravity->SetString( "convar", "sv_gravity" );
-		pGravity->SetString( "tag", "gravity" );
-
-		pCvarTagList->AddSubKey( pGravity );
-	}
-
 #else
 
 	const char *CMultiplayRules::GetVoiceCommandSubtitle( int iMenu, int iItem )

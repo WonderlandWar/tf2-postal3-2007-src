@@ -15,9 +15,7 @@
 #include "vphysics/constraints.h"
 #include "vcollide_parse.h"
 #include "ndebugoverlay.h"
-#ifdef HL2_DLL
 #include "hl2_player.h"
-#endif
 #include "props.h"
 #include "vehicle_choreo_generic_shared.h"
 #include "ai_utils.h"

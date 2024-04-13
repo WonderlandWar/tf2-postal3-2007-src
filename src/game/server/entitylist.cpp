@@ -763,7 +763,7 @@ CBaseEntity *CGlobalEntityList::FindEntityInSphere( CBaseEntity *pStartEntity, c
 //				or Use handler, NULL otherwise.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityByNameNearest( const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityByNameNearest( const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller )
 {
 	CBaseEntity *pEntity = NULL;
 
@@ -782,19 +782,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByNameNearest( const char *szName, con
 		if ( !pSearch->edict() )
 			continue;
 
-		Vector origin;
-		if ( pSearch->IsBSPModel() && pSearch->CollisionProp())
-		{
-			if ( brushPrecision == BRUSHPRECISION_NEAREST )
-				pSearch->CollisionProp()->CalcNearestPoint(vecSrc,&origin);
-			else
-				origin = pSearch->CollisionProp()->GetCollisionOrigin();
-		}
-		else
-			origin = pSearch->GetAbsOrigin();
-
-
-		float flDist2 = (origin - vecSrc).LengthSqr();
+		float flDist2 = (pSearch->GetAbsOrigin() - vecSrc).LengthSqr();
 
 		if (flMaxDist2 > flDist2)
 		{
@@ -819,7 +807,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByNameNearest( const char *szName, con
 //				or Use handler, NULL otherwise.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityByNameWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityByNameWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller )
 {
 	//
 	// Check for matching class names within the search radius.
@@ -836,19 +824,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByNameWithin( CBaseEntity *pStartEntit
 		if ( !pEntity->edict() )
 			continue;
 
-		Vector origin;
-		if ( pEntity->IsBSPModel() && pEntity->CollisionProp())
-		{
-			if ( brushPrecision == BRUSHPRECISION_NEAREST )
-				pEntity->CollisionProp()->CalcNearestPoint(vecSrc,&origin);
-			else
-				origin = pEntity->CollisionProp()->GetCollisionOrigin();
-		}
-		else
-			origin = pEntity->GetAbsOrigin();
-
-
-		float flDist2 = (origin - vecSrc).LengthSqr();
+		float flDist2 = (pEntity->GetAbsOrigin() - vecSrc).LengthSqr();
 
 		if (flMaxDist2 > flDist2)
 		{
@@ -868,7 +844,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByNameWithin( CBaseEntity *pStartEntit
 //			flRadius - Search radius for classname search, 0 to search everywhere.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityByClassnameNearest( const char *szName, const Vector &vecSrc, float flRadius, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityByClassnameNearest( const char *szName, const Vector &vecSrc, float flRadius )
 {
 	CBaseEntity *pEntity = NULL;
 
@@ -887,19 +863,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByClassnameNearest( const char *szName
 		if ( !pSearch->edict() )
 			continue;
 
-		Vector origin;
-		if ( pSearch->IsBSPModel() && pSearch->CollisionProp())
-		{
-			if ( brushPrecision == BRUSHPRECISION_NEAREST )
-				pSearch->CollisionProp()->CalcNearestPoint(vecSrc,&origin);
-			else
-				origin = pSearch->CollisionProp()->GetCollisionOrigin();
-		}
-		else
-			origin = pSearch->GetAbsOrigin();
-
-
-		float flDist2 = (origin - vecSrc).LengthSqr();
+		float flDist2 = (pSearch->GetAbsOrigin() - vecSrc).LengthSqr();
 
 		if (flMaxDist2 > flDist2)
 		{
@@ -921,7 +885,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByClassnameNearest( const char *szName
 //			flRadius - Search radius for classname search, 0 to search everywhere.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityByClassnameWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityByClassnameWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius )
 {
 	//
 	// Check for matching class names within the search radius.
@@ -938,19 +902,7 @@ CBaseEntity *CGlobalEntityList::FindEntityByClassnameWithin( CBaseEntity *pStart
 		if ( !pEntity->edict() )
 			continue;
 
-		Vector origin;
-		if ( pEntity->IsBSPModel() && pEntity->CollisionProp())
-		{
-			if ( brushPrecision == BRUSHPRECISION_NEAREST )
-				pEntity->CollisionProp()->CalcNearestPoint(vecSrc,&origin);
-			else
-				origin = pEntity->CollisionProp()->GetCollisionOrigin();
-		}
-		else
-			origin = pEntity->GetAbsOrigin();
-
-
-		float flDist2 = (origin - vecSrc).LengthSqr();
+		float flDist2 = (pEntity->GetAbsOrigin() - vecSrc).LengthSqr();
 
 		if (flMaxDist2 > flDist2)
 		{
@@ -1000,14 +952,14 @@ CBaseEntity *CGlobalEntityList::FindEntityGeneric( CBaseEntity *pStartEntity, co
 //				or Use handler, NULL otherwise.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityGenericWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityGenericWithin( CBaseEntity *pStartEntity, const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller )
 {
 	CBaseEntity *pEntity = NULL;
 
-	pEntity = gEntList.FindEntityByNameWithin( pStartEntity, szName, vecSrc, flRadius, pSearchingEntity, pActivator, pCaller, brushPrecision );
+	pEntity = gEntList.FindEntityByNameWithin( pStartEntity, szName, vecSrc, flRadius, pSearchingEntity, pActivator, pCaller );
 	if (!pEntity)
 	{
-		pEntity = gEntList.FindEntityByClassnameWithin( pStartEntity, szName, vecSrc, flRadius, brushPrecision );
+		pEntity = gEntList.FindEntityByClassnameWithin( pStartEntity, szName, vecSrc, flRadius );
 	}
 
 	return pEntity;
@@ -1025,14 +977,14 @@ CBaseEntity *CGlobalEntityList::FindEntityGenericWithin( CBaseEntity *pStartEnti
 //				or Use handler, NULL otherwise.
 // Output : Returns a pointer to the found entity, NULL if none.
 //-----------------------------------------------------------------------------
-CBaseEntity *CGlobalEntityList::FindEntityGenericNearest( const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller, int brushPrecision )
+CBaseEntity *CGlobalEntityList::FindEntityGenericNearest( const char *szName, const Vector &vecSrc, float flRadius, CBaseEntity *pSearchingEntity, CBaseEntity *pActivator, CBaseEntity *pCaller )
 {
 	CBaseEntity *pEntity = NULL;
 
-	pEntity = gEntList.FindEntityByNameNearest( szName, vecSrc, flRadius, pSearchingEntity, pActivator, pCaller, brushPrecision );
+	pEntity = gEntList.FindEntityByNameNearest( szName, vecSrc, flRadius, pSearchingEntity, pActivator, pCaller );
 	if (!pEntity)
 	{
-		pEntity = gEntList.FindEntityByClassnameNearest( szName, vecSrc, flRadius, brushPrecision );
+		pEntity = gEntList.FindEntityByClassnameNearest( szName, vecSrc, flRadius );
 	}
 
 	return pEntity;

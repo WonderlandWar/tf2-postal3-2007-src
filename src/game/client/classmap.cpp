@@ -99,7 +99,7 @@ C_BaseEntity *CClassMap::CreateEntity( const char *mapname )
 		if ( !lookup )
 			continue;
 
-		if ( Q_stricmp( lookup->GetMapName(), mapname ) )
+		if ( Q_strcmp( lookup->GetMapName(), mapname ) )
 			continue;
 
 		if ( !lookup->factory )

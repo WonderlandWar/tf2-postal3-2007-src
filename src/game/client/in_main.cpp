@@ -286,7 +286,6 @@ CInput::CInput( void )
 {
 	m_pCommands = NULL;
 	m_pCameraThirdData = NULL;
-	m_pVerifiedCommands = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -980,7 +979,7 @@ void CInput::ExtraMouseSample( float frametime, bool active )
 
 	// Let the move manager override anything it wants to.
 	g_pClientMode->CreateMove( frametime, cmd );
-	
+		
 	// Get current view angles after the client mode tweaks with it
 	engine->SetViewAngles( cmd->viewangles );
 	prediction->SetLocalViewAngles( cmd->viewangles );
@@ -988,8 +987,7 @@ void CInput::ExtraMouseSample( float frametime, bool active )
 
 void CInput::CreateMove ( int sequence_number, float input_sample_frametime, bool active )
 {	
-	CUserCmd *cmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP ];
-	CVerifiedUserCmd *pVerified = &m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ];
+	CUserCmd *cmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP];
 
 	cmd->Reset();
 
@@ -1077,7 +1075,7 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 
 	// Let the move manager override anything it wants to.
 	g_pClientMode->CreateMove( input_sample_frametime, cmd );
-
+	
 	// Get current view angles after the client mode tweaks with it
 	engine->SetViewAngles( cmd->viewangles );
 
@@ -1096,9 +1094,6 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 	}
 	m_EntityGroundContact.RemoveAll();
 #endif
-
-	pVerified->m_cmd = *cmd;
-	pVerified->m_crc = cmd->GetChecksum();
 }
 
 //-----------------------------------------------------------------------------
@@ -1127,16 +1122,6 @@ void CInput::DecodeUserCmdFromBuffer( bf_read& buf, int sequence_number )
 	CUserCmd *cmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP];
 
 	ReadUsercmd( &buf, cmd, &nullcmd );
-}
-
-void CInput::ValidateUserCmd( CUserCmd *usercmd, int sequence_number )
-{
-	// Validate that the usercmd hasn't been changed
-	CRC32_t crc = usercmd->GetChecksum();
-	if ( crc != m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ].m_crc )
-	{
-		*usercmd = m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ].m_cmd;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1168,10 +1153,6 @@ bool CInput::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool is
 			// DevMsg( "WARNING! User command delta too old (from %i, to %i)\n", from, to );
 			f = &nullcmd;
 		}
-		else
-		{
-			ValidateUserCmd( f, from );
-		}
 	}
 
 	t = GetUserCmd( to );
@@ -1180,10 +1161,6 @@ bool CInput::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool is
 	{
 		// DevMsg( "WARNING! User command too old (from %i, to %i)\n", from, to );
 		t = &nullcmd;
-	}
-	else
-	{
-		ValidateUserCmd( t, to );
 	}
 
 	// Write it into the buffer
@@ -1217,7 +1194,7 @@ CUserCmd *CInput::GetUserCmd( int sequence_number )
 	{
 		return NULL;	// usercmd was overwritten by newer command
 	}
-
+	
 	return usercmd;
 }
 
@@ -1449,7 +1426,6 @@ void CInput::Init_All (void)
 {
 	Assert( !m_pCommands );
 	m_pCommands = new CUserCmd[ MULTIPLAYER_BACKUP ];
-	m_pVerifiedCommands = new CVerifiedUserCmd[ MULTIPLAYER_BACKUP ];
 
 	m_fMouseInitialized	= false;
 	m_fRestoreSPI		= false;
@@ -1489,9 +1465,6 @@ void CInput::Shutdown_All(void)
 
 	delete[] m_pCommands;
 	m_pCommands = NULL;
-
-	delete[] m_pVerifiedCommands;
-	m_pVerifiedCommands = NULL;
 }
 
 void CInput::LevelInit( void )

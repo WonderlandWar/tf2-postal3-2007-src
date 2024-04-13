@@ -15,12 +15,6 @@
 #include "steam\steam_api.h"
 #include "c_baseplayer.h"
 
-// Avatar images, and avatar images with friends, don't scale with resolution.
-#define AVATAR_INDENT_X			(22)
-#define AVATAR_INDENT_Y			(1)
-#define AVATAR_POSTDENT_X		(1)
-#define AVATAR_POSTDENT_Y		(1)
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -31,8 +25,7 @@ public:
 
 	// Call this to set the steam ID associated with the avatar
 	bool SetAvatarSteamID( CSteamID steamIDUser );
-	void UpdateFriendStatus( void );
-	void ClearAvatarSteamID( void );
+	void ClearAvatarSteamID( void ) { m_bValid = false; }
 
 	// Call to Paint the image
 	// Image will draw within the current panel context at the specified position
@@ -65,13 +58,6 @@ public:
 		m_nTall = tall; 
 	}
 
-	void SetAvatarSize(int wide, int tall)	
-	{
-		m_iAvatarWidth = wide;
-		m_iAvatarHeight = tall;
-		SetSize( wide + AVATAR_INDENT_X + AVATAR_POSTDENT_X, tall + AVATAR_INDENT_Y + AVATAR_POSTDENT_Y );
-	}
-
 	// Set the draw color 
 	virtual void SetColor(Color col)			
 	{ 
@@ -79,8 +65,6 @@ public:
 	}
 
 	bool	IsValid( void ) { return m_bValid; }
-
-	int		GetWide( void ) { return m_nWide; }
 
 protected:
 	void InitFromRGBA( const byte *rgba, int width, int height );
@@ -90,11 +74,6 @@ private:
 	int m_iTextureID;
 	int m_nX, m_nY, m_nWide, m_nTall;
 	bool m_bValid;
-	bool m_bFriend;
-	CHudTexture *m_pFriendIcon;
-	int	 m_iAvatarWidth;
-	int	 m_iAvatarHeight;
-	CSteamID	m_SteamID;
 };
 
 //-----------------------------------------------------------------------------
@@ -111,7 +90,6 @@ public:
 	void SetPlayer( C_BasePlayer *pPlayer );
 
 	virtual void PaintBackground( void );
-	bool	IsValid( void ) { return (GetImage() && ((CAvatarImage*)GetImage())->IsValid()); }
 
 protected:
 	CPanelAnimationVar( Color, m_clrOutline, "color_outline", "Black" );
