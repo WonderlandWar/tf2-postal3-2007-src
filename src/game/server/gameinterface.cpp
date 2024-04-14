@@ -3071,12 +3071,3 @@ private:
 };
 
 EXPOSE_SINGLE_INTERFACE( CServerDLLSharedAppSystems, IServerDLLSharedAppSystems, SERVER_DLL_SHARED_APPSYSTEMS );
-
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void CServerGameTags::GetTaggedConVarList( KeyValues *pCvarTagList )
-{
-	//TFP3: Do nothing
-}

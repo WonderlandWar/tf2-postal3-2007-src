@@ -171,13 +171,5 @@ public:
 
 bool IsEngineThreaded();
 
-class CServerGameTags : public IServerGameTags
-{
-public:
-	virtual void GetTaggedConVarList( KeyValues *pCvarTagList );
-
-};
-EXPOSE_SINGLE_INTERFACE( CServerGameTags, IServerGameTags, INTERFACEVERSION_SERVERGAMETAGS );
-
 #endif // GAMEINTERFACE_H
 
