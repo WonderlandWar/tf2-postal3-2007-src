@@ -976,27 +976,20 @@ void CBaseCombatWeapon::SetActivity( Activity act, float duration )
 //====================================================================================
 int CBaseCombatWeapon::UpdateClientData( CBasePlayer *pPlayer )
 {
-	int iNewState = WEAPON_IS_CARRIED_BY_PLAYER;
-
 	if ( pPlayer->GetActiveWeapon() == this )
 	{
 		if ( pPlayer->m_fOnTarget ) 
 		{
-			iNewState = WEAPON_IS_ONTARGET;
+			m_iState = WEAPON_IS_ONTARGET;
 		}
 		else
 		{
-			iNewState = WEAPON_IS_ACTIVE;
+			m_iState = WEAPON_IS_ACTIVE;
 		}
 	}
 	else
 	{
-		iNewState = WEAPON_IS_CARRIED_BY_PLAYER;
-	}
-
-	if ( m_iState != iNewState )
-	{
-		m_iState = iNewState;
+		m_iState = WEAPON_IS_CARRIED_BY_PLAYER;
 	}
 	return 1;
 }

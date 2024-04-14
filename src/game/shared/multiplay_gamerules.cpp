@@ -52,26 +52,7 @@ ConVar mp_chattime(
 		true, 1,
 		true, 120 );
 
-#ifdef GAME_DLL
-void MPTimeLimitCallback( IConVar *var, const char *pOldString, float flOldValue )
-{
-	if ( mp_timelimit.GetInt() < 0 )
-	{
-		mp_timelimit.SetValue( 0 );
-	}
-
-	if ( MultiplayRules() )
-	{
-		MultiplayRules()->HandleTimeLimitChange();
-	}
-}
-#endif 
-
-ConVar mp_timelimit( "mp_timelimit", "0", FCVAR_NOTIFY|FCVAR_REPLICATED, "game time per map in minutes"
-#ifdef GAME_DLL
-					, MPTimeLimitCallback 
-#endif
-					);
+ConVar mp_timelimit( "mp_timelimit", "0", FCVAR_NOTIFY|FCVAR_REPLICATED, "game time per map in minutes" );
 
 #ifdef GAME_DLL
 
@@ -88,12 +69,6 @@ ConVar mp_waitingforplayers_cancel( "mp_waitingforplayers_cancel", "0", FCVAR_GA
 ConVar mp_clan_readyrestart( "mp_clan_readyrestart", "0", FCVAR_GAMEDLL, "If non-zero, game will restart once someone from each team gives the ready signal" );
 ConVar mp_clan_ready_signal( "mp_clan_ready_signal", "ready", FCVAR_GAMEDLL, "Text that team leader from each team must speak for the match to begin" );
 					  					  
-#endif
-
-#ifndef CLIENT_DLL
-int CMultiplayRules::m_nMapCycleTimeStamp = 0;
-int CMultiplayRules::m_nMapCycleindex = 0;
-CUtlVector<char*> CMultiplayRules::m_MapList;
 #endif
 
 //=========================================================
@@ -1045,95 +1020,67 @@ bool CMultiplayRules::Init()
 		}
 	}
 
-	void CMultiplayRules::GetNextLevelName( char *pszNextMap, int bufsize, bool bRandom /* = false */ )
+	// TFP3: Copied from Source 2006
+	void CMultiplayRules::GetNextLevelName( char *pszNextMap, int bufsize )
 	{
+		char szFirstMapInList[32];
+		Q_strncpy( szFirstMapInList, "hldm1" ,sizeof(szFirstMapInList));  // the absolute default level is hldm1
+
+		// find the map to change to
+
 		const char *mapcfile = mapcyclefile.GetString();
 		Assert( mapcfile != NULL );
+		Q_strncpy( pszNextMap, STRING(gpGlobals->mapname) ,bufsize);
+		Q_strncpy( szFirstMapInList, STRING(gpGlobals->mapname) ,sizeof(szFirstMapInList));
 
-		// Check the time of the mapcycle file and re-populate the list of level names if the file has been modified
-		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "GAME" );
+		int length;
+		char *pFileList;
+		char *aFileList = pFileList = (char*)UTIL_LoadFileForMe( mapcfile, &length );
+		if ( pFileList && length )
+		{
+			// the first map name in the file becomes the default
+			sscanf( pFileList, " %31s", pszNextMap );
+			if ( engine->IsMapValid( pszNextMap ) )
+				Q_strncpy( szFirstMapInList, pszNextMap ,sizeof(szFirstMapInList));
 
-		if ( 0 == nMapCycleTimeStamp )
-		{
-			// Map cycle file does not exist, make a list containing only the current map
-			char *szCurrentMapName = new char[32];
-			Q_strncpy( szCurrentMapName, STRING(gpGlobals->mapname), 32 );
-			m_MapList.AddToTail( szCurrentMapName );
-		}
-		else
-		{
-			// If map cycle file has changed or this is the first time through ...
-			if ( m_nMapCycleTimeStamp != nMapCycleTimeStamp )
+			// keep pulling mapnames out of the list until the current mapname
+			// if the current mapname isn't found,  load the first map in the list
+			bool next_map_is_it = false;
+			while ( 1 )
 			{
-				// Reset map index and map cycle timestamp
-				m_nMapCycleTimeStamp = nMapCycleTimeStamp;
-				m_nMapCycleindex = 0;
+				while ( *pFileList && isspace( *pFileList ) ) pFileList++; // skip over any whitespace
+				if ( !(*pFileList) )
+					break;
 
-				// Clear out existing map list. Not using Purge() because I don't think that it will do a 'delete []'
-				for ( int i = 0; i < m_MapList.Count(); i++ )
+				char cBuf[32];
+				int ret = sscanf( pFileList, " %31s", cBuf );
+				// Check the map name is valid
+				if ( ret != 1 || *cBuf < 13 )
+					break;
+
+				if ( next_map_is_it )
 				{
-					delete [] m_MapList[i];
-				}
-
-				m_MapList.RemoveAll();
-
-				// Repopulate map list from mapcycle file
-				int nFileLength;
-				char *aFileList = (char*)UTIL_LoadFileForMe( mapcfile, &nFileLength );
-				if ( aFileList && nFileLength )
-				{
-					V_SplitString( aFileList, "\n", m_MapList );
-
-					for ( int i = 0; i < m_MapList.Count(); i++ )
+					// check that it is a valid map file
+					if ( engine->IsMapValid( cBuf ) )
 					{
-						bool bIgnore = false;
-
-						// Strip out the spaces in the name
-						StripChar( m_MapList[i] , '\r');
-						StripChar( m_MapList[i] , ' ');
-						
-						if ( !engine->IsMapValid( m_MapList[i] ) )
-						{
-							bIgnore = true;
-
-							// If the engine doesn't consider it a valid map remove it from the lists
-							char szWarningMessage[MAX_PATH];
-							V_snprintf( szWarningMessage, MAX_PATH, "Invalid map '%s' included in map cycle file. Ignored.\n", m_MapList[i] );
-							Warning( szWarningMessage );
-						}
-						else if ( !Q_strncmp( m_MapList[i], "//", 2 ) )
-						{
-							bIgnore = true;
-						}
-
-						if ( bIgnore )
-						{
-							delete [] m_MapList[i];
-							m_MapList.Remove( i );
-							--i;
-						}
+						Q_strncpy( pszNextMap, cBuf, bufsize);
+						break;
 					}
-
-					UTIL_FreeFile( (byte *)aFileList );
 				}
+
+				if ( FStrEq( cBuf, STRING(gpGlobals->mapname) ) )
+				{  // we've found our map;  next map is the one to change to
+					next_map_is_it = true;
+				}
+
+				pFileList += strlen( cBuf );
 			}
+
+			UTIL_FreeFile( (byte *)aFileList );
 		}
 
-		// If somehow we have no maps in the list then add the current one
-		if ( 0 == m_MapList.Count() )
-		{
-			char *szDefaultMapName = new char[32];
-			Q_strncpy( szDefaultMapName, STRING(gpGlobals->mapname), 32 );
-			m_MapList.AddToTail( szDefaultMapName );
-		}
-
-		if ( bRandom )
-		{
-			m_nMapCycleindex = RandomInt( 0, m_MapList.Count() - 1 );
-		}
-
-		// Here's the return value
-		Q_strncpy( pszNextMap, m_MapList[m_nMapCycleindex], bufsize);
+		if ( !engine->IsMapValid(pszNextMap) )
+			Q_strncpy( pszNextMap, szFirstMapInList, bufsize);
 	}
 
 	void CMultiplayRules::ChangeLevel( void )
@@ -1202,15 +1149,6 @@ bool CMultiplayRules::Init()
 	}
 
 #ifndef CLIENT_DLL
-	void CMultiplayRules::IncrementMapCycleIndex()
-	{
-		// Reset index if we've passed the end of the map list
-		if ( ++m_nMapCycleindex >= m_MapList.Count() )
-		{
-			m_nMapCycleindex = 0;
-		}
-	}
-
 	bool CMultiplayRules::ClientCommand( CBaseEntity *pEdict, const CCommand &args )
 	{
 		CBasePlayer *pPlayer = ToBasePlayer( pEdict );
@@ -1330,20 +1268,6 @@ bool CMultiplayRules::Init()
 	bool CMultiplayRules::IsLoadingBugBaitReport()
 	{
 		return ( !engine->IsDedicatedServer()&& CommandLine()->CheckParm( "-bugbait" ) && sv_cheats->GetBool() );
-	}
-
-	void CMultiplayRules::HaveAllPlayersSpeakConceptIfAllowed( int iConcept )
-	{
-		CBaseMultiplayerPlayer *pPlayer;
-		for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-		{
-			pPlayer = ToBaseMultiplayerPlayer( UTIL_PlayerByIndex( i ) );
-
-			if ( !pPlayer )
-				continue;
-
-			pPlayer->SpeakConceptIfAllowed( iConcept );
-		}
 	}
 
 #else

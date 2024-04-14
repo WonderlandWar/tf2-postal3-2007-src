@@ -128,11 +128,6 @@ CGameRulesRegister* CGameRulesRegister::FindByName( const char *pName )
 		// Make sure the client gets notification to make a new game rules object.
 		Assert( g_StringTableGameRules );
 		g_StringTableGameRules->AddString( true, "classname", strlen( pClassName ) + 1, pClassName );
-
-		if ( g_pGameRules )
-		{
-			g_pGameRules->CreateCustomNetworkStringTables();
-		}
 	}			
 
 #endif

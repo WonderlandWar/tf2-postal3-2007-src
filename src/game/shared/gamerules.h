@@ -39,8 +39,6 @@ class CBasePlayer;
 class CItem;
 class CAmmoDef;
 
-extern ConVar sk_autoaim_mode;
-
 // Autoaiming modes
 enum
 {
@@ -173,6 +171,9 @@ public:
 	virtual bool InRoundRestart( void ) { return false; }
 
 #ifdef CLIENT_DLL
+	
+	// Game Achievements (client version)
+	virtual void MarkAchievement ( char const *pchAchievementName );
 
 	virtual bool IsBonusChallengeTimeBased( void );
 	
@@ -244,7 +245,6 @@ public:
 	virtual bool  FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker ) {return TRUE;};// can this player take damage from this attacker?
 	virtual bool ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target ) { return TRUE; }
 	virtual float GetAutoAimScale( CBasePlayer *pPlayer ) { return 1.0f; }
-	virtual int	GetAutoAimMode()	{ return AUTOAIM_ON; }
 
 	virtual bool ShouldUseRobustRadiusDamage(CBaseEntity *pEntity) { return false; }
 	virtual void  RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRadius, int iClassIgnore, CBaseEntity *pEntityIgnore );
@@ -359,12 +359,8 @@ public:
 
 	virtual bool CanEntityBeUsePushed( CBaseEntity *pEnt ) { return true; }
 
-	virtual void CreateCustomNetworkStringTables( void ) { }
-
 	// Game Achievements (server version)
 	virtual void MarkAchievement ( IRecipientFilter& filter, char const *pchAchievementName );
-
-	virtual void ResetMapCycleTimeStamp( void ){ return; }
 	
 #endif
 

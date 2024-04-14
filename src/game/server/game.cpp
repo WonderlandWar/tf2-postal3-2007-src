@@ -12,20 +12,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-void MapCycleFileChangedCallback( IConVar *var, const char *pOldString, float flOldValue )
-{
-	if ( Q_stricmp( pOldString, mapcyclefile.GetString() ) != 0 )
-	{
-		if ( GameRules() )
-		{
-			// For multiplayer games, forces the mapcyclefile to be reloaded
-			GameRules()->ResetMapCycleTimeStamp();
-		}
-	}
-}
-
 ConVar	displaysoundlist( "displaysoundlist","0" );
-ConVar  mapcyclefile( "mapcyclefile", "mapcycle.txt", FCVAR_NONE, "Name of the .txt file used to cycle the maps on multiplayer servers ", MapCycleFileChangedCallback );
+ConVar  mapcyclefile( "mapcyclefile", "mapcycle.txt" );
 ConVar  servercfgfile( "servercfgfile","server.cfg" );
 ConVar  lservercfgfile( "lservercfgfile","listenserver.cfg" );
 

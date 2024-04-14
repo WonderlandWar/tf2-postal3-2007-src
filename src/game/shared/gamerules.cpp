@@ -34,7 +34,6 @@
 
 
 ConVar g_Language( "g_Language", "0", FCVAR_REPLICATED );
-ConVar sk_autoaim_mode( "sk_autoaim_mode", "1", FCVAR_ARCHIVE | FCVAR_REPLICATED );
 
 static CViewVectors g_DefaultViewVectors(
 	Vector( 0, 0, 64 ),			//VEC_VIEW (m_vView)
@@ -100,6 +99,18 @@ void CGameRulesProxy::NotifyNetworkStateChanged()
 ConVar	old_radius_damage( "old_radiusdamage", "0.0", FCVAR_REPLICATED );
 
 #ifdef CLIENT_DLL //{
+
+void CGameRules::MarkAchievement( const char *pchAchievementName )
+{
+	if ( pchAchievementName && pchAchievementName[0] )
+	{
+		DevMsg( "Achievement earned, ID:%s.\n", pchAchievementName );
+	}
+	else
+	{
+		Warning( "Attempted to mark bad achievement ID" );
+	}
+}
 
 bool CGameRules::IsBonusChallengeTimeBased( void )
 {

@@ -72,6 +72,13 @@
 #include "weapon_physcannon.h"
 #endif
 
+#ifdef HL2_DLL
+extern ConVar hl2_xbox_aiming;
+#define UseXboxAiming() hl2_xbox_aiming.GetBool()
+#else
+#define UseXboxAiming() 0
+#endif 
+
 ConVar autoaim_max_dist( "autoaim_max_dist", "2160" ); // 2160 = 180 feet
 ConVar autoaim_max_deflect( "autoaim_max_deflect", "0.99" );
 
@@ -6547,7 +6554,7 @@ void CBasePlayer::GetAutoaimVector( autoaim_params_t &params )
 
 	Vector	forward;
 
-	if( IsInAVehicle() && g_pGameRules->GetAutoAimMode() == AUTOAIM_ON_CONSOLE )
+	if( IsXbox() && IsInAVehicle() )
 	{
 		m_vecAutoAim = angles;
 		AngleVectors( EyeAngles() + m_vecAutoAim, &forward );
@@ -6650,7 +6657,7 @@ QAngle CBasePlayer::AutoaimDeflection( Vector &vecSrc, autoaim_params_t &params 
 			{
 				bool bAimAtThis = true;
 
-				if( pEntHit->IsNPC() && g_pGameRules->GetAutoAimMode() > AUTOAIM_NONE )
+				if( UseXboxAiming() && pEntHit->IsNPC() )
 				{
 					int iRelationType = GetDefaultRelationshipDisposition( pEntHit->Classify() );
 
@@ -6747,13 +6754,7 @@ QAngle CBasePlayer::AutoaimDeflection( Vector &vecSrc, autoaim_params_t &params 
 				// Refuse to take wild shots at targets far from reticle.
 				if( GetActiveWeapon() != NULL && dot < GetActiveWeapon()->GetMaxAutoAimDeflection() )
 				{
-					// Be lenient if the player is looking down, though. 30 degrees through 90 degrees of pitch.
-					// (90 degrees is looking down at player's own 'feet'. Looking straight ahead is 0 degrees pitch.
-					// This was done for XBox to make it easier to fight headcrabs around the player's feet.
-					if( eyeAngles.x < 30.0f || eyeAngles.x > 90.0f || g_pGameRules->GetAutoAimMode() != AUTOAIM_ON_CONSOLE )
-					{
-						continue;
-					}
+					continue;
 				}
 			}
 

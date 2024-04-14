@@ -190,14 +190,6 @@ public:
 // Bugbait report	
 	bool IsLoadingBugBaitReport( void );
 
-	virtual void ResetMapCycleTimeStamp( void ){ m_nMapCycleTimeStamp = 0; }
-
-	virtual void HandleTimeLimitChange( void ){ return; }
-
-	void IncrementMapCycleIndex();
-
-	void HaveAllPlayersSpeakConceptIfAllowed( int iConcept );
-
 public:
 
 	struct ResponseRules_t
@@ -207,17 +199,13 @@ public:
 	CUtlVector<ResponseRules_t>	m_ResponseRules;
 
 	virtual void InitCustomResponseRulesDicts()	{}
-	virtual void ShutdownCustomResponseRulesDicts() {}
 
 protected:
 	virtual bool UseSuicidePenalty() { return true; }		// apply point penalty for suicide?
-	virtual void GetNextLevelName( char *szNextMap, int bufsize, bool bRandom = false );
+	virtual void GetNextLevelName( char *szNextMap, int bufsize );
 	virtual void ChangeLevel( void );
 	virtual void GoToIntermission( void );
 	float m_flIntermissionEndTime;
-	static int m_nMapCycleTimeStamp;
-	static int m_nMapCycleindex;
-	static CUtlVector<char*> m_MapList;
 	
 #else
 	
