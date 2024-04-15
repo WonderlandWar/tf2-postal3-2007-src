@@ -27,9 +27,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Copying to E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\"
-				CommandLine="if exist &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot; attrib -r &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot;&#x0D;&#x0A;if exist &quot;$(TargetDir)&quot;server.dll copy &quot;$(TargetDir)&quot;server.dll &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot;&#x0D;&#x0A;"
-				Outputs="E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -146,9 +146,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Copying to E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\"
-				CommandLine="if exist &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot; attrib -r &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot;&#x0D;&#x0A;if exist &quot;$(TargetDir)&quot;server.dll copy &quot;$(TargetDir)&quot;server.dll &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll&quot;&#x0D;&#x0A;if exist &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.pdb&quot; attrib -r &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.pdb&quot;&#x0D;&#x0A;if exist &quot;$(TargetDir)&quot;server.pdb copy &quot;$(TargetDir)&quot;server.pdb &quot;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin&quot;&#x0D;&#x0A;"
-				Outputs="E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.dll;E:\Program Files (x86)\Steam\steamapps\SourceMods\tfp3_2007\bin\server.pdb"
+				Description=""
+				CommandLine=""
+				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

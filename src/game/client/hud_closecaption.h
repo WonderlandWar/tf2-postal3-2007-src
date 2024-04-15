@@ -104,7 +104,7 @@ public:
 	void			Reset( void );
 	void			Process( const wchar_t *stream, float duration, char const *tokenstream, bool fromplayer, bool direct = false );
 	
-	bool			ProcessCaption( char const *tokenname, float duration, bool fromplayer = false, bool direct = false );
+	void			ProcessCaption( char const *tokenname, float duration, bool fromplayer = false, bool direct = false );
 	void			ProcessCaptionDirect( char const *tokenname, float duration, bool fromplayer = false );
 
 	void			ProcessSentenceCaptionStream( char const *tokenstream );
@@ -131,8 +131,6 @@ public:
 	void			Lock( void );
 	void			Unlock( void );
 
-	void			FindSound( char const *pchANSI );
-
 public:
 
 	struct CaptionRepeat
@@ -150,11 +148,19 @@ public:
 		float	m_flInterval;
 	};
 
+#if !defined( _XBOX )
+	struct TokenNameLookup
+	{
+		CRC32_t	crc;
+		int		stringIndex;
+	};
+#endif
+
 private:
 
-	void ClearAsyncWork();
+	void	ClearAsyncWork();
 	void ProcessAsyncWork();
-	bool AddAsyncWork( char const *tokenstream, bool bIsStream, float duration, bool fromplayer, bool direct = false );
+	void AddAsyncWork( char const *tokenstream, bool bIsStream, float duration, bool fromplayer, bool direct = false );
 
 	void _ProcessSentenceCaptionStream( int wordCount, char const *tokenstream, const wchar_t *caption_full );
 	void _ProcessCaption( const wchar_t *caption, char const *tokenname, float duration, bool fromplayer, bool direct = false );
@@ -162,13 +168,20 @@ private:
 	CUtlLinkedList< CAsyncCaption *, unsigned short >	m_AsyncWork;
 
 	CUtlRBTree< CaptionRepeat, int >	m_CloseCaptionRepeats;
+#if !defined( _XBOX )
+	CUtlRBTree< TokenNameLookup, int >	m_TokenNameLookup;
+#endif
 
 private:
 
 	static bool CaptionTokenLessFunc( const CaptionRepeat &lhs, const CaptionRepeat &rhs );
+#if !defined( _XBOX )
+	static bool TokenNameLessFunc( const TokenNameLookup &lhs, const TokenNameLookup &rhs );
+#endif
 
 	void	DrawStream( wrect_t& rect, wrect_t &rcWindow, CCloseCaptionItem *item, int iFadeLine, float flFadeLineAlpha ); 
 	void	ComputeStreamWork( int available_width, CCloseCaptionItem *item );
+	bool	LookupUnicodeText( char const *token, wchar_t *outbuf, size_t count );
 	bool	SplitCommand( wchar_t const **ppIn, wchar_t *cmd, wchar_t *args ) const;
 
 	bool	StreamHasCommand( const wchar_t *stream, const wchar_t *findcmd ) const;
@@ -181,13 +194,16 @@ private:
 
 	void	DumpWork( CCloseCaptionItem *item );
 
+	void	BuildTokenNameLookup();
+
 	void AddWorkUnit( 
 		CCloseCaptionItem *item,	
 		WorkUnitParams& params );
 
 	CUtlVector< CCloseCaptionItem * > m_Items;
 
-	vgui::HFont		m_hFonts[CCFONT_MAX];
+
+	vgui::HFont		m_hFonts[ CCFONT_MAX ];
 
 	void			CreateFonts( void );
 

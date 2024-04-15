@@ -44,6 +44,80 @@ static bool g_bPermitDirectSoundPrecache = false;
 
 void ClearModelSoundsCache();
 
+#if !defined( _XBOX )
+struct TokenNameLookup
+{
+	TokenNameLookup()
+	{
+		crc = 0;
+		sym = UTL_INVAL_SYMBOL;
+		reported = false;
+	}
+
+	CRC32_t crc;
+	CUtlSymbol sym;
+	bool reported;
+};
+
+static bool TokenCRCLessFunc( const TokenNameLookup &lhs, const TokenNameLookup &rhs )
+{
+	return (unsigned int)lhs.crc < (unsigned int)rhs.crc;
+}
+
+static CUtlSymbolTable g_CloseCaptionCRCToTokenLookupSymbols;
+static CUtlRBTree< TokenNameLookup, int > g_CloseCaptionCRCToTokenLookup( 0, 0, TokenCRCLessFunc );
+
+static char const *FindTokenForCRC( const CRC32_t& crc )
+{
+	TokenNameLookup lookup;
+	lookup.crc = crc;
+
+	int idx = g_CloseCaptionCRCToTokenLookup.Find( lookup );
+	if ( idx == g_CloseCaptionCRCToTokenLookup.InvalidIndex() )
+	{
+		return "";
+	}
+
+	if ( g_CloseCaptionCRCToTokenLookup[ idx ].reported )
+	{
+		return "";
+	}
+
+	g_CloseCaptionCRCToTokenLookup[ idx ].reported = true;
+
+	return g_CloseCaptionCRCToTokenLookupSymbols.String( g_CloseCaptionCRCToTokenLookup[ idx ].sym );
+}
+
+void RememberCRC( const CRC32_t& crc, const char *tokenname )
+{
+	CUtlSymbol sym = g_CloseCaptionCRCToTokenLookupSymbols.AddString( tokenname );
+
+	TokenNameLookup lookup;
+	lookup.crc = crc;
+	if ( g_CloseCaptionCRCToTokenLookup.Find( lookup ) == g_CloseCaptionCRCToTokenLookup.InvalidIndex() )
+	{
+		lookup.sym = sym;
+		lookup.reported = false;
+		g_CloseCaptionCRCToTokenLookup.Insert( lookup );
+	}
+}
+
+static void CC_LookupCaptionCRC( const CCommand &args )
+{
+	if ( args.ArgC() != 2 )
+		return;
+
+	CRC32_t crc = (CRC32_t)atoi( args.Arg(1) );
+	char const *token = FindTokenForCRC( crc );
+	if ( token && token[ 0 ] )
+	{
+		Msg( "Missing Close Caption Token %s\n", token );
+	}
+}
+
+static ConCommand cc_lookup_crc( "cc_lookup_crc", CC_LookupCaptionCRC, "For tracking down missing CC token strings\n" );
+#endif // !_XBOX
+
 #endif // !CLIENT_DLL
 
 void WaveTrace( char const *wavname, char const *funcname )
@@ -589,6 +663,16 @@ public:
 			Hack_FixEscapeChars( lowercase );
 		}
 
+#if !defined( _XBOX )
+		// Get the crc of the token name so we don't have to network down a full string!!!
+		CRC32_t tokenCRC;
+		CRC32_Init( &tokenCRC );
+		CRC32_ProcessBuffer( &tokenCRC, lowercase, Q_strlen( lowercase ) );
+		CRC32_Final( &tokenCRC );
+#if !defined( CLIENT_DLL )
+		RememberCRC( tokenCRC, lowercase );
+#endif
+#endif
 		// NOTE:  We must make a copy or else if the filter is owned by a SoundPatch, we'll end up destructively removing
 		//  all players from it!!!!
 		CRecipientFilter filterCopy;
@@ -655,7 +739,11 @@ public:
 
 			// Send caption and duration hint down to client
 			UserMessageBegin( filterCopy, "CloseCaption" );
+#if !defined( _XBOX )
+				WRITE_LONG( (int)tokenCRC ); // NOTE This will be the CRC of the caption token w/o the _male or _female suffix!!!
+#else
 				WRITE_STRING( lowercase );
+#endif
 				WRITE_SHORT( min( 255, (int)( duration * 10.0f ) ) ),
 				WRITE_BYTE( byteflags ),
 			MessageEnd();

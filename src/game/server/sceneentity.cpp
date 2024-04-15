@@ -1774,10 +1774,23 @@ void CSceneEntity::DispatchStartSpeak( CChoreoScene *scene, CBaseFlex *actor, CC
 			bool validtoken = event->GetPlaybackCloseCaptionToken( tok, sizeof( tok ) );
 			if ( validtoken )
 			{
+				CRC32_t tokenCRC;
+				CRC32_Init( &tokenCRC );
+
 				char lowercase[ 256 ];
 				Q_strncpy( lowercase, tok, sizeof( lowercase ) );
 				Q_strlower( lowercase );
 
+				CRC32_ProcessBuffer( &tokenCRC, lowercase, Q_strlen( lowercase ) );
+				CRC32_Final( &tokenCRC );
+#if !defined( _XBOX )
+#if !defined( CLIENT_DLL )
+				{
+					void RememberCRC( const CRC32_t& crc, const char *tokenname );
+					RememberCRC( tokenCRC, lowercase );
+				}
+#endif
+#endif
 				// Remove any players who don't want close captions
 				CBaseEntity::RemoveRecipientsIfNotCloseCaptioning( filter );
 
@@ -1837,7 +1850,11 @@ void CSceneEntity::DispatchStartSpeak( CChoreoScene *scene, CBaseFlex *actor, CC
 
 					// Send caption and duration hint down to client
 					UserMessageBegin( filter, "CloseCaption" );
+#if !defined( _XBOX )
+						WRITE_LONG( tokenCRC ); // NOTE This will be the CRC of the caption token w/o the _male or _female suffix!!!
+#else
 						WRITE_STRING( lowercase );
+#endif
 						WRITE_SHORT( min( 255, (int)( duration * 10.0f ) ) );
 						WRITE_BYTE( byteflags ); // warn on missing
 					MessageEnd();
