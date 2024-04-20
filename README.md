@@ -1,6 +1,6 @@
 TF2 Postal 3
 ==
-This is repo contains TF2 ported to the Source 2007 SDK with reverse engineered TF2 Postal 3 code from the Postal 3 leak. It's currently unfinished but a lot of progress has been made.
+This is repo contains TF2 ported to the Source 2007 SDK with reverse engineered TF2 Postal 3 code from the Postal 3 leak. It's now considered "finished enough" since no more differences have been found and if there are differences, it's most likely something minor.
 
 The goal for this project is to be code accurate and meant to be as authentic as possible.
 
