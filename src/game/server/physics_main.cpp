@@ -1843,7 +1843,7 @@ void CBaseEntity::PhysicsStep()
 		PhysicsCheckWaterTransition();
 		SetLastThink( -1, gpGlobals->curtime );
 		UpdatePhysicsShadowToCurrentPosition(gpGlobals->frametime);
-		PhysicsRelinkChildren(gpGlobals->frametime);
+		PhysicsRelinkChildren();
 		return;
 	}
 
@@ -1916,7 +1916,7 @@ void CBaseEntity::PhysicsStep()
 			VPhysicsGetObject()->UpdateShadow( GetAbsOrigin(), vec3_angle, (GetFlags() & FL_FLY) ? true : false, dt );
 		}
 	}
-	PhysicsRelinkChildren(dt);
+	PhysicsRelinkChildren();
 }
 
 

@@ -74,11 +74,10 @@ struct RagdollInfo_t
 class CAttachmentData
 {
 public:
-	matrix3x4_t	m_AttachmentToWorld;
+	Vector	m_vOrigin;
 	QAngle	m_angRotation;
-	Vector	m_vOriginVelocity;
 	int		m_nLastFramecount : 31;
-	int		m_bAnglesComputed : 1;
+	Vector	m_vOriginVelocity;
 };
 
 
@@ -167,7 +166,6 @@ public:
 
 	virtual CStudioHdr *OnNewModel( void );
 	CStudioHdr	*GetModelPtr() const;
-	void InvalidateMdlCache();
 	
 	virtual void SetPredictable( bool state );
 	void UseClientSideAnimation();
@@ -231,11 +229,9 @@ public:
 	virtual bool					GetSoundSpatialization( SpatializationInfo_t& info );
 
 	// Attachments.
-	bool							GetAttachment( const char *szName, Vector &absOrigin );
 	bool							GetAttachment( const char *szName, Vector &absOrigin, QAngle &absAngles );
 
 	// Inherited from C_BaseEntity
-	virtual bool					GetAttachment( int number, Vector &origin );
 	virtual bool					GetAttachment( int number, Vector &origin, QAngle &angles );
 	virtual bool					GetAttachment( int number, matrix3x4_t &matrix );
 	virtual bool					GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel );
@@ -243,7 +239,6 @@ public:
 	// Returns the attachment in local space
 	bool							GetAttachmentLocal( int iAttachment, matrix3x4_t &attachmentToLocal );
 	bool							GetAttachmentLocal( int iAttachment, Vector &origin, QAngle &angles );
-	bool                            GetAttachmentLocal( int iAttachment, Vector &origin );
 
 	// Should this object cast render-to-texture shadows?
 	virtual ShadowType_t			ShadowCastType();
@@ -361,8 +356,6 @@ public:
 	static void						PushAllowBoneAccess( bool bAllowForNormalModels, bool bAllowForViewModels, char const *tagPush );
 	static void						PopBoneAccess( char const *tagPop );
 	static void						ThreadedBoneSetup();
-	static void						InitBoneSetupThreadPool();
-	static void						ShutdownBoneSetupThreadPool();
 
 	// Invalidate bone caches so all SetupBones() calls force bone transforms to be regenerated.
 	static void						InvalidateBoneCaches();
@@ -408,7 +401,7 @@ protected:
 	// View models scale their attachment positions to account for FOV. To get the unmodified
 	// attachment position (like if you're rendering something else during the view model's DrawModel call),
 	// use TransformViewModelAttachmentToWorld.
-	virtual void					FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld ) {}
+	virtual void					FormatViewModelAttachment( int nAttachment, Vector &vecOrigin, QAngle &angle ) {}
 
 	// View models say yes to this.
 	virtual bool					IsViewModel() const;
@@ -424,12 +417,10 @@ protected:
 	virtual bool					CalcAttachments();
 
 private:
-	// This method should return true if the bones have changed + SetupBones needs to be called
-	virtual float					LastBoneChangedTime() { return FLT_MAX; }
 
 	CBoneList*						RecordBones( CStudioHdr *hdr, matrix3x4_t *pBoneState );
 
-	bool							PutAttachment( int number, const matrix3x4_t &attachmentToWorld );
+	bool							PutAttachment( int number, const Vector &origin, const QAngle &angles );
 	void							TermRopes();
 
 	void							DelayedInitModelEffects( void );
@@ -550,7 +541,6 @@ private:
 	
 	CUtlVector< matrix3x4_t >		m_CachedBoneData; // never access this directly. Use m_BoneAccessor.
 	memhandle_t						m_hitboxBoneCacheHandle;
-	float							m_flLastBoneSetupTime;
 	CJiggleBones					*m_pJiggleBones;
 
 	// Calculated attachment points
@@ -608,7 +598,6 @@ public:
 	virtual void SUB_Remove( void );
 
 	void	FadeOut( void );
-	virtual float LastBoneChangedTime();
 
 	bool m_bFadeOut;
 	bool m_bImportant;
@@ -687,17 +676,6 @@ inline CStudioHdr *C_BaseAnimating::GetModelPtr() const
 		const_cast<C_BaseAnimating *>(this)->LockStudioHdr();
 	}
 	return ( m_pStudioHdr && m_pStudioHdr->IsValid() ) ? m_pStudioHdr : NULL;
-}
-
-
-inline void C_BaseAnimating::InvalidateMdlCache()
-{
-	UnlockStudioHdr();
-	if ( m_pStudioHdr != NULL )
-	{
-		delete m_pStudioHdr;
-		m_pStudioHdr = NULL;
-	}
 }
 
 //-----------------------------------------------------------------------------

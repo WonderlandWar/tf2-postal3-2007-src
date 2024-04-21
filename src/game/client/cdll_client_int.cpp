@@ -867,8 +867,6 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
 	ClientWorldFactoryInit();
 
-	C_BaseAnimating::InitBoneSetupThreadPool();
-
 	return true;
 }
 
@@ -885,7 +883,6 @@ void CHLClient::PostInit()
 //-----------------------------------------------------------------------------
 void CHLClient::Shutdown( void )
 {
-	C_BaseAnimating::ShutdownBoneSetupThreadPool();
 	ClientWorldFactoryShutdown();
 
 	g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetViewEffectsRestoreBlockHandler() );
@@ -1187,15 +1184,7 @@ void CHLClient::StartStatsReporting( HANDLE handle, bool bArbitrated )
 //-----------------------------------------------------------------------------
 void CHLClient::InvalidateMdlCache()
 {
-	C_BaseAnimating *pAnimating;
-	for ( C_BaseEntity *pEntity = ClientEntityList().FirstBaseEntity(); pEntity; pEntity = ClientEntityList().NextBaseEntity(pEntity) )
-	{
-		pAnimating = dynamic_cast<C_BaseAnimating *>(pEntity);
-		if ( pAnimating )
-		{
-			pAnimating->InvalidateMdlCache();
-		}
-	}
+	// Didn't exist in TFP3, but this function HAS to exist or CHLClient will be abstract!
 }
 
 //-----------------------------------------------------------------------------
@@ -1731,8 +1720,6 @@ void OnRenderStart()
 	// entities	at the correct abs position so that their attachment points
 	// are at the correct location
 	view->OnRenderStart();
-
-	RopeManager()->OnRenderStart();
 	
 	// This will place all entities in the correct position in world space and in the KD-tree
 	C_BaseAnimating::UpdateClientSideAnimations();
@@ -1878,7 +1865,6 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
 			// Mark the frame as open for client fx additions
 			SetFXCreationAllowed( true );
 			SetBeamCreationAllowed( true );
-			C_BaseEntity::CheckCLInterpChanged();
 		}
 		break;
 	}

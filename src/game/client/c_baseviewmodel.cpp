@@ -75,12 +75,9 @@ void FormatViewModelAttachment( Vector &vOrigin, bool bInverse )
 }
 
 
-void C_BaseViewModel::FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld )
+void C_BaseViewModel::FormatViewModelAttachment( int nAttachment, Vector &vecOrigin, QAngle &angle )
 {
-	Vector vecOrigin;
-	MatrixPosition( attachmentToWorld, vecOrigin );
 	::FormatViewModelAttachment( vecOrigin, false );
-	PositionMatrix( vecOrigin, attachmentToWorld );
 }
 
 

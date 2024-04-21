@@ -255,7 +255,7 @@ public:
 	// TFP3: Revisit!!
 	// Death & Ragdolls.
 	virtual void CreateRagdollEntity( void );
-	void CreateRagdollEntity( bool bGib, bool bBurning );
+	void CreateRagdollEntity( bool bGib );
 	void DestroyRagdoll( void );
 	CNetworkHandle( CBaseEntity, m_hRagdoll );	// networked entity handle 
 	virtual bool ShouldGib( const CTakeDamageInfo &info );
@@ -281,8 +281,8 @@ public:
 	virtual void SetModelIndex( int index );
 	void SetDisguiseModelIndex( int index ) { m_nDisguiseModelIndex = index; }
 
-	CNetworkVar( int, m_nPlayerModelIndex );
-	CNetworkVar( int, m_nDisguiseModelIndex );
+	CNetworkVar( short, m_nPlayerModelIndex );
+	CNetworkVar( short, m_nDisguiseModelIndex );
 
 	float GetCritMult( void ) { return m_Shared.GetCritMult(); }
 	void  RecordDamageEvent( const CTakeDamageInfo &info, bool bKill ) { m_Shared.RecordDamageEvent(info,bKill); }
@@ -373,9 +373,6 @@ public:
 
 	void				CheckForIdle( void );
 	void				PickWelcomeObserverPoint();
-
-	void				StopRandomExpressions( void ) { m_flNextRandomExpressionTime = -1; }
-	void				StartRandomExpressions( void ) { m_flNextRandomExpressionTime = gpGlobals->curtime; }
 
 	virtual bool			WantsLagCompensationOnEntity( const CBasePlayer	*pPlayer, const CUserCmd *pCmd, const CBitVec<MAX_EDICTS> *pEntityTransmitBits ) const;
 

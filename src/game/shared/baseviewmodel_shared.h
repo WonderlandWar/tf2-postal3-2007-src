@@ -152,7 +152,7 @@ public:
 	virtual void			UncorrectViewModelAttachment( Vector &vOrigin );
 
 	// (inherited from C_BaseAnimating)
-	virtual void			FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld );
+	virtual void			FormatViewModelAttachment( int nAttachment, Vector &vecOrigin, QAngle &angle );
 	virtual bool			IsViewModel() const;
 	
 	CBaseCombatWeapon		*GetWeapon() const { return m_hWeapon.Get(); }

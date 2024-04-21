@@ -62,8 +62,8 @@ public:
 	virtual void	HandleFireOnEmpty( void );
 	virtual void	WeaponReset( void );
 		
-	virtual void	ItemPreFrame( void );
 	virtual void	ItemPostFrame( void );
+	virtual void	ItemPreFrame( void );
 
 	virtual int GetCustomDamageType() const { return TF_DMG_CUSTOM_MINIGUN; }
 

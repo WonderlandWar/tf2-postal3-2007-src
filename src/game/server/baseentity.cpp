@@ -86,9 +86,6 @@ CBasePlayer *CBaseEntity::m_pPredictionPlayer = NULL;
 // Used to make sure nobody calls UpdateTransmitState directly.
 int g_nInsideDispatchUpdateTransmitState = 0;
 
-// When this is false, throw an assert in debug when GetAbsAnything is called. Used when hierachy is incomplete/invalid.
-bool CBaseEntity::s_bAbsQueriesValid = true;
-
 
 ConVar sv_netvisdist( "sv_netvisdist", "10000", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Test networking visibility distance" );
 
@@ -574,11 +571,11 @@ void CBaseEntity::AddTimedOverlay( const char *msg, int endTime )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-void CBaseEntity::DrawBBoxOverlay( float flDuration )
+void CBaseEntity::DrawBBoxOverlay( void )
 {
 	if (edict())
 	{
-		NDebugOverlay::EntityBounds(this, 255, 100, 0, 0, flDuration );
+		NDebugOverlay::EntityBounds(this, 255, 100, 0, 0 ,0);
 
 		if ( CollisionProp()->IsSolidFlagSet( FSOLID_USE_TRIGGER_BOUNDS ) )
 		{
@@ -586,7 +583,7 @@ void CBaseEntity::DrawBBoxOverlay( float flDuration )
 			CollisionProp()->WorldSpaceTriggerBounds( &vecTriggerMins, &vecTriggerMaxs );
 			Vector center = 0.5f * (vecTriggerMins + vecTriggerMaxs);
 			Vector extents = vecTriggerMaxs - center;
-			NDebugOverlay::Box(center, -extents, extents, 0, 255, 255, 0, flDuration );
+			NDebugOverlay::Box(center, -extents, extents, 0, 255, 255, 0 ,0);
 		}
 	}
 }
@@ -1461,31 +1458,6 @@ void CBaseEntity::Event_Killed( const CTakeDamageInfo &info )
 	m_lifeState = LIFE_DEAD;
 	UTIL_Remove( this );
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: helper method to send a game event when this entity is killed.  Note:
-//			gets called specifically for particular entities (mostly NPC), this
-//			does not get called for every entity
-//-----------------------------------------------------------------------------
-void CBaseEntity::SendOnKilledGameEvent( const CTakeDamageInfo &info )
-{
-	IGameEvent *event = gameeventmanager->CreateEvent( "entity_killed" );
-	if ( event )
-	{
-		event->SetInt( "entindex_killed", entindex() );
-		if ( info.GetAttacker())
-		{
-			event->SetInt( "entindex_attacker", info.GetAttacker()->entindex() );
-		}
-		if ( info.GetInflictor())
-		{
-			event->SetInt( "entindex_inflictor", info.GetInflictor()->entindex() );
-		}		
-		event->SetInt( "damagebits", info.GetDamageType() );
-		gameeventmanager->FireEvent( event );
-	}
-}
-
 
 bool CBaseEntity::HasTarget( string_t targetname )
 {
@@ -2381,7 +2353,7 @@ void CBaseEntity::SetMoveDoneTime( float flDelay )
 //-----------------------------------------------------------------------------
 // Purpose: Relinks all of a parents children into the collision tree
 //-----------------------------------------------------------------------------
-void CBaseEntity::PhysicsRelinkChildren( float dt )
+void CBaseEntity::PhysicsRelinkChildren( void )
 {
 	CBaseEntity *child;
 
@@ -2399,7 +2371,7 @@ void CBaseEntity::PhysicsRelinkChildren( float dt )
 		//
 		if ( child->GetMoveType() != MOVETYPE_VPHYSICS )
 		{
-			child->UpdatePhysicsShadowToCurrentPosition( dt );
+			child->UpdatePhysicsShadowToCurrentPosition( gpGlobals->frametime );
 		}
 		else if ( child->GetOwnerEntity() != this )
 		{
@@ -2410,7 +2382,7 @@ void CBaseEntity::PhysicsRelinkChildren( float dt )
 
 		if ( child->FirstMoveChild() )
 		{
-			child->PhysicsRelinkChildren(dt);
+			child->PhysicsRelinkChildren();
 		}
 	}
 }
@@ -4496,46 +4468,11 @@ static CWatchForModelAccess g_WatchForModels;
 
 #endif
 
-// HACK:  This must match the #define in cl_animevent.h in the client .dll code!!!
-#define CL_EVENT_SOUND				5004
-#define CL_EVENT_FOOTSTEP_LEFT		6004
-#define CL_EVENT_FOOTSTEP_RIGHT		6005
-#define CL_EVENT_MFOOTSTEP_LEFT		6006
-#define CL_EVENT_MFOOTSTEP_RIGHT	6007
-
 //-----------------------------------------------------------------------------
-// Precache model sound. Requires a local symbol table to prevent
-// a very expensive call to PrecacheScriptSound().
+// Precache model sounds
 //-----------------------------------------------------------------------------
-void CBaseEntity::PrecacheSoundHelper( const char *pName )
+void CBaseEntity::PrecacheModelSounds( int nModelIndex )
 {
-	if ( !IsX360() )
-	{
-		// 360 only
-		Assert( 0 );
-		return;
-	}
-
-	if ( !pName || !pName[0] )
-	{
-		return;
-	}
-
-	if ( UTL_INVAL_SYMBOL == g_ModelSoundsSymbolHelper.Find( pName ) )
-	{
-		g_ModelSoundsSymbolHelper.AddString( pName );
-
-		// very expensive, only call when required
-		PrecacheScriptSound( pName );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Precache model components
-//-----------------------------------------------------------------------------
-void CBaseEntity::PrecacheModelComponents( int nModelIndex )
-{
-
 	model_t *pModel = (model_t *)modelinfo->GetModel( nModelIndex );
 	if ( !pModel || modelinfo->GetModelType( pModel ) != mod_studio )
 	{
@@ -4576,128 +4513,70 @@ void CBaseEntity::PrecacheModelComponents( int nModelIndex )
 			entry->PrecacheSoundList();
 		}
 	}
+}
 
-	// particles
+//-----------------------------------------------------------------------------
+// Precache model components
+//-----------------------------------------------------------------------------
+void CBaseEntity::PrecacheModelParticles( int nModelIndex )
+{
+	model_t *pModel = (model_t *)modelinfo->GetModel( nModelIndex );
+	if ( !pModel || modelinfo->GetModelType( pModel ) != mod_studio )
 	{
-		// Check keyvalues for auto-emitting particles
-		KeyValues *pModelKeyValues = new KeyValues("");
-		KeyValues::AutoDelete autodelete_pModelKeyValues( pModelKeyValues );
-		if ( pModelKeyValues->LoadFromBuffer( modelinfo->GetModelName( pModel ), modelinfo->GetModelKeyValueText( pModel ) ) )
-		{
-			KeyValues *pParticleEffects = pModelKeyValues->FindKey("Particles");
-			if ( pParticleEffects )
-			{						   
-				// Start grabbing the sounds and slotting them in
-				for ( KeyValues *pSingleEffect = pParticleEffects->GetFirstSubKey(); pSingleEffect; pSingleEffect = pSingleEffect->GetNextKey() )
-				{
-					const char *pParticleEffectName = pSingleEffect->GetString( "name", "" );
-					PrecacheParticleSystem( pParticleEffectName );
-				}
+		return;
+	}
+
+	// Check keyvalues for auto-emitting particles
+	KeyValues *pModelKeyValues = new KeyValues("");
+	KeyValues::AutoDelete autodelete_pModelKeyValues( pModelKeyValues );
+	if ( pModelKeyValues->LoadFromBuffer( modelinfo->GetModelName( pModel ), modelinfo->GetModelKeyValueText( pModel ) ) )
+	{
+		KeyValues *pParticleEffects = pModelKeyValues->FindKey("Particles");
+		if ( pParticleEffects )
+		{						   
+			// Start grabbing the sounds and slotting them in
+			for ( KeyValues *pSingleEffect = pParticleEffects->GetFirstSubKey(); pSingleEffect; pSingleEffect = pSingleEffect->GetNextKey() )
+			{
+				const char *pParticleEffectName = pSingleEffect->GetString( "name", "" );
+				PrecacheParticleSystem( pParticleEffectName );
 			}
 		}
 	}
-
-	// model anim event owned components
+	
+	// Check animevents for particle events
+	CStudioHdr studioHdr( modelinfo->GetStudiomodel( pModel ), mdlcache ); 
+	if ( studioHdr.IsValid() )
 	{
-		// Check animevents for particle events
-		CStudioHdr studioHdr( modelinfo->GetStudiomodel( pModel ), mdlcache ); 
-		if ( studioHdr.IsValid() )
+		// force animation event resolution!!!
+		VerifySequenceIndex( &studioHdr );
+
+		int nSeqCount = studioHdr.GetNumSeq();
+		for ( int i = 0; i < nSeqCount; ++i )
 		{
-			// force animation event resolution!!!
-			VerifySequenceIndex( &studioHdr );
-
-			int nSeqCount = studioHdr.GetNumSeq();
-			for ( int i = 0; i < nSeqCount; ++i )
+			mstudioseqdesc_t &seq = studioHdr.pSeqdesc( i );
+			int nEventCount = seq.numevents;
+			for ( int j = 0; j < nEventCount; ++j )
 			{
-				mstudioseqdesc_t &seq = studioHdr.pSeqdesc( i );
-				int nEventCount = seq.numevents;
-				for ( int j = 0; j < nEventCount; ++j )
+				mstudioevent_t *pEvent = seq.pEvent( j );
+
+				if ( !( pEvent->type & AE_TYPE_NEWEVENTSYSTEM ) || ( pEvent->type & AE_TYPE_CLIENT ) )
 				{
-					mstudioevent_t *pEvent = seq.pEvent( j );
-
-					if ( !( pEvent->type & AE_TYPE_NEWEVENTSYSTEM ) || ( pEvent->type & AE_TYPE_CLIENT ) )
+					if ( pEvent->event == AE_CL_CREATE_PARTICLE_EFFECT )
 					{
-						if ( pEvent->event == AE_CL_CREATE_PARTICLE_EFFECT )
+						char token[256];
+						const char *pOptions = pEvent->pszOptions();
+						nexttoken( token, pOptions, ' ' );
+						if ( token ) 
 						{
-							char token[256];
-							const char *pOptions = pEvent->pszOptions();
-							nexttoken( token, pOptions, ' ' );
-							if ( token ) 
-							{
-								PrecacheParticleSystem( token );
-							}
-							continue;
+							PrecacheParticleSystem( token );
 						}
-					}
-
-					// 360 precaches the model sounds now at init time, the cost is now ~250 msecs worst case.
-					// The disk based solution was not needed. Now at runtime partly due to already crawling the sequences
-					// for the particles and the expensive part was redundant PrecacheScriptSound(), which is now prevented
-					// by a local symbol table.
-					if ( IsX360() )
-					{
-						switch ( pEvent->event )
-						{
-						default:
-							{
-								if ( ( pEvent->type & AE_TYPE_NEWEVENTSYSTEM ) && ( pEvent->event == AE_SV_PLAYSOUND ) )
-								{
-									PrecacheSoundHelper( pEvent->pszOptions() );
-								}
-							}
-							break;
-						case CL_EVENT_FOOTSTEP_LEFT:
-						case CL_EVENT_FOOTSTEP_RIGHT:
-							{
-								char soundname[256];
-								char const *options = pEvent->pszOptions();
-								if ( !options || !options[0] )
-								{
-									options = "NPC_CombineS";
-								}
-
-								Q_snprintf( soundname, sizeof( soundname ), "%s.RunFootstepLeft", options );
-								PrecacheSoundHelper( soundname );
-								Q_snprintf( soundname, sizeof( soundname ), "%s.RunFootstepRight", options );
-								PrecacheSoundHelper( soundname );
-								Q_snprintf( soundname, sizeof( soundname ), "%s.FootstepLeft", options );
-								PrecacheSoundHelper( soundname );
-								Q_snprintf( soundname, sizeof( soundname ), "%s.FootstepRight", options );
-								PrecacheSoundHelper( soundname );
-							}
-							break;
-						case AE_CL_PLAYSOUND:
-							{
-								if ( !( pEvent->type & AE_TYPE_CLIENT ) )
-									break;
-
-								if ( pEvent->pszOptions()[0] )
-								{
-									PrecacheSoundHelper( pEvent->pszOptions() );
-								}
-								else
-								{
-									Warning( "-- Error --:  empty soundname, .qc error on AE_CL_PLAYSOUND in model %s, sequence %s, animevent # %i\n", 
-										studioHdr.GetRenderHdr()->pszName(), seq.pszLabel(), j+1 );
-								}
-							}
-							break;
-						case CL_EVENT_SOUND:
-						case SCRIPT_EVENT_SOUND:
-						case SCRIPT_EVENT_SOUND_VOICE:
-							{
-								PrecacheSoundHelper( pEvent->pszOptions() );
-							}
-							break;
-						}
+						continue;
 					}
 				}
 			}
 		}
 	}
 }
-
-
 			
 //-----------------------------------------------------------------------------
 // Purpose: Add model to level precache list
@@ -4731,7 +4610,8 @@ int CBaseEntity::PrecacheModel( const char *name )
 	int idx = engine->PrecacheModel( name, true );
 	if ( idx != -1 )
 	{
-		PrecacheModelComponents( idx );
+		PrecacheModelSounds( idx );
+		PrecacheModelParticles( idx );
 	}
 
 #if defined( WATCHACCESS )

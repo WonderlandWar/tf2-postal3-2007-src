@@ -109,17 +109,7 @@ public:
 	IMaterial		*GetSolidMaterial( void )		{ return m_pMaterial; }
 	IMaterial		*GetBackMaterial( void )		{ return m_pBackMaterial; }
 
-	struct BuildRopeQueuedData_t
-	{
-		Vector	*m_pPredictedPositions;
-		Vector	*m_pLightValues;
-		int		m_iNodeCount;
-		Vector	m_vColorMod;
-		float	m_RopeLength;
-		float	m_Slack;
-	};
-
-	void			BuildRope( RopeSegData_t *pRopeSegment, const Vector &vCurrentViewForward, const Vector &vCurrentViewOrigin, BuildRopeQueuedData_t *pQueuedData );
+	void			BuildRope( RopeSegData_t *pRopeSegment );
 
 // C_BaseEntity overrides.
 public:
@@ -132,9 +122,6 @@ public:
 
 	// Specify ROPE_ATTACHMENT_START_POINT or ROPE_ATTACHMENT_END_POINT for the attachment.
 	virtual	bool	GetAttachment( int number, Vector &origin, QAngle &angles );
-	virtual bool	GetAttachment( int number, matrix3x4_t &matrix );
-	virtual bool	GetAttachment( int number, Vector &origin );
-	virtual bool	GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel );
 
 private:
 	
@@ -158,10 +145,16 @@ private:
 	void			CalcLightValues();
 
 	void			ReceiveMessage( int classID, bf_read &msg );
-	bool			CalculateEndPointAttachment( C_BaseEntity *pEnt, int iAttachment, Vector &vPos, QAngle *pAngles );
+	bool			CalculateEndPointAttachment( C_BaseEntity *pEnt, int iAttachment, Vector &vPos, QAngle &pAngles );
 
 
 private:
+
+	bool			m_bNewDataThisFrame; // Set to true in OnDataChanged so that we simulate that frame
+
+	bool			m_bPhysicsInitted;	// It waits until all required entities are 
+										// present to start simulating and rendering.
+
 	// Track which links touched something last frame. Used to prevent wind from gusting on them.
 	CBitVec<ROPE_MAX_SEGMENTS>		m_LinksTouchingSomething;
 	int								m_nLinksTouchingSomething;
@@ -183,6 +176,8 @@ private:
 	Vector			m_LightValues[ROPE_MAX_SEGMENTS]; // light info when the rope is created.
 
 	int				m_nSegments;		// Number of segments.
+
+	bool			m_bConstrainBetweenEndpoints;	// Simulated segment points won't stretch beyond the endpoints
 	
 	EHANDLE			m_hStartPoint;		// StartPoint/EndPoint are entities
 	EHANDLE			m_hEndPoint;
@@ -219,17 +214,9 @@ private:
 
 	Vector			m_vColorMod;				// Color modulation on all verts?
 
+	bool			m_bEndPointAttachmentsDirty;
 	Vector			m_vCachedEndPointAttachmentPos[2];
 	QAngle			m_vCachedEndPointAttachmentAngle[2];
-
-	// In network table, can't bit-compress
-	bool			m_bConstrainBetweenEndpoints;	// Simulated segment points won't stretch beyond the endpoints
-
-	bool			m_bEndPointAttachmentPositionsDirty : 1;
-	bool			m_bEndPointAttachmentAnglesDirty : 1;
-	bool			m_bNewDataThisFrame : 1;			// Set to true in OnDataChanged so that we simulate that frame
-	bool			m_bPhysicsInitted : 1;				// It waits until all required entities are 
-	// present to start simulating and rendering.
 
 	friend class CRopeManager;
 };
@@ -250,7 +237,6 @@ public:
 	virtual void				ResetRenderCache( void ) = 0;
 	virtual void				AddToRenderCache( C_RopeKeyframe *pRope ) = 0;
 	virtual void				DrawRenderCache( bool bShadowDepth ) = 0;
-	virtual void				OnRenderStart( void ) = 0;
 };
 
 IRopeManager *RopeManager();

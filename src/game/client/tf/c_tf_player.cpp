@@ -2550,7 +2550,8 @@ void C_TFPlayer::CreateSaveMeEffect( void )
 	if ( pLocalPlayer && pLocalPlayer->IsPlayerClass( TF_CLASS_MEDIC ) )
 	{
 		Vector vecPos;
-		if ( GetAttachmentLocal( LookupAttachment( "head" ), vecPos ) )
+		QAngle vecAngles;
+		if ( GetAttachmentLocal( LookupAttachment( "head" ), vecPos, vecAngles ) )
 		{
 			vecPos += Vector(0,0,18);	// Particle effect is 18 units above the attachment
 			CTFMedicCallerPanel::AddMedicCaller( this, 5.0, vecPos );

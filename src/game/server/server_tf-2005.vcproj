@@ -3949,14 +3949,6 @@
 					RelativePath="..\shared\tf\tf_viewmodel.h"
 					>
 				</File>
-				<File
-					RelativePath=".\tf\tf_weapon_builder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\tf\tf_weapon_builder.h"
-					>
-				</File>
 				<Filter
 					Name="Weapons"
 					>
@@ -3982,6 +3974,14 @@
 					</File>
 					<File
 						RelativePath="..\shared\tf\tf_weapon_bottle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\tf\tf_weapon_builder.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\tf\tf_weapon_builder.h"
 						>
 					</File>
 					<File

@@ -293,10 +293,6 @@ void CTFMinigun::WindUp( void )
 	m_iWeaponState = AC_STATE_STARTFIRING;
 	pPlayer->m_Shared.AddCond( TF_COND_AIMING );
 
-#ifndef CLIENT_DLL
-	pPlayer->StopRandomExpressions();
-#endif
-
 	WeaponSoundUpdate();
 
 	// Update player's speed

@@ -672,7 +672,7 @@ public:
 	virtual	void DrawDebugGeometryOverlays(void);					
 	virtual int  DrawDebugTextOverlays(void);
 	void		 DrawTimedOverlays( void );
-	void		 DrawBBoxOverlay( float flDuration = 0.0f );
+	void		 DrawBBoxOverlay( void );
 	void		 DrawAbsBoxOverlay();
 	void		 DrawRBoxOverlay();
 
@@ -757,10 +757,6 @@ public:
 
 	void				SetRenderMode( RenderMode_t nRenderMode );
 	RenderMode_t		GetRenderMode() const;
-
-private:
-	// NOTE: Keep this near vtable so it's in cache with vtable.
-	CServerNetworkProperty m_Network;
 
 public:
 	// members
@@ -890,8 +886,6 @@ public:
 	virtual bool	IsAlive( void );
 	// Entity killed (only fired once)
 	virtual void	Event_Killed( const CTakeDamageInfo &info );
-	
-	void SendOnKilledGameEvent( const CTakeDamageInfo &info );
 
 	// Notifier that I've killed some other entity. (called from Victim's Event_Killed).
 	virtual void	Event_KilledOther( CBaseEntity *pVictim, const CTakeDamageInfo &info ) { return; }
@@ -1418,7 +1412,7 @@ protected:
 	void					InvalidatePhysicsRecursive( int nChangeFlags );
 
 	int						PhysicsClipVelocity (const Vector& in, const Vector& normal, Vector& out, float overbounce );
-	void					PhysicsRelinkChildren( float dt );
+	void					PhysicsRelinkChildren( void );
 
 	// Performs the collision resolution for fliers.
 	void					PerformFlyCollisionResolution( trace_t &trace, Vector &move );
@@ -1529,8 +1523,8 @@ private:
 	void ShadowCastDistThink( );
 
 	// Precache model sounds + particles
-	static void PrecacheModelComponents( int nModelIndex );
-	static void PrecacheSoundHelper( const char *pName );
+	static void PrecacheModelSounds( int nModelIndex );
+	static void PrecacheModelParticles( int nModelIndex );	
 
 protected:
 	// Which frame did I simulate?
@@ -1567,6 +1561,7 @@ private:
 	friend class CCollisionProperty;
 	friend class CServerNetworkProperty;
 	CNetworkVarEmbedded( CCollisionProperty, m_Collision );
+	CServerNetworkProperty m_Network;
 
 	CNetworkHandle( CBaseEntity, m_hOwnerEntity );	// only used to point to an edict it won't collide with
 	CNetworkHandle( CBaseEntity, m_hEffectEntity );	// Fire/Dissolve entity.
@@ -1710,20 +1705,6 @@ public:
 	static char const				*GetDLLType( void )
 	{
 		return "server";
-	}
-	
-	static bool s_bAbsQueriesValid;
-
-	// Call this when hierarchy is not completely set up (such as during Restore) to throw asserts
-	// when people call GetAbsAnything. 
-	static inline void SetAbsQueriesValid( bool bValid )
-	{
-		s_bAbsQueriesValid = bValid;
-	}
-	
-	static inline bool IsAbsQueriesValid()
-	{
-		return s_bAbsQueriesValid;
 	}
 };
 

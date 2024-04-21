@@ -294,7 +294,8 @@ C_LocalTempEntity *ClientsideProjectileCallback( const CEffectData &data, float 
 			CTFPlayer *pTFPlayer = ToTFPlayer( pEnt );
 			if ( pTFPlayer->GetActiveWeapon() )
 			{
-				pTFPlayer->GetActiveWeapon()->GetAttachment( "muzzle", vecSrc );
+				QAngle vecAngle;
+				pTFPlayer->GetActiveWeapon()->GetAttachment( "muzzle", vecSrc, vecAngle );
 			}
 		}
 		else

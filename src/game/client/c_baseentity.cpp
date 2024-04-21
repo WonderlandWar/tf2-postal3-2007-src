@@ -962,7 +962,6 @@ void C_BaseEntity::Clear( void )
 {
 	m_bDormant = true;
 
-	m_nCreationTick = -1;
 	m_RefEHandle.Term();
 	m_ModelInstance = MODEL_INSTANCE_INVALID;
 	m_ShadowHandle = CLIENTSHADOW_INVALID_HANDLE;
@@ -1058,8 +1057,6 @@ bool C_BaseEntity::Init( int entnum, int iSerialNum )
 	CollisionProp()->CreatePartitionHandle();
 
 	Interp_SetupMappings( GetVarMapping() );
-
-	m_nCreationTick = gpGlobals->tickcount;
 
 	return true;
 }
@@ -1851,12 +1848,6 @@ bool C_BaseEntity::GetAttachment( int number, Vector &origin, QAngle &angles )
 	return true;
 }
 
-bool C_BaseEntity::GetAttachment( int number, Vector &origin )
-{
-	origin = GetAbsOrigin();
-	return true;
-}
-
 bool C_BaseEntity::GetAttachment( int number, matrix3x4_t &matrix )
 {
 	MatrixCopy( EntityToWorldTransform(), matrix );
@@ -2482,8 +2473,6 @@ void C_BaseEntity::PostDataUpdate( DataUpdateType_t updateType )
 		m_flProxyRandomValue = random->RandomFloat( 0, 1 );
 
 		ResetLatched();
-
-		m_nCreationTick = gpGlobals->tickcount;
 	}
 
 	CheckInitPredictable( "PostDataUpdate" );
@@ -4954,8 +4943,6 @@ void C_BaseEntity::AllocateIntermediateData( void )
 		m_pIntermediateData[ i ] = new unsigned char[ allocsize ];
 		Q_memset( m_pIntermediateData[ i ], 0, allocsize );
 	}
-
-	m_nIntermediateDataCount = 0;
 #endif
 }
 
@@ -4974,8 +4961,6 @@ void C_BaseEntity::DestroyIntermediateData( void )
 	}
 	delete[] m_pOriginalData;
 	m_pOriginalData = NULL;
-
-	m_nIntermediateDataCount = 0;
 #endif
 }
 
@@ -5487,9 +5472,6 @@ int C_BaseEntity::SaveData( const char *context, int slot, int type )
 	else
 	{
 		Q_snprintf( sz, sizeof( sz ), "%s SaveData(slot %02i)", context, slot );
-
-		// Remember high water mark so that we can detect below if we are reading from a slot not yet predicted into...
-		m_nIntermediateDataCount = slot;
 	}
 
 	CPredictionCopy copyHelper( type, dest, PC_DATA_PACKED, this, PC_DATA_NORMAL );
@@ -6106,40 +6088,11 @@ void C_BaseEntity::RemoveVar( void *data, bool bAssert )
 	}
 }
 
-void C_BaseEntity::CheckCLInterpChanged()
-{
-	float flCurValue_Interp = GetClientInterpAmount();
-	static float flLastValue_Interp = flCurValue_Interp;
-
-	float flCurValue_InterpNPCs = cl_interp_npcs.GetFloat();
-	static float flLastValue_InterpNPCs = flCurValue_InterpNPCs;
-	
-	if ( flLastValue_Interp != flCurValue_Interp || 
-		 flLastValue_InterpNPCs != flCurValue_InterpNPCs  )
-	{
-		flLastValue_Interp = flCurValue_Interp;
-		flLastValue_InterpNPCs = flCurValue_InterpNPCs;
-	
-		// Tell all the existing entities to update their interpolation amounts to account for the change.
-		C_BaseEntityIterator iterator;
-		C_BaseEntity *pEnt;
-		while ( (pEnt = iterator.Next()) != NULL )
-		{
-			pEnt->Interp_UpdateInterpolationAmounts( pEnt->GetVarMapping() );
-		}
-	}
-}
-
 void C_BaseEntity::DontRecordInTools()
 {
 #ifndef NO_TOOLFRAMEWORK
 	m_bRecordInTools = false;
 #endif
-}
-
-int C_BaseEntity::GetCreationTick() const
-{
-	return m_nCreationTick;
 }
 
 //------------------------------------------------------------------------------

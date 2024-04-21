@@ -563,16 +563,6 @@ void C_ClientRagdoll::ClientThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: clear out any face/eye values stored in the material system
 //-----------------------------------------------------------------------------
-float C_ClientRagdoll::LastBoneChangedTime()
-{
-	// When did this last change?
-	return m_pRagdoll ? m_pRagdoll->GetLastVPhysicsUpdateTime() : -FLT_MAX;
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: clear out any face/eye values stored in the material system
-//-----------------------------------------------------------------------------
 void C_ClientRagdoll::SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeightCount, float *pFlexWeights, float *pFlexDelayedWeights )
 {
 	BaseClass::SetupWeights( pBoneToWorld, nFlexWeightCount, pFlexWeights, pFlexDelayedWeights );
@@ -671,7 +661,6 @@ C_BaseAnimating::C_BaseAnimating() :
 
 	m_iMostRecentModelBoneCounter = 0xFFFFFFFF;
 	m_iMostRecentBoneSetupRequest = g_iPreviousBoneCounter - 1;
-	m_flLastBoneSetupTime = -FLT_MAX;
 
 	m_vecPreRagdollMins = vec3_origin;
 	m_vecPreRagdollMaxs = vec3_origin;
@@ -969,10 +958,9 @@ CStudioHdr *C_BaseAnimating::OnNewModel()
 		// This is to make sure we don't use the attachment before its been set up
 		for ( int i=0; i < m_Attachments.Count(); i++ )
 		{
-			m_Attachments[i].m_bAnglesComputed = false;
 			m_Attachments[i].m_nLastFramecount = 0;
 #ifdef _DEBUG
-			m_Attachments[i].m_AttachmentToWorld.Invalidate();
+			m_Attachments[i].m_vOrigin.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
 			m_Attachments[i].m_angRotation.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
 			m_Attachments[i].m_vOriginVelocity.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
 #endif
@@ -1733,31 +1721,15 @@ void C_BaseAnimating::StandardBlendingRules( CStudioHdr *hdr, Vector pos[], Quat
 // Input  : number - which point
 // Output : float * - the attachment point
 //-----------------------------------------------------------------------------
-bool C_BaseAnimating::PutAttachment( int number, const matrix3x4_t &attachmentToWorld )
+bool C_BaseAnimating::PutAttachment( int number, const Vector &origin, const QAngle &angles )
 {
 	if ( number < 1 || number > m_Attachments.Count() )
+	{
 		return false;
-
-	CAttachmentData *pAtt = &m_Attachments[number-1];
-	if ( gpGlobals->frametime > 0 && pAtt->m_nLastFramecount > 0 && pAtt->m_nLastFramecount == gpGlobals->framecount - 1 )
-	{
-		Vector vecPreviousOrigin, vecOrigin;
-		MatrixPosition( pAtt->m_AttachmentToWorld, vecPreviousOrigin );
-		MatrixPosition( attachmentToWorld, vecOrigin );
-		pAtt->m_vOriginVelocity = (vecOrigin - vecPreviousOrigin) / gpGlobals->frametime;
 	}
-	else
-	{
-		pAtt->m_vOriginVelocity.Init();
-	}
-	pAtt->m_nLastFramecount = gpGlobals->framecount;
-	pAtt->m_bAnglesComputed = false;
-	pAtt->m_AttachmentToWorld = attachmentToWorld;
 
-#ifdef _DEBUG
-	pAtt->m_angRotation.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
-#endif
-
+	m_Attachments[number-1].m_vOrigin = origin;
+	m_Attachments[number-1].m_angRotation = angles;
 	return true;
 }
 
@@ -1788,8 +1760,11 @@ void C_BaseAnimating::SetupBones_AttachmentHelper( CStudioHdr *hdr )
 		}
 
 		// FIXME: this shouldn't be here, it should client side on-demand only and hooked into the bone cache!!
-		FormatViewModelAttachment( i, world );
-		PutAttachment( i + 1, world );
+		QAngle angles;
+		Vector origin;
+		MatrixAngles( world, angles, origin );
+		FormatViewModelAttachment( i, origin, angles );
+		PutAttachment( i + 1, origin, angles );
 	}
 }
 
@@ -1822,7 +1797,8 @@ bool C_BaseAnimating::GetAttachment( int number, Vector &origin, QAngle &angles 
 	// Note: this could be more efficient, but we want the matrix3x4_t version of GetAttachment to be the origin of
 	// attachment generation, so a derived class that wants to fudge attachments only 
 	// has to reimplement that version. This also makes it work like the server in that regard.
-	if ( number < 1 || number > m_Attachments.Count() || !CalcAttachments() )
+	matrix3x4_t attachmentToWorld;
+	if ( !GetAttachment( number, attachmentToWorld) )
 	{
 		// Set this to the model origin/angles so that we don't have stack fungus in origin and angles.
 		origin = GetAbsOrigin();
@@ -1830,58 +1806,27 @@ bool C_BaseAnimating::GetAttachment( int number, Vector &origin, QAngle &angles 
 		return false;
 	}
 
-	CAttachmentData *pData = &m_Attachments[number-1];
-	if ( !pData->m_bAnglesComputed )
-	{
-		MatrixAngles( pData->m_AttachmentToWorld, pData->m_angRotation );
-		pData->m_bAnglesComputed = true;
-	}
-	angles = pData->m_angRotation;
-	MatrixPosition( pData->m_AttachmentToWorld, origin );
+	MatrixAngles( attachmentToWorld, angles );
+	MatrixPosition( attachmentToWorld, origin );
 	return true;
 }
 
 bool C_BaseAnimating::GetAttachment( int number, matrix3x4_t& matrix )
 {
 	if ( number < 1 || number > m_Attachments.Count() )
+	{
 		return false;
+	}
 
 	if ( !CalcAttachments() )
 		return false;
 
-	matrix = m_Attachments[number-1].m_AttachmentToWorld;
+	Vector &origin = m_Attachments[number-1].m_vOrigin;
+	QAngle &angles = m_Attachments[number-1].m_angRotation;
+	AngleMatrix( angles, origin, matrix );
+
 	return true;
 }
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Get attachment point by index (position only)
-// Input  : number - which point
-//-----------------------------------------------------------------------------
-bool C_BaseAnimating::GetAttachment( int number, Vector &origin )
-{
-	// Note: this could be more efficient, but we want the matrix3x4_t version of GetAttachment to be the origin of
-	// attachment generation, so a derived class that wants to fudge attachments only 
-	// has to reimplement that version. This also makes it work like the server in that regard.
-	matrix3x4_t attachmentToWorld;
-	if ( !GetAttachment( number, attachmentToWorld ) )
-	{
-		// Set this to the model origin/angles so that we don't have stack fungus in origin and angles.
-		origin = GetAbsOrigin();
-		return false;
-	}
-
-	MatrixPosition( attachmentToWorld, origin );
-	return true;
-}
-
-
-bool C_BaseAnimating::GetAttachment( const char *szName, Vector &absOrigin )
-{
-	return GetAttachment( LookupAttachment( szName ), absOrigin );
-}
-
-
 
 bool C_BaseAnimating::GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel )
 {
@@ -1923,18 +1868,6 @@ bool C_BaseAnimating::GetAttachmentLocal( int iAttachment, Vector &origin, QAngl
 	{
 		origin.Init( attachmentToEntity[0][3], attachmentToEntity[1][3], attachmentToEntity[2][3] );
 		MatrixAngles( attachmentToEntity, angles );
-		return true;
-	}
-	return false;
-}
-
-bool C_BaseAnimating::GetAttachmentLocal( int iAttachment, Vector &origin )
-{
-	matrix3x4_t attachmentToEntity;
-
-	if ( GetAttachmentLocal( iAttachment, attachmentToEntity ) )
-	{
-		MatrixPosition( attachmentToEntity, origin );
 		return true;
 	}
 	return false;
@@ -2420,14 +2353,6 @@ static void PostThreadedBoneSetup()
 static bool g_bInThreadedBoneSetup;
 static bool g_bDoThreadedBoneSetup;
 
-void C_BaseAnimating::InitBoneSetupThreadPool()
-{
-}				 
-
-void C_BaseAnimating::ShutdownBoneSetupThreadPool()
-{
-}
-
 void C_BaseAnimating::ThreadedBoneSetup()
 {
 	g_bDoThreadedBoneSetup = cl_threaded_bone_setup.GetBool();
@@ -2519,22 +2444,10 @@ bool C_BaseAnimating::SetupBones( matrix3x4_t *pBoneToWorldOut, int nMaxBones, i
 	{
 		// Clear out which bones we've touched this frame if this is 
 		// the first time we've seen this object this frame.
-		if ( LastBoneChangedTime() >= m_flLastBoneSetupTime )
-		{
-			m_BoneAccessor.SetReadableBones( 0 );
-			m_BoneAccessor.SetWritableBones( 0 );
-			m_flLastBoneSetupTime = currentTime;
-		}
+		m_BoneAccessor.SetReadableBones( 0 );
+		m_BoneAccessor.SetWritableBones( 0 );
 		m_iPrevBoneMask = m_iAccumulatedBoneMask;
 		m_iAccumulatedBoneMask = 0;
-
-#ifdef STUDIO_ENABLE_PERF_COUNTERS
-		CStudioHdr *hdr = GetModelPtr();
-		if (hdr)
-		{
-			hdr->ClearPerfCounters();
-		}
-#endif
 	}
 
 	int nBoneCount = m_CachedBoneData.Count();
@@ -2685,7 +2598,6 @@ C_BaseAnimating* C_BaseAnimating::FindFollowedEntity()
 void C_BaseAnimating::InvalidateBoneCache()
 {
 	m_iMostRecentModelBoneCounter = g_iModelBoneCounter - 1;
-	m_flLastBoneSetupTime = -FLT_MAX; 
 }
 
 

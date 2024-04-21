@@ -76,7 +76,7 @@ BEGIN_NETWORK_TABLE( CWeaponMedigun, DT_WeaponMedigun )
 #ifdef TFP3_MEDIGUN_FIX
 	SendPropEHandle( SENDINFO( m_hHealingTarget ) ),
 #else
-	SendPropArray3( SENDINFO_ARRAY3(m_hHealingTargets), SendPropEHandle( SENDINFO_ARRAY(m_hHealingTargets), MAX_HEALING_TARGETS, SendProxy_EHandleToInt ) ),
+	SendPropArray3( SENDINFO_ARRAY3(m_hHealingTargets), SendPropEHandle( SENDINFO_ARRAY(m_hHealingTargets), MAX_HEALING_TARGETS ) ),
 #endif
 	SendPropBool( SENDINFO( m_bHealing ) ),
 	SendPropBool( SENDINFO( m_bAttacking ) ),

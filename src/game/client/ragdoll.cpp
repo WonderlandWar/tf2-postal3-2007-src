@@ -359,7 +359,6 @@ public:
 	virtual void BuildTransformations( CStudioHdr *pStudioHdr, Vector *pos, Quaternion q[], const matrix3x4_t &cameraTransform, int boneMask, CBoneBitList &boneComputed );
 	IPhysicsObject *GetElement( int elementNum );
 	virtual void UpdateOnRemove();
-	virtual float LastBoneChangedTime();
 
 	// Incoming from network
 	Vector		m_ragPos[RAGDOLL_MAX_ELEMENTS];
@@ -379,7 +378,6 @@ private:
 	CNetworkVar( float, m_flBlendWeight );
 	float m_flBlendWeightCurrent;
 	CNetworkVar( int, m_nOverlaySequence );
-	float m_flLastBoneChangeTime;
 };
 
 
@@ -398,7 +396,6 @@ C_ServerRagdoll::C_ServerRagdoll( void ) :
 	m_iv_ragAngles("C_ServerRagdoll::m_iv_ragAngles")
 {
 	m_elementCount = 0;
-	m_flLastBoneChangeTime = -FLT_MAX;
 
 	AddVar( m_ragPos, &m_iv_ragPos, LATCH_SIMULATION_VAR  );
 	AddVar( m_ragAngles, &m_iv_ragAngles, LATCH_SIMULATION_VAR );
@@ -415,13 +412,6 @@ void C_ServerRagdoll::PostDataUpdate( DataUpdateType_t updateType )
 
 	m_iv_ragPos.NoteChanged( gpGlobals->curtime, true );
 	m_iv_ragAngles.NoteChanged( gpGlobals->curtime, true );
-	// this is the local client time at which this update becomes stale
-	m_flLastBoneChangeTime = gpGlobals->curtime + GetInterpolationAmount(m_iv_ragPos.GetType());
-}
-
-float C_ServerRagdoll::LastBoneChangedTime()
-{
-	return m_flLastBoneChangeTime;
 }
 
 int C_ServerRagdoll::InternalDrawModel( int flags )
@@ -734,7 +724,6 @@ public:
 		}
 	}
 	void OnDataChanged( DataUpdateType_t updateType );
-	virtual float LastBoneChangedTime() { return FLT_MAX; }
 
 	Vector		m_attachmentPointBoneSpace;
 	Vector		m_vecOffset;

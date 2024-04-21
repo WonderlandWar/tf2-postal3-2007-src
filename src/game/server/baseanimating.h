@@ -48,14 +48,12 @@ public:
 	virtual void SetModel( const char *szModelName );
 	virtual void Activate();
 	virtual void Spawn();
-	virtual void Precache();
 	virtual void SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways );
 
 	virtual int	 Restore( IRestore &restore );
 	virtual void OnRestore();
 
 	CStudioHdr *GetModelPtr( void );
-	void InvalidateMdlCache();
 
 	virtual CBaseAnimating*	GetBaseAnimating() { return this; }
 
@@ -438,16 +436,6 @@ inline CStudioHdr *CBaseAnimating::GetModelPtr( void )
 		LockStudioHdr();
 	}
 	return ( m_pStudioHdr && m_pStudioHdr->IsValid() ) ? m_pStudioHdr : NULL;
-}
-
-inline void CBaseAnimating::InvalidateMdlCache()
-{
-	UnlockStudioHdr();
-	if ( m_pStudioHdr != NULL )
-	{
-		delete m_pStudioHdr;
-		m_pStudioHdr = NULL;
-	}
 }
 
 //-----------------------------------------------------------------------------

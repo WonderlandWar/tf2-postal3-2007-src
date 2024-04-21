@@ -227,7 +227,7 @@ private:
 //...maybe store the name instead of the index?
 	CNetworkVar( int, m_nDisguiseTeam );		// Team spy is disguised as.
 	CNetworkVar( int, m_nDisguiseClass );		// Class spy is disguised as.
-	CNetworkHandle( CBaseEntity, m_hDisguiseTarget );					// Playing the spy is using for name disguise.
+	CNetworkVar( EHANDLE, m_hDisguiseTarget );					// Playing the spy is using for name disguise.
 	CNetworkVar( int, m_iDisguiseHealth );		// Health to show our enemies in player id
 	CNetworkVar( int, m_nDesiredDisguiseClass );
 	CNetworkVar( int, m_nDesiredDisguiseTeam );
@@ -292,6 +292,9 @@ private:
 #else
 	int m_iDisguiseWeaponModelIndex;
 	CTFWeaponInfo *m_pDisguiseWeaponInfo;
+	// TPF3:
+	// TODO: Use WEAPON_FILE_INFO_HANDLE instead?
+	unsigned int m_hDisguiseWeaponInfo;
 #endif
 };			   
 
@@ -299,7 +302,5 @@ private:
 #define TF_DEATH_ASSISTER_DOMINATION	0x0002	// assister is dominating victim
 #define TF_DEATH_REVENGE				0x0004	// killer got revenge on victim
 #define TF_DEATH_ASSISTER_REVENGE		0x0008	// assister got revenge on victim
-
-extern const char *g_pszBDayGibs[22];
 
 #endif // TF_PLAYER_SHARED_H

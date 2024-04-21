@@ -1677,15 +1677,7 @@ bool CServerGameDLL::ShouldHideServer( void )
 //-----------------------------------------------------------------------------
 void CServerGameDLL::InvalidateMdlCache()
 {
-	CBaseAnimating *pAnimating;
-	for ( CBaseEntity *pEntity = gEntList.FirstEnt(); pEntity != NULL; pEntity = gEntList.NextEnt(pEntity) )
-	{
-		pAnimating = dynamic_cast<CBaseAnimating *>(pEntity);
-		if ( pAnimating )
-		{
-			pAnimating->InvalidateMdlCache();
-		}
-	}
+	// Didn't exist in TFP3, but this function HAS to exist or CServerGameDLL will be abstract!
 }
 
 

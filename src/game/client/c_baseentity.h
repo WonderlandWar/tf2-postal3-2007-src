@@ -560,7 +560,6 @@ public:
 	// Attachments
 	virtual int						LookupAttachment( const char *pAttachmentName ) { return -1; }
 	virtual bool					GetAttachment( int number, matrix3x4_t &matrix );
-	virtual bool					GetAttachment( int number, Vector &origin );
 	virtual	bool					GetAttachment( int number, Vector &origin, QAngle &angles );
 	virtual bool					GetAttachmentVelocity( int number, Vector &originVel, Quaternion &angleVel );
 
@@ -1115,9 +1114,6 @@ public:
 
 	float	GetSimulationTime() const;
 	void	SetSimulationTime( float st );
-
-	int		GetCreationTick() const;
-
 #ifdef _DEBUG
 	void FunctionCheck( void *pFunction, const char *name );
 
@@ -1186,8 +1182,6 @@ public:
 	static void						SetPredictionRandomSeed( const CUserCmd *cmd );
 	static C_BasePlayer				*GetPredictionPlayer( void );
 	static void						SetPredictionPlayer( C_BasePlayer *player );
-	static void						CheckCLInterpChanged();
-
 	// Collision group accessors
 	int GetCollisionGroup() const;
 	void SetCollisionGroup( int collisionGroup );
@@ -1564,7 +1558,6 @@ private:
 	// For storing prediction results and pristine network state
 	byte							*m_pIntermediateData[ MULTIPLAYER_BACKUP ];
 	byte							*m_pOriginalData;
-	int								m_nIntermediateDataCount;
 
 	bool							m_bIsPlayerSimulated;
 #endif
@@ -1605,7 +1598,6 @@ private:
 	int								m_fDataObjectTypes;
 
 	AimEntsListHandle_t				m_AimEntsListHandle;
-	int								m_nCreationTick;
 
 	
 public:

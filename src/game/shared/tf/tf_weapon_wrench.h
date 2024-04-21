@@ -30,8 +30,8 @@ public:
 
 	CTFWrench();
 	virtual int			GetWeaponID( void ) const			{ return TF_WEAPON_WRENCH; }
-	virtual void		Smack( void );
 	virtual void		OnEntityHit( CBaseEntity *pEntity );
+	virtual void		Smack( void );
 
 private:
 
