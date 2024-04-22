@@ -500,11 +500,7 @@ void CTFGameMovement::AvoidPlayers( void )
 	}
 
 	// Don't allow the max push speed to be greater than the max player speed.
-#ifdef CLIENT_DLL
 	float flMaxPlayerSpeed = mv->m_flClientMaxSpeed;
-#else
-	float flMaxPlayerSpeed = mv->m_flMaxSpeed;
-#endif
 	float flCropFraction = 0.33333333f;
 
 	if ( m_bSpeedCropped )

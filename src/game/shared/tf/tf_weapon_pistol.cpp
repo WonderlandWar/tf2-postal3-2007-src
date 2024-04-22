@@ -24,27 +24,22 @@
 //
 IMPLEMENT_NETWORKCLASS_ALIASED( TFPistol, DT_WeaponPistol )
 
-BEGIN_NETWORK_TABLE_NOBASE( CTFPistol, DT_PistolLocalData )
+BEGIN_NETWORK_TABLE( CTFPistol, DT_WeaponPistol )
 #if !defined( CLIENT_DLL )
 	SendPropTime( SENDINFO( m_flSoonestPrimaryAttack ) ),
+	SendPropTime( SENDINFO( m_flLastAttackTime ) ),
 	SendPropFloat( SENDINFO ( m_flAccuracyPenaltyTime ) ),
 #else
 	RecvPropTime( RECVINFO( m_flSoonestPrimaryAttack ) ),
+	RecvPropTime( RECVINFO( m_flLastAttackTime ) ),
 	RecvPropFloat( RECVINFO ( m_flAccuracyPenaltyTime ) ),
-#endif
-END_NETWORK_TABLE()
-
-BEGIN_NETWORK_TABLE( CTFPistol, DT_WeaponPistol )
-#if !defined( CLIENT_DLL )
-	SendPropDataTable( "PistolLocalData", 0, &REFERENCE_SEND_TABLE( DT_PistolLocalData ), SendProxy_SendLocalWeaponDataTable ),
-#else
-	RecvPropDataTable( "PistolLocalData", 0, 0, &REFERENCE_RECV_TABLE( DT_PistolLocalData ) ),
 #endif
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CTFPistol )
 #ifdef CLIENT_DLL
 	DEFINE_PRED_FIELD( m_flSoonestPrimaryAttack, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_flLastAttackTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_flAccuracyPenaltyTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
 #endif
 END_PREDICTION_DATA()
@@ -110,6 +105,7 @@ void CTFPistol::ItemPostFrame( void )
 //-----------------------------------------------------------------------------
 void CTFPistol::PrimaryAttack( void )
 {
+	m_flLastAttackTime = gpGlobals->curtime;
 	m_flSoonestPrimaryAttack = gpGlobals->curtime + PISTOL_FASTEST_REFIRE_TIME;
 
 	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
@@ -131,12 +127,10 @@ void CTFPistol::PrimaryAttack( void )
 	BaseClass::PrimaryAttack();
 	
 	// Add an accuracy penalty which can move past our maximum penalty time if we're really spastic
-	float val;
     if ( gpGlobals->curtime <= m_flAccuracyPenaltyTime )
-		val = m_flAccuracyPenaltyTime + PISTOL_ACCURACY_SHOT_PENALTY_TIME;
+		m_flAccuracyPenaltyTime += PISTOL_ACCURACY_SHOT_PENALTY_TIME;
     else
-		val = gpGlobals->curtime + PISTOL_ACCURACY_SHOT_PENALTY_TIME;
-	m_flAccuracyPenaltyTime = val;
+		m_flAccuracyPenaltyTime = gpGlobals->curtime + PISTOL_ACCURACY_SHOT_PENALTY_TIME;
 }
 
 float CTFPistol::GetWeaponSpread( void )

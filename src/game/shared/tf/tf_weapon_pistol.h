@@ -50,6 +50,7 @@ public:
 
 	virtual int		GetWeaponID( void ) const			{ return TF_WEAPON_PISTOL; }
 	CNetworkVar( float,	m_flSoonestPrimaryAttack );
+	CNetworkVar( float,	m_flLastAttackTime );
 	CNetworkVar( float, m_flAccuracyPenaltyTime );
 
 private:

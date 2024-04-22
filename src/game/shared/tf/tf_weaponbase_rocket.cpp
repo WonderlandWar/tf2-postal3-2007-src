@@ -412,7 +412,7 @@ void CTFBaseRocket::FlyThink( void )
 		CBaseEntity *pHomingTarget = m_hHomingTarget;
 		if ( pHomingTarget )
 		{
-			const Vector vecHomingTargetOrg = pHomingTarget->EyePosition();
+			Vector vecHomingTargetOrg = pHomingTarget->WorldSpaceCenter();
 
 			float flHomingSpeedLateral = tf_rocket_homing_speed_lateral.GetFloat();
 			float flHomingSpeedVertical = tf_rocket_homing_speed_vertical.GetFloat();
