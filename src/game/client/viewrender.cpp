@@ -359,7 +359,7 @@ public:
 	  {
 	  }
 
-	bool			Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible );
+	bool			Setup( const CViewSetup &view, int *pClearFlags, bool *pSkyboxVisible );
 	void			Draw();
 
 protected:
@@ -368,14 +368,14 @@ protected:
 	virtual bool ShouldDrawPortals() { return false; }
 #endif
 
-	virtual SkyboxVisibility_t	ComputeSkyboxVisibility();
+	virtual bool	ComputeSkyboxVisibility();
 
 	bool			GetSkyboxFogEnable();
 
 	void			Enable3dSkyboxFog( void );
 	void			DrawInternal( view_id_t iSkyBoxViewID = VIEW_3DSKY, bool bInvokePreAndPostRender = true, ITexture *pRenderTarget = NULL );
 
-	sky3dparams_t *	PreRender3dSkyboxWorld( SkyboxVisibility_t nSkyboxVisible );
+	sky3dparams_t *	PreRender3dSkyboxWorld( bool bSkyboxVisible );
 
 	sky3dparams_t *m_pSky3dParams;
 };
@@ -393,13 +393,13 @@ public:
 		  m_pRenderTarget( NULL )
 	  {}
 
-	  bool			Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible, ITexture *pRenderTarget = NULL );
+	  bool			Setup( const CViewSetup &view, int *pClearFlags, bool *pSkyboxVisible, ITexture *pRenderTarget = NULL );
 
 	  //Skybox drawing through portals with workarounds to fix area bits, position/scaling, view id's..........
 	  void			Draw();
 
 private:
-	virtual SkyboxVisibility_t	ComputeSkyboxVisibility();
+	virtual bool	ComputeSkyboxVisibility();
 
 	ITexture *m_pRenderTarget;
 };
@@ -956,7 +956,7 @@ bool CViewRender::UpdateRefractIfNeededByList( CUtlVector< IClientRenderable * >
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CViewRender::DrawRenderablesInList( CUtlVector< IClientRenderable * > &list, int flags )
+void CViewRender::DrawRenderablesInList( CUtlVector< IClientRenderable * > &list )
 {
 	Assert( m_pCurrentlyDrawingEntity == NULL );
 	int nCount = list.Count();
@@ -972,7 +972,7 @@ void CViewRender::DrawRenderablesInList( CUtlVector< IClientRenderable * > &list
 		if ( pRenderable->ShouldDraw() )
 		{
 			m_pCurrentlyDrawingEntity = pUnk->GetBaseEntity();
-			pRenderable->DrawModel( STUDIO_RENDER | flags );
+			pRenderable->DrawModel( STUDIO_RENDER );
 		}
 	}
 	m_pCurrentlyDrawingEntity = NULL;
@@ -1068,7 +1068,7 @@ void CViewRender::DrawViewModels( const CViewSetup &view, bool drawViewmodel )
 	}
 
 	DrawRenderablesInList( opaqueViewModelList );
-	DrawRenderablesInList( translucentViewModelList, STUDIO_TRANSPARENCY );
+	DrawRenderablesInList( translucentViewModelList );
 
 	// Reset the depth range to the original values
 	if( bUseDepthHack )
@@ -1209,7 +1209,7 @@ bool CViewRender::UpdateShadowDepthTexture( ITexture *pRenderTarget, ITexture *p
 //-----------------------------------------------------------------------------
 // Purpose: Renders world and all entities, etc.
 //-----------------------------------------------------------------------------
-void CViewRender::ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxVisible, const CViewSetup &view, 
+void CViewRender::ViewDrawScene( bool bDrew3dSkybox, bool bSkyboxVisible, const CViewSetup &view, 
 								int nClearFlags, view_id_t viewID, bool bDrawViewModel, int baseDrawFlags, ViewCustomVisibility_t *pCustomVisibility )
 {
 	VPROF( "CViewRender::ViewDrawScene" );
@@ -1238,7 +1238,7 @@ void CViewRender::ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxV
 	SetupVis( view, visFlags, pCustomVisibility );
 
 	if ( !bDrew3dSkybox && 
-		( nSkyboxVisible == SKYBOX_NOT_VISIBLE ) && ( visFlags & IVRenderView::VIEW_SETUP_VIS_EX_RETURN_FLAGS_USES_RADIAL_VIS ) )
+		!bSkyboxVisible && ( visFlags & IVRenderView::VIEW_SETUP_VIS_EX_RETURN_FLAGS_USES_RADIAL_VIS ) )
 	{
 		// This covers the case where we don't see a 3dskybox, yet radial vis is clipping
 		// the far plane.  Need to clear to fog color in this case.
@@ -1247,7 +1247,7 @@ void CViewRender::ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxV
 	}
 
 	bool drawSkybox = r_skybox.GetBool();
-	if ( bDrew3dSkybox || ( nSkyboxVisible == SKYBOX_NOT_VISIBLE ) )
+	if ( bDrew3dSkybox || !bSkyboxVisible )
 	{
 		drawSkybox = false;
 	}
@@ -1849,11 +1849,11 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 		SetupMain3DView( view, nClearFlags );
 			 	  
 		bool bDrew3dSkybox = false;
-		SkyboxVisibility_t nSkyboxVisible = SKYBOX_NOT_VISIBLE;
+		bool bSkyboxVisible = false;
 
 		// if the 3d skybox world is drawn, then don't draw the normal skybox
 		CSkyboxView *pSkyView = new CSkyboxView( this );
-		if ( ( bDrew3dSkybox = pSkyView->Setup( view, &nClearFlags, &nSkyboxVisible ) ) != false )
+		if ( ( bDrew3dSkybox = pSkyView->Setup( view, &nClearFlags, &bSkyboxVisible ) ) != false )
 		{
 			AddViewToScene( pSkyView );
 		}
@@ -1871,7 +1871,7 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 		// Render world and all entities, particles, etc.
 		if( !g_pIntroData )
 		{
-			ViewDrawScene( bDrew3dSkybox, nSkyboxVisible, view, nClearFlags, VIEW_MAIN, whatToDraw & RENDERVIEW_DRAWVIEWMODEL );
+			ViewDrawScene( bDrew3dSkybox, bSkyboxVisible, view, nClearFlags, VIEW_MAIN, whatToDraw & RENDERVIEW_DRAWVIEWMODEL );
 		}
 		else
 		{
@@ -2449,7 +2449,7 @@ void CViewRender::ViewDrawScene_PortalStencil( const CViewSetup &viewIn, ViewCus
 		pPrimaryWaterRefractionTexture->SwapContents( pReplacementWaterRefractionTexture );
 
 	bool bDrew3dSkybox = false;
-	SkyboxVisibility_t nSkyboxVisible = SKYBOX_NOT_VISIBLE;
+	bool bSkyboxVisible = false;
 	int iClearFlags = 0;
 
 	Draw3dSkyboxworld_Portal( view, iClearFlags, bDrew3dSkybox, nSkyboxVisible );
@@ -2548,7 +2548,7 @@ void CViewRender::ViewDrawScene_PortalStencil( const CViewSetup &viewIn, ViewCus
 		pPrimaryWaterRefractionTexture->SwapContents( pReplacementWaterRefractionTexture );
 }
 
-void CViewRender::Draw3dSkyboxworld_Portal( const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget ) 
+void CViewRender::Draw3dSkyboxworld_Portal( const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, bool &bSkyboxVisible, ITexture *pRenderTarget ) 
 { 
 	CRefPtr<CPortalSkyboxView> pSkyView = new CPortalSkyboxView( this ); 
 	if ( ( bDrew3dSkybox = pSkyView->Setup( view, &nClearFlags, &nSkyboxVisible, pRenderTarget ) ) == true )
@@ -3079,7 +3079,7 @@ void CRendering3dView::UpdateRenderablesOpacity()
 //-----------------------------------------------------------------------------
 // Kinda awkward...three optional parameters at the end...
 void CRendering3dView::BuildWorldRenderLists( bool bDrawEntities, int iForceViewLeaf /* = -1 */, 
-	bool bUseCacheIfEnabled /* = true */, bool bShadowDepth /* = false */, float *pReflectionWaterHeight /*= NULL*/ )
+	bool bUseCacheIfEnabled /* = true */, bool bShadowDepth /* = false */ )
 {
 	VPROF_BUDGET( "BuildWorldRenderLists", VPROF_BUDGETGROUP_WORLD_RENDERING );
 
@@ -3101,7 +3101,7 @@ void CRendering3dView::BuildWorldRenderLists( bool bDrawEntities, int iForceView
 
 		render->BuildWorldLists( m_pWorldRenderList, m_pWorldListInfo, 
 			( m_pCustomVisibility ) ? m_pCustomVisibility->m_iForceViewLeaf : iForceViewLeaf, 
-			pVisData, bShadowDepth, pReflectionWaterHeight );
+			pVisData, bShadowDepth );
 
 		if ( bUseCache && !pVisData )
 		{
@@ -4280,9 +4280,9 @@ void CRendering3dView::SetFogVolumeState( const VisibleFogVolumeInfo_t &fogInfo,
 //-----------------------------------------------------------------------------
 // Standard 3d skybox view
 //-----------------------------------------------------------------------------
-SkyboxVisibility_t CSkyboxView::ComputeSkyboxVisibility()
+bool CSkyboxView::ComputeSkyboxVisibility()
 {
-	return engine->IsSkyboxVisibleFromPoint( origin );
+	return engine->IsSkyboxVisibleFromPoint( origin ) != SKYBOX_NOT_VISIBLE;
 }
 
 
@@ -4355,9 +4355,9 @@ void CSkyboxView::Enable3dSkyboxFog( void )
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-sky3dparams_t *CSkyboxView::PreRender3dSkyboxWorld( SkyboxVisibility_t nSkyboxVisible )
+sky3dparams_t *CSkyboxView::PreRender3dSkyboxWorld( bool bSkyboxVisible )
 {
-	if ( ( nSkyboxVisible != SKYBOX_3DSKYBOX_VISIBLE ) && r_3dsky.GetInt() != 2 )
+	if ( !bSkyboxVisible && r_3dsky.GetInt() != 2 )
 		return NULL;
 
 	// render the 3D skybox
@@ -4473,7 +4473,7 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-bool CSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible )
+bool CSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, bool *pSkyboxVisible )
 {
 	BaseClass::Setup( view );
 
@@ -4517,7 +4517,7 @@ void CSkyboxView::Draw()
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-bool CPortalSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, SkyboxVisibility_t *pSkyboxVisible, ITexture *pRenderTarget )
+bool CPortalSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, bool *pSkyboxVisible, ITexture *pRenderTarget )
 {
 	if ( !BaseClass::Setup( view, pClearFlags, pSkyboxVisible ) )
 		return false;
@@ -4530,7 +4530,7 @@ bool CPortalSkyboxView::Setup( const CViewSetup &view, int *pClearFlags, SkyboxV
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
-SkyboxVisibility_t CPortalSkyboxView::ComputeSkyboxVisibility()
+bool CPortalSkyboxView::ComputeSkyboxVisibility()
 {
 	return g_pPortalRender->IsSkyboxVisibleFromExitPortal();
 }
@@ -4895,8 +4895,7 @@ void CBaseWorldView::DrawSetup( float waterHeight, int nSetupFlags, float waterZ
 	render->BeginUpdateLightmaps();
 
 	bool bDrawEntities = ( nSetupFlags & DF_DRAW_ENTITITES ) != 0;
-	bool bDrawReflection = ( nSetupFlags & DF_RENDER_REFLECTION ) != 0;
-	BuildWorldRenderLists( bDrawEntities, iForceViewLeaf, true, false, bDrawReflection ? &waterHeight : NULL );
+	BuildWorldRenderLists( bDrawEntities, iForceViewLeaf, true, false );
 
 	PruneWorldListInfo();
 
