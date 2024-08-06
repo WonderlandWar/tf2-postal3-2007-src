@@ -212,7 +212,7 @@ public:
 
 	// Spawing rules.
 	CBaseEntity *GetPlayerSpawnSpot( CBasePlayer *pPlayer );
-	bool IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer, bool bIgnorePlayers );
+	bool IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer );
 
 	virtual float FlItemRespawnTime( CItem *pItem );
 	virtual Vector VecItemRespawnSpot( CItem *pItem );
@@ -239,7 +239,7 @@ public:
 	virtual void DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	virtual CBasePlayer *GetDeathScorer( CBaseEntity *pKiller, CBaseEntity *pInflictor, CBaseEntity *pVictim );
 
-	const char *GetKillingWeaponName( const CTakeDamageInfo &info, CTFPlayer *pVictim );
+	const char *GetKillingWeaponName( CBaseEntity *pInflictor, CBasePlayer *pScorer );
 	CBasePlayer *GetAssister( CBasePlayer *pVictim, CBasePlayer *pScorer, CBaseEntity *pInflictor );
 	CTFPlayer *GetRecentDamager( CTFPlayer *pVictim, int iDamager, float flMaxElapsed );
 

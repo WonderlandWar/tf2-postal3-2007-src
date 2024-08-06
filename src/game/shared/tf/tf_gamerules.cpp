@@ -971,7 +971,6 @@ void CTFGameRules::RadiusDamage( const CTakeDamageInfo &info, const Vector &vecS
 		// Note, don't delete each team since they are in the gEntList and will 
 		// automatically be deleted from there, instead.
 		TFTeamMgr()->Shutdown();
-		ShutdownCustomResponseRulesDicts();
 	}
 
 	//-----------------------------------------------------------------------------
@@ -1372,7 +1371,7 @@ CBaseEntity *CTFGameRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
 // Purpose: Checks to see if the player is on the correct team and whether or
 //          not the spawn point is available.
 //-----------------------------------------------------------------------------
-bool CTFGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer, bool bIgnorePlayers )
+bool CTFGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer )
 {
 	// Check the team.
 	if ( pSpot->GetTeamNumber() != pPlayer->GetTeamNumber() )
@@ -1391,16 +1390,9 @@ bool CTFGameRules::IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer, 
 	Vector mins = GetViewVectors()->m_vHullMin;
 	Vector maxs = GetViewVectors()->m_vHullMax;
 
-	if ( !bIgnorePlayers )
-	{
-		Vector vTestMins = pSpot->GetAbsOrigin() + mins;
-		Vector vTestMaxs = pSpot->GetAbsOrigin() + maxs;
-		return UTIL_IsSpaceEmpty( pPlayer, vTestMins, vTestMaxs );
-	}
-
-	trace_t trace;
-	UTIL_TraceHull( pSpot->GetAbsOrigin(), pSpot->GetAbsOrigin(), mins, maxs, MASK_PLAYERSOLID, pPlayer, COLLISION_GROUP_PLAYER_MOVEMENT, &trace );
-	return ( trace.fraction == 1 && trace.allsolid != 1 && (trace.startsolid != 1) );
+	Vector vTestMins = pSpot->GetAbsOrigin() + mins;
+	Vector vTestMaxs = pSpot->GetAbsOrigin() + maxs;
+	return UTIL_IsSpaceEmpty( pPlayer, vTestMins, vTestMaxs );
 }
 
 Vector CTFGameRules::VecItemRespawnSpot( CItem *pItem )
@@ -1733,20 +1725,11 @@ void CTFGameRules::CreateStandardEntities()
 //-----------------------------------------------------------------------------
 // Purpose: determine the class name of the weapon that got a kill
 //-----------------------------------------------------------------------------
-const char *CTFGameRules::GetKillingWeaponName( const CTakeDamageInfo &info, CTFPlayer *pVictim )
+const char *CTFGameRules::GetKillingWeaponName( CBaseEntity *pInflictor, CBasePlayer *pScorer )
 {
-	CBaseEntity *pInflictor = info.GetInflictor();
-	CBaseEntity *pKiller = info.GetAttacker();
-	CBasePlayer *pScorer = TFGameRules()->GetDeathScorer( pKiller, pInflictor, pVictim );
-
 	const char *killer_weapon_name = "world";
 
-	if ( info.GetDamageCustom() == TF_DMG_CUSTOM_BURNING )
-	{
-		// special-case burning damage, since persistent burning damage may happen after attacker has switched weapons
-		killer_weapon_name = "tf_weapon_flamethrower";
-	}
-	else if ( pScorer && pInflictor && ( pInflictor == pScorer ) )
+	if ( pScorer && pInflictor && ( pInflictor == pScorer ) )
 	{
 		// If the inflictor is the killer,  then it must be their current weapon doing the damage
 		if ( pScorer->GetActiveWeapon() )
@@ -1869,7 +1852,7 @@ void CTFGameRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &inf
 	CTFPlayer *pAssister = ToTFPlayer( GetAssister( pVictim, pScorer, pInflictor ) );
 
 	// Work out what killed the player, and send a message to all clients about it
-	const char *killer_weapon_name = GetKillingWeaponName( info, pTFPlayerVictim );
+	const char *killer_weapon_name = GetKillingWeaponName( pInflictor, pScorer );
 
 	if ( pScorer )	// Is the killer a client?
 	{
@@ -3000,9 +2983,6 @@ void CTFGameRules::HandleOvertimeBegin()
 void CTFGameRules::InitCustomResponseRulesDicts()
 {
 	MEM_ALLOC_CREDIT();
-
-	// Clear if necessary.
-	ShutdownCustomResponseRulesDicts();
 
 	// Initialize the response rules for TF.
 	m_ResponseRules.AddMultipleToTail( TF_CLASS_COUNT_ALL );

@@ -1747,7 +1747,7 @@ void CBaseObject::Killed( const CTakeDamageInfo &info )
 		IGameEvent * event = gameeventmanager->CreateEvent( "object_destroyed" );
 
 		// Work out what killed the player, and send a message to all clients about it
-		const char *killer_weapon_name = TFGameRules()->GetKillingWeaponName( info, NULL );
+		const char *killer_weapon_name = TFGameRules()->GetKillingWeaponName( pInflictor, pScorer );
 
 		CTFPlayer *pTFPlayer = GetOwner();
 

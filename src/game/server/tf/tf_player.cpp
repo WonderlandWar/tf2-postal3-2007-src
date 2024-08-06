@@ -1117,7 +1117,6 @@ bool CTFPlayer::SelectSpawnSpot( const char *pEntClassName, CBaseEntity* &pSpot 
 	// First we try to find a spawn point that is fully clear. If that fails,
 	// we look for a spawnpoint that's clear except for another players. We
 	// don't collide with our team members, so we should be fine.
-	bool bIgnorePlayers = false;
 
 	CBaseEntity *pFirstSpot = pSpot;
 	do 
@@ -1125,7 +1124,7 @@ bool CTFPlayer::SelectSpawnSpot( const char *pEntClassName, CBaseEntity* &pSpot 
 		if ( pSpot )
 		{
 			// Check to see if this is a valid team spawn (player is on this team, etc.).
-			if( TFGameRules()->IsSpawnPointValid( pSpot, this, bIgnorePlayers ) )
+			if( TFGameRules()->IsSpawnPointValid( pSpot, this ) )
 			{
 				// Check for a bad spawn entity.
 				if ( pSpot->GetAbsOrigin() == Vector( 0, 0, 0 ) )
@@ -1141,13 +1140,6 @@ bool CTFPlayer::SelectSpawnSpot( const char *pEntClassName, CBaseEntity* &pSpot 
 
 		// Get the next spawning point to check.
 		pSpot = gEntList.FindEntityByClassname( pSpot, pEntClassName );
-
-		if ( pSpot == pFirstSpot && !bIgnorePlayers )
-		{
-			// Loop through again, ignoring players
-			bIgnorePlayers = true;
-			pSpot = gEntList.FindEntityByClassname( pSpot, pEntClassName );
-		}
 	} 
 	// Continue until a valid spawn point is found or we hit the start.
 	while ( pSpot != pFirstSpot ); 

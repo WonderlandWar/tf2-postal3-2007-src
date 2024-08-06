@@ -324,9 +324,26 @@ const char *WeaponIdToAlias( int iWeapon )
 int GetWeaponFromDamage( const CTakeDamageInfo &info )
 {
 	int iWeapon = TF_WEAPON_NONE;
+	
+	CBaseEntity *pAttacker = info.GetAttacker();
+	CBaseEntity *pInflictor = info.GetInflictor();
+
+	CBasePlayer *pScorer = TFGameRules()->GetDeathScorer( pAttacker, pInflictor, NULL );
 
 	// Work out what killed the player, and send a message to all clients about it
-	const char *killer_weapon_name = TFGameRules()->GetKillingWeaponName( info, NULL );
+	const char *killer_weapon_name = "";	
+	if ( pScorer && pInflictor && ( pInflictor == pScorer ) )
+	{
+		// If the inflictor is the killer,  then it must be their current weapon doing the damage
+		if ( pScorer->GetActiveWeapon() )
+		{
+			killer_weapon_name = pScorer->GetActiveWeapon()->GetClassname(); 
+		}
+	}
+	else if ( pInflictor )
+	{
+		killer_weapon_name = STRING( pInflictor->m_iClassname );
+	}
 
 	if ( !Q_strnicmp( killer_weapon_name, "tf_projectile", 13 ) )
 	{
