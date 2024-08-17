@@ -4370,13 +4370,12 @@ void CGameMovement::PlayerMove( void )
 	AngleVectors (mv->m_vecViewAngles, &m_vecForward, &m_vecRight, &m_vecUp );  // Determine movement angles
 
 	// Always try and unstick us unless we are using a couple of the movement modes
-	if ( player->GetMoveType() != MOVETYPE_NOCLIP && 
-		 player->GetMoveType() != MOVETYPE_NONE && 		 
-		 player->GetMoveType() != MOVETYPE_ISOMETRIC && 
-		 player->GetMoveType() != MOVETYPE_OBSERVER && 
-		 !player->pl.deadflag )
+	if ( CheckInterval( STUCK ) )
 	{
-		if ( CheckInterval( STUCK ) )
+		if ( player->GetMoveType() != MOVETYPE_NOCLIP && 
+			 player->GetMoveType() != MOVETYPE_NONE && 		 
+			 player->GetMoveType() != MOVETYPE_ISOMETRIC && 
+			 player->GetMoveType() != MOVETYPE_OBSERVER )
 		{
 			if ( CheckStuck() )
 			{
