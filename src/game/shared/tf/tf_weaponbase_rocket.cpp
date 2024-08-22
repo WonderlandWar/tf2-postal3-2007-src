@@ -50,7 +50,7 @@ END_NETWORK_TABLE()
 // Server specific.
 #ifdef GAME_DLL
 BEGIN_DATADESC( CTFBaseRocket )
-DEFINE_ENTITYFUNC( RocketTouch ),
+DEFINE_FUNCTION( RocketTouch ),
 DEFINE_THINKFUNC( FlyThink ),
 END_DATADESC()
 #endif

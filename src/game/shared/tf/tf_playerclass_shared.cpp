@@ -8,11 +8,6 @@
 #include "materialsystem/imaterialsystemhardwareconfig.h"
 #include "tier2/tier2.h"
 
-#ifdef CLIENT_DLL
-bool UseHWMorphModels();
-#endif
-
-
 #define TF_CLASS_UNDEFINED_FILE			""
 #define TF_CLASS_SCOUT_FILE				"scripts/playerclasses/scout"
 #define TF_CLASS_SNIPER_FILE			"scripts/playerclasses/sniper"

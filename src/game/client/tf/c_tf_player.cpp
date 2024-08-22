@@ -11,7 +11,7 @@
 #include "iclientvehicle.h"
 #include "ivieweffects.h"
 #include "input.h"
-#include "IEffects.h"
+#include "ieffects.h"
 #include "fx.h"
 #include "c_basetempentity.h"
 #include "hud_macros.h"
@@ -27,7 +27,7 @@
 #include "tf_weaponbase.h"
 #include "c_tf_playerresource.h"
 #include "toolframework/itoolframework.h"
-#include "tier1/KeyValues.h"
+#include "tier1/keyvalues.h"
 #include "tier0/vprof.h"
 #include "prediction.h"
 #include "effect_dispatch_data.h"
@@ -39,8 +39,8 @@
 #include "toolframework_client.h"
 #include "soundenvelope.h"
 #include "voice_status.h"
-#include "clienteffectprecachesystem.h"
-#include "functionproxy.h"
+#include "ClientEffectPrecacheSystem.h"
+#include "FunctionProxy.h"
 #include "toolframework_client.h"
 #include "choreoevent.h"
 #include "vguicenterprint.h"
@@ -54,9 +54,9 @@
 #include "c_team.h"
 #include "collisionutils.h"
 // for spy material proxy
-#include "proxyentity.h"
-#include "materialsystem/imaterial.h"
-#include "materialsystem/imaterialvar.h"
+#include "ProxyEntity.h"
+#include "materialsystem/IMaterial.h"
+#include "materialsystem/IMaterialVar.h"
 #include "c_tf_team.h"
 
 #if defined( CTFPlayer )
@@ -2357,10 +2357,6 @@ C_BaseObject *C_TFPlayer::GetObjectOfType( int iObjectType )
 
 		if ( !pObj )
 			continue;
-
-		// TFP3: This doesn't appear to exist in the dlls
-		//if ( pObj->IsDormant() || pObj->IsMarkedForDeletion() )
-		//	continue;
 
 		if ( pObj->GetType() == iObjectType )
 		{

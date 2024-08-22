@@ -140,7 +140,7 @@ void CTFGameStats::Event_LevelShutdown( float flElapsed )
 
 	if ( m_reportedStats.m_pCurrentMap )
 	{
-		// TFP3: TODO: Is this accurate?
+		// TFP3: TODO: Is this accurate? Doesn't seem to matter either way
 		m_reportedStats.m_pCurrentMap->Shutdown( gpGlobals->curtime );
 	}
 }

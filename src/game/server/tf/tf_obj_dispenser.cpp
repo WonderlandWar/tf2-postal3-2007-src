@@ -198,15 +198,13 @@ void CObjectDispenser::SetModel( const char *pModel )
 //-----------------------------------------------------------------------------
 void CObjectDispenser::OnGoActive( void )
 {
-	// TFP3: Disabled for testing
-#if 1
 	CTFPlayer *pBuilder = GetBuilder();
 
 	Assert( pBuilder );
 
 	if ( !pBuilder )
 		return;
-#endif
+
 	SetModel( DISPENSER_MODEL );
 
 	// Put some ammo in the Dispenser

@@ -144,7 +144,7 @@ int CTFGrenadePipebombProjectile::DrawModel( int flags )
 		return 0;
 	// tfp3: Revisit later, too buggy right now
 #if 0
-	Vector vecToFirePos = m_vInitialVelocity - m_vecFirePosition;
+	Vector vecToFirePos = WorldSpaceCenter() - m_vecFirePosition;
 
 	Vector vecVelocity;
 	EstimateAbsVelocity( vecVelocity );

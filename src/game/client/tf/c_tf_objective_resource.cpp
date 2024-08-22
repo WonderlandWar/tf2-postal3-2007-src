@@ -41,7 +41,7 @@ const char *C_TFObjectiveResource::GetGameSpecificCPCappingSwipe( int index, int
 	Assert( iCappingTeam != TEAM_UNASSIGNED );
 
 	if ( iCappingTeam == TF_TEAM_RED )
-		return "sprites/obj_icons/icon_obj_cap_red";	
+		return "sprites/obj_icons/icon_obj_cap_red";
 
 	return "sprites/obj_icons/icon_obj_cap_blu";
 }

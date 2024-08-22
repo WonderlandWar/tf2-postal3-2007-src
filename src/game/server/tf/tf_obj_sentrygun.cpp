@@ -244,15 +244,13 @@ bool CObjectSentrygun::StartBuilding( CBaseEntity *pBuilder )
 //-----------------------------------------------------------------------------
 void CObjectSentrygun::OnGoActive( void )
 {
-	// TFP3: Removing this for debugging!!
-#if 1
 	CTFPlayer *pBuilder = GetBuilder();
 
 	Assert( pBuilder );
 
 	if ( !pBuilder )
 		return;
-#endif	
+
 	SetModel( SENTRY_MODEL_LEVEL_1 );
 
 	m_iState.Set( SENTRY_STATE_SEARCHING );

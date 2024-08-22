@@ -461,8 +461,12 @@ void CTFGameMovement::AvoidPlayers( void )
 
 	// TFP3:
 	// TODO: Is this accurate? This makes the push speed super slow
-	float flPushScale =  1.0 - (vecDelta.Length2DSqr() * TF_OO_AVOID_MAX_RADIUS_SQR);
-	flPushScale = min( 1.0, flPushScale );
+	float flPushScale = (vecDelta.Length2DSqr() * TF_OO_AVOID_MAX_RADIUS_SQR);
+	//flPushScale = min( 1.0, flPushScale );
+	if ( flPushScale <= 1.0 )
+		flPushScale = 1.0 - flPushScale;
+	else
+		flPushScale = 1.0;
 
 	float flPushStrength = (gpGlobals->frametime * 600) * flPushScale;
 

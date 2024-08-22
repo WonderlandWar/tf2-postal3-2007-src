@@ -503,22 +503,9 @@ bool CTFPlayerAnimState::HandleDucking( Activity &idealActivity )
 		else
 		{
 			idealActivity = ACT_MP_CROUCHWALK;		
-
 			if ( m_pTFPlayer->m_Shared.InCond( TF_COND_AIMING ) )
 			{
-				// Don't do this for the heavy! we don't usually let him deployed crouch walk
-				bool bIsMinigun = false;
-
-				CTFPlayer *pPlayer = GetTFPlayer();
-				if ( pPlayer && pPlayer->GetActiveTFWeapon() )
-				{
-					bIsMinigun = ( pPlayer->GetActiveTFWeapon()->GetWeaponID() == TF_WEAPON_MINIGUN );
-				}
-
-				if ( !bIsMinigun )
-				{
-					idealActivity = ACT_MP_CROUCH_DEPLOYED;
-				}
+				idealActivity = ACT_MP_CROUCH_DEPLOYED;
 			}
 		}
 

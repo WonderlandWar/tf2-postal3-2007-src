@@ -13,7 +13,7 @@
 #include "ienginevgui.h"
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
-#include <vgui/IVGui.h>
+#include <vgui/IVGUI.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/EditablePanel.h>
 #include "tf_imagepanel.h"
@@ -50,9 +50,10 @@ DECLARE_HUDELEMENT( CHudTeamGoal );
 //-----------------------------------------------------------------------------
 CHudTeamGoal::CHudTeamGoal( const char *pElementName ) : CHudElement( pElementName ), BaseClass( NULL, "HudTeamGoal" )
 {
-	// TFP3: No clue what could've been here since IDA provides nothing...
 	Panel *pParent = g_pClientMode->GetViewport();
 	SetParent( pParent );
+
+	SetHiddenBits( HIDEHUD_MISCSTATUS );
 }
 
 //-----------------------------------------------------------------------------

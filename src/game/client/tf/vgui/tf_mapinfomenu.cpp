@@ -12,12 +12,10 @@
 #include <game/client/iviewport.h>
 #include <vgui/ILocalize.h>
 #include <KeyValues.h>
-#include <filesystem.h>
+#include <FileSystem.h>
 #include "IGameUIFuncs.h" // for key bindings
 
-#ifdef _WIN32
 #include "winerror.h"
-#endif
 #include "ixboxsystem.h"
 #include "tf_gamerules.h"
 #include "tf_controls.h"

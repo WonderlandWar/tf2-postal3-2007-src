@@ -2295,8 +2295,11 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 						Warning("    RANDOM: Dist %.2f, Ctr: %.2f, Min: %.2f, Max: %.2f\n", flDistance, flCenter, flMin, flMax );
 					}
 				}
-
-				float flOut = SimpleSplineRemapValClamped( RandomFloat( flMin, flMax ), 0, 1, -flRandomDamage, flRandomDamage );
+				
+				float flRandomVal = RandomFloat( flMin, flMax );
+				float flOut = SimpleSplineRemapValClamped( flRandomVal, 0, 1, -flRandomDamage, flRandomDamage );
+				// TFP3: flOut was most likely different but some of the values are undefined!
+				//float flOut = SimpleSplineRemapValClamped( flRandomVal, -flRandomDamage, flRandomDamage,  );
 				flDamage = info.GetDamage() + flOut;
 
 				/*
@@ -3521,7 +3524,7 @@ void CTFPlayer::StateEnterACTIVE()
 //-----------------------------------------------------------------------------
 bool CTFPlayer::SetObserverMode(int mode)
 {
-	if ( mode < OBS_MODE_NONE || mode >= NUM_OBSERVER_MODES )
+	if ( mode >= NUM_OBSERVER_MODES )
 		return false;
 
 	// Skip over OBS_MODE_ROAMING for dead players
@@ -4513,6 +4516,9 @@ public:
 	bool CanUseObserverPoint( CTFPlayer *pPlayer )
 	{
 		if ( m_bDisabled )
+			return false;
+
+		if ( ( pPlayer->GetTeamNumber() >= FIRST_GAME_TEAM ) && ( mp_forcecamera.GetInt() == OBS_ALLOW_TEAM ) )
 			return false;
 
 		if ( m_hAssociatedTeamEntity && ( mp_forcecamera.GetInt() == OBS_ALLOW_TEAM ) )
