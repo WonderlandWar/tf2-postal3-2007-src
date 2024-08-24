@@ -141,16 +141,14 @@ void CTFGrenadePipebombProjectile::OnDataChanged(DataUpdateType_t updateType)
 int CTFGrenadePipebombProjectile::DrawModel( int flags )
 {
 	if ( gpGlobals->curtime < ( m_flCreationTime + 0.2 ) )
-		return 0;
-	// tfp3: Revisit later, too buggy right now
-#if 0
-	Vector vecToFirePos = WorldSpaceCenter() - m_vecFirePosition;
+	{
+		Vector vecToFirePos = WorldSpaceCenter() - m_vecFirePosition;
+		Vector vecVelocity;
+		EstimateAbsVelocity( vecVelocity );
+		if ( DotProduct( vecVelocity, vecToFirePos ) < 0 )
+			return 0;
+	}
 
-	Vector vecVelocity;
-	EstimateAbsVelocity( vecVelocity );
-	if ( DotProduct( vecVelocity, vecToFirePos ) < 0 )
-		return 0;
-#endif
 	return BaseClass::DrawModel( flags );
 }
 
