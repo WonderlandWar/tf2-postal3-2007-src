@@ -142,6 +142,8 @@ int CTFGrenadePipebombProjectile::DrawModel( int flags )
 {
 	if ( gpGlobals->curtime < ( m_flCreationTime + 0.2 ) )
 	{
+		// TFP3:
+		// FIXME: WorldSpaceCenter() may not be accurate!
 		Vector vecToFirePos = WorldSpaceCenter() - m_vecFirePosition;
 		Vector vecVelocity;
 		EstimateAbsVelocity( vecVelocity );
