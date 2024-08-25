@@ -37,14 +37,11 @@ typedef enum {
 	SPECIAL1,
 	SPECIAL2,
 	SPECIAL3,
-	TAUNT,
 
 	// Add new shoot sound types here
 
 	NUM_SHOOT_SOUND_TYPES,
 } WeaponSound_t;
-
-int GetWeaponSoundFromString( const char *pszString );
 
 #define MAX_SHOOT_SOUNDS	16			// Maximum number of shoot sounds per shoot type
 

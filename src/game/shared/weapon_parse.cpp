@@ -32,22 +32,11 @@ const char *pWeaponSoundCategories[ NUM_SHOOT_SOUND_TYPES ] =
 	"melee_hit_world",
 	"special1",
 	"special2",
-	"special3",
-	"taunt"
+	"special3"
 };
 #else
 extern const char *pWeaponSoundCategories[ NUM_SHOOT_SOUND_TYPES ];
 #endif
-
-int GetWeaponSoundFromString( const char *pszString )
-{
-	for ( int i = EMPTY; i < NUM_SHOOT_SOUND_TYPES; i++ )
-	{
-		if ( !Q_stricmp(pszString,pWeaponSoundCategories[i]) )
-			return (WeaponSound_t)i;
-	}
-	return -1;
-}
 
 
 // Item flags that we parse out of the file.
