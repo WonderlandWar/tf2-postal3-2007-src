@@ -101,7 +101,6 @@ void CBasePlayer::ItemPreFrame()
 	// Handle use events
 	PlayerUse();
 
-	//Tony; re-ordered this for efficiency and to make sure that certain things happen in the correct order!
     if ( gpGlobals->curtime < m_flNextAttack )
 	{
 		return;

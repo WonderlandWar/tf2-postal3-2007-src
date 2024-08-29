@@ -16,7 +16,7 @@
 #include "utlmap.h"
 #include "steam/steam_api.h"
 
-class CAchievementMgr : public CAutoGameSystemPerFrame, public CGameEventListener, public IAchievementMgr
+class CAchievementMgr : public CAutoGameSystem, public CGameEventListener, public IAchievementMgr
 {
 public:
 	CAchievementMgr();
@@ -27,7 +27,6 @@ public:
 	virtual void LevelInitPreEntity();
 	virtual void LevelShutdownPreEntity();
 	virtual void InitializeAchievements();
-	virtual void Update( float frametime );
 
 	void OnMapEvent( const char *pchEventName );
 	
@@ -39,7 +38,6 @@ public:
 	CUtlMap<int, CBaseAchievement *> &GetAchievements() { return m_mapAchievement; }
 
 	CBaseAchievement *GetAchievementByName( const char *pchName );
-	bool	HasAchieved( const char *pchName );
 
 	void UploadUserData();
 	void DownloadUserData();
@@ -48,7 +46,6 @@ public:
 	void SaveGlobalStateIfDirty( bool bAsync = false );
 	void EnsureGlobalStateLoaded();
 	void AwardAchievement( int iAchievementID );
-	void UpdateAchievement( int iAchievementID, int nData );
 	void PreRestoreSavedGame();
 	void PostRestoreSavedGame();
 	void ResetAchievements();
@@ -61,10 +58,11 @@ public:
 	void OnAchievementEvent( int iAchievementID );
 	void SetDirty( bool bDirty ) { m_bDirty = bDirty; }
 	bool CheckAchievementsEnabled();
+#ifndef NO_STEAM
 	bool LoggedIntoSteam() { return ( steamapicontext->SteamUser() && steamapicontext->SteamUserStats() && steamapicontext->SteamUser()->BLoggedOn() ); }
-	float GetTimeLastUpload() { return m_flTimeLastUpload; }			// time we last uploaded to Steam
-
-	bool WereCheatsEverOn( void ) { return m_bCheatsEverOn; }
+#else
+	bool LoggedIntoSteam() { return false; }
+#endif
 
 #if !defined(NO_STEAM)
 	STEAM_CALLBACK( CAchievementMgr, Steam_OnUserStatsReceived, UserStatsReceived_t, m_CallbackUserStatsReceived );
@@ -90,8 +88,6 @@ private:
 	char  m_szMap[MAX_PATH];			// file base of map name, cached since we access it frequently in this form
 	bool  m_bDirty;						// do we have interesting state that needs to be saved
 	bool  m_bGlobalStateLoaded;			// have we loaded global state
-	bool  m_bCheatsEverOn;				// have cheats ever been turned on in this level
-	float m_flTimeLastUpload;			// last time we uploaded to Steam
 
 	CUtlVector<int> m_AchievementsAwarded;
 };

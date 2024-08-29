@@ -325,6 +325,14 @@ void IGameSystem::FrameUpdatePreEntityThinkAllSystems()
 	InvokePerFrameMethod( &IGameSystemPerFrame::FrameUpdatePreEntityThink );
 }
 
+void IGameSystem::FrameUpdatePrePlayerRunCommandAllSystems( CBasePlayer *player, CUserCmd *ucmd )
+{
+	s_pRunCommandPlayer = player;
+	s_pRunCommandUserCmd = ucmd;
+
+	InvokePerFrameMethod( &IGameSystemPerFrame::FrameUpdatePrePlayerRunCommand );
+}
+
 void IGameSystem::FrameUpdatePostEntityThinkAllSystems()
 {
 	SafeRemoveIfDesiredAllSystems();

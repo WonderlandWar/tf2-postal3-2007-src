@@ -409,22 +409,17 @@ void CTFClientScoreBoardDialog::UpdatePlayerList()
 			
 			
 			// Update their avatar
-			
-			// TFP3: SteamFriends() and SteamUtils() doesn't exist in the 2007 SDK, instead we're going to use CSteamAPIContext
-			ISteamFriends *pSteamFriends = steamapicontext->SteamFriends();
-			ISteamUtils *pSteamUtils = steamapicontext->SteamUtils();
-
-			if ( pKeyValues && pSteamFriends && pSteamUtils )
+			if ( pKeyValues && steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
 			{
 				player_info_t pi;
 				if ( engine->GetPlayerInfo( playerIndex, &pi ) )
 				{
 					if ( pi.friendsID )
 					{
-						CSteamID steamIDForPlayer( pi.friendsID, 1, pSteamUtils->GetConnectedUniverse(), k_EAccountTypeIndividual );
+						CSteamID steamIDForPlayer( pi.friendsID, 1, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
 
 						// See if the avatar's changed
-						int iAvatar = pSteamFriends->GetFriendAvatar( steamIDForPlayer );
+						int iAvatar = steamapicontext->SteamFriends()->GetFriendAvatar( steamIDForPlayer );
 						if ( m_iImageAvatars[playerIndex] != iAvatar )
 						{
 							m_iImageAvatars[playerIndex] = iAvatar;

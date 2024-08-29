@@ -344,7 +344,7 @@ void CPlayerMove::RunCommand ( CBasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 
 	g_pGameMovement->StartTrackPredictionErrors( player );
 
-	CommentarySystem_PePlayerRunCommand( player, ucmd );
+	IGameSystem::FrameUpdatePrePlayerRunCommandAllSystems( player, ucmd );
 
 	// Do weapon selection
 	if ( ucmd->weaponselect != 0 )

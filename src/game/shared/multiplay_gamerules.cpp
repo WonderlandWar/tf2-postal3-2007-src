@@ -132,8 +132,7 @@ int	CMultiplayRules::Damage_GetShouldNotBleed( void )
 bool CMultiplayRules::Damage_IsTimeBased( int iDmgType )
 {
 	// Damage types that are time-based.
-	//Tony; fixed. return Damage_GetTimeBased instead of checking them directly.
-	return ( ( iDmgType & Damage_GetTimeBased() ) != 0 );
+	return ( ( iDmgType & ( DMG_PARALYZE | DMG_NERVEGAS | DMG_POISON | DMG_RADIATION | DMG_DROWNRECOVER | DMG_ACID | DMG_SLOWBURN ) ) != 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -280,9 +279,7 @@ bool CMultiplayRules::Init()
 
 		if ( g_fGameOver )   // someone else quit the game already
 		{
-			// Tony; wait for intermission to end
-			if ( m_flIntermissionEndTime && ( m_flIntermissionEndTime < gpGlobals->curtime ) )
-				ChangeLevel(); // intermission is over
+			ChangeLevel(); // intermission is over
 			return;
 		}
 

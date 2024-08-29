@@ -37,7 +37,6 @@ CBaseAchievement::CBaseAchievement()
 	m_iAchievementID = 0;
 	m_iPointValue = 0;
 	m_bHideUntilAchieved = false;
-	m_bStoreProgressInSteam = false;
 	m_pVictimClassNameFilter = NULL;
 	m_pAttackerClassNameFilter = NULL;
 	m_pInflictorClassNameFilter = NULL;
@@ -195,27 +194,6 @@ void CBaseAchievement::IncrementCount()
 		if ( cc_achievement_debug.GetInt() )
 		{
 			Msg( "Achievement count increased for %s: %d/%d\n", GetName(), m_iCount, m_iGoal );
-		}
-
-		// if this achievement's progress should be stored in Steam, set the steam stat for it
-		if ( StoreProgressInSteam() && steamapicontext->SteamUserStats() )
-		{
-			// Set the Steam stat with the same name as the achievement.  Only cached locally until we upload it.
-			char pszProgressName[1024];
-			Q_snprintf( pszProgressName, 1024, "%s_STAT", GetName() );
-			bool bRet = steamapicontext->SteamUserStats()->SetStat( CGameID( engine->GetAppID() ), pszProgressName, m_iCount );
-			if ( !bRet )
-			{
-				DevMsg( "ISteamUserStats::GetStat failed to set progress value in Steam for achievement %s\n", pszProgressName );
-			}
-
-			// Upload user data to commit the change to Steam so if the client crashes, progress isn't lost.
-			// Only upload if we haven't uploaded recently, to keep us from spamming Steam with uploads.  If we don't
-			// upload now, it will get uploaded no later than level shutdown.
-			if ( ( m_pAchievementMgr->GetTimeLastUpload() == 0 ) || ( Plat_FloatTime() - m_pAchievementMgr->GetTimeLastUpload() > 60 * 15 ) )
-			{
-				m_pAchievementMgr->UploadUserData();
-			}
 		}
 
 		// if we've hit goal, award the achievement
@@ -608,47 +586,6 @@ void CFailableAchievement::SetFailed()
 			Msg( "Achievement failed: %s (%s)\n", GetName(), GetName() );
 		}	
 	}	
+
 }
 
-//===========================================
-
-void CAchievement_AchievedCount::Init() 
-{
-	SetFlags( ACH_SAVE_GLOBAL );
-	SetGoal( 1 );
-	SetAchievementsRequired( 0, 0, 0 );
-}
-
-// Count how many achievements have been earned in our range
-void CAchievement_AchievedCount::OnSteamUserStatsStored( void )
-{
-	int iAllAchievements = m_pAchievementMgr->GetAchievementCount();
-	int iAchieved = 0;
-
-	for ( int i=0; i<iAllAchievements; ++i )
-	{		
-		IAchievement* pCurAchievement = (IAchievement*)m_pAchievementMgr->GetAchievementByIndex( i );
-		Assert ( pCurAchievement );
-
-		int iAchievementID = pCurAchievement->GetAchievementID();
-		if ( iAchievementID < m_iLowRange || iAchievementID > m_iHighRange )
-			continue;
-
-		if ( pCurAchievement->IsAchieved() )
-		{
-			iAchieved++;
-		}
-	}
-
-	if ( iAchieved >= m_iNumRequired )
-	{
-		IncrementCount();
-	}
-}
-
-void CAchievement_AchievedCount::SetAchievementsRequired( int iNumRequired, int iLowRange, int iHighRange )
-{
-	m_iNumRequired = iNumRequired;
-	m_iLowRange = iLowRange;
-	m_iHighRange = iHighRange;
-}

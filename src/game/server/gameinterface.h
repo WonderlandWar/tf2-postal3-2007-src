@@ -104,7 +104,7 @@ public:
 	// Used by commentary system to hide multiplayer commentary servers from the master.
 	virtual bool			ShouldHideServer( void );
 
-	virtual void			InvalidateMdlCache();
+	virtual void			InvalidateMdlCache() {} // Didn't exist in TFP3, but this function HAS to exist or CServerGameDLL will be abstract!
 
 	float	m_fAutoSaveDangerousTime;
 	float	m_fAutoSaveDangerousMinHealthToCommit;

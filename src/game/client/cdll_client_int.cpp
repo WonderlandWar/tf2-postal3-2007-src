@@ -260,6 +260,7 @@ public:
 		GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
 	}
 
+	// TFP3: Consider making these functions do nothing if they don't effect anything
 	void OnGameUIActivated( void )
 	{
 		IGameEvent *event = gameeventmanager->CreateEvent( "gameui_activated" );
@@ -531,7 +532,7 @@ public:
 	virtual void			GetPropertyDisplayString( uint id, uint value, char *pOutput, int nBytes );
 	virtual void			StartStatsReporting( HANDLE handle, bool bArbitrated );
 
-	virtual void			InvalidateMdlCache();
+	virtual void			InvalidateMdlCache() {} // Didn't exist in TFP3, but this function HAS to exist or CHLClient will be abstract!
 public:
 	void PrecacheMaterial( const char *pMaterialName );
 
@@ -651,27 +652,7 @@ CHLClient::CHLClient()
 
 
 extern IGameSystem *ViewportClientSystem();
-//Tony; added to fetch the gameinfo file and mount additional content.
-static void MountAdditionalContent()
-{
-	KeyValues *pMainFile, *pFileSystemInfo;
-	int nExtraContentId = -1;
-	
-	pMainFile = new KeyValues( "gameinfo.txt" );
-	if ( pMainFile->LoadFromFile( filesystem, VarArgs("%s/gameinfo.txt", engine->GetGameDirectory()), "MOD" ) )
-	{
-		pFileSystemInfo = pMainFile->FindKey( "FileSystem" );
-		if (pFileSystemInfo)
-			nExtraContentId = pFileSystemInfo->GetInt( "AdditionalContentId", -1 );
-	}
-	pMainFile->deleteThis();
 
-	if (nExtraContentId != -1)
-	{
-		if( filesystem->MountSteamContent(-nExtraContentId) != FILESYSTEM_MOUNT_OK )
-			Warning("Unable to mount extra content with appId: %i\n", nExtraContentId);
-	}
-}
 //-----------------------------------------------------------------------------
 // Purpose: Called when the DLL is first loaded.
 // Input  : engineFactory - 
@@ -763,9 +744,6 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 		return false;
 	}
 
-	//Tony; mount an extra appId if it exists.
-	MountAdditionalContent();
-
 	if ( CommandLine()->FindParm( "-textmode" ) )
 		g_bTextMode = true;
 
@@ -795,8 +773,6 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
 	if (!VGui_Startup( appSystemFactory ))
 		return false;
-
-	//vgui::VGui_InitMatSysInterfacesList( "ClientDLL", &appSystemFactory, 1 );
 
 	// Add the client systems.	
 	
@@ -1178,15 +1154,6 @@ void CHLClient::StartStatsReporting( HANDLE handle, bool bArbitrated )
 {
 	presence->StartStatsReporting( handle, bArbitrated );
 }
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void CHLClient::InvalidateMdlCache()
-{
-	// Didn't exist in TFP3, but this function HAS to exist or CHLClient will be abstract!
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pSF - 

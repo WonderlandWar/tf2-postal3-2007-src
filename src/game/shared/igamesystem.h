@@ -88,6 +88,8 @@ public:
 	static void UpdateAllSystems( float frametime );
 	static void PostRenderAllSystems();
 #else
+	// Called at the start of running the player usercmd, to allow gamesystems to change it
+	static void FrameUpdatePrePlayerRunCommandAllSystems( CBasePlayer *player, CUserCmd *ucmd );
 	static void FrameUpdatePreEntityThinkAllSystems();
 	static void FrameUpdatePostEntityThinkAllSystems();
 	static void PreClientUpdateAllSystems();
@@ -114,6 +116,10 @@ public:
 	// Called after rendering
 	virtual void PostRender() = 0;
 #else
+	// Called at the start of running the player usercmd, to allow gamesystems to change it
+	virtual void FrameUpdatePrePlayerRunCommand() = 0;
+
+
 	// Called each frame before entities think
 	virtual void FrameUpdatePreEntityThink() = 0;
 	// called after entities think
@@ -161,6 +167,10 @@ private:
 	// Called after rendering
 	virtual void PostRender() {}
 #else
+	// Called at the start of running the player usercmd, to allow gamesystems to change it
+	virtual void FrameUpdatePrePlayerRunCommand() {}
+
+
 	// Called each frame before entities think
 	virtual void FrameUpdatePreEntityThink() {}
 	// called after entities think
@@ -204,6 +214,10 @@ public:
 	// Called after rendering
 	virtual void PostRender () { }
 #else
+	// Called at the start of running the player usercmd, to allow gamesystems to change it
+	virtual void FrameUpdatePrePlayerRunCommand() { }
+
+
 	// Called each frame before entities think
 	virtual void FrameUpdatePreEntityThink() { }
 	// called after entities think

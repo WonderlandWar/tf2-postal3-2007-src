@@ -43,8 +43,6 @@ public:
 	int	GetPointValue() { return m_iPointValue; }
 	bool ShouldHideUntilAchieved() { return m_bHideUntilAchieved; }
 	void SetHideUntilAchieved( bool bHide ) { m_bHideUntilAchieved = bHide; }
-	void SetStoreProgressInSteam( bool bStoreProgressInSteam ) { m_bStoreProgressInSteam = bStoreProgressInSteam; }
-	bool StoreProgressInSteam() { return m_bStoreProgressInSteam; }
 	virtual bool ShouldShowProgressNotification() { return true; }
 	virtual void OnPlayerStatsUpdate() {}
 
@@ -66,8 +64,6 @@ public:
 	void EvaluateIsAlreadyAchieved();
 	virtual void OnMapEvent( const char *pEventName );
 	virtual void PrintAdditionalStatus() {}		// for debugging, achievements may report additional status in achievement_status concmd
-	virtual void OnSteamUserStatsStored() {}
-	virtual void UpdateAchievement( int nData ) {}
 
 protected:
 	virtual void FireGameEvent( IGameEvent *event );
@@ -93,7 +89,6 @@ protected:
 	int m_iProgressMsgMinimum;							// the minimum progress needed before showing progress notification
 	int m_iPointValue;									// # of points this achievement is worth (currently only used for XBox Live)
 	bool m_bHideUntilAchieved;							// should this achievement be hidden until achieved?
-	bool m_bStoreProgressInSteam;						// should incremental progress be stored in Steam.  A counter with same name as achievement must be set up in Steam.
 	const char *m_pInflictorClassNameFilter;			// if non-NULL, inflictor class name to filter with
 	const char *m_pInflictorEntityNameFilter;			// if non-NULL, inflictor entity name to filter with
 	const char *m_pVictimClassNameFilter;				// if non-NULL, victim class name to filter with
@@ -153,23 +148,6 @@ class CMapAchievement : public CBaseAchievement
 		SetFlags( ACH_LISTEN_MAP_EVENTS | ACH_SAVE_GLOBAL );
 		SetGoal( 1 );
 	}
-};
-
-
-//----------------------------------------------------------------------------------------------------------------
-class CAchievement_AchievedCount : public CBaseAchievement
-{
-public:
-	void Init();
-	virtual void OnSteamUserStatsStored( void );
-
-protected:
-	void SetAchievementsRequired( int iNumRequired, int iLowRange, int iHighRange );
-
-private:
-	int m_iNumRequired;
-	int m_iLowRange;
-	int m_iHighRange;
 };
 
 //

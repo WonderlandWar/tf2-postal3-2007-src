@@ -93,10 +93,6 @@
 #include "portal_player.h"
 #endif
 
-#if defined ( SDK_DLL )
-#include "sdk_gamerules.h"
-#endif
-
 extern IToolFrameworkServer *g_pToolFrameworkServer;
 extern IParticleSystemQuery *g_pParticleSystemQuery;
 
@@ -506,43 +502,6 @@ void DrawAllDebugOverlays( void )
 CServerGameDLL g_ServerGameDLL;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL, g_ServerGameDLL);
 
-//Tony; added to fetch the gameinfo file and mount additional content.
-static void MountAdditionalContent()
-{
-	KeyValues *pMainFile, *pFileSystemInfo;
-	char gamePath[256];
-	engine->GetGameDir( gamePath, 256 );
-	Q_StripTrailingSlash( gamePath );
-
-	int nExtraContentId = -1;
-	
-	pMainFile = new KeyValues( "gameinfo.txt" );
-//On linux because of case sensitiviy we need to check for both.
-#ifdef _LINUX
-	if ( pMainFile->LoadFromFile( filesystem, UTIL_VarArgs("%s/GameInfo.txt", gamePath), "MOD" ) )
-	{
-		pFileSystemInfo = pMainFile->FindKey( "FileSystem" );
-		if (pFileSystemInfo)
-			nExtraContentId = pFileSystemInfo->GetInt( "AdditionalContentId", -1 );
-	}
-	else
-#endif
-	if ( pMainFile->LoadFromFile( filesystem, UTIL_VarArgs("%s/gameinfo.txt", gamePath), "MOD" ) )
-	{
-		pFileSystemInfo = pMainFile->FindKey( "FileSystem" );
-		if (pFileSystemInfo)
-			nExtraContentId = pFileSystemInfo->GetInt( "AdditionalContentId", -1 );
-	}
-	pMainFile->deleteThis();
-
-	if (nExtraContentId != -1)
-	{
-		if( filesystem->MountSteamContent(-nExtraContentId) != FILESYSTEM_MOUNT_OK )
-			Warning("Unable to mount extra content with appId: %i\n", nExtraContentId);
-	}
-}
-
-
 bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory, 
 		CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory, 
 		CGlobalVars *pGlobals)
@@ -613,9 +572,6 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 	// Yes, both the client and game .dlls will try to Connect, the soundemittersystem.dll will handle this gracefully
 	if ( !soundemitterbase->Connect( appSystemFactory ) )
 		return false;
-
-	//Tony; mount an extra appId if it exists.
-	MountAdditionalContent();
 
 	// cache the globals
 	gpGlobals = pGlobals;
@@ -1055,11 +1011,6 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
 
 #ifdef CSTRIKE_DLL // BOTPORT: TODO: move these ifdefs out
 	TheBots->ServerActivate();
-#endif
-
-//Tony; call activate on the gamerules
-#if defined ( SDK_DLL )
-	SDKGameRules()->ServerActivate();
 #endif
 }
 
@@ -1671,15 +1622,6 @@ bool CServerGameDLL::ShouldHideServer( void )
 
 	return false;
 }
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void CServerGameDLL::InvalidateMdlCache()
-{
-	// Didn't exist in TFP3, but this function HAS to exist or CServerGameDLL will be abstract!
-}
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Called during a transition, to build a map adjacency list

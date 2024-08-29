@@ -404,30 +404,6 @@ void CHudCommentary::Paint()
 	vgui::surface()->DrawSetTextPos( m_iSpeakersX, m_iSpeakersY );
 	vgui::surface()->DrawPrintText( m_szSpeakers, wcslen(m_szSpeakers) );
 
-	if ( COMMENTARY_BUTTONS & IN_ATTACK )
-	{
-		int iY = m_iBarY + m_iBarTall + YRES(4);
-		wchar_t wzFinal[512] = L"";
-
-		wchar_t *pszText = g_pVGuiLocalize->Find( "#Commentary_PrimaryAttack" );
-		if ( pszText )
-		{
-			UTIL_ReplaceKeyBindings( pszText, 0, wzFinal, sizeof( wzFinal ) );
-			vgui::surface()->DrawSetTextPos( m_iSpeakersX, iY );
-			vgui::surface()->DrawPrintText( wzFinal, wcslen(wzFinal) );
-		}
-
-		pszText = g_pVGuiLocalize->Find( "#Commentary_SecondaryAttack" );
-		if ( pszText )
-		{
-			int w, h;
-			UTIL_ReplaceKeyBindings( pszText, 0, wzFinal, sizeof( wzFinal ) );
-			vgui::surface()->GetTextSize( hFont, wzFinal, w, h );
-			vgui::surface()->DrawSetTextPos( m_iBarX + m_iBarWide - w, iY );
-			vgui::surface()->DrawPrintText( wzFinal, wcslen(wzFinal) );
-		}
-	}
-
 	// Draw the commentary count
 	// Determine our text size, and move that far in from the right hand size (plus the offset)
 	int iCountWide, iCountTall;
@@ -514,26 +490,4 @@ void CHudCommentary::StartCommentary( C_PointCommentaryNode *pNode, char *pszSpe
 void CHudCommentary::StopCommentary( void )
 {
 	m_hActiveNode = NULL;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CommentaryModeShouldSwallowInput( C_BasePlayer *pPlayer )
-{
-	if ( !IsInCommentaryMode() )	
-		return false;
-
-	if ( pPlayer->m_nButtons & COMMENTARY_BUTTONS )
-	{
-		// Always steal the secondary attack
-		if ( pPlayer->m_nButtons & IN_ATTACK2 )
-			return true;
-
-		// See if there's any nodes ahead of us.
-		if ( IsNodeUnderCrosshair( pPlayer ) )
-			return true;
-	}
-
-	return false;
 }

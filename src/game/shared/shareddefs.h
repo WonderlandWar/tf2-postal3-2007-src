@@ -472,7 +472,6 @@ enum
 	EFL_SETTING_UP_BONES =		(1<<3),	// Set while a model is setting up its bones.
 	EFL_KEEP_ON_RECREATE_ENTITIES = (1<<4), // This is a special entity that should not be deleted when we restart entities only
 
-	//Tony; BUG?? I noticed this today while performing stealz on flag 16! look at the definition of the flag above...
 	EFL_HAS_PLAYER_CHILD=		(1<<4),	// One of the child entities is a player.
 
 	EFL_DIRTY_SHADOWUPDATE =	(1<<5),	// Client only- need shadow manager to update the shadow...
@@ -761,11 +760,5 @@ enum
 {
 	SIMULATION_TIME_WINDOW_BITS = 8,
 };
-
-//-----------------------------------------------------------------------------
-// Commentary Mode
-//-----------------------------------------------------------------------------
-// The player's method of starting / stopping commentary
-#define COMMENTARY_BUTTONS		(IN_USE)
 
 #endif // SHAREDDEFS_H

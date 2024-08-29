@@ -204,9 +204,6 @@ static const char *s_PreserveEnts[] =
 	"sky_camera",
 	"scene_manager",
 	"trigger_soundscape",
-	"commentary_auto",
-	"point_commentary_node",
-	"point_commentary_viewpoint",
 	"", // END Marker
 };
 
