@@ -3639,11 +3639,10 @@ void CGameMovement::CategorizePosition( void )
 	if ( player->IsObserver() )
 		return;
 
-	float flOffset = 2.0f;
-
 	point[0] = mv->m_vecAbsOrigin[0];
 	point[1] = mv->m_vecAbsOrigin[1];
-	point[2] = mv->m_vecAbsOrigin[2] - flOffset;
+	point[2] = mv->m_vecAbsOrigin[2] - 2;	// move a total of 4 units to try and avoid some
+	                                        // epsilon error
 
 	Vector bumpOrigin;
 	bumpOrigin = mv->m_vecAbsOrigin;
@@ -4375,7 +4374,8 @@ void CGameMovement::PlayerMove( void )
 		if ( player->GetMoveType() != MOVETYPE_NOCLIP && 
 			 player->GetMoveType() != MOVETYPE_NONE && 		 
 			 player->GetMoveType() != MOVETYPE_ISOMETRIC && 
-			 player->GetMoveType() != MOVETYPE_OBSERVER )
+			 player->GetMoveType() != MOVETYPE_OBSERVER &&
+			 !player->pl.deadflag )
 		{
 			if ( CheckStuck() )
 			{

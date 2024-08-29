@@ -635,65 +635,57 @@ bool CTFGameMovement::CheckJumpButton()
 
 bool CTFGameMovement::CheckWater( void )
 {
-	Vector vecPlayerMin = GetPlayerMins();
-	Vector vecPlayerMax = GetPlayerMaxs();
+	Vector	point;
+	int		cont;
 
-	Vector vecPoint( ( mv->m_vecAbsOrigin.x + ( vecPlayerMin.x + vecPlayerMax.x ) * 0.5f ),
-				     ( mv->m_vecAbsOrigin.y + ( vecPlayerMin.y + vecPlayerMax.y ) * 0.5f ),
-				     ( mv->m_vecAbsOrigin.z + vecPlayerMin.z + 1 ) );
-
-
+	// Pick a spot just above the players feet.
+	point[0] = mv->m_vecAbsOrigin[0] + (GetPlayerMins()[0] + GetPlayerMaxs()[0]) * 0.5;
+	point[1] = mv->m_vecAbsOrigin[1] + (GetPlayerMins()[1] + GetPlayerMaxs()[1]) * 0.5;
+	point[2] = mv->m_vecAbsOrigin[2] + GetPlayerMins()[2] + 1;
+	
 	// Assume that we are not in water at all.
-	int wl = WL_NotInWater;
-	int wt = CONTENTS_EMPTY;
+	player->SetWaterLevel( WL_NotInWater );
+	player->SetWaterType( CONTENTS_EMPTY );
 
-	// Check to see if our feet are underwater.
-	int nContents = GetPointContentsCached( vecPoint );	
-	if ( nContents & MASK_WATER )
+	// Grab point contents.
+	cont = GetPointContentsCached( point );	
+	
+	// Are we under water? (not solid and not empty?)
+	if ( cont & MASK_WATER )
 	{
 		// Clear our jump flag, because we have landed in water.
 		m_pTFPlayer->m_Shared.SetJumping( false );
 
-		// Set water type and level.
-		wt = nContents;
-		wl = WL_Feet;
+		// Set water type
+		player->SetWaterType( cont );
 
-		float flWaistZ = mv->m_vecAbsOrigin.z + ( vecPlayerMin.z + vecPlayerMax.z ) * 0.5f + 12.0f;
+		// We are at least at level one
+		player->SetWaterLevel( WL_Feet );
 
-		// Now check eyes
-		vecPoint.z = mv->m_vecAbsOrigin.z + player->GetViewOffset()[2];
-		nContents = enginetrace->GetPointContents( vecPoint );
-		if ( nContents & MASK_WATER )
+		// Now check a point that is at the player hull midpoint.
+		point[2] = mv->m_vecAbsOrigin[2] + (GetPlayerMins()[2] + GetPlayerMaxs()[2])*0.5;
+		cont = enginetrace->GetPointContents( point );
+		// If that point is also under water...
+		if ( cont & MASK_WATER )
 		{
-			// In over our eyes
-			wl = WL_Eyes;  
-			VectorCopy( vecPoint, m_vecWaterPoint );
-			m_vecWaterPoint.z = flWaistZ;
-		}
-		else
-		{
-			// Now check a point that is at the player hull midpoint (waist) and see if that is underwater.
-			vecPoint.z = flWaistZ;
-			nContents = enginetrace->GetPointContents( vecPoint );
-			if ( nContents & MASK_WATER )
-			{
-				// Set the water level at our waist.
-				wl = WL_Waist;
-				VectorCopy( vecPoint, m_vecWaterPoint );
-			}
+			// Set a higher water level.
+			player->SetWaterLevel( WL_Waist );
+
+			// Now check the eye position.  (view_ofs is relative to the origin)
+			point[2] = mv->m_vecAbsOrigin[2] + player->GetViewOffset()[2];
+			cont = enginetrace->GetPointContents( point );
+			if ( cont & MASK_WATER )
+				player->SetWaterLevel( WL_Eyes );  // In over our eyes
 		}
 	}
 
-	player->SetWaterLevel( wl );
-	player->SetWaterType( wt );
-
-	// If we just transitioned from not in water to water, record the time for splashes, etc.
-	if ( ( WL_NotInWater == m_nOldWaterLevel ) && ( wl >  WL_NotInWater ) )
+	// if we just transitioned from not in water to in water, record the time it happened
+	if ( ( WL_NotInWater == m_nOldWaterLevel ) && ( player->GetWaterLevel() >  WL_NotInWater ) )
 	{
 		m_flWaterEntryTime = gpGlobals->curtime;
 	}
 
-	return ( wl > WL_Feet );
+	return ( player->GetWaterLevel() > WL_Feet );
 }
 
 
