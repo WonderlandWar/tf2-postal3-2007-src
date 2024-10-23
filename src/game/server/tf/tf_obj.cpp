@@ -1367,8 +1367,7 @@ CBaseEntity *CBaseObject::GetFirstFriendlyObjectOnMe( void )
 {
 	CBaseObject *pFirstObject = NULL;
 
-	IHasBuildPoints *pBPInterface = dynamic_cast<IHasBuildPoints*>(this);
-	int iNumObjects = pBPInterface->GetNumObjectsOnMe();
+	int iNumObjects = GetNumObjectsOnMe();
 	for ( int iPoint=0;iPoint<iNumObjects;iPoint++ )
 	{
 		CBaseObject *pObject = GetBuildPointObject( iPoint );
@@ -1452,8 +1451,6 @@ int CBaseObject::OnTakeDamage( const CTakeDamageInfo &info )
 			return 0;
 	}
 
-	IHasBuildPoints *pBPInterface = dynamic_cast<IHasBuildPoints*>(this);
-
 	float flDamage = info.GetDamage();
 
 	// Objects build on other objects take less damage
@@ -1468,7 +1465,7 @@ int CBaseObject::OnTakeDamage( const CTakeDamageInfo &info )
 	}
 
 	bool bFriendlyObjectsAttached = false;
-	int iNumObjects = pBPInterface->GetNumObjectsOnMe();
+	int iNumObjects = GetNumObjectsOnMe();
 	for ( int iPoint=0;iPoint<iNumObjects;iPoint++ )
 	{
 		CBaseObject *pObject = GetBuildPointObject( iPoint );
@@ -2138,9 +2135,7 @@ void CBaseObject::DetachObjectFromObject( void )
 		return;
 
 	// Clear the build point
-	IHasBuildPoints *pBPInterface = dynamic_cast<IHasBuildPoints*>(GetParentObject() );
-	Assert( pBPInterface );
-	pBPInterface->SetObjectOnBuildPoint( m_iBuiltOnPoint, NULL );
+	SetObjectOnBuildPoint( m_iBuiltOnPoint, NULL );
 
 	SetParent( NULL );
 	m_hBuiltOnEntity = NULL;
@@ -2181,9 +2176,7 @@ void CBaseObject::SpawnEntityOnBuildPoint( const char *pEntityName, int iAttachm
 	pObject->AttachObjectToObject( this, iPoint, vecOrigin );
 	//pObject->m_fObjectFlags |= OF_CANNOT_BE_DISMANTLED;
 
-	IHasBuildPoints *pBPInterface = dynamic_cast<IHasBuildPoints*>(this);
-	Assert( pBPInterface );
-	pBPInterface->SetObjectOnBuildPoint( iPoint, pObject );
+	SetObjectOnBuildPoint( iPoint, pObject );
 }
 
 
