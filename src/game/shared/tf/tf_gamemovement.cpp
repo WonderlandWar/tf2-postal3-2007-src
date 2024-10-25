@@ -306,8 +306,6 @@ void CTFGameMovement::AirDash( void )
 	m_pTFPlayer->DoAnimationEvent( PLAYERANIMEVENT_DOUBLEJUMP );
 }
 
-// TFP3:
-// FIXME: This is not accurate and was copied from C_TFPlayer::AvoidPlayers()!!
 //-----------------------------------------------------------------------------
 // Purpose: Try to steer away from any players and objects we might interpenetrate
 //-----------------------------------------------------------------------------

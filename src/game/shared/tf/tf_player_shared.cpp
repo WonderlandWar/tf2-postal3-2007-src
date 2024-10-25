@@ -89,7 +89,6 @@ BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	RecvPropInt( RECVINFO( m_bAirDash) ),
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
 	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
-
 	RecvPropTime( RECVINFO( m_flInvulnerableOffTime ) ),
 	// Spy.
 	RecvPropTime( RECVINFO( m_flInvisChangeCompleteTime ) ),
@@ -129,8 +128,7 @@ BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
 	SendPropFloat( SENDINFO( m_flCritMult ), 8, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
 	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
-	
+	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),	
 	SendPropTime( SENDINFO( m_flInvulnerableOffTime ) ),
 	// Spy
 	SendPropTime( SENDINFO( m_flInvisChangeCompleteTime ) ),
@@ -646,7 +644,6 @@ void CTFPlayerShared::ConditionGameRulesThink( void )
 				RemoveCond( TF_COND_INVULNERABLE );
 			}
 		}
-
 	}
 
 #endif
@@ -1987,7 +1984,7 @@ bool CTFPlayer::HasTheFlag( void )
 //-----------------------------------------------------------------------------
 int CTFPlayer::CanBuild( int iObjectType )
 {
-	if ( iObjectType < 0 || iObjectType >= OBJ_LAST )
+	if ( iObjectType >= OBJ_LAST )
 		return CB_UNKNOWN_OBJECT;
 
 #ifndef CLIENT_DLL

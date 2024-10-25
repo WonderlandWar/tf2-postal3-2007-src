@@ -169,7 +169,6 @@ CObjectTeleporter::CObjectTeleporter()
 {
 	SetMaxHealth( TELEPORTER_MAX_HEALTH );
 	m_iHealth = TELEPORTER_MAX_HEALTH;
-	UseClientSideAnimation();
 }
 
 //-----------------------------------------------------------------------------
