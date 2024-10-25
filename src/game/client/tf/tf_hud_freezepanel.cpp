@@ -66,9 +66,6 @@ CTFFreezePanel::CTFFreezePanel( const char *pElementName )
 	
 	m_pKillerHealth = new CTFFreezePanelHealth( this, "FreezePanelHealth" );
 	m_pNemesisSubPanel = new EditablePanel( this, "NemesisSubPanel" );
-
-
-	m_pNemesisSubPanel = dynamic_cast<EditablePanel *>( FindChildByName( "NemesisSubPanel" ) );
 }
 
 //-----------------------------------------------------------------------------

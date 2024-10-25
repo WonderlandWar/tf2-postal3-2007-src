@@ -2776,8 +2776,8 @@ void CTFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	}
 
 	bool bDisguised = m_Shared.InCond( TF_COND_DISGUISED );
-	// we want the rag doll to burn if the player was burning and was not a pryo (who only burns momentarily)
-	bool bBurning = m_Shared.InCond( TF_COND_BURNING ) && ( TF_CLASS_PYRO != GetPlayerClass()->GetClassIndex() );
+	// we want the rag doll to burn if the player was burning
+	bool bBurning = m_Shared.InCond( TF_COND_BURNING );
 
 	// Remove all conditions...
 	m_Shared.RemoveAllCond( NULL );
