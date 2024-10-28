@@ -68,7 +68,8 @@ CTFClientScoreBoardDialog::CTFClientScoreBoardDialog( IViewPort *pViewPort ) : C
 
 	SetDialogVariable( "server", "" );
 
-	SetVisible( false );
+	// Doesn't show in IDA
+	//SetVisible( false );
 
 	m_pImageList = NULL;
 
@@ -483,6 +484,7 @@ void CTFClientScoreBoardDialog::UpdateSpectatorList()
 	}
 
 	wchar_t wzSpectators[512] = L"";
+	memset( szSpectatorList, 0, sizeof( szSpectatorList ) );
 	if ( nSpectators > 0 )
 	{
 		const char *pchFormat = ( 1 == nSpectators ? "#ScoreBoard_Spectator" : "#ScoreBoard_Spectators" );
@@ -546,6 +548,8 @@ void CTFClientScoreBoardDialog::UpdatePlayerDetails()
 	{
 		m_pClassImage->SetVisible( false );
 	}
+
+	// tfp3: The SetVisible call is strange, there should only be one but there isn't an arg in it!
 }
 
 //-----------------------------------------------------------------------------

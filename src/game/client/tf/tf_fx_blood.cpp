@@ -28,12 +28,10 @@
 //-----------------------------------------------------------------------------
 void TFBloodSprayCallback( const CEffectData &data )
 {
-	Vector vecOrigin = data.m_vOrigin;
-	Vector vecNormal = data.m_vNormal;
 	ClientEntityHandle_t hEntity = data.m_hEntity;
 	
 	QAngle	vecAngles;
-	VectorAngles( -vecNormal, vecAngles );
+	VectorAngles( -data.m_vNormal, vecAngles );
 
 	// determine if the bleeding player is underwater
 	bool bUnderwater = false;
@@ -45,11 +43,11 @@ void TFBloodSprayCallback( const CEffectData &data )
 	 
 	if ( !bUnderwater && TFGameRules() && TFGameRules()->IsBirthday() && RandomFloat(0,1) < 0.2 )
 	{
-		DispatchParticleEffect( "bday_blood", vecOrigin, vecAngles, pPlayer );
+		DispatchParticleEffect( "bday_blood", data.m_vOrigin, vecAngles, pPlayer );
 	}
 	else
 	{
-		DispatchParticleEffect( bUnderwater ? "water_blood_impact_red_01" : "blood_impact_red_01", vecOrigin, vecAngles, pPlayer );
+		DispatchParticleEffect( bUnderwater ? "water_blood_impact_red_01" : "blood_impact_red_01", data.m_vOrigin, vecAngles, pPlayer );
 	}
 
 	// if underwater, don't add additional spray
@@ -58,21 +56,11 @@ void TFBloodSprayCallback( const CEffectData &data )
 
 	// Now throw out a spray away from the view
 	// Get the distance to the view
+	Vector vecOrigin = data.m_vOrigin;
+	Vector vecNormal = data.m_vNormal;
 	float flDistance = (vecOrigin - MainViewOrigin()).Length();
 	float flLODDistance = 0.25 * (flDistance / 512);
-
-	Vector right, up;
-	if (vecNormal != Vector(0, 0, 1) )
-	{
-		right = vecNormal.Cross( Vector(0, 0, 1) );
-		up = right.Cross( vecNormal );
-	}
-	else
-	{
-		right = Vector(0, 0, 1);
-		up = right.Cross( vecNormal );
-	}
-
+		
 	// If the normal's too close to being along the view, push it out
 	Vector vecForward, vecRight;
 	AngleVectors( MainViewAngles(), &vecForward, &vecRight, NULL );

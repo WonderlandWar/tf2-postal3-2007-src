@@ -100,7 +100,6 @@ void CTFIntroMenu::OnTick()
 	{
 		if ( m_iAction == INTRO_STARTVIDEO )
 		{
-			
 			char mapname[MAX_MAP_NAME];
 
 			Q_FileBase( engine->GetLevelName(), mapname, sizeof( mapname ) );

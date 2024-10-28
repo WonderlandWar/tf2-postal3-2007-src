@@ -1096,7 +1096,6 @@ CControlPointProgressBar::CControlPointProgressBar(Panel *parent) : vgui::Editab
 	m_pTeardropSide = NULL;
 	m_pBlocked = NULL;
 	m_iOrgHeight = 0;
-	m_iMidGroupIndex = -1;
 }
 
 //-----------------------------------------------------------------------------

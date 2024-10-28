@@ -1532,7 +1532,7 @@ void CTFPlayerShared::UpdateCritMult( void )
 
 	if ( m_DamageEvents.Count() == 0 )
 	{
-		m_flCritMult = 1.0;
+		m_flCritMult = flMinMult;
 		return;
 	}
 

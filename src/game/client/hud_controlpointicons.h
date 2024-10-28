@@ -73,7 +73,6 @@ private:
 	CIconPanel					*m_pTeardropSide;
 	CIconPanel					*m_pBlocked;
 	int							m_iOrgHeight;
-	int							m_iMidGroupIndex;
 };
 
 //-----------------------------------------------------------------------------

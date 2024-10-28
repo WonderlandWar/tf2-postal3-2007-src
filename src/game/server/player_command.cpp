@@ -300,8 +300,6 @@ void CPlayerMove::RunPostThink( CBasePlayer *player )
 	player->PostThink();
 }
 
-void CommentarySystem_PePlayerRunCommand( CBasePlayer *player, CUserCmd *ucmd );
-
 //-----------------------------------------------------------------------------
 // Purpose: Runs movement commands for the player
 // Input  : *player - 

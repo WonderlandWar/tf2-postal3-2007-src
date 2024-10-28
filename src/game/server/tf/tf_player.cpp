@@ -2125,9 +2125,6 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 	if ( GetFlags() & FL_GODMODE )
 		return 0;
 
-	if ( IsInCommentaryMode() )
-		return 0;
-
 	if ( m_debugOverlays & OVERLAY_BUDDHA_MODE ) 
 	{
 		if ((m_iHealth - info.GetDamage()) <= 0)
@@ -2298,8 +2295,8 @@ int CTFPlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 				
 				float flRandomVal = RandomFloat( flMin, flMax );
 				float flOut = SimpleSplineRemapValClamped( flRandomVal, 0, 1, -flRandomDamage, flRandomDamage );
-				// TFP3: flOut was most likely different but some of the values are undefined!
-				//float flOut = SimpleSplineRemapValClamped( flRandomVal, -flRandomDamage, flRandomDamage,  );
+				// TFP3: flOut was most likely different but some of the values are unset!
+				//float flOut = SimpleSplineRemapValClamped( flRandomVal, -flRandomDamage, flRandomDamage, ???, ??? );
 				flDamage = info.GetDamage() + flOut;
 
 				/*

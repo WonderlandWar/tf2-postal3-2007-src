@@ -37,10 +37,6 @@ ConVar weapon_medigun_construction_rate( "weapon_medigun_construction_rate", "10
 ConVar weapon_medigun_charge_rate( "weapon_medigun_charge_rate", "40", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Amount of time healing it takes to fully charge the medigun." );
 ConVar weapon_medigun_chargerelease_rate( "weapon_medigun_chargerelease_rate", "8", FCVAR_CHEAT | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Amount of time it takes the a full charge of the medigun to be released." );
 
-#if defined (CLIENT_DLL)
-ConVar tf_medigun_autoheal( "tf_medigun_autoheal", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO, "Setting this to 1 will cause the Medigun's primary attack to be a toggle instead of needing to be held down." );
-#endif
-
 #if !defined (CLIENT_DLL)
 ConVar tf_medigun_lagcomp(  "tf_medigun_lagcomp", "1", FCVAR_DEVELOPMENTONLY );
 #endif
@@ -655,18 +651,17 @@ void CWeaponMedigun::ItemPostFrame( void )
 
 	// Try to start healing
 	m_bAttacking = false;
+
+	if ( /*m_bChargeRelease || */ pOwner->m_nButtons & IN_ATTACK )
 	{
-		if ( /*m_bChargeRelease || */ pOwner->m_nButtons & IN_ATTACK )
-		{
-			PrimaryAttack();
-			m_bAttacking = true;
-		}
- 		else if ( m_bHealing )
- 		{
- 			// Detach from the player if they release the attack button.
- 			RemoveHealingTarget( -1 );
- 		}
+		PrimaryAttack();
+		m_bAttacking = true;
 	}
+ 	else if ( m_bHealing )
+ 	{
+ 		// Detach from the player if they release the attack button.
+ 		RemoveHealingTarget( -1 );
+ 	}
 
 	if ( pOwner->m_nButtons & IN_ATTACK2 )
 	{
@@ -1159,11 +1154,11 @@ void CWeaponMedigun::UpdateEffects( void )
 			//m_hHealingTargetEffects.InsertBefore( i, healingtargeteffects_t() );
 			m_hHealingTargetEffects.AddToTail( healingtargeteffects_t() );
 #ifdef TFP3_MEDIGUN_FIX
-			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pTarget = m_hHealingTarget;
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()-1].pTarget = m_hHealingTarget;
 #else
-			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pTarget = m_hHealingTargets[0];
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()-1].pTarget = m_hHealingTargets[0];
 #endif	
-			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()].pEffect = pEffect;
+			m_hHealingTargetEffects[m_hHealingTargetEffects.Count()-1].pEffect = pEffect;
 		}
 		else
 		{
