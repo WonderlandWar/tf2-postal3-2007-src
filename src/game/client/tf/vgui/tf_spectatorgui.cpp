@@ -400,7 +400,7 @@ void CTFSpectatorGUI::UpdateTarget( void )
 		return;
 	}
 	
-	if ( m_pTargetNameLabel->IsVisible() && ShouldShowSpectatingTarget() )
+	if ( !m_pTargetNameLabel->IsVisible() && ShouldShowSpectatingTarget() )
 	{	
 		ShowSpectatingTarget( true );
 	}
@@ -421,6 +421,9 @@ void CTFSpectatorGUI::UpdateTarget( void )
 		iMaxBuffedHealth = pPlayer->m_Shared.GetMaxBuffedHealth();
 
 	m_pTargetHealth->SetHealth( iHealth, pSpecTarget->GetMaxHealth(), iMaxBuffedHealth );
+	
+	// tfp3: Using iSpecTarget may not be accurate, but it seems to work perfectly
+	SetDialogVariable( "targetname", g_PR->GetPlayerName( iSpecTarget ) );
 }
 
 //-----------------------------------------------------------------------------
