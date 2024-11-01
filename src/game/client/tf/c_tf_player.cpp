@@ -901,29 +901,27 @@ void RecvProxyArrayLength_PlayerObjects( void *pStruct, int objectID, int curren
 
 // specific to the local player
 BEGIN_RECV_TABLE_NOBASE( C_TFPlayer, DT_TFLocalPlayerExclusive )
-	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
+	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ), // tfp3: m_vecNetworkOrigin may not be accurate here...
 	RecvPropArray2( 
 		RecvProxyArrayLength_PlayerObjects,
 		RecvPropInt( "player_object_array_element", 0, SIZEOF_IGNORE, 0, RecvProxy_PlayerObjectList ), 
 		MAX_OBJECTS_PER_PLAYER, 
 		0, 
-		"player_object_array"	),
+		"player_object_array"	),		
 
-	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
-//	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
-
+	RecvPropInt( RECVINFO( m_iSpawnCounter ) ),	
+	RecvPropInt( RECVINFO( m_iActivePipebombs ) ),
 END_RECV_TABLE()
 
 // all players except the local player
 BEGIN_RECV_TABLE_NOBASE( C_TFPlayer, DT_TFNonLocalPlayerExclusive )
-	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ),
-
-	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
-	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
-
+	RecvPropVector( RECVINFO_NAME( m_vecNetworkOrigin, m_vecOrigin ) ), // tfp3: m_vecNetworkOrigin may not be accurate here...
 END_RECV_TABLE()
 
 IMPLEMENT_CLIENTCLASS_DT( C_TFPlayer, DT_TFPlayer, CTFPlayer )
+
+	RecvPropFloat( RECVINFO( m_angEyeAngles[0] ) ),
+	RecvPropFloat( RECVINFO( m_angEyeAngles[1] ) ),
 
 	RecvPropBool(RECVINFO(m_bSaveMeParity)),
 
@@ -936,10 +934,6 @@ IMPLEMENT_CLIENTCLASS_DT( C_TFPlayer, DT_TFPlayer, CTFPlayer )
 
 	RecvPropDataTable( "tflocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_TFLocalPlayerExclusive) ),
 	RecvPropDataTable( "tfnonlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_TFNonLocalPlayerExclusive) ),
-
-	RecvPropInt( RECVINFO( m_iSpawnCounter ) ),
-	
-	RecvPropInt( RECVINFO( m_iActivePipebombs ) ),
 	
 	RecvPropInt( RECVINFO( m_nPlayerModelIndex ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseModelIndex ) ),

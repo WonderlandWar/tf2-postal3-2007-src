@@ -72,34 +72,38 @@ ConVar tf_spy_cloak_no_attack_time( "tf_spy_cloak_no_attack_time", "2.0", FCVAR_
 
 // Client specific.
 #ifdef CLIENT_DLL
-
-BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerSharedLocal )
-	RecvPropInt( RECVINFO( m_nDesiredDisguiseTeam ) ),
-	RecvPropInt( RECVINFO( m_nDesiredDisguiseClass ) ),
-	RecvPropTime( RECVINFO( m_flStealthNoAttackExpire ) ),
-	RecvPropFloat( RECVINFO( m_flCloakMeter) ),
-	RecvPropArray3( RECVINFO_ARRAY( m_bPlayerDominated ), RecvPropBool( RECVINFO( m_bPlayerDominated[0] ) ) ),
-END_RECV_TABLE()
-
 BEGIN_RECV_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
-	RecvPropInt( RECVINFO( m_nPlayerCond ) ),
-	RecvPropInt( RECVINFO( m_bJumping) ),
-	RecvPropInt( RECVINFO( m_nNumHealers ) ),
-	RecvPropFloat( RECVINFO( m_flCritMult) ),
-	RecvPropInt( RECVINFO( m_bAirDash) ),
 	RecvPropInt( RECVINFO( m_nPlayerState ) ),
-	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
+	RecvPropInt( RECVINFO( m_nPlayerCond ) ),
+
+	RecvPropBool( RECVINFO( m_bEnableSeparation ) ),
+	RecvPropVector( RECVINFO( m_vSeparationVelocity ) ),
+	
+	RecvPropTime( RECVINFO ( m_flLastStealthExposeTime ) ),
+	RecvPropInt( RECVINFO( m_nNumHealers ) ),
 	RecvPropTime( RECVINFO( m_flInvulnerableOffTime ) ),
-	// Spy.
+	RecvPropInt( RECVINFO( m_iDesiredPlayerClass ) ),
+	RecvPropFloat( RECVINFO( m_flCloakMeter) ),
+
+	RecvPropInt( RECVINFO( m_bJumping) ),
+	RecvPropInt( RECVINFO( m_bAirDash) ),
+
+	RecvPropTime( RECVINFO( m_flStealthNoAttackExpire ) ),
+	RecvPropFloat( RECVINFO( m_flCritMult) ),
+
 	RecvPropTime( RECVINFO( m_flInvisChangeCompleteTime ) ),
 	RecvPropTime( RECVINFO( m_flInvisChangeTotalTime ) ),	
-	RecvPropTime( RECVINFO ( m_flLastStealthExposeTime ) ),
+
 	RecvPropInt( RECVINFO( m_nDisguiseTeam ) ),
 	RecvPropInt( RECVINFO( m_nDisguiseClass ) ),
-	RecvPropInt( RECVINFO( m_iDisguiseHealth ) ),
+	RecvPropInt( RECVINFO( m_nDesiredDisguiseTeam ) ),
+	RecvPropInt( RECVINFO( m_nDesiredDisguiseClass ) ),
+
 	RecvPropEHandle( RECVINFO( m_hDisguiseTarget ) ),
-	// Local Data.
-	RecvPropDataTable( "tfsharedlocaldata", 0, 0, &REFERENCE_RECV_TABLE(DT_TFPlayerSharedLocal) ),
+	RecvPropInt( RECVINFO( m_iDisguiseHealth ) ),
+	
+	RecvPropArray3( RECVINFO_ARRAY( m_bPlayerDominated ), RecvPropBool( RECVINFO( m_bPlayerDominated[0] ) ) ),
+	RecvPropArray3( RECVINFO_ARRAY( m_flPlayerPushTime ), RecvPropFloat( RECVINFO( m_flPlayerPushTime[0] ) ) ),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA_NO_BASE( CTFPlayerShared )
@@ -114,32 +118,38 @@ END_PREDICTION_DATA()
 // Server specific.
 #else
 
-BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerSharedLocal )
-	SendPropInt( SENDINFO( m_nDesiredDisguiseTeam ), 3, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_nDesiredDisguiseClass ), 4, SPROP_UNSIGNED ),
-	SendPropFloat( SENDINFO( m_flCloakMeter ), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN, 0.0, 100.0 ),
-	SendPropArray3( SENDINFO_ARRAY3( m_bPlayerDominated ), SendPropBool( SENDINFO_ARRAY( m_bPlayerDominated ) ) ),
-END_SEND_TABLE()
-
 BEGIN_SEND_TABLE_NOBASE( CTFPlayerShared, DT_TFPlayerShared )
+	SendPropInt( SENDINFO( m_nPlayerState ), TF_STATE_COUNT, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_nPlayerCond ), TF_COND_LAST, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-	SendPropInt( SENDINFO( m_bJumping ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+
+	SendPropBool( SENDINFO( m_bEnableSeparation ) ),
+	SendPropVector( SENDINFO( m_vSeparationVelocity ) ),
+
+	SendPropTime( SENDINFO ( m_flLastStealthExposeTime ) ),
 	SendPropInt( SENDINFO( m_nNumHealers ), 5, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-	SendPropFloat( SENDINFO( m_flCritMult ), 8, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
-	SendPropInt( SENDINFO( m_nPlayerState ), Q_log2( TF_STATE_COUNT )+1, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),	
 	SendPropTime( SENDINFO( m_flInvulnerableOffTime ) ),
-	// Spy
+	SendPropInt( SENDINFO( m_iDesiredPlayerClass ), Q_log2( TF_CLASS_COUNT_ALL )+1, SPROP_UNSIGNED ),
+	SendPropFloat( SENDINFO( m_flCloakMeter ), 0, SPROP_NOSCALE | SPROP_CHANGES_OFTEN, 0.0, 100.0 ),
+
+	SendPropInt( SENDINFO( m_bJumping ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+	SendPropInt( SENDINFO( m_bAirDash ), 1, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+
+	SendPropTime( SENDINFO( m_flStealthNoAttackExpire ) ),
+	SendPropFloat( SENDINFO( m_flCritMult ), 8, SPROP_UNSIGNED | SPROP_CHANGES_OFTEN ),
+
 	SendPropTime( SENDINFO( m_flInvisChangeCompleteTime ) ),
 	SendPropTime( SENDINFO( m_flInvisChangeTotalTime ) ),	
-	SendPropTime( SENDINFO ( m_flLastStealthExposeTime ) ),
+
 	SendPropInt( SENDINFO( m_nDisguiseTeam ), 3, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_nDisguiseClass ), 4, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO( m_iDisguiseHealth ), 10 ),
+	SendPropInt( SENDINFO( m_nDesiredDisguiseTeam ), 3, SPROP_UNSIGNED ),
+	SendPropInt( SENDINFO( m_nDesiredDisguiseClass ), 4, SPROP_UNSIGNED ),
+
 	SendPropEHandle( SENDINFO( m_hDisguiseTarget ) ),
-	// Local Data.
-	SendPropDataTable( "tfsharedlocaldata", 0, &REFERENCE_SEND_TABLE( DT_TFPlayerSharedLocal ), SendProxy_SendLocalDataTable ),	
+	SendPropInt( SENDINFO( m_iDisguiseHealth ), 10 ),	
+
+	SendPropArray3( SENDINFO_ARRAY3( m_bPlayerDominated ), SendPropBool( SENDINFO_ARRAY( m_bPlayerDominated ) ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_flPlayerPushTime ), SendPropFloat( SENDINFO_ARRAY( m_flPlayerPushTime ) ) ),
 END_SEND_TABLE()
 
 #endif

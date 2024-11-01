@@ -83,11 +83,8 @@ bool CHudTeamGoal::ShouldDraw( void )
 	if ( !m_pGoalLabel )
 		return false;
 
-	if ( TFGameRules() )
+	if ( TFGameRules() && TFGameRules()->InSetup() )
 	{
-		if ( !TFGameRules()->InSetup() )
-			return false;
-
 		C_TFPlayer *pPlayer = C_TFPlayer::GetLocalTFPlayer();
 		if ( pPlayer && pPlayer->IsAlive() && pPlayer->GetTeamNumber() >= FIRST_GAME_TEAM )
 		{
