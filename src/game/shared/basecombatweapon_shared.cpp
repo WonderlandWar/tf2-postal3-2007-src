@@ -38,8 +38,6 @@
 
 #define HIDEWEAPON_THINK_CONTEXT			"BaseCombatWeapon_HideThink"
 
-extern bool UTIL_ItemCanBeTouchedByPlayer( CBaseEntity *pItem, CBasePlayer *pPlayer );
-
 CBaseCombatWeapon::CBaseCombatWeapon()
 {
 	// Constructor must call this
@@ -752,15 +750,7 @@ void CBaseCombatWeapon::DefaultTouch( CBaseEntity *pOther )
 	if ( !pPlayer )
 		return;
 
-	if( UTIL_ItemCanBeTouchedByPlayer(this, pPlayer) )
-	{
-		// This makes sure the player could potentially take the object
-		// before firing the cache interaction output. That doesn't mean
-		// the player WILL end up taking the object, but cache interactions
-		// are fired as soon as you prove you have found the object, not
-		// when you finally acquire it.
-		m_OnCacheInteraction.FireOutput( pOther, this );
-	}
+	m_OnCacheInteraction.FireOutput( pOther, this );
 
 	if( HasSpawnFlags(SF_WEAPON_NO_PLAYER_PICKUP) )
 		return;

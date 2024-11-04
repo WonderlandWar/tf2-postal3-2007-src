@@ -375,6 +375,17 @@ void CObjectTeleporter::TeleporterTouch( CBaseEntity *pOther )
 				}
 			}
 		}
+		else if ( m_iState == TELEPORTER_STATE_IDLE )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#Teleporter_entrance_idle" );
+		}
+	}
+	else
+	{
+		if ( m_iState == TELEPORTER_STATE_IDLE )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#Teleporter_exit_idle" );
+		}
 	}
 }
 

@@ -1053,12 +1053,10 @@ bool CBaseObject::StartBuilding( CBaseEntity *pBuilder )
 	// Deduct the cost from the player
 	if ( pBuilder && pBuilder->IsPlayer() )
 	{
-		/*
 		if ( ((CTFPlayer*)pBuilder)->IsPlayerClass( TF_CLASS_ENGINEER ) )
 		{
 			((CTFPlayer*)pBuilder)->HintMessage( HINT_ENGINEER_USE_WRENCH_ONOWN );
 		}
-		*/
 
 		int iAmountPlayerPaidForMe = ((CTFPlayer*)pBuilder)->StartedBuildingObject( m_iObjectType );
 		if ( !iAmountPlayerPaidForMe )
