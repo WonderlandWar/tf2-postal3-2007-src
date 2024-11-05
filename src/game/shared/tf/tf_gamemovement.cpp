@@ -333,8 +333,6 @@ void CTFGameMovement::AvoidPlayers( void )
 	Vector vecTFPlayerCenter = m_pTFPlayer->WorldSpaceCenter();
 	Vector vecTFPlayerMin = m_pTFPlayer->CollisionProp()->OBBMins();
 	Vector vecTFPlayerMax = m_pTFPlayer->CollisionProp()->OBBMaxs();
-	float flZHeight = vecTFPlayerMax.z - vecTFPlayerMin.z;
-	vecTFPlayerCenter.z += 0.5f * flZHeight;
 	VectorAdd( vecTFPlayerMin, vecTFPlayerCenter, vecTFPlayerMin );
 	VectorAdd( vecTFPlayerMax, vecTFPlayerCenter, vecTFPlayerMax );
 
@@ -374,8 +372,6 @@ void CTFGameMovement::AvoidPlayers( void )
 		vecAvoidCenter = pAvoidPlayer->WorldSpaceCenter();
 		vecAvoidMin = pAvoidPlayer->WorldAlignMins();
 		vecAvoidMax = pAvoidPlayer->WorldAlignMaxs();
-		flZHeight = vecAvoidMax.z - vecAvoidMin.z;
-		vecAvoidCenter.z += 0.5f * flZHeight;
 		VectorAdd( vecAvoidMin, vecAvoidCenter, vecAvoidMin );
 		VectorAdd( vecAvoidMax, vecAvoidCenter, vecAvoidMax );
 
@@ -491,14 +487,14 @@ void CTFGameMovement::AvoidPlayers( void )
 	}
 
 	// Move away from the other player/object.
-	Vector vecSeparationVelocity;
+	Vector vecSeparationVelocity = m_pTFPlayer->m_Shared.GetSeparationVelocity();
 	if ( vecDelta.Dot( vecPush ) < 0 )
 	{
-		vecSeparationVelocity = vecPush * flPushStrength;
+		vecSeparationVelocity += vecPush * flPushStrength;
 	}
 	else
 	{
-		vecSeparationVelocity = vecPush * -flPushStrength;
+		vecSeparationVelocity += vecPush * -flPushStrength;
 	}
 
 	// Don't allow the max push speed to be greater than the max player speed.
@@ -518,12 +514,8 @@ void CTFGameMovement::AvoidPlayers( void )
 		VectorScale( vecSeparationVelocity, flMaxPlayerSpeed, vecSeparationVelocity );
 	}
 
-	//Msg( "fwd: %f - rt: %f - forward: %f - side: %f\n", fwd, rt, forward, side );
-
 	m_pTFPlayer->m_Shared.SetSeparation( true );
 	m_pTFPlayer->m_Shared.SetSeparationVelocity( vecSeparationVelocity );
-
-	//Msg( "Pforwardmove=%f, sidemove=%f\n", mv->m_flForwardMove, mv->m_flSideMove );
 }
 
 bool CTFGameMovement::CheckJumpButton()
