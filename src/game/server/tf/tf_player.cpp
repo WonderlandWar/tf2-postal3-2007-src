@@ -3006,7 +3006,8 @@ bool CTFPlayer::CalculateAmmoPackPositionAndAngles( CTFWeaponBase *pWeapon, Vect
 {
 	// Look up the hand and weapon bones.
 	int iHandBone = LookupBone( "weapon_bone" );
-	if ( iHandBone == -1 )
+	int iWeaponBone = pWeapon->LookupBone( "weapon_bone" );
+	if ( iHandBone == -1 || iWeaponBone == -1 )
 		return false;
 
 	GetBonePosition( iHandBone, vecOrigin, vecAngles );

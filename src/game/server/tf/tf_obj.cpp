@@ -2133,7 +2133,7 @@ void CBaseObject::DetachObjectFromObject( void )
 		return;
 
 	// Clear the build point
-	SetObjectOnBuildPoint( m_iBuiltOnPoint, NULL );
+	GetParentObject()->SetObjectOnBuildPoint( m_iBuiltOnPoint, NULL );
 
 	SetParent( NULL );
 	m_hBuiltOnEntity = NULL;
