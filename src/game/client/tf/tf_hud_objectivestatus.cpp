@@ -366,34 +366,6 @@ void CTFHudTimeStatus::SetTimeAdded( int iIndex, int nSeconds )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTFHudTimeStatus::CheckClockLabelLength( CTFLabel *pLabel, CTFImagePanel *pBG )
-{
-	if ( !pLabel || ! pBG )
-		return;
-
-	int textWide, textTall;
-	pLabel->GetContentSize( textWide, textTall );
-
-	// make sure our string isn't longer than the label it's in
-	if ( textWide > pLabel->GetWide() )
-	{
-		int xStart, yStart, wideStart, tallStart;
-		pLabel->GetBounds( xStart, yStart, wideStart, tallStart );
-		
-		int newXPos = xStart + ( wideStart / 2.0f ) - ( textWide / 2.0f );
-		pLabel->SetBounds(  newXPos, yStart, textWide, tallStart );
-	}
-
-	// turn off the background if our text label is wider than it is
-	if ( pLabel->GetWide() > pBG->GetWide() )
-	{
-		pBG->SetVisible( false );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 void CTFHudTimeStatus::SetExtraTimePanels()
 {
 	if ( !TFGameRules() )
@@ -439,8 +411,6 @@ void CTFHudTimeStatus::SetExtraTimePanels()
 
 			m_pOvertimeBG->SetVisible( true );
 			m_pOvertimeLabel->SetVisible( true );
-
-			CheckClockLabelLength( m_pOvertimeLabel, m_pOvertimeBG );
 		}
 		else
 		{
@@ -463,8 +433,6 @@ void CTFHudTimeStatus::SetExtraTimePanels()
 				m_pSetupBG->SetVisible( false );
 				m_pSetupLabel->SetVisible( false );
 			}
-
-			CheckClockLabelLength( m_pWaitingForPlayersLabel, m_pWaitingForPlayersBG );
 		}
 	}
 }

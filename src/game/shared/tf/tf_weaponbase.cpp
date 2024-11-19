@@ -658,19 +658,19 @@ bool CTFWeaponBase::ReloadSingly( void )
 			if ( m_flTimeWeaponIdle > gpGlobals->curtime )
 				return false;
 
-			// If we have ammo, remove ammo and add it to clip
-			if ( pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
-			{
-				m_iClip1 = min( ( m_iClip1 + 1 ), GetMaxClip1() );
-				pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
-			}
-
 			if ( Clip1() == GetMaxClip1() || pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) <= 0 )
 			{
 				m_iReloadMode.Set( TF_RELOAD_FINISH );
 			}
 			else
 			{
+				// If we have ammo, remove ammo and add it to clip
+				if ( pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) > 0 && !m_bReloadedThroughAnimEvent )
+				{
+					m_iClip1 += 1;
+					pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+				}
+
 				m_iReloadMode.Set( TF_RELOADING );
 			}
 

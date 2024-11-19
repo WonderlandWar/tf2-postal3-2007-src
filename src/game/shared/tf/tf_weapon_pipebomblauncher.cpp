@@ -27,9 +27,9 @@
 extern ConVar tf_grenadelauncher_livetime;
 
 // hard code these eventually
-ConVar tf_grenadelauncher_min_vel( "tf_grenadelauncher_min_vel", "900", 24576 );
-ConVar tf_grenadelauncher_max_vel( "tf_grenadelauncher_max_vel", "2400", 24576 );
-ConVar tf_grenadelauncher_max_chargetime( "tf_grenadelauncher_max_chargetime", "4.0", 24576 );
+ConVar tf_grenadelauncher_min_vel( "tf_grenadelauncher_min_vel", "900", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar tf_grenadelauncher_max_vel( "tf_grenadelauncher_max_vel", "2400", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar tf_grenadelauncher_max_chargetime( "tf_grenadelauncher_max_chargetime", "4.0", FCVAR_REPLICATED | FCVAR_CHEAT );
 
 //=============================================================================
 //
@@ -387,7 +387,6 @@ void CTFPipebombLauncher::DetonateRemotePipebombs( bool bFizzle )
 				pTemp->Fizzle();
 			}
 			
-			//pTemp->SetThink( &CTFGrenadePipebombProjectile::Detonate );
 			pTemp->SetTimer( gpGlobals->curtime ); // explode NOW
 			pTemp->SetNextThink( gpGlobals->curtime );
 		}

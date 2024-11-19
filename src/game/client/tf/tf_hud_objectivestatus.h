@@ -84,7 +84,6 @@ private:
 
 	void SetExtraTimePanels();
 	void SetTimeAdded( int iIndex, int nSeconds );
-	void CheckClockLabelLength( CTFLabel *pLabel, CTFImagePanel *pBG );
 
 private:
 
