@@ -325,8 +325,7 @@ void CTFSniperRifle::Zoom( void )
 
 	ToggleZoom();
 
-	// at least 0.1 seconds from now, but don't stomp a previous value
-	m_flNextPrimaryAttack = max( m_flNextPrimaryAttack, gpGlobals->curtime + 0.1 );
+	m_flNextPrimaryAttack = gpGlobals->curtime + 0.1;
 	m_flNextSecondaryAttack = gpGlobals->curtime + TF_WEAPON_SNIPERRIFLE_ZOOM_TIME;
 }
 
