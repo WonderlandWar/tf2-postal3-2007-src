@@ -76,7 +76,7 @@ public:
 	virtual wchar_t	*GetPrepend( void ) { return m_pwszPrepend; }
 
 private:
-	wchar_t		m_pwszPrepend[ MAX_PREPEND_STRING ];
+	wchar_t		*m_pwszPrepend;
 };
 
 #endif // TF_HUD_TARGET_ID_H

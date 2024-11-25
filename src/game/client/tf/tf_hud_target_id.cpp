@@ -266,7 +266,7 @@ void CTargetID::UpdateID( void )
 
 			// determine if the target is a disguised spy (either friendly or enemy)
 			if ( pPlayer->m_Shared.InCond( TF_COND_DISGUISED ) && // they're disguised
-				//!pPlayer->m_Shared.InCond( TF_COND_DISGUISING ) && // they're not in the process of disguising
+				!pPlayer->m_Shared.InCond( TF_COND_DISGUISING ) && // they're not in the process of disguising
 				!pPlayer->m_Shared.InCond( TF_COND_STEALTHED ) ) // they're not cloaked
 			{
 				bDisguisedTarget = true;
@@ -429,7 +429,7 @@ void CTargetID::UpdateID( void )
 //-----------------------------------------------------------------------------
 CSecondaryTargetID::CSecondaryTargetID( const char *pElementName ) : CTargetID( pElementName )
 {
-	m_pwszPrepend[0] = '\0';
+	m_pwszPrepend = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -451,7 +451,7 @@ int CSecondaryTargetID::CalculateTargetIndex( C_TFPlayer *pLocalTFPlayer )
 	{
 		if ( pHealTarget->entindex() != m_iTargetEntIndex )
 		{
-			g_pVGuiLocalize->ConstructString( m_pwszPrepend, sizeof(m_pwszPrepend), g_pVGuiLocalize->Find("#TF_playerid_healtarget" ), 0 );
+			m_pwszPrepend = g_pVGuiLocalize->Find("#TF_playerid_healtarget" );
 		}
 		return pHealTarget->entindex();
 	}
@@ -464,14 +464,14 @@ int CSecondaryTargetID::CalculateTargetIndex( C_TFPlayer *pLocalTFPlayer )
 	{
 		if ( pHealer->entindex() != m_iTargetEntIndex )
 		{
-			g_pVGuiLocalize->ConstructString( m_pwszPrepend, sizeof(m_pwszPrepend), g_pVGuiLocalize->Find("#TF_playerid_healer" ), 0 );
+			m_pwszPrepend = g_pVGuiLocalize->Find("#TF_playerid_healer" );
 		}
 		return pHealer->entindex();
 	}
 
 	if ( m_iTargetEntIndex )
 	{
-		m_pwszPrepend[0] = '\0';
+		m_pwszPrepend = NULL;
 	}
 	return 0;
 }
