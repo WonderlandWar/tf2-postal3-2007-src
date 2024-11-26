@@ -313,7 +313,7 @@ void CObjectSapper::SapperThink( void )
 	info.SetDamage( iDamage );
 	info.SetAttacker( this );
 	info.SetInflictor( this );
-	info.SetDamageCustom( 1 );
+	info.SetDamageType( DMG_CRUSH );
 
 	pObject->TakeDamage( info );
 
