@@ -128,14 +128,17 @@ void CTFPistol::PrimaryAttack( void )
 	
 	// Add an accuracy penalty which can move past our maximum penalty time if we're really spastic
     if ( gpGlobals->curtime <= m_flAccuracyPenaltyTime )
+	{	
 		m_flAccuracyPenaltyTime += PISTOL_ACCURACY_SHOT_PENALTY_TIME;
-    else
+	} 
+	else
+	{
 		m_flAccuracyPenaltyTime = gpGlobals->curtime + PISTOL_ACCURACY_SHOT_PENALTY_TIME;
+	}
 }
 
 float CTFPistol::GetWeaponSpread( void )
 {
 	float flWeaponSpread = BaseClass::GetWeaponSpread();
-	float val = m_flAccuracyPenaltyTime - gpGlobals->curtime;
-	return RemapValClamped( val, 0.0f, PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME, 1.0f, 10.0f ) * flWeaponSpread;
+	return RemapValClamped( m_flAccuracyPenaltyTime - gpGlobals->curtime, 0.0f, PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME, 1.0f, 10.0f ) * flWeaponSpread;
 }

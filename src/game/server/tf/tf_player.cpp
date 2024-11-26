@@ -1379,7 +1379,9 @@ void CTFPlayer::HandleCommand_JoinClass( const char *pClassName )
 	{
 		if ( IsAlive() && !TFGameRules()->CanChangeClassInStalemate() )
 		{
-			ClientPrint(this, HUD_PRINTTALK, "#game_stalemate_cant_change_class" );
+			char szTime[5];
+			V_snprintf( szTime, sizeof( szTime ), "%.0f", tf_stalematechangeclasstime.GetFloat() );
+			ClientPrint(this, HUD_PRINTCENTER, "#game_stalemate_cant_change_class", szTime );
 			return;
 		}
 	}

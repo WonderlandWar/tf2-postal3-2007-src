@@ -242,20 +242,17 @@ void CTFWeaponBase::Precache()
 	}
 
 	const CTFWeaponInfo *pTFInfo = &GetTFWpnData();
-	
 
 	if ( pTFInfo->m_pClassViewModelKV )
 	{
-		for ( int i = 0; i < TF_CLASS_COUNT_ALL; ++i )
+		for ( KeyValues *pKV = pTFInfo->m_pClassViewModelKV->GetFirstSubKey(); pKV != NULL; pKV = pKV->GetNextKey() )
 		{
-			TFPlayerClassData_t *pData = GetPlayerClassData( i );
-	
-			KeyValues *pKV = pTFInfo->m_pClassViewModelKV;
-
-			const char *result = pKV->GetString( pData->m_szClassName, NULL );
+			const char *result = pKV->GetString();
 
 			if ( result )
+			{
 				PrecacheModel( result );
+			}
 		}
 	}
 

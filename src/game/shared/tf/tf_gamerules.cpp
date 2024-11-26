@@ -710,6 +710,8 @@ void CTFGameRules::SetupOnStalemateStart( void )
 		pHealthPack = gEntList.NextEntByClass( pHealthPack );
 	}
 
+	UTIL_ClientPrintAll( HUD_PRINTCENTER, "#EnterStalemate" );
+
 	CTFPlayer *pPlayer;
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
