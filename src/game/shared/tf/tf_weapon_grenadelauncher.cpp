@@ -199,7 +199,6 @@ float CTFGrenadeLauncher::GetProjectileSpeed( void )
 void CTFGrenadeLauncher::SecondaryAttack( void )
 {
 #ifdef GAME_DLL
-
 	if ( !CanAttack() )
 		return;
 
@@ -208,9 +207,10 @@ void CTFGrenadeLauncher::SecondaryAttack( void )
 	{
 		CTFWeaponBase *pPipeBombLauncher = pOwner->Weapon_OwnsThisID( TF_WEAPON_PIPEBOMBLAUNCHER );
 		if ( pPipeBombLauncher )
+		{
 			pPipeBombLauncher->SecondaryAttack();
+		}
 	}
-
 #endif
 }
 

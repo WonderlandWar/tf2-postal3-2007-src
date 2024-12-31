@@ -52,6 +52,24 @@ CTFBottle::CTFBottle()
 {
 }
 
+void CTFBottle::SecondaryAttack( void )
+{
+#ifdef GAME_DLL
+	if ( !CanAttack() )
+		return;
+
+	CTFPlayer *pOwner = ToTFPlayer( GetOwner() );
+	if ( pOwner )
+	{
+		CTFWeaponBase *pPipeBombLauncher = pOwner->Weapon_OwnsThisID( TF_WEAPON_PIPEBOMBLAUNCHER );
+		if ( pPipeBombLauncher )
+		{
+			pPipeBombLauncher->SecondaryAttack();
+		}
+	}
+#endif
+}
+
 void CTFBottle::WeaponReset( void )
 {
 	BaseClass::WeaponReset();

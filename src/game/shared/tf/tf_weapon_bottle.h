@@ -31,6 +31,8 @@ public:
 	CTFBottle();
 	virtual int			GetWeaponID( void ) const			{ return TF_WEAPON_BOTTLE; }
 
+	virtual void		SecondaryAttack( void );
+
 	virtual void		Smack( void );
 	virtual void		WeaponReset( void );
 	virtual bool		DefaultDeploy( char *szViewModel, char *szWeaponModel, int iActivity, char *szAnimExt );
