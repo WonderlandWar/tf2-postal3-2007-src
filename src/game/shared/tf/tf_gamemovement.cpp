@@ -1164,12 +1164,25 @@ void CTFGameMovement::CategorizePosition( void )
 		return;
 	}
 
-	// Calculate the start and end position.
-	Vector vecStartPos = mv->m_vecAbsOrigin;
-	Vector vecEndPos( mv->m_vecAbsOrigin.x, mv->m_vecAbsOrigin.y, ( mv->m_vecAbsOrigin.z - 2.0f ) );
+	Vector vecEndPos;
+	float flOffset = 2.0f;
+
+	vecEndPos[0] = mv->m_vecAbsOrigin[0];
+	vecEndPos[1] = mv->m_vecAbsOrigin[1];
+	vecEndPos[2] = mv->m_vecAbsOrigin[2] - flOffset;
+
+	Vector vecStartPos;
+	vecStartPos = mv->m_vecAbsOrigin;
+	vecStartPos.z += 2;
 
 	trace_t trace;
 	TracePlayerBBox( vecStartPos, vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
+
+	if ( trace.startsolid )
+	{
+		vecStartPos = mv->m_vecAbsOrigin;
+		TracePlayerBBox( vecStartPos, vecEndPos, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, trace );
+	}
 
 	// Steep plane, not on ground.
 	if ( trace.plane.normal.z < 0.7f )
