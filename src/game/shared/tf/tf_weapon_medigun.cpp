@@ -158,7 +158,7 @@ void CWeaponMedigun::WeaponReset( void )
 	m_flReleaseStartedAt = 0;
 	m_flChargeLevel = 0.0f;
 
-	RemoveHealingTarget( true );
+	RemoveHealingTarget( -1, true );
 
 #if defined( CLIENT_DLL )
 	m_bPlayingSound = false;
@@ -226,7 +226,7 @@ bool CWeaponMedigun::Deploy( void )
 //-----------------------------------------------------------------------------
 bool CWeaponMedigun::Holster( CBaseCombatWeapon *pSwitchingTo )
 {
-	RemoveHealingTarget( true );
+	RemoveHealingTarget( -1, true );
 	m_bAttacking = false;
 	m_bHolstered = true;
 
@@ -253,7 +253,7 @@ bool CWeaponMedigun::Holster( CBaseCombatWeapon *pSwitchingTo )
 //-----------------------------------------------------------------------------
 void CWeaponMedigun::UpdateOnRemove( void )
 {
-	RemoveHealingTarget( true );
+	RemoveHealingTarget( -1, true );
 	m_bAttacking = false;
 
 #ifdef CLIENT_DLL
@@ -679,7 +679,7 @@ bool CWeaponMedigun::Lower( void )
 	// Stop healing if we are
 	if ( m_bHealing )
 	{
-		RemoveHealingTarget( true );
+		RemoveHealingTarget( -1, true );
 		m_bAttacking = false;
 
 #ifdef CLIENT_DLL
